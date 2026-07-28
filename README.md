@@ -1,5 +1,7 @@
 # QuestBoard
 
+Gamified team project tracker for university students: verify each other’s work, reduce the shared boss HP, and finish the final quest together.
+
 QuestBoard turns the messy middle of a university group project into a shared weekly quest: the team creates a boss with real remaining-work HP, optionally splits it into goblins, submits proof, and lets one assigned teammate verify each hit.
 
 ## What is included
