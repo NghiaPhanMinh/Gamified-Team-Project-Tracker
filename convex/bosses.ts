@@ -1,17 +1,22 @@
 import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-export const byProject = query({
-  args: { projectId: v.id("projects") },
-  handler: async (ctx, args) => ctx.db.query("bosses").withIndex("by_project", (q) => q.eq("projectId", args.projectId)).order("desc").collect(),
+const shareInput = v.object({ memberId: v.id("users"), verifierId: v.id("users"), weight: v.number() });
+
+export const byTeam = query({
+  args: { teamId: v.id("teams") },
+  handler: async (ctx, args) => ctx.db.query("bosses").withIndex("by_team", (q) => q.eq("teamId", args.teamId)).order("desc").collect(),
 });
 
 export const create = mutation({
-  args: { projectId: v.id("projects"), title: v.string(), totalScope: v.number(), deadline: v.number(), actorId: v.optional(v.id("users")) },
+  args: { teamId: v.id("teams"), title: v.string(), deadline: v.number(), partyMemberIds: v.array(v.id("users")), shares: v.array(shareInput), actorId: v.id("users") },
   handler: async (ctx, args) => {
-    const { actorId, ...bossArgs } = args;
-    const bossId = await ctx.db.insert("bosses", { ...bossArgs, remainingHP: args.totalScope, status: "active", createdAt: Date.now() });
-    if (actorId) await ctx.db.insert("activityLog", { projectId: args.projectId, actorId, action: "created the weekly boss", detail: args.title, timestamp: Date.now() });
+    if (args.partyMemberIds.length < 2) throw new Error("A boss needs at least two party members");
+    const memberSet = new Set(args.partyMemberIds.map(String));
+    if (args.shares.length !== args.partyMemberIds.length || args.shares.some((share) => !memberSet.has(String(share.memberId)) || !memberSet.has(String(share.verifierId)) || String(share.memberId) === String(share.verifierId))) throw new Error("Every party member needs one teammate verifier");
+    const bossId = await ctx.db.insert("bosses", { teamId: args.teamId, title: args.title, deadline: args.deadline, partyMemberIds: args.partyMemberIds, status: "active", createdAt: Date.now() });
+    for (const share of args.shares) await ctx.db.insert("bossShares", { ...share, bossId, status: "pending" });
+    await ctx.db.insert("activityLog", { teamId: args.teamId, actorId: args.actorId, action: "created a weekly boss", detail: args.title, timestamp: Date.now() });
     return bossId;
   },
 });
@@ -19,19 +24,19 @@ export const create = mutation({
 export const resolveDue = internalMutation({
   args: {},
   handler: async (ctx) => {
-    const active = await ctx.db.query("bosses").collect();
-    const now = Date.now();
-    let resolved = 0;
-    for (const boss of active) {
-      if (boss.status !== "active" || boss.deadline > now) continue;
-      const status = boss.remainingHP <= 0 ? "defeated" : "survived";
-      await ctx.db.patch(boss._id, { status, resolvedAt: now });
-      const project = await ctx.db.get(boss.projectId);
-      const team = project ? await ctx.db.get(project.teamId) : null;
-      const actorId = team?.members[0];
-      if (project && actorId) await ctx.db.insert("activityLog", { projectId: project._id, actorId, action: status === "defeated" ? "defeated the boss" : "logged a surviving boss", detail: status === "defeated" ? "HP reached zero before the deadline" : "HP remained at the deadline · no penalty", timestamp: now });
-      resolved += 1;
+    const bosses = await ctx.db.query("bosses").collect(); const now = Date.now(); let count = 0;
+    for (const boss of bosses) {
+      if (boss.status !== "active") continue;
+      const shares = await ctx.db.query("bossShares").withIndex("by_boss", (q) => q.eq("bossId", boss._id)).collect();
+      const complete = shares.length > 0 && shares.every((share) => share.status === "verified");
+      if (complete) { await ctx.db.patch(boss._id, { status: "defeated", resolvedAt: now }); continue; }
+      if (boss.deadline <= now) {
+        await ctx.db.patch(boss._id, { status: "survived", resolvedAt: now });
+        const team = await ctx.db.get(boss.teamId); const actorId = team?.members[0];
+        if (actorId) await ctx.db.insert("activityLog", { teamId: boss.teamId, actorId, action: "logged a surviving boss", detail: "HP remained at the deadline · no penalty", timestamp: now });
+        count += 1;
+      }
     }
-    return resolved;
+    return count;
   },
 });

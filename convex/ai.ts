@@ -11,7 +11,7 @@ export const suggestSetup = action({
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
       body: JSON.stringify({
         model: "openrouter/auto:free",
-        messages: [{ role: "system", content: "Return JSON only: {title:string,totalScope:number,days:number,goblins:[{title:string,weight:number}]} with realistic university project tasks." }, { role: "user", content: args.brief }],
+        messages: [{ role: "system", content: "Return JSON only: {title:string,days:number,shares:[{memberLabel:string,weight:number}]} with a realistic university project boss breakdown. Use 2-6 shares, with weights totaling 100." }, { role: "user", content: args.brief }],
         response_format: { type: "json_object" },
       }),
     });
