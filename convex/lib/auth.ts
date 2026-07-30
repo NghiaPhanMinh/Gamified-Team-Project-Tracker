@@ -1,5 +1,6 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import type { GenericQueryCtx, GenericMutationCtx } from "convex/server";
+import type { GenericId } from "convex/values";
 
 import type { DataModel, Doc } from "../_generated/dataModel";
 
@@ -41,4 +42,26 @@ export async function requireUserProfile(
   }
 
   return profile;
+}
+
+export async function requireTeamMember(
+  ctx: DatabaseContext,
+  teamId: GenericId<"teams">,
+): Promise<{
+  membership: Doc<"teamMembers">;
+  profile: Doc<"userProfiles">;
+}> {
+  const profile = await requireUserProfile(ctx);
+  const membership = await ctx.db
+    .query("teamMembers")
+    .withIndex("by_team_and_user", (query) =>
+      query.eq("teamId", teamId).eq("profileId", profile._id),
+    )
+    .unique();
+
+  if (membership === null) {
+    throw new Error("You do not have access to this team.");
+  }
+
+  return { membership, profile };
 }

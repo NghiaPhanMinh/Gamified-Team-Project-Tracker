@@ -284,8 +284,8 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 ## Tables
 
 - [x] `userProfiles`
-- [ ] `teams`
-- [ ] `teamMembers`
+- [x] `teams`
+- [x] `teamMembers`
 - [ ] `customFrameworks`
 - [ ] `projects`
 - [ ] `projectMembers`
@@ -294,14 +294,14 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 - [ ] `tasks`
 - [ ] `taskEvidence`
 - [ ] `taskReviews`
-- [ ] `activityLogs`
+- [x] `activityLogs`
 - [ ] `projectSnapshots`
 
 ## Validation
 
 - [x] Explicit validators
-- [ ] No important `v.any()`
-- [ ] Convex IDs used
+- [x] No important `v.any()`
+- [x] Convex IDs used
 - [ ] Storage IDs used for files
 - [x] All public args validated
 - [~] All indexes generated
@@ -310,10 +310,10 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Indexes
 
-- [ ] teams by join code
-- [ ] team members by team
-- [ ] team members by user
-- [ ] team member by team+user
+- [x] teams by join code
+- [x] team members by team
+- [x] team members by user
+- [x] team member by team+user
 - [ ] custom frameworks by team
 - [ ] projects by team+status
 - [ ] projects by team+updated time
@@ -335,42 +335,42 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Create Team
 
-- [ ] Team name required
-- [ ] Unique short join code
-- [ ] Creator becomes member
-- [ ] Creator lands on team home
-- [ ] Join code visible
-- [ ] Join code copyable
-- [ ] Activity logged
+- [x] Team name required
+- [x] Unique short join code
+- [x] Creator becomes member
+- [x] Creator lands on team home
+- [x] Join code visible
+- [x] Join code copyable
+- [x] Activity logged
 
 ## Join Team
 
-- [ ] Join input
-- [ ] Code normalised
-- [ ] Invalid code error
-- [ ] Duplicate join blocked
-- [ ] Membership stored
-- [ ] User lands on team home
-- [ ] Activity logged
+- [x] Join input
+- [x] Code normalised
+- [x] Invalid code error
+- [x] Duplicate join blocked
+- [x] Membership stored
+- [x] User lands on team home
+- [x] Activity logged
 
 ## Permissions
 
-- [ ] Non-member cannot read team
+- [x] Non-member cannot read team
 - [ ] Non-member cannot read projects
 - [ ] Non-member cannot read evidence
 - [ ] Non-member cannot edit framework
-- [ ] Non-member mutation rejected
+- [x] Non-member mutation rejected
 
 ## Realtime Gate
 
-- [ ] Separate Account A session
-- [ ] Separate Account B session
-- [ ] Both join same team
-- [ ] Member appears within 1–2 seconds
-- [ ] Shared test record updates live
-- [ ] No refresh
-- [ ] Uses `useQuery`
-- [ ] Product work waits until gate passes
+- [x] Separate Account A session
+- [x] Separate Account B session
+- [x] Both join same team
+- [x] Member appears within 1–2 seconds
+- [x] Shared test record updates live
+- [x] No refresh
+- [x] Uses `useQuery`
+- [x] Product work waits until gate passes
 
 ---
 
@@ -1364,8 +1364,8 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 | 1 | Convex connection | Completed |  | 2026-07-30 |
 | 2 | Branding and theme | Not started |  |  |
 | 3 | Google authentication | Completed |  | 2026-07-31 |
-| 4 | Data architecture | Not started |  |  |
-| 5 | Team realtime | Not started |  |  |
+| 4 | Data architecture | In progress | Later product tables remain | 2026-07-31 |
+| 5 | Team realtime | Completed |  | 2026-07-31 |
 | 6 | Character customisation | Not started |  |  |
 | 7 | Built-in frameworks | Not started |  |  |
 | 8 | Custom framework | Not started |  |  |
@@ -1392,29 +1392,29 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Current phase
 
-- [x] Phase: 3 — Google authentication
+- [x] Phase: 5 — Team creation and realtime gate
 
 ## Goal
 
-- [x] Goal: Verify Google sign-in, profile idempotency, session refresh, sign-out, and signed-out backend rejection.
+- [x] Goal: Verify secure team creation, code-based joining, two-account realtime membership, shared-record updates, and backend team authorisation.
 
 ## Blockers
 
-- [x] Blocker 1 resolved: Google Cloud OAuth web client ID and secret are stored privately in Convex.
+- [x] Blocker 1 resolved: two authenticated accounts joined one team and observed shared state without refresh.
 - [ ] Blocker 2:
 - [ ] Blocker 3:
 
 ## Codex result
 
-- Files changed: Google-only auth provider, HTTP routes, auth configuration, auth/profile schema, protected helpers, profile functions, signed-out/loading/authenticated UI, sign-in/sign-out controls, docs and environment templates.
-- Packages: `@convex-dev/auth@0.0.94`, patched `@auth/core@0.41.3`, and Node development types.
-- Schema/index changes: Convex Auth tables plus `userProfiles`; indexes `by_auth_user_id` and `by_email`.
-- Security checks: JWT keys stored only in Convex, Google secret server-side, patched Auth.js, signed-out query and mutation rejection.
-- Commands: Convex Auth initializer, Convex deployment, function metadata, signed-out function checks, typecheck, lint, tests, build, production dependency audit.
-- Tests passed: auth/schema deployment, function metadata, two-account Google sign-in, first-profile creation, returning-profile reuse, refresh persistence, sign-out, signed-out query rejection, signed-out mutation rejection, profile uniqueness, typecheck, lint, 5 tests, production build, and zero production dependency vulnerabilities.
-- Tests failed: none in the mandatory local authentication gate.
-- Manual actions completed: Google OAuth web client configured, local origin and exact Convex callback registered, `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` stored privately, and two Google accounts tested.
-- Remaining issue: OAuth-cancel handling remains an edge-case test; production OAuth and deployment remain intentionally pending.
+- Files changed: team schema, membership authorisation helper, code validation, create/join/shared-note functions, authenticated team lobby, live team room, member list, invite-code copy control, shared team pulse, responsive styles, and backend tests.
+- Packages: added `convex-test@0.0.54` for backend function testing.
+- Schema/index changes: `teams`, `teamMembers`, `teamSharedRecords`, and `activityLogs`; join-code, membership, shared-record, and activity indexes.
+- Security checks: actor derived from auth, member-only team reads and writes, normalised join codes, duplicate membership rejection, and no client-trusted permissions.
+- Commands: Convex code generation and deployment, function metadata, data verification, typecheck, lint, 9 tests, production build, and production dependency audit.
+- Tests passed: unique join codes, creator ownership, code normalisation, invalid and duplicate join rejection, non-member read/write rejection, shared-note persistence, activity logging, two-account live membership, no duplicate memberships, typecheck, lint, 9 tests, production build, and zero production dependency vulnerabilities.
+- Tests failed: none in the mandatory realtime team gate.
+- Manual actions completed: Account A created a team; Account B joined from a separate session; both observed the shared team and live record without refresh.
+- Remaining issue: project-, framework-, and evidence-level team permissions remain intentionally pending until those features exist.
 
 ## Next action
 
@@ -1423,3 +1423,4 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 - [x] Update checklist
 - [x] Commit working state
 - [x] Continue only after gate passes
+- [~] Begin team-member character customisation

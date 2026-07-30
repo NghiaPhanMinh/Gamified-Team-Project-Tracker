@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 
 import { api } from "../../../convex/_generated/api";
 import { BrandLogo } from "../brand/BrandLogo";
+import { TeamSystem } from "../teams/TeamSystem";
 import { ThemeToggle } from "../theme/ThemeToggle";
 
 export function AuthenticatedHome() {
@@ -73,28 +74,7 @@ export function AuthenticatedHome() {
         </div>
       </nav>
 
-      <section className="welcome-panel">
-        <div>
-          <p className="kicker">Google account connected</p>
-          <h1>Welcome, {profile.displayName}.</h1>
-          <p>
-            Your private profile is ready. Team creation stays locked until the
-            two-account authentication gate is verified.
-          </p>
-        </div>
-        {profile.imageUrl ? (
-          <img
-            className="profile-image"
-            src={profile.imageUrl}
-            alt=""
-            width="112"
-            height="112"
-            referrerPolicy="no-referrer"
-          />
-        ) : (
-          <BrandLogo />
-        )}
-      </section>
+      <TeamSystem profile={profile} />
     </main>
   );
 }
