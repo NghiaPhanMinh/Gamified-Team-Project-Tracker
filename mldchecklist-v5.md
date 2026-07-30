@@ -31,15 +31,15 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 - [ ] Tasks over 14 days receive a breakdown suggestion
 - [ ] Two weeks is guidance, not a hard limit
 - [ ] Projects and text history are not capped at two
-- [ ] Separate goblin logging is not included
-- [ ] Goblin quota logic is not included
-- [ ] Compulsory final PDF share per member is not included
+- [x] Separate goblin logging is not included
+- [x] Goblin quota logic is not included
+- [x] Compulsory final PDF share per member is not included
 - [ ] Review is optional per task
 - [ ] Task evidence supports note, link, image, and PDF
-- [ ] Practical statuses replace defeated/survived as core database states
-- [ ] Boss/quest language remains optional presentation only
-- [ ] No public teammate leaderboard
-- [ ] No punitive XP
+- [~] Practical statuses replace defeated/survived as core database states
+- [x] Boss/quest language remains optional presentation only
+- [x] No public teammate leaderboard
+- [x] No punitive XP
 - [ ] No automatic recurring AI monitoring
 - [ ] No unlicensed font or sound downloads
 
@@ -837,28 +837,28 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Practical Progress
 
-- [ ] Weighted required tasks
-- [ ] Milestone completion
-- [ ] Project status
-- [ ] Progress source documented
-- [ ] No manual client-only persistent progress
+- [~] Weighted required tasks
+- [~] Milestone completion
+- [~] Project status
+- [x] Progress source documented
+- [x] No manual client-only persistent progress
 
 ## Optional Boss Visual
 
-- [ ] Project represented as boss
-- [ ] Weighted progress reduces visual health
-- [ ] Milestone animation
-- [ ] Completion celebration
-- [ ] Overdue “boss still standing”
-- [ ] Game does not block actions
-- [ ] Core data uses practical statuses
+- [~] Project represented as boss
+- [x] Weighted progress reduces visual health
+- [x] Milestone animation
+- [x] Completion celebration
+- [x] Overdue “boss still standing”
+- [x] Game does not block actions
+- [~] Core data uses practical statuses
 
 ## Removed
 
-- [ ] No separate goblin log
-- [ ] No goblin quota
-- [ ] No final-member-PDF HP
-- [ ] No defeated/survived-only database state
+- [x] No separate goblin log
+- [x] No goblin quota
+- [x] No final-member-PDF HP
+- [x] No defeated/survived-only database state
 
 ---
 
@@ -1339,11 +1339,11 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 # 29. Explicitly Out of Scope
 
 - [ ] No payments
-- [ ] No public leaderboard
-- [ ] No punitive XP
-- [ ] No separate goblin log
-- [ ] No goblin quota
-- [ ] No compulsory final PDF per member
+- [x] No public leaderboard
+- [x] No punitive XP
+- [x] No separate goblin log
+- [x] No goblin quota
+- [x] No compulsory final PDF per member
 - [ ] No self-review
 - [ ] No universal reviewer per member
 - [ ] Project history has no two-project cap
@@ -1375,7 +1375,7 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 | 12 | Nonlinear workflow | Not started |  |  |
 | 13 | Task management | Not started |  |  |
 | 14 | Evidence and review | Not started |  |  |
-| 15 | Progress/game layer | Not started |  |  |
+| 15 | Progress/game layer | In progress | Persistent integration awaits project/task data | 2026-07-31 |
 | 16 | Workload and risk | Not started |  |  |
 | 17 | Activity | Not started |  |  |
 | 18 | Sound | Not started |  |  |
@@ -1392,36 +1392,33 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Current phase
 
-- [x] Phase: 8 — Team-owned Custom Framework builder
+- [~] Phase: 15 — Progress and optional game layer foundation
 
 ## Goal
 
-- [x] Goal: Create, duplicate, edit, reorder, validate, version, and share team-owned framework templates in realtime.
+- [x] Goal: Define deterministic weighted progress and demonstrate an optional boss visual without creating a second source of truth.
 
 ## Blockers
 
-- [x] Blocker 1 resolved: framework create and version-2 edits are visible to both authenticated teammates without refresh.
-- [ ] Blocker 2:
-- [ ] Blocker 3:
+- [~] Persistent game progress awaits project, milestone, and task records from phases 9–14.
+- [x] The preview is clearly labelled as local and non-persistent.
 
 ## Codex result
 
-- Files changed: typed custom-framework schema, validation and cycle detection, creator/team-owner permissions, create/list/update functions, preset-copy flow, visual phase builder, realtime team library, responsive styles, and backend tests.
+- Files changed: deterministic weighted-progress engine, practical project-state derivation, milestone calculation, responsive Game Functions Lab, boss-health presentation, reduced-motion-safe milestone and completion effects, integration in the team workspace, styles, and tests.
 - Packages: no new package.
-- Schema/index changes: `customFrameworks` with team, creator, version, typed phases, source preset, timestamps, and team/creator indexes; typed create/update activity events.
-- Security checks: membership required for reads and writes; only creator or team owner may edit; invalid sources, missing dependencies, self-dependencies, cycles, duplicate phase keys, and excessive inputs are rejected.
-- Commands: Convex code generation and deployment, live data verification, typecheck, lint, 17 tests, production build, and production dependency audit.
-- Tests passed: blank creation, preset duplication, realtime listing, owner/creator editing, version increments, non-member rejection, unauthorised editor rejection, cyclic dependency rejection, live version-2 update, activity logging, typecheck, lint, 17 tests, production build, and zero production dependency vulnerabilities.
-- Tests failed: none after the complete live version-2 check.
-- Manual actions: one team member copied and saved a preset; the other saw it without refresh; the creator saved version 2 and the teammate saw the edit live.
-- Remaining issue: using templates in projects and safely deleting used templates depend on the next project-creation phase.
+- Schema/index changes: none; persistent project integration is intentionally deferred until project/task records exist.
+- Fairness rules: optional tasks do not inflate progress; zero, negative, and invalid weights are ignored; no leaderboard, punitive XP, goblin log, goblin quota, or blocking game gate was introduced.
+- Commands: typecheck, lint, 23 tests, production build, diff validation, and production dependency audit.
+- Tests passed: weighted completion, optional-task exclusion, invalid-weight handling, milestone completion, practical active/at-risk/overdue/completed states, interactive boss-health reduction, overdue copy, typecheck, lint, 23 tests, production build, and zero production dependency vulnerabilities.
+- Tests failed: none.
+- Manual actions: refresh the team workspace and use the Game Functions Lab task controls to review the visual states.
+- Remaining issue: connect the deterministic engine to persisted project tasks and milestones after those product phases are implemented.
 
 ## Next action
 
 - [x] Review code
-- [x] Test manually
+- [x] Run automated tests
 - [x] Update checklist
-- [x] Commit working state
-- [x] Continue only after gate passes
-- [x] Team-owned Custom Framework builder completed
-- [~] Begin long-running project structure and creation
+- [x] Commit and push working state
+- [ ] Integrate with persistent project/task data

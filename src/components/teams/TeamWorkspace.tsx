@@ -6,6 +6,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import type { BuiltInFramework } from "../../data/frameworks";
 import { CustomFrameworkSection } from "../frameworks/CustomFrameworkSection";
 import { FrameworkLibrary } from "../frameworks/FrameworkLibrary";
+import { GameLayerPreview } from "../game/GameLayerPreview";
 import { getSpellGlyph, type SpellType } from "../../lib/character";
 import { getErrorMessage } from "../../lib/errors";
 import { CharacterCustomizer } from "./CharacterCustomizer";
@@ -233,6 +234,8 @@ export function TeamWorkspace({
           </ul>
         </aside>
       </div>
+
+      <GameLayerPreview />
 
       {currentMember ? (
         <CharacterCustomizer
