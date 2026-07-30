@@ -1,0 +1,68 @@
+# MayLamDi
+
+MayLamDi is a realtime project-planning platform for university teams. It helps
+teams structure long projects, allocate work transparently, track progress, and
+preserve contribution evidence without punitive ranking.
+
+This repository is an intentional clean start. No deleted QuestBoard code has
+been restored or migrated.
+
+## Foundation status
+
+- Phase 0: clean React/Vite/TypeScript/Tailwind bootstrap
+- Phase 1: link and verify the existing Convex development deployment
+- Product features remain gated until the foundation checks pass
+
+See `mldchecklist-v5.md` for the honest implementation and test status.
+
+## Local setup
+
+Requirements:
+
+- Node.js 22 or a compatible current LTS release
+- npm
+- access to the existing Convex project for backend development
+
+Install and run:
+
+```sh
+npm install
+npm run dev
+```
+
+Create `.env.local` from `.env.example` and set:
+
+```env
+VITE_CONVEX_URL=https://resilient-mastiff-759.convex.cloud
+```
+
+Do not place Google, OpenRouter, Convex deploy, GitHub, or Vercel secrets in
+frontend `VITE_` variables.
+
+## Checks
+
+```sh
+npm run typecheck
+npm run lint
+npm test
+npm run build
+```
+
+## Deployment direction
+
+- GitHub stores source code.
+- Vercel hosts the React/Vite frontend.
+- Convex provides data, functions, realtime subscriptions, file storage,
+  authentication integration, and scheduled functions.
+- Google Cloud provides the Google OAuth client.
+- OpenRouter is an optional server-side AI provider.
+
+Production deployment is intentionally deferred until the development
+foundation and authentication gates pass.
+
+## Fonts
+
+The design specifies Blode Starkly for headings and Glacial Indifference for
+body text. Font files are not bundled because licensed files were not supplied.
+The interface uses documented system fallbacks and remains functional without
+those fonts.
