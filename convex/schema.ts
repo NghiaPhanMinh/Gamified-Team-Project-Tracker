@@ -3,10 +3,17 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 const teamRole = v.union(v.literal("owner"), v.literal("member"));
+const spellType = v.union(
+  v.literal("spark"),
+  v.literal("shield"),
+  v.literal("focus"),
+  v.literal("bloom"),
+);
 const activityAction = v.union(
   v.literal("team_created"),
   v.literal("member_joined"),
   v.literal("shared_note_updated"),
+  v.literal("character_changed"),
 );
 
 export default defineSchema({
@@ -37,6 +44,7 @@ export default defineSchema({
     joinedAt: v.number(),
     characterFill: v.string(),
     characterOutline: v.string(),
+    spellType: v.optional(spellType),
   })
     .index("by_team", ["teamId"])
     .index("by_user", ["profileId"])
@@ -56,6 +64,9 @@ export default defineSchema({
       teamName: v.optional(v.string()),
       memberDisplayName: v.optional(v.string()),
       noteLength: v.optional(v.number()),
+      characterFill: v.optional(v.string()),
+      characterOutline: v.optional(v.string()),
+      spellType: v.optional(spellType),
     }),
     createdAt: v.number(),
   })

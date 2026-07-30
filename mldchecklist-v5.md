@@ -378,28 +378,28 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Selector
 
-- [ ] Fill colour
-- [ ] Outline colour
-- [ ] Palette only
-- [ ] Fill/outline cannot match
-- [ ] Thick rounded outline
-- [ ] Live preview
-- [ ] Initials/name visible
-- [ ] Optional spell type
-- [ ] Keyboard accessible
-- [ ] Mobile friendly
+- [x] Fill colour
+- [x] Outline colour
+- [x] Palette only
+- [x] Fill/outline cannot match
+- [x] Thick rounded outline
+- [x] Live preview
+- [x] Initials/name visible
+- [x] Optional spell type
+- [x] Keyboard accessible
+- [x] Mobile friendly
 
 ## Backend
 
-- [ ] Stored per team member
-- [ ] Membership checked
-- [ ] Palette validated
-- [ ] Arbitrary CSS rejected
-- [ ] Matching colours rejected
-- [ ] Change logged
-- [ ] Teammates update live
-- [ ] Refresh persists
-- [ ] Different teams may use different colours
+- [x] Stored per team member
+- [x] Membership checked
+- [x] Palette validated
+- [x] Arbitrary CSS rejected
+- [x] Matching colours rejected
+- [x] Change logged
+- [x] Teammates update live
+- [x] Refresh persists
+- [x] Different teams may use different colours
 
 ---
 
@@ -1366,7 +1366,7 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 | 3 | Google authentication | Completed |  | 2026-07-31 |
 | 4 | Data architecture | In progress | Later product tables remain | 2026-07-31 |
 | 5 | Team realtime | Completed |  | 2026-07-31 |
-| 6 | Character customisation | Not started |  |  |
+| 6 | Character customisation | Completed |  | 2026-07-31 |
 | 7 | Built-in frameworks | Not started |  |  |
 | 8 | Custom framework | Not started |  |  |
 | 9 | Long project structure | Not started |  |  |
@@ -1392,29 +1392,29 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Current phase
 
-- [x] Phase: 5 — Team creation and realtime gate
+- [x] Phase: 6 — Team-member character customisation
 
 ## Goal
 
-- [x] Goal: Verify secure team creation, code-based joining, two-account realtime membership, shared-record updates, and backend team authorisation.
+- [x] Goal: Verify palette-only per-team characters, optional spell styles, backend validation, refresh persistence, activity logging, and realtime teammate updates.
 
 ## Blockers
 
-- [x] Blocker 1 resolved: two authenticated accounts joined one team and observed shared state without refresh.
+- [x] Blocker 1 resolved: two authenticated accounts observed character changes live without refresh.
 - [ ] Blocker 2:
 - [ ] Blocker 3:
 
 ## Codex result
 
-- Files changed: team schema, membership authorisation helper, code validation, create/join/shared-note functions, authenticated team lobby, live team room, member list, invite-code copy control, shared team pulse, responsive styles, and backend tests.
-- Packages: added `convex-test@0.0.54` for backend function testing.
-- Schema/index changes: `teams`, `teamMembers`, `teamSharedRecords`, and `activityLogs`; join-code, membership, shared-record, and activity indexes.
-- Security checks: actor derived from auth, member-only team reads and writes, normalised join codes, duplicate membership rejection, and no client-trusted permissions.
-- Commands: Convex code generation and deployment, function metadata, data verification, typecheck, lint, 9 tests, production build, and production dependency audit.
-- Tests passed: unique join codes, creator ownership, code normalisation, invalid and duplicate join rejection, non-member read/write rejection, shared-note persistence, activity logging, two-account live membership, no duplicate memberships, typecheck, lint, 9 tests, production build, and zero production dependency vulnerabilities.
-- Tests failed: none in the mandatory realtime team gate.
-- Manual actions completed: Account A created a team; Account B joined from a separate session; both observed the shared team and live record without refresh.
-- Remaining issue: project-, framework-, and evidence-level team permissions remain intentionally pending until those features exist.
+- Files changed: approved palette and spell constants, character validators, member character mutation, live character customiser, team member avatars, responsive character preview, activity metadata, and backend tests.
+- Packages: no new runtime package.
+- Schema/index changes: optional typed spell style on `teamMembers`; typed `character_changed` activity event and metadata.
+- Security checks: actor derived from auth, membership required, arbitrary CSS rejected, palette enforced, and matching fill/outline rejected.
+- Commands: Convex code generation and deployment, live data verification, typecheck, lint, 10 tests, production build, and production dependency audit.
+- Tests passed: palette normalisation, arbitrary CSS rejection, matching-colour rejection, non-member mutation rejection, per-team settings, live teammate update, refresh persistence, activity logging, typecheck, lint, 10 tests, production build, and zero production dependency vulnerabilities.
+- Tests failed: none in the character customisation phase.
+- Manual actions completed: both authenticated members saved characters; teammate avatars updated without refresh; settings remained after refresh.
+- Remaining issue: broader project and framework features remain intentionally pending.
 
 ## Next action
 
@@ -1423,4 +1423,5 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 - [x] Update checklist
 - [x] Commit working state
 - [x] Continue only after gate passes
-- [~] Begin team-member character customisation
+- [x] Team-member character customisation completed
+- [~] Begin built-in framework library

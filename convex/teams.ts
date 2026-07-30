@@ -4,6 +4,10 @@ import { mutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import { requireTeamMember, requireUserProfile } from "./lib/auth";
 import {
+  SPELL_TYPES,
+  validateCharacterColours,
+} from "./lib/characterValidation";
+import {
   assertValidJoinCode,
   generateJoinCode,
   normalizeSharedNote,
@@ -106,6 +110,7 @@ export const getWorkspace = query({
           joinedAt: teamMembership.joinedAt,
           characterFill: teamMembership.characterFill,
           characterOutline: teamMembership.characterOutline,
+          spellType: teamMembership.spellType,
         };
       }),
     );
@@ -265,6 +270,47 @@ export const updateSharedNote = mutation({
       actorProfileId: profile._id,
       action: "shared_note_updated",
       metadata: { noteLength: note.length },
+      createdAt: now,
+    });
+
+    return null;
+  },
+});
+
+export const updateCharacter = mutation({
+  args: {
+    teamId: v.id("teams"),
+    fill: v.string(),
+    outline: v.string(),
+    spellType: v.optional(
+      v.union(
+        v.literal(SPELL_TYPES[0]),
+        v.literal(SPELL_TYPES[1]),
+        v.literal(SPELL_TYPES[2]),
+        v.literal(SPELL_TYPES[3]),
+      ),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const { membership, profile } = await requireTeamMember(ctx, args.teamId);
+    const colours = validateCharacterColours(args.fill, args.outline);
+    const now = Date.now();
+
+    await ctx.db.patch(membership._id, {
+      characterFill: colours.fill,
+      characterOutline: colours.outline,
+      spellType: args.spellType,
+    });
+    await ctx.db.patch(args.teamId, { updatedAt: now });
+    await ctx.db.insert("activityLogs", {
+      teamId: args.teamId,
+      actorProfileId: profile._id,
+      action: "character_changed",
+      metadata: {
+        characterFill: colours.fill,
+        characterOutline: colours.outline,
+        spellType: args.spellType,
+      },
       createdAt: now,
     });
 

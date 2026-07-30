@@ -693,10 +693,28 @@ select:focus-visible {
 .member-avatar {
   display: grid;
   place-items: center;
+  position: relative;
   color: var(--color-navy);
   font-family: var(--font-heading);
   font-size: 1.25rem;
   font-weight: 900;
+}
+
+.member-avatar i {
+  position: absolute;
+  right: -0.35rem;
+  bottom: -0.35rem;
+  display: grid;
+  width: 1.35rem;
+  height: 1.35rem;
+  place-items: center;
+  border: 2px solid var(--color-text);
+  border-radius: 50%;
+  background: var(--color-yellow);
+  color: var(--color-navy);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-style: normal;
 }
 
 .member-list li > span:last-child {
@@ -706,6 +724,173 @@ select:focus-visible {
 
 .member-list small {
   color: var(--color-muted);
+}
+
+.character-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.42fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  margin-top: 1.5rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: var(--border-strong);
+  border-radius: 2rem;
+  background: var(--color-green);
+  color: var(--color-navy);
+  box-shadow: var(--shadow-card);
+}
+
+.character-copy h2 {
+  max-width: 12ch;
+  margin: 0;
+  font-size: clamp(2.8rem, 6vw, 5.5rem);
+  letter-spacing: -0.045em;
+}
+
+.character-copy > p:not(.card-eyebrow, .form-error) {
+  max-width: 58ch;
+  line-height: 1.6;
+}
+
+.character-controls {
+  display: grid;
+  gap: 1.25rem;
+  margin: 2rem 0 1.25rem;
+}
+
+.character-controls fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.character-controls legend {
+  margin-bottom: 0.65rem;
+  font-weight: 900;
+}
+
+.palette-grid,
+.spell-grid {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.palette-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.spell-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.palette-option,
+.spell-grid button {
+  min-height: 3.2rem;
+  border: 2px solid var(--color-navy);
+  border-radius: 0.8rem;
+  background: var(--color-cream);
+  color: var(--color-navy);
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.palette-option {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem;
+  text-align: left;
+}
+
+.palette-option > span {
+  flex: 0 0 auto;
+  width: 1.45rem;
+  height: 1.45rem;
+  border: 2px solid var(--color-navy);
+  border-radius: 50%;
+}
+
+.palette-option[aria-checked="true"],
+.spell-grid button[aria-checked="true"] {
+  outline: 4px solid var(--color-blue);
+  outline-offset: 2px;
+  box-shadow: 3px 3px 0 var(--color-navy);
+}
+
+.spell-grid button {
+  display: grid;
+  gap: 0.1rem;
+  place-items: center;
+  padding: 0.45rem;
+}
+
+.spell-grid button > span {
+  font-size: 1.25rem;
+}
+
+.character-copy > .primary-button {
+  margin-top: 1rem;
+  cursor: pointer;
+}
+
+.character-preview {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  min-height: 23rem;
+  padding: 1.25rem;
+  border: 3px solid var(--color-navy);
+  border-radius: 1.5rem;
+  background: var(--color-pink);
+  text-align: center;
+}
+
+.character-preview > span {
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.character-orb {
+  position: relative;
+  display: grid;
+  width: min(62vw, 12rem);
+  aspect-ratio: 1;
+  margin: 1.2rem 0 0.8rem;
+  place-items: center;
+  border: 0.85rem solid;
+  border-radius: 42% 58% 52% 48% / 52% 42% 58% 48%;
+  box-shadow: 8px 8px 0 color-mix(in srgb, var(--color-navy) 22%, transparent);
+  transform: rotate(-2deg);
+}
+
+.character-orb strong {
+  font-family: var(--font-heading);
+  font-size: 4.5rem;
+  line-height: 1;
+}
+
+.character-orb i {
+  position: absolute;
+  right: -1.2rem;
+  bottom: -0.8rem;
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  place-items: center;
+  border: 3px solid var(--color-navy);
+  border-radius: 50%;
+  background: var(--color-yellow);
+  color: var(--color-navy);
+  font-size: 1.8rem;
+  font-style: normal;
+}
+
+.character-preview > p {
+  margin: 0;
+  font-weight: 900;
 }
 
 .text-link {
@@ -908,6 +1093,10 @@ footer {
     grid-template-columns: 1fr;
   }
 
+  .character-card {
+    grid-template-columns: 1fr;
+  }
+
   .team-lobby-heading,
   .team-hero {
     align-items: flex-start;
@@ -978,6 +1167,11 @@ footer {
   .team-lobby-heading h1,
   .team-hero h1 {
     font-size: clamp(3rem, 15vw, 5rem);
+  }
+
+  .palette-grid,
+  .spell-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .welcome-panel > .brand-logo,

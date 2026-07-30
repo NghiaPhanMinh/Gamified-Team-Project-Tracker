@@ -169,4 +169,83 @@ describe("team backend gate", () => {
       "shared_note_updated",
     ]);
   });
+
+  it("validates and stores different character settings per team", async () => {
+    const testDatabase = convexTest(schema, modules);
+    const owner = await addProfile(
+      testDatabase,
+      "Owner One",
+      "owner@example.com",
+    );
+    const outsider = await addProfile(
+      testDatabase,
+      "Outsider",
+      "outsider@example.com",
+    );
+    const firstTeamId = await owner.asUser.mutation(api.teams.create, {
+      name: "Colour Team",
+    });
+    const secondTeamId = await owner.asUser.mutation(api.teams.create, {
+      name: "Other Colour Team",
+    });
+
+    await owner.asUser.mutation(api.teams.updateCharacter, {
+      teamId: firstTeamId,
+      fill: "#1dd851",
+      outline: "#121f25",
+      spellType: "spark",
+    });
+    await owner.asUser.mutation(api.teams.updateCharacter, {
+      teamId: secondTeamId,
+      fill: "#4CA0FE",
+      outline: "#FFFDED",
+      spellType: "shield",
+    });
+
+    await expect(
+      owner.asUser.mutation(api.teams.updateCharacter, {
+        teamId: firstTeamId,
+        fill: "red",
+        outline: "#121F25",
+      }),
+    ).rejects.toThrow(/MayLamDi palette/i);
+    await expect(
+      owner.asUser.mutation(api.teams.updateCharacter, {
+        teamId: firstTeamId,
+        fill: "#FFF73F",
+        outline: "#FFF73F",
+      }),
+    ).rejects.toThrow(/must be different/i);
+    await expect(
+      outsider.asUser.mutation(api.teams.updateCharacter, {
+        teamId: firstTeamId,
+        fill: "#FF8AE7",
+        outline: "#121F25",
+      }),
+    ).rejects.toThrow(/do not have access/i);
+
+    const firstWorkspace = await owner.asUser.query(api.teams.getWorkspace, {
+      teamId: firstTeamId,
+    });
+    const secondWorkspace = await owner.asUser.query(api.teams.getWorkspace, {
+      teamId: secondTeamId,
+    });
+    const firstCharacter = firstWorkspace.members.find(
+      (member) => member.profileId === owner.profileId,
+    );
+    const secondCharacter = secondWorkspace.members.find(
+      (member) => member.profileId === owner.profileId,
+    );
+
+    expect(firstCharacter).toMatchObject({
+      characterFill: "#1DD851",
+      characterOutline: "#121F25",
+      spellType: "spark",
+    });
+    expect(secondCharacter).toMatchObject({
+      characterFill: "#4CA0FE",
+      characterOutline: "#FFFDED",
+      spellType: "shield",
+    });
+  });
 });

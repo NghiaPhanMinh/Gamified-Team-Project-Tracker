@@ -3,7 +3,9 @@ import { useMutation, useQuery } from "convex/react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { getSpellGlyph, type SpellType } from "../../lib/character";
 import { getErrorMessage } from "../../lib/errors";
+import { CharacterCustomizer } from "./CharacterCustomizer";
 
 type TeamSummary = {
   _id: Id<"teams">;
@@ -58,6 +60,9 @@ export function TeamWorkspace({
     ? editedDraft
     : (workspace.sharedRecord?.note ?? "");
   const joinCode = workspace.team.joinCode;
+  const currentMember = workspace.members.find(
+    (member) => member.profileId === workspace.currentProfileId,
+  );
 
   async function handleCopyCode() {
     try {
@@ -195,26 +200,18 @@ export function TeamWorkspace({
           <ul className="member-list" aria-live="polite">
             {workspace.members.map((member) => (
               <li key={member.profileId}>
-                {member.imageUrl ? (
-                  <img
-                    src={member.imageUrl}
-                    alt=""
-                    width="52"
-                    height="52"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <span
-                    className="member-avatar"
-                    style={{
-                      backgroundColor: member.characterFill,
-                      borderColor: member.characterOutline,
-                    }}
-                    aria-hidden="true"
-                  >
-                    {member.displayName.slice(0, 1).toUpperCase()}
-                  </span>
-                )}
+                <span
+                  className="member-avatar"
+                  style={{
+                    backgroundColor: member.characterFill,
+                    borderColor: member.characterOutline,
+                    color: member.characterOutline,
+                  }}
+                  aria-hidden="true"
+                >
+                  {member.displayName.slice(0, 1).toUpperCase()}
+                  <i>{getSpellGlyph(member.spellType as SpellType | undefined)}</i>
+                </span>
                 <span>
                   <strong>
                     {member.displayName}
@@ -231,6 +228,19 @@ export function TeamWorkspace({
           </ul>
         </aside>
       </div>
+
+      {currentMember ? (
+        <CharacterCustomizer
+          key={`${selectedTeamId}:${currentMember.characterFill}:${currentMember.characterOutline}:${currentMember.spellType ?? "none"}`}
+          teamId={selectedTeamId}
+          member={{
+            displayName: currentMember.displayName,
+            characterFill: currentMember.characterFill,
+            characterOutline: currentMember.characterOutline,
+            spellType: currentMember.spellType as SpellType | undefined,
+          }}
+        />
+      ) : null}
     </section>
   );
 }
