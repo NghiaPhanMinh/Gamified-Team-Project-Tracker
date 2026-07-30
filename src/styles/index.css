@@ -893,6 +893,274 @@ select:focus-visible {
   font-weight: 900;
 }
 
+.framework-library {
+  margin-top: 1.5rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: var(--border-strong);
+  border-radius: 2rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.framework-library-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.framework-library-heading h2 {
+  max-width: 15ch;
+  margin: 0;
+  font-size: clamp(2.8rem, 6vw, 5.5rem);
+  letter-spacing: -0.045em;
+}
+
+.framework-library-heading > div > p:last-child {
+  max-width: 62ch;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.version-badge {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.7rem;
+  border: 2px solid var(--color-text);
+  border-radius: 999px;
+  background: var(--color-yellow);
+  color: var(--color-navy);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.framework-picker {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(9rem, 1fr));
+  gap: 0.7rem;
+  margin: 2rem 0 1.5rem;
+  padding: 0.3rem 0.3rem 0.7rem;
+  overflow-x: auto;
+}
+
+.framework-picker-card {
+  --framework-accent: var(--color-blue);
+  display: grid;
+  align-content: space-between;
+  min-height: 9.5rem;
+  padding: 0.85rem;
+  border: 2px solid var(--color-text);
+  border-radius: 1rem;
+  background: color-mix(
+    in srgb,
+    var(--framework-accent) 68%,
+    var(--color-surface)
+  );
+  color: var(--color-navy);
+  text-align: left;
+  cursor: pointer;
+}
+
+.framework-picker-card > span {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.framework-picker-card > strong {
+  font-size: 0.95rem;
+  line-height: 1.15;
+}
+
+.framework-picker-card > small {
+  font-weight: 800;
+}
+
+.framework-picker-card[aria-pressed="true"] {
+  outline: 4px solid var(--color-blue);
+  outline-offset: 3px;
+  box-shadow: 5px 5px 0 var(--color-text);
+  transform: translateY(-2px);
+}
+
+.framework-accent-yellow {
+  --framework-accent: var(--color-yellow);
+}
+
+.framework-accent-pink {
+  --framework-accent: var(--color-pink);
+}
+
+.framework-accent-green {
+  --framework-accent: var(--color-green);
+}
+
+.framework-accent-blue {
+  --framework-accent: var(--color-blue);
+}
+
+.framework-accent-orange {
+  --framework-accent: var(--color-orange);
+}
+
+.framework-accent-magenta {
+  --framework-accent: var(--color-magenta);
+}
+
+.framework-preview {
+  --framework-accent: var(--color-blue);
+  overflow: hidden;
+  border: 3px solid var(--color-text);
+  border-radius: 1.5rem;
+}
+
+.framework-preview > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.38fr);
+  gap: 2rem;
+  padding: clamp(1.4rem, 3vw, 2.5rem);
+  background: color-mix(
+    in srgb,
+    var(--framework-accent) 72%,
+    var(--color-surface)
+  );
+  color: var(--color-navy);
+}
+
+.framework-preview h3 {
+  max-width: 16ch;
+  margin: 0;
+  font-size: clamp(2.5rem, 5vw, 4.8rem);
+  letter-spacing: -0.04em;
+}
+
+.framework-preview > header p:last-child {
+  max-width: 60ch;
+  line-height: 1.6;
+}
+
+.discipline-tags {
+  display: flex;
+  align-content: start;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.discipline-tags span,
+.phase-flags span {
+  padding: 0.35rem 0.55rem;
+  border: 2px solid var(--color-navy);
+  border-radius: 999px;
+  background: var(--color-cream);
+  color: var(--color-navy);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.framework-phase-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  background: var(--color-page);
+  list-style: none;
+}
+
+.framework-phase-list > li {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 2px solid var(--color-text);
+}
+
+.phase-number {
+  display: grid;
+  width: 3.2rem;
+  height: 3.2rem;
+  place-items: center;
+  border: 2px solid var(--color-text);
+  border-radius: 50%;
+  background: var(--framework-accent);
+  color: var(--color-navy);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 900;
+}
+
+.phase-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.phase-heading h4 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 3vw, 2.3rem);
+}
+
+.phase-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.phase-details > p:not(.dependency-note) {
+  max-width: 72ch;
+  color: var(--color-muted);
+  line-height: 1.55;
+}
+
+.phase-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.phase-meta-grid > div {
+  padding: 0.9rem;
+  border: 2px solid var(--color-text);
+  border-radius: 0.9rem;
+  background: var(--color-surface);
+}
+
+.phase-meta-grid ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.phase-meta-grid li {
+  padding: 0.3rem 0.45rem;
+  border-radius: 0.5rem;
+  background: color-mix(
+    in srgb,
+    var(--framework-accent) 28%,
+    var(--color-surface)
+  );
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.dependency-note {
+  margin: 0.9rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.framework-preview-note {
+  padding: 1rem 1.5rem;
+  border-top: 2px solid var(--color-text);
+  background: var(--color-yellow);
+  color: var(--color-navy);
+  font-size: 0.86rem;
+  font-weight: 900;
+  text-align: center;
+}
+
 .text-link {
   color: var(--color-text);
   font-weight: 900;
@@ -1097,6 +1365,15 @@ footer {
     grid-template-columns: 1fr;
   }
 
+  .framework-library-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .framework-preview > header {
+    grid-template-columns: 1fr;
+  }
+
   .team-lobby-heading,
   .team-hero {
     align-items: flex-start;
@@ -1172,6 +1449,19 @@ footer {
   .palette-grid,
   .spell-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .framework-phase-list > li {
+    grid-template-columns: 1fr;
+  }
+
+  .phase-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .phase-meta-grid {
+    grid-template-columns: 1fr;
   }
 
   .welcome-panel > .brand-logo,

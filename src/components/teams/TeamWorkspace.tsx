@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { FrameworkLibrary } from "../frameworks/FrameworkLibrary";
 import { getSpellGlyph, type SpellType } from "../../lib/character";
 import { getErrorMessage } from "../../lib/errors";
 import { CharacterCustomizer } from "./CharacterCustomizer";
@@ -241,6 +242,8 @@ export function TeamWorkspace({
           }}
         />
       ) : null}
+
+      <FrameworkLibrary />
     </section>
   );
 }

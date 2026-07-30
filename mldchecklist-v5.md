@@ -407,93 +407,93 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Design and Creative
 
-- [ ] Empathise
-- [ ] Define / Research
-- [ ] Ideate
-- [ ] Prototype
-- [ ] Test
-- [ ] Refine
-- [ ] Deliver
-- [ ] Nonlinear overlap supported
-- [ ] Testing loopback supported
+- [x] Empathise
+- [x] Define / Research
+- [x] Ideate
+- [x] Prototype
+- [x] Test
+- [x] Refine
+- [x] Deliver
+- [x] Nonlinear overlap supported
+- [x] Testing loopback supported
 
 ## Marketing and Communications
 
-- [ ] Situation and Audience Research
-- [ ] Strategy and Objectives
-- [ ] Concept Development
-- [ ] Content Production
-- [ ] Channel Planning
-- [ ] Launch
-- [ ] Measurement and Optimisation
+- [x] Situation and Audience Research
+- [x] Strategy and Objectives
+- [x] Concept Development
+- [x] Content Production
+- [x] Channel Planning
+- [x] Launch
+- [x] Measurement and Optimisation
 
 ## Business and Entrepreneurship
 
-- [ ] Problem or Opportunity
-- [ ] Market and Stakeholder Research
-- [ ] Solution or Business Model
-- [ ] Financial and Operational Planning
-- [ ] Risk Assessment
-- [ ] Implementation Proposal
-- [ ] Evaluation and Presentation
+- [x] Problem or Opportunity
+- [x] Market and Stakeholder Research
+- [x] Solution or Business Model
+- [x] Financial and Operational Planning
+- [x] Risk Assessment
+- [x] Implementation Proposal
+- [x] Evaluation and Presentation
 
 ## Architecture and Spatial Design
 
-- [ ] Site and Context Analysis
-- [ ] User and Programme Research
-- [ ] Concept Development
-- [ ] Schematic Design
-- [ ] Design Development
-- [ ] Technical Documentation
-- [ ] Visualisation and Presentation
-- [ ] Review and Revision
-- [ ] Nonlinear revision supported
+- [x] Site and Context Analysis
+- [x] User and Programme Research
+- [x] Concept Development
+- [x] Schematic Design
+- [x] Design Development
+- [x] Technical Documentation
+- [x] Visualisation and Presentation
+- [x] Review and Revision
+- [x] Nonlinear revision supported
 
 ## Film, Animation, and Media Production
 
-- [ ] Development
-- [ ] Research and Script
-- [ ] Pre-production
-- [ ] Production
-- [ ] Post-production
-- [ ] Testing and Revision
-- [ ] Distribution or Presentation
-- [ ] Common dependencies included
+- [x] Development
+- [x] Research and Script
+- [x] Pre-production
+- [x] Production
+- [x] Post-production
+- [x] Testing and Revision
+- [x] Distribution or Presentation
+- [x] Common dependencies included
 
 ## Software and IT
 
-- [ ] Requirements
-- [ ] Backlog and Planning
-- [ ] UX / Technical Design
-- [ ] Development
-- [ ] Testing
-- [ ] Deployment
-- [ ] Review and Iteration
-- [ ] Sprint support
+- [x] Requirements
+- [x] Backlog and Planning
+- [x] UX / Technical Design
+- [x] Development
+- [x] Testing
+- [x] Deployment
+- [x] Review and Iteration
+- [x] Sprint support
 
 ## Academic Research
 
-- [ ] Research Question
-- [ ] Literature Review
-- [ ] Methodology
-- [ ] Ethics / Preparation
-- [ ] Data Collection
-- [ ] Analysis
-- [ ] Discussion
-- [ ] Writing
-- [ ] Review and Submission
+- [x] Research Question
+- [x] Literature Review
+- [x] Methodology
+- [x] Ethics / Preparation
+- [x] Data Collection
+- [x] Analysis
+- [x] Discussion
+- [x] Writing
+- [x] Review and Submission
 
 ## Framework Quality
 
-- [ ] Names and descriptions
-- [ ] Discipline tags
-- [ ] Suggested deliverables
-- [ ] Suggested skills
-- [ ] Default dependencies
-- [ ] Overlap metadata
-- [ ] Review checkpoints
-- [ ] Versioned template data
-- [ ] Preview UI
+- [x] Names and descriptions
+- [x] Discipline tags
+- [x] Suggested deliverables
+- [x] Suggested skills
+- [x] Default dependencies
+- [x] Overlap metadata
+- [x] Review checkpoints
+- [x] Versioned template data
+- [x] Preview UI
 - [ ] Duplicate/edit option
 
 ---
@@ -1367,7 +1367,7 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 | 4 | Data architecture | In progress | Later product tables remain | 2026-07-31 |
 | 5 | Team realtime | Completed |  | 2026-07-31 |
 | 6 | Character customisation | Completed |  | 2026-07-31 |
-| 7 | Built-in frameworks | Not started |  |  |
+| 7 | Built-in frameworks | Completed |  | 2026-07-31 |
 | 8 | Custom framework | Not started |  |  |
 | 9 | Long project structure | Not started |  |  |
 | 10 | Project creation | Not started |  |  |
@@ -1392,29 +1392,29 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Current phase
 
-- [x] Phase: 6 — Team-member character customisation
+- [x] Phase: 7 — Built-in framework library
 
 ## Goal
 
-- [x] Goal: Verify palette-only per-team characters, optional spell styles, backend validation, refresh persistence, activity logging, and realtime teammate updates.
+- [x] Goal: Deliver seven versioned reusable framework templates with complete phase metadata and an accessible responsive preview library.
 
 ## Blockers
 
-- [x] Blocker 1 resolved: two authenticated accounts observed character changes live without refresh.
+- [x] Blocker 1 resolved: all required framework structures are represented by one shared typed data model.
 - [ ] Blocker 2:
 - [ ] Blocker 3:
 
 ## Codex result
 
-- Files changed: approved palette and spell constants, character validators, member character mutation, live character customiser, team member avatars, responsive character preview, activity metadata, and backend tests.
-- Packages: no new runtime package.
-- Schema/index changes: optional typed spell style on `teamMembers`; typed `character_changed` activity event and metadata.
-- Security checks: actor derived from auth, membership required, arbitrary CSS rejected, palette enforced, and matching fill/outline rejected.
-- Commands: Convex code generation and deployment, live data verification, typecheck, lint, 10 tests, production build, and production dependency audit.
-- Tests passed: palette normalisation, arbitrary CSS rejection, matching-colour rejection, non-member mutation rejection, per-team settings, live teammate update, refresh persistence, activity logging, typecheck, lint, 10 tests, production build, and zero production dependency vulnerabilities.
-- Tests failed: none in the character customisation phase.
-- Manual actions completed: both authenticated members saved characters; teammate avatars updated without refresh; settings remained after refresh.
-- Remaining issue: broader project and framework features remain intentionally pending.
+- Files changed: typed framework and phase model, seven versioned built-in templates, complete outputs/skills/dependencies/overlap/review metadata, responsive framework selector, detailed phase preview, and framework validation/UI tests.
+- Packages: no new package.
+- Schema/index changes: none; built-in templates are intentionally versioned constants.
+- Security checks: built-in data is read-only; no user input or secret is involved.
+- Commands: typecheck, lint, 14 tests, production build, and production dependency audit.
+- Tests passed: seven unique templates, expected disciplines and phase names, complete metadata, valid dependency references, nonlinear overlap, sprint support, accessible template switching, typecheck, lint, 14 tests, production build, and zero production dependency vulnerabilities.
+- Tests failed: one selector-semantics test initially failed and was fixed by preserving native button accessibility; final suite passes.
+- Manual actions: no external dashboard action required.
+- Remaining issue: duplicate/edit belongs to the next team-owned Custom Framework phase.
 
 ## Next action
 
@@ -1423,5 +1423,5 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 - [x] Update checklist
 - [x] Commit working state
 - [x] Continue only after gate passes
-- [x] Team-member character customisation completed
-- [~] Begin built-in framework library
+- [x] Built-in framework library completed
+- [~] Begin team-owned Custom Framework builder
