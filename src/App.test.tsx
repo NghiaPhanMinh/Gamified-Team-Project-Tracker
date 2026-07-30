@@ -4,7 +4,17 @@ import { vi } from "vitest";
 
 import { App } from "./App";
 
+vi.mock("@convex-dev/auth/react", () => ({
+  useAuthActions: () => ({
+    signIn: vi.fn(),
+    signOut: vi.fn(),
+  }),
+}));
+
 vi.mock("convex/react", () => ({
+  Authenticated: () => null,
+  AuthLoading: () => null,
+  Unauthenticated: ({ children }: { children: React.ReactNode }) => children,
   useQuery: () => ({
     checkedAt: 1,
     service: "MayLamDi",
@@ -29,6 +39,9 @@ describe("MayLamDi clean scaffold", () => {
     expect(screen.getAllByAltText("MayLamDi logo")).not.toHaveLength(0);
     expect(screen.getByText(/no old questboard code/i)).toBeInTheDocument();
     expect(screen.getByText(/live workspace connected/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /continue with google/i }),
+    ).toBeInTheDocument();
   });
 
   it("persists a dark theme preference", () => {

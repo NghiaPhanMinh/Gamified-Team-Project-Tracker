@@ -255,6 +255,109 @@ h1 span {
   opacity: 0.78;
 }
 
+.sign-in-control {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.google-sign-in {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  cursor: pointer;
+}
+
+.google-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border: 2px solid var(--color-navy);
+  border-radius: 50%;
+  background: var(--color-cream);
+  color: var(--color-blue);
+  font-family: Arial, sans-serif;
+  font-weight: 900;
+}
+
+.auth-error {
+  max-width: 34rem;
+  margin: 0;
+  color: #a21b32;
+  font-weight: 800;
+}
+
+.secondary-button {
+  min-height: 2.75rem;
+  padding: 0.55rem 0.9rem;
+  border: var(--border-strong);
+  border-radius: 999px;
+  background: var(--color-yellow);
+  color: var(--color-navy);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.auth-state-page {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.auth-state-page .brand-logo {
+  width: min(58vw, 12rem);
+  margin-bottom: 1.5rem;
+}
+
+.auth-state-page h1 {
+  max-width: 14ch;
+  margin: 0.5rem 0 1rem;
+  font-size: clamp(2.6rem, 8vw, 5rem);
+}
+
+.authenticated-shell {
+  min-height: 100vh;
+}
+
+.welcome-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2rem;
+  width: min(100% - 2rem, 72rem);
+  margin: clamp(3rem, 10vw, 8rem) auto;
+  padding: clamp(1.5rem, 5vw, 4rem);
+  border: var(--border-strong);
+  border-radius: 2rem;
+  background: var(--color-pink);
+  color: var(--color-navy);
+  box-shadow: var(--shadow-card);
+}
+
+.welcome-panel h1 {
+  max-width: 16ch;
+  margin: 0;
+  font-size: clamp(3rem, 7vw, 6rem);
+}
+
+.welcome-panel p:last-child {
+  max-width: 56ch;
+  line-height: 1.6;
+}
+
+.welcome-panel > .brand-logo,
+.profile-image {
+  width: 7rem;
+  height: 7rem;
+  border: 3px solid var(--color-navy);
+  border-radius: 50%;
+  background: var(--color-cream);
+  object-fit: cover;
+}
+
 .text-link {
   color: var(--color-text);
   font-weight: 900;
@@ -490,6 +593,15 @@ footer {
 
   .floating-chip {
     font-size: 0.68rem;
+  }
+
+  .welcome-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-panel > .brand-logo,
+  .profile-image {
+    grid-row: 1;
   }
 }
 

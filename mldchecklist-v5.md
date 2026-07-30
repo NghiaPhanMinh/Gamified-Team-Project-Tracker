@@ -231,35 +231,35 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Convex Auth
 
-- [ ] Compatible package version confirmed
-- [ ] Google provider configured
-- [ ] Continue with Google button
-- [ ] Sign-out button
-- [ ] Signed-out state
-- [ ] Loading state
-- [ ] Authenticated state
-- [ ] No username/password
-- [ ] No magic link
-- [ ] No local fake session
-- [ ] Secret not exposed to React
+- [x] Compatible package version confirmed
+- [x] Google provider configured
+- [x] Continue with Google button
+- [x] Sign-out button
+- [x] Signed-out state
+- [x] Loading state
+- [x] Authenticated state
+- [x] No username/password
+- [x] No magic link
+- [x] No local fake session
+- [x] Secret not exposed to React
 
 ## Profile
 
-- [ ] First login creates profile
-- [ ] Profile linked to authenticated identity
-- [ ] Returning login reuses profile
-- [ ] Creation is idempotent
-- [ ] Display name saved
-- [ ] Email saved
-- [ ] Optional profile image handled
-- [ ] Created time saved
-- [ ] Updated time saved
-- [ ] Email is not sole identity
+- [~] First login creates profile
+- [~] Profile linked to authenticated identity
+- [~] Returning login reuses profile
+- [~] Creation is idempotent
+- [~] Display name saved
+- [~] Email saved
+- [~] Optional profile image handled
+- [~] Created time saved
+- [~] Updated time saved
+- [x] Email is not sole identity
 
 ## Auth Helpers
 
-- [ ] `requireAuthUser`
-- [ ] `requireUserProfile`
+- [x] `requireAuthUser`
+- [x] `requireUserProfile`
 - [ ] `requireTeamMember`
 - [ ] `requireProjectMember`
 - [ ] `requireTaskOwnerOrTeamPermission`
@@ -272,8 +272,8 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 - [ ] OAuth cancel handled
 - [ ] Refresh persists session
 - [ ] Sign-out works
-- [ ] Signed-out query rejected
-- [ ] Signed-out mutation rejected
+- [x] Signed-out query rejected
+- [x] Signed-out mutation rejected
 - [ ] No duplicate profile
 - [ ] Project features wait until gate passes
 
@@ -283,7 +283,7 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Tables
 
-- [ ] `userProfiles`
+- [x] `userProfiles`
 - [ ] `teams`
 - [ ] `teamMembers`
 - [ ] `customFrameworks`
@@ -299,14 +299,14 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Validation
 
-- [ ] Explicit validators
+- [x] Explicit validators
 - [ ] No important `v.any()`
 - [ ] Convex IDs used
 - [ ] Storage IDs used for files
-- [ ] All public args validated
-- [ ] All indexes generated
-- [ ] Schema deploys
-- [ ] Types generate
+- [x] All public args validated
+- [~] All indexes generated
+- [x] Schema deploys
+- [x] Types generate
 
 ## Indexes
 
@@ -1038,7 +1038,7 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 - [ ] Landing
 - [ ] Product explanation
 - [ ] Logo
-- [ ] Google sign-in
+- [x] Google sign-in
 - [ ] Theme toggle
 - [ ] Responsive navigation
 
@@ -1363,7 +1363,7 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 | 0 | Clean repository bootstrap | Completed |  | 2026-07-30 |
 | 1 | Convex connection | Completed |  | 2026-07-30 |
 | 2 | Branding and theme | Not started |  |  |
-| 3 | Google authentication | Not started |  |  |
+| 3 | Google authentication | Blocked | Google OAuth client credentials required | 2026-07-30 |
 | 4 | Data architecture | Not started |  |  |
 | 5 | Team realtime | Not started |  |  |
 | 6 | Character customisation | Not started |  |  |
@@ -1392,29 +1392,29 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Current phase
 
-- [x] Phase: 1 — Convex connection
+- [!] Phase: 3 — Google authentication
 
 ## Goal
 
-- [x] Goal: Link and verify `resilient-mastiff-759` with a deployed health query.
+- [~] Goal: Verify Google sign-in, profile idempotency, session refresh, sign-out, and signed-out backend rejection.
 
 ## Blockers
 
-- [x] Blocker 1: Convex device login approved for project `dms4`.
+- [!] Blocker 1: Google Cloud OAuth web client ID and secret must be created and stored privately in Convex.
 - [ ] Blocker 2:
 - [ ] Blocker 3:
 
 ## Codex result
 
-- Files changed: clean React/Vite/TypeScript/Tailwind scaffold, logo asset, design tokens, tests, docs, environment templates, Convex provider and pending health query.
-- Packages: React, React DOM, Convex, Vite, TypeScript, Tailwind, ESLint, Vitest, Testing Library.
-- Schema/index changes: none; schema work is gated.
-- Security checks: secrets ignored, frontend Convex URL validation, production dependency audit.
-- Commands: install, typecheck, lint, test, build, local server, Convex device login.
-- Tests passed: Convex generation, deployed `health:check`, function metadata, Convex logs, live browser query, typecheck, lint, 5 tests, production build, zero production dependency vulnerabilities, local HTTP 200.
-- Tests failed: initial test configuration and router audit failed, then were fixed; no current foundation failures.
-- Manual actions: Google OAuth and later production dashboard setup remain.
-- Remaining issues: Google authentication is the next mandatory gate.
+- Files changed: Google-only auth provider, HTTP routes, auth configuration, auth/profile schema, protected helpers, profile functions, signed-out/loading/authenticated UI, sign-in/sign-out controls, docs and environment templates.
+- Packages: `@convex-dev/auth@0.0.94`, patched `@auth/core@0.41.3`, and Node development types.
+- Schema/index changes: Convex Auth tables plus `userProfiles`; indexes `by_auth_user_id` and `by_email`.
+- Security checks: JWT keys stored only in Convex, Google secret server-side, patched Auth.js, signed-out query and mutation rejection.
+- Commands: Convex Auth initializer, Convex deployment, function metadata, signed-out function checks, typecheck, lint, tests, build, production dependency audit.
+- Tests passed: auth/schema deployment, function metadata, signed-out query rejection, signed-out mutation rejection, typecheck, lint, 5 tests, production build, zero production dependency vulnerabilities.
+- Tests failed: Google sign-in cannot run until Google Cloud credentials are configured.
+- Manual actions: create Google OAuth web client, register local origin and exact Convex callback, set `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`.
+- Remaining issues: two-account sign-in, profile idempotency, refresh persistence, sign-out and OAuth-cancel tests.
 
 ## Next action
 

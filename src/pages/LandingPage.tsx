@@ -1,3 +1,4 @@
+import { GoogleSignInButton } from "../components/auth/GoogleSignInButton";
 import { BrandLogo } from "../components/brand/BrandLogo";
 import { ConvexStatus } from "../components/system/ConvexStatus";
 import { ThemeToggle } from "../components/theme/ThemeToggle";
@@ -52,9 +53,7 @@ export function LandingPage() {
             stay ahead of risks, and keep a clear contribution trail.
           </p>
           <div className="hero-actions">
-            <button className="primary-button" type="button" disabled>
-              Google sign-in arrives after the foundation gate
-            </button>
+            <GoogleSignInButton />
             <a className="text-link" href="#how-it-helps">
               See the plan
             </a>

@@ -34,10 +34,30 @@ Create `.env.local` from `.env.example` and set:
 
 ```env
 VITE_CONVEX_URL=https://resilient-mastiff-759.convex.cloud
+VITE_CONVEX_SITE_URL=https://resilient-mastiff-759.convex.site
 ```
 
 Do not place Google, OpenRouter, Convex deploy, GitHub, or Vercel secrets in
 frontend `VITE_` variables.
+
+## Google authentication development setup
+
+MayLamDi uses Convex Auth with Google only. Configure Google Cloud with:
+
+- Authorized JavaScript origin: `http://localhost:5173`
+- Authorized redirect URI:
+  `https://resilient-mastiff-759.convex.site/api/auth/callback/google`
+- Basic OpenID, email, and profile identity only
+
+Set the Google client values privately on the Convex development deployment:
+
+```sh
+npx convex env set AUTH_GOOGLE_ID
+npx convex env set AUTH_GOOGLE_SECRET
+```
+
+The Convex Auth initializer already sets `SITE_URL`, `JWT_PRIVATE_KEY`, and
+`JWKS` for the development deployment. Never commit their values.
 
 ## Checks
 
