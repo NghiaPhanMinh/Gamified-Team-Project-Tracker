@@ -465,6 +465,14 @@ select {
   padding: 0.75rem 0.9rem;
 }
 
+input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 1.15rem;
+  min-height: 1.15rem;
+  padding: 0;
+  accent-color: var(--color-magenta);
+}
+
 textarea {
   min-height: 7.5rem;
   padding: 0.9rem;
@@ -1152,13 +1160,274 @@ select:focus-visible {
 }
 
 .framework-preview-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   padding: 1rem 1.5rem;
   border-top: 2px solid var(--color-text);
   background: var(--color-yellow);
   color: var(--color-navy);
   font-size: 0.86rem;
   font-weight: 900;
+}
+
+.framework-preview-note button {
+  flex: 0 0 auto;
+  min-height: 2.65rem;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--color-navy);
+  border-radius: 999px;
+  background: var(--color-green);
+  color: var(--color-navy);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.custom-framework-section {
+  margin-top: 1.5rem;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: var(--border-strong);
+  border-radius: 2rem;
+  background: var(--color-magenta);
+  color: var(--color-navy);
+  box-shadow: var(--shadow-card);
+}
+
+.custom-framework-heading,
+.custom-framework-builder > header,
+.custom-phase-toolbar,
+.builder-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.custom-framework-heading {
+  align-items: end;
+}
+
+.custom-framework-heading h2 {
+  max-width: 14ch;
+  margin: 0;
+  font-size: clamp(2.8rem, 6vw, 5.5rem);
+  letter-spacing: -0.045em;
+}
+
+.custom-framework-heading > div > p:last-child {
+  max-width: 60ch;
+  line-height: 1.6;
+}
+
+.custom-framework-empty {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 3px dashed var(--color-navy);
+  border-radius: 1.2rem;
+  background: color-mix(in srgb, var(--color-cream) 78%, transparent);
   text-align: center;
+}
+
+.custom-framework-empty strong {
+  font-family: var(--font-heading);
+  font-size: 1.7rem;
+}
+
+.custom-framework-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.custom-framework-grid > article {
+  display: grid;
+  align-content: start;
+  gap: 0.8rem;
+  padding: 1.25rem;
+  border: 3px solid var(--color-navy);
+  border-radius: 1.2rem;
+  background: var(--color-cream);
+  box-shadow: 5px 5px 0 var(--color-navy);
+}
+
+.custom-framework-grid article > span {
+  width: fit-content;
+  padding: 0.3rem 0.5rem;
+  border-radius: 999px;
+  background: var(--color-yellow);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.custom-framework-grid h3 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+}
+
+.custom-framework-grid p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.custom-framework-grid ul {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-left: 1.3rem;
+}
+
+.custom-framework-grid .quiet-button {
+  width: fit-content;
+  margin-top: auto;
+  border-color: var(--color-navy);
+  background: var(--color-pink);
+  color: var(--color-navy);
+}
+
+.custom-framework-builder {
+  margin-top: 1.5rem;
+  padding: clamp(1rem, 3vw, 2rem);
+  border: 3px solid var(--color-navy);
+  border-radius: 1.5rem;
+  background: var(--color-cream);
+}
+
+.custom-framework-builder > header {
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.custom-framework-builder h3 {
+  max-width: 15ch;
+  margin: 0;
+  font-size: clamp(2.2rem, 4vw, 4rem);
+}
+
+.custom-framework-builder .quiet-button {
+  border-color: var(--color-navy);
+  color: var(--color-navy);
+}
+
+.framework-basics,
+.custom-phase-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.framework-basics label,
+.custom-phase-fields label {
+  display: grid;
+  align-content: start;
+  gap: 0.45rem;
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.framework-basics label:last-child {
+  grid-column: 1 / -1;
+}
+
+.custom-phase-editor-list {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.custom-phase-editor {
+  padding: 1rem;
+  border: 3px solid var(--color-navy);
+  border-radius: 1rem;
+  background: var(--color-pink);
+}
+
+.custom-phase-toolbar {
+  margin-bottom: 1rem;
+}
+
+.custom-phase-toolbar > span {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.custom-phase-toolbar > div {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.custom-phase-toolbar button,
+.add-phase-button {
+  min-height: 2.45rem;
+  padding: 0.4rem 0.65rem;
+  border: 2px solid var(--color-navy);
+  border-radius: 0.65rem;
+  background: var(--color-yellow);
+  color: var(--color-navy);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.custom-phase-toolbar button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.custom-phase-fields small {
+  font-weight: 700;
+}
+
+.phase-option-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.phase-option-grid label,
+.dependency-selector label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 900;
+}
+
+.dependency-selector {
+  margin: 1rem 0 0;
+  padding: 0.9rem;
+  border: 2px solid var(--color-navy);
+  border-radius: 0.8rem;
+}
+
+.dependency-selector legend {
+  padding: 0 0.3rem;
+  font-weight: 900;
+}
+
+.dependency-selector > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem 1rem;
+}
+
+.add-phase-button {
+  background: var(--color-green);
+}
+
+.builder-actions {
+  margin-top: 1rem;
+}
+
+.builder-actions > span {
+  font-weight: 900;
+}
+
+.builder-actions .primary-button {
+  cursor: pointer;
 }
 
 .text-link {
@@ -1374,6 +1643,16 @@ footer {
     grid-template-columns: 1fr;
   }
 
+  .custom-framework-grid,
+  .framework-basics,
+  .custom-phase-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .framework-basics label:last-child {
+    grid-column: auto;
+  }
+
   .team-lobby-heading,
   .team-hero {
     align-items: flex-start;
@@ -1461,6 +1740,25 @@ footer {
   }
 
   .phase-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .framework-preview-note,
+  .custom-framework-heading,
+  .custom-framework-builder > header,
+  .custom-phase-toolbar,
+  .builder-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .framework-preview-note button,
+  .custom-framework-heading .secondary-button,
+  .builder-actions .primary-button {
+    width: 100%;
+  }
+
+  .phase-option-grid {
     grid-template-columns: 1fr;
   }
 

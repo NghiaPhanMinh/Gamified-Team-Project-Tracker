@@ -286,7 +286,7 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 - [x] `userProfiles`
 - [x] `teams`
 - [x] `teamMembers`
-- [ ] `customFrameworks`
+- [x] `customFrameworks`
 - [ ] `projects`
 - [ ] `projectMembers`
 - [ ] `phases`
@@ -314,7 +314,7 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 - [x] team members by team
 - [x] team members by user
 - [x] team member by team+user
-- [ ] custom frameworks by team
+- [x] custom frameworks by team
 - [ ] projects by team+status
 - [ ] projects by team+updated time
 - [ ] project members by project
@@ -502,45 +502,45 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Builder
 
-- [ ] Name
-- [ ] Description
-- [ ] Add phase
-- [ ] Rename phase
-- [ ] Reorder phase
-- [ ] Delete phase
-- [ ] Optional phase
-- [ ] Suggested deliverables
-- [ ] Suggested skills
-- [ ] Dependencies
-- [ ] Overlap toggle
-- [ ] Review checkpoint
-- [ ] Duplicate preset
-- [ ] Save
-- [ ] Edit
+- [x] Name
+- [x] Description
+- [x] Add phase
+- [x] Rename phase
+- [x] Reorder phase
+- [x] Delete phase
+- [x] Optional phase
+- [x] Suggested deliverables
+- [x] Suggested skills
+- [x] Dependencies
+- [x] Overlap toggle
+- [x] Review checkpoint
+- [x] Duplicate preset
+- [x] Save
+- [x] Edit
 - [ ] Delete with confirmation
 - [ ] Reuse in future projects
 
 ## Backend
 
-- [ ] Stored in Convex
-- [ ] Team ownership enforced
-- [ ] Creator stored
-- [ ] Created/updated time
-- [ ] Version stored
-- [ ] Validation
-- [ ] Non-member blocked
+- [x] Stored in Convex
+- [x] Team ownership enforced
+- [x] Creator stored
+- [x] Created/updated time
+- [x] Version stored
+- [x] Validation
+- [x] Non-member blocked
 - [ ] Deleting used framework handled safely
 
 ## Test
 
-- [ ] Create from blank
-- [ ] Duplicate Design framework
-- [ ] Edit phases
-- [ ] Save
+- [x] Create from blank
+- [x] Duplicate Design framework
+- [x] Edit phases
+- [x] Save
 - [ ] Use in project
-- [ ] Reopen
-- [ ] Teammates see live
-- [ ] Unauthorised edit rejected
+- [x] Reopen
+- [x] Teammates see live
+- [x] Unauthorised edit rejected
 
 ---
 
@@ -1368,7 +1368,7 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 | 5 | Team realtime | Completed |  | 2026-07-31 |
 | 6 | Character customisation | Completed |  | 2026-07-31 |
 | 7 | Built-in frameworks | Completed |  | 2026-07-31 |
-| 8 | Custom framework | Not started |  |  |
+| 8 | Custom framework | Completed | Project-use and safe whole-template deletion follow project creation | 2026-07-31 |
 | 9 | Long project structure | Not started |  |  |
 | 10 | Project creation | Not started |  |  |
 | 11 | Allocation engine | Not started |  |  |
@@ -1392,29 +1392,29 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Current phase
 
-- [x] Phase: 7 — Built-in framework library
+- [x] Phase: 8 — Team-owned Custom Framework builder
 
 ## Goal
 
-- [x] Goal: Deliver seven versioned reusable framework templates with complete phase metadata and an accessible responsive preview library.
+- [x] Goal: Create, duplicate, edit, reorder, validate, version, and share team-owned framework templates in realtime.
 
 ## Blockers
 
-- [x] Blocker 1 resolved: all required framework structures are represented by one shared typed data model.
+- [x] Blocker 1 resolved: framework create and version-2 edits are visible to both authenticated teammates without refresh.
 - [ ] Blocker 2:
 - [ ] Blocker 3:
 
 ## Codex result
 
-- Files changed: typed framework and phase model, seven versioned built-in templates, complete outputs/skills/dependencies/overlap/review metadata, responsive framework selector, detailed phase preview, and framework validation/UI tests.
+- Files changed: typed custom-framework schema, validation and cycle detection, creator/team-owner permissions, create/list/update functions, preset-copy flow, visual phase builder, realtime team library, responsive styles, and backend tests.
 - Packages: no new package.
-- Schema/index changes: none; built-in templates are intentionally versioned constants.
-- Security checks: built-in data is read-only; no user input or secret is involved.
-- Commands: typecheck, lint, 14 tests, production build, and production dependency audit.
-- Tests passed: seven unique templates, expected disciplines and phase names, complete metadata, valid dependency references, nonlinear overlap, sprint support, accessible template switching, typecheck, lint, 14 tests, production build, and zero production dependency vulnerabilities.
-- Tests failed: one selector-semantics test initially failed and was fixed by preserving native button accessibility; final suite passes.
-- Manual actions: no external dashboard action required.
-- Remaining issue: duplicate/edit belongs to the next team-owned Custom Framework phase.
+- Schema/index changes: `customFrameworks` with team, creator, version, typed phases, source preset, timestamps, and team/creator indexes; typed create/update activity events.
+- Security checks: membership required for reads and writes; only creator or team owner may edit; invalid sources, missing dependencies, self-dependencies, cycles, duplicate phase keys, and excessive inputs are rejected.
+- Commands: Convex code generation and deployment, live data verification, typecheck, lint, 17 tests, production build, and production dependency audit.
+- Tests passed: blank creation, preset duplication, realtime listing, owner/creator editing, version increments, non-member rejection, unauthorised editor rejection, cyclic dependency rejection, live version-2 update, activity logging, typecheck, lint, 17 tests, production build, and zero production dependency vulnerabilities.
+- Tests failed: none after the complete live version-2 check.
+- Manual actions: one team member copied and saved a preset; the other saw it without refresh; the creator saved version 2 and the teammate saw the edit live.
+- Remaining issue: using templates in projects and safely deleting used templates depend on the next project-creation phase.
 
 ## Next action
 
@@ -1423,5 +1423,5 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 - [x] Update checklist
 - [x] Commit working state
 - [x] Continue only after gate passes
-- [x] Built-in framework library completed
-- [~] Begin team-owned Custom Framework builder
+- [x] Team-owned Custom Framework builder completed
+- [~] Begin long-running project structure and creation

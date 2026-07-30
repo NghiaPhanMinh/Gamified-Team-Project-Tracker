@@ -1,8 +1,15 @@
 import { useMemo, useState } from "react";
 
-import { BUILT_IN_FRAMEWORKS } from "../../data/frameworks";
+import {
+  BUILT_IN_FRAMEWORKS,
+  type BuiltInFramework,
+} from "../../data/frameworks";
 
-export function FrameworkLibrary() {
+type FrameworkLibraryProps = {
+  onDuplicate: (framework: BuiltInFramework) => void;
+};
+
+export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
   const [selectedFrameworkId, setSelectedFrameworkId] = useState(
     BUILT_IN_FRAMEWORKS[0].id,
   );
@@ -135,8 +142,16 @@ export function FrameworkLibrary() {
         </ol>
 
         <div className="framework-preview-note">
-          Built-in templates are read-only starting points. Team-owned custom
-          copies will be added in the next framework phase.
+          <span>
+            Built-in templates stay read-only. Make a team copy when you want
+            to rename, reorder, or extend the phases.
+          </span>
+          <button
+            type="button"
+            onClick={() => onDuplicate(selectedFramework)}
+          >
+            Copy and customise
+          </button>
         </div>
       </article>
     </section>

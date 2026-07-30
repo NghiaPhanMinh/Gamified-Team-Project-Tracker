@@ -14,7 +14,20 @@ const activityAction = v.union(
   v.literal("member_joined"),
   v.literal("shared_note_updated"),
   v.literal("character_changed"),
+  v.literal("framework_created"),
+  v.literal("framework_updated"),
 );
+const customFrameworkPhase = v.object({
+  key: v.string(),
+  name: v.string(),
+  description: v.string(),
+  isOptional: v.boolean(),
+  suggestedDeliverables: v.array(v.string()),
+  suggestedSkills: v.array(v.string()),
+  canOverlap: v.boolean(),
+  defaultDependencyKeys: v.array(v.string()),
+  reviewCheckpoint: v.boolean(),
+});
 
 export default defineSchema({
   ...authTables,
@@ -56,6 +69,20 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_team", ["teamId"]),
+  customFrameworks: defineTable({
+    teamId: v.id("teams"),
+    creatorProfileId: v.id("userProfiles"),
+    name: v.string(),
+    description: v.string(),
+    phases: v.array(customFrameworkPhase),
+    sourceBuiltInId: v.optional(v.string()),
+    version: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_team", ["teamId"])
+    .index("by_team_and_updated", ["teamId", "updatedAt"])
+    .index("by_creator", ["creatorProfileId"]),
   activityLogs: defineTable({
     teamId: v.id("teams"),
     actorProfileId: v.id("userProfiles"),
@@ -67,6 +94,8 @@ export default defineSchema({
       characterFill: v.optional(v.string()),
       characterOutline: v.optional(v.string()),
       spellType: v.optional(spellType),
+      customFrameworkId: v.optional(v.id("customFrameworks")),
+      frameworkName: v.optional(v.string()),
     }),
     createdAt: v.number(),
   })

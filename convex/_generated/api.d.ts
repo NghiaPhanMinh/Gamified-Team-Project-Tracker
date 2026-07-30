@@ -9,10 +9,12 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as customFrameworks from "../customFrameworks.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_characterValidation from "../lib/characterValidation.js";
+import type * as lib_customFrameworkValidation from "../lib/customFrameworkValidation.js";
 import type * as lib_teamValidation from "../lib/teamValidation.js";
 import type * as profiles from "../profiles.js";
 import type * as teams from "../teams.js";
@@ -25,10 +27,12 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  customFrameworks: typeof customFrameworks;
   health: typeof health;
   http: typeof http;
   "lib/auth": typeof lib_auth;
   "lib/characterValidation": typeof lib_characterValidation;
+  "lib/customFrameworkValidation": typeof lib_customFrameworkValidation;
   "lib/teamValidation": typeof lib_teamValidation;
   profiles: typeof profiles;
   teams: typeof teams;

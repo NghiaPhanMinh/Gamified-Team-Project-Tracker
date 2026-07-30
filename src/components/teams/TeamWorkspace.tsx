@@ -3,6 +3,8 @@ import { useMutation, useQuery } from "convex/react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import type { BuiltInFramework } from "../../data/frameworks";
+import { CustomFrameworkSection } from "../frameworks/CustomFrameworkSection";
 import { FrameworkLibrary } from "../frameworks/FrameworkLibrary";
 import { getSpellGlyph, type SpellType } from "../../lib/character";
 import { getErrorMessage } from "../../lib/errors";
@@ -36,6 +38,8 @@ export function TeamWorkspace({
   const [isSaving, setIsSaving] = useState(false);
   const [noteError, setNoteError] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState("Copy code");
+  const [frameworkSeed, setFrameworkSeed] =
+    useState<BuiltInFramework | null>(null);
 
   const noteAuthor = useMemo(() => {
     if (!workspace?.sharedRecord) {
@@ -243,7 +247,14 @@ export function TeamWorkspace({
         />
       ) : null}
 
-      <FrameworkLibrary />
+      <FrameworkLibrary onDuplicate={setFrameworkSeed} />
+      <CustomFrameworkSection
+        teamId={selectedTeamId}
+        currentProfileId={workspace.currentProfileId}
+        currentRole={workspace.currentRole}
+        seed={frameworkSeed}
+        onSeedClosed={() => setFrameworkSeed(null)}
+      />
     </section>
   );
 }
