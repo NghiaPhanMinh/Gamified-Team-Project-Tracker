@@ -18,8 +18,8 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 - [x] Deleted QuestBoard code is never restored
 - [x] No migration plan is required
 - [x] Supplied logo is used from `public/assets/maylamdi-logo.png`
-- [ ] Google sign-in is the only MVP authentication method
-- [ ] Convex is the only application backend/database
+- [x] Google sign-in is the only MVP authentication method
+- [x] Convex is the only application backend/database
 - [ ] Vercel hosts the frontend
 - [ ] OpenRouter AI is optional
 - [ ] Manual planning works without AI
@@ -214,20 +214,20 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Google Cloud Manual Setup
 
-- [ ] Google Cloud project exists
-- [ ] Branding complete
-- [ ] Audience External
-- [ ] Testing mode
-- [ ] Test users added
-- [ ] OpenID scope only
-- [ ] Email scope only
-- [ ] Profile scope only
-- [ ] OAuth web client created
-- [ ] Local origin registered
+- [x] Google Cloud project exists
+- [x] Branding complete
+- [x] Audience External
+- [x] Testing mode
+- [x] Test users added
+- [x] OpenID scope only
+- [x] Email scope only
+- [x] Profile scope only
+- [x] OAuth web client created
+- [x] Local origin registered
 - [ ] Production origin registered
-- [ ] Exact callback registered
-- [ ] Client ID stored privately
-- [ ] Client secret stored privately
+- [x] Exact callback registered
+- [x] Client ID stored privately
+- [x] Client secret stored privately
 
 ## Convex Auth
 
@@ -245,15 +245,15 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Profile
 
-- [~] First login creates profile
-- [~] Profile linked to authenticated identity
-- [~] Returning login reuses profile
-- [~] Creation is idempotent
-- [~] Display name saved
-- [~] Email saved
-- [~] Optional profile image handled
-- [~] Created time saved
-- [~] Updated time saved
+- [x] First login creates profile
+- [x] Profile linked to authenticated identity
+- [x] Returning login reuses profile
+- [x] Creation is idempotent
+- [x] Display name saved
+- [x] Email saved
+- [x] Optional profile image handled
+- [x] Created time saved
+- [x] Updated time saved
 - [x] Email is not sole identity
 
 ## Auth Helpers
@@ -267,15 +267,15 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Auth Gate Test
 
-- [ ] Account A signs in
-- [ ] Account B signs in
+- [x] Account A signs in
+- [x] Account B signs in
 - [ ] OAuth cancel handled
-- [ ] Refresh persists session
-- [ ] Sign-out works
+- [x] Refresh persists session
+- [x] Sign-out works
 - [x] Signed-out query rejected
 - [x] Signed-out mutation rejected
-- [ ] No duplicate profile
-- [ ] Project features wait until gate passes
+- [x] No duplicate profile
+- [x] Project features wait until gate passes
 
 ---
 
@@ -1363,7 +1363,7 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 | 0 | Clean repository bootstrap | Completed |  | 2026-07-30 |
 | 1 | Convex connection | Completed |  | 2026-07-30 |
 | 2 | Branding and theme | Not started |  |  |
-| 3 | Google authentication | Blocked | Google OAuth client credentials required | 2026-07-30 |
+| 3 | Google authentication | Completed |  | 2026-07-31 |
 | 4 | Data architecture | Not started |  |  |
 | 5 | Team realtime | Not started |  |  |
 | 6 | Character customisation | Not started |  |  |
@@ -1392,15 +1392,15 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Current phase
 
-- [!] Phase: 3 — Google authentication
+- [x] Phase: 3 — Google authentication
 
 ## Goal
 
-- [~] Goal: Verify Google sign-in, profile idempotency, session refresh, sign-out, and signed-out backend rejection.
+- [x] Goal: Verify Google sign-in, profile idempotency, session refresh, sign-out, and signed-out backend rejection.
 
 ## Blockers
 
-- [!] Blocker 1: Google Cloud OAuth web client ID and secret must be created and stored privately in Convex.
+- [x] Blocker 1 resolved: Google Cloud OAuth web client ID and secret are stored privately in Convex.
 - [ ] Blocker 2:
 - [ ] Blocker 3:
 
@@ -1411,15 +1411,15 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 - Schema/index changes: Convex Auth tables plus `userProfiles`; indexes `by_auth_user_id` and `by_email`.
 - Security checks: JWT keys stored only in Convex, Google secret server-side, patched Auth.js, signed-out query and mutation rejection.
 - Commands: Convex Auth initializer, Convex deployment, function metadata, signed-out function checks, typecheck, lint, tests, build, production dependency audit.
-- Tests passed: auth/schema deployment, function metadata, signed-out query rejection, signed-out mutation rejection, typecheck, lint, 5 tests, production build, zero production dependency vulnerabilities.
-- Tests failed: Google sign-in cannot run until Google Cloud credentials are configured.
-- Manual actions: create Google OAuth web client, register local origin and exact Convex callback, set `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`.
-- Remaining issues: two-account sign-in, profile idempotency, refresh persistence, sign-out and OAuth-cancel tests.
+- Tests passed: auth/schema deployment, function metadata, two-account Google sign-in, first-profile creation, returning-profile reuse, refresh persistence, sign-out, signed-out query rejection, signed-out mutation rejection, profile uniqueness, typecheck, lint, 5 tests, production build, and zero production dependency vulnerabilities.
+- Tests failed: none in the mandatory local authentication gate.
+- Manual actions completed: Google OAuth web client configured, local origin and exact Convex callback registered, `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` stored privately, and two Google accounts tested.
+- Remaining issue: OAuth-cancel handling remains an edge-case test; production OAuth and deployment remain intentionally pending.
 
 ## Next action
 
 - [x] Review code
 - [x] Test manually
 - [x] Update checklist
-- [ ] Commit working state
+- [x] Commit working state
 - [x] Continue only after gate passes
