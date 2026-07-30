@@ -1,7 +1,0 @@
-node_modules
-dist
-dist-check
-.pnpm-store
-.env.local
-.env
-.convex
