@@ -68,7 +68,7 @@ npm test
 npm run build
 ```
 
-## Deployment direction
+## Production deployment
 
 - GitHub stores source code.
 - Vercel hosts the React/Vite frontend.
@@ -77,8 +77,57 @@ npm run build
 - Google Cloud provides the Google OAuth client.
 - OpenRouter is an optional server-side AI provider.
 
-Production deployment is intentionally deferred until the development
-foundation and authentication gates pass.
+The Vercel project uses:
+
+```text
+Framework preset: Vite
+Root directory: .
+Install command: npm install
+Build command: npm run vercel-build
+Output directory: dist
+Production branch: main
+```
+
+Set `CONVEX_DEPLOY_KEY` as a private Vercel Production environment variable.
+The build command deploys the Convex schema and functions, then builds the Vite
+frontend with the production `VITE_CONVEX_URL`. Do not manually point a
+production Vercel build at the development deployment.
+
+Configure these values privately on the production Convex deployment:
+
+```text
+SITE_URL
+JWT_PRIVATE_KEY
+JWKS
+AUTH_GOOGLE_ID
+AUTH_GOOGLE_SECRET
+```
+
+`OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, and
+`OPENROUTER_FALLBACK_MODEL` remain optional until the server-side AI action is
+implemented. Never add them to a `VITE_` variable.
+
+For Google OAuth, register:
+
+```text
+Production JavaScript origin:
+https://maylamdi.vercel.app
+
+Production redirect URI:
+https://reminiscent-narwhal-80.convex.site/api/auth/callback/google
+
+Local JavaScript origin:
+http://localhost:5173
+
+Development redirect URI:
+https://resilient-mastiff-759.convex.site/api/auth/callback/google
+```
+
+The production frontend uses the separate Convex deployment
+`reminiscent-narwhal-80`. The repository owner must connect
+`NghiaPhanMinh/Gamified-Team-Project-Tracker` to the Vercel project for
+automatic deployments from `main`; GitHub does not allow a collaborator on a
+personal repository to establish that Vercel connection.
 
 ## Fonts
 

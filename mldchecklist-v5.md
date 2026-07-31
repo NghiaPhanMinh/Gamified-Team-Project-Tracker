@@ -20,7 +20,7 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 - [x] Supplied logo is used from `public/assets/maylamdi-logo.png`
 - [x] Google sign-in is the only MVP authentication method
 - [x] Convex is the only application backend/database
-- [ ] Vercel hosts the frontend
+- [x] Vercel hosts the frontend
 - [ ] OpenRouter AI is optional
 - [ ] Manual planning works without AI
 - [ ] Seven built-in frameworks exist
@@ -1277,7 +1277,7 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Build
 
-- [ ] Install
+- [x] Install
 - [x] Convex generation
 - [x] Type check
 - [x] Lint
@@ -1291,12 +1291,12 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Convex
 
-- [ ] Production deployment exists
-- [ ] Schema deployed
-- [ ] Functions deployed
-- [ ] Auth variables set
+- [x] Production deployment exists
+- [x] Schema deployed
+- [x] Functions deployed
+- [x] Auth variables set
 - [ ] OpenRouter variables set
-- [ ] Development/production separated
+- [x] Development/production separated
 
 ## Google OAuth
 
@@ -1308,12 +1308,12 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 ## Vercel
 
 - [ ] Existing repository connected
-- [ ] Correct root
-- [ ] Correct build command
-- [ ] `CONVEX_DEPLOY_KEY` private
-- [ ] Production uses production Convex
-- [ ] Deployment succeeds
-- [ ] Route refresh works
+- [x] Correct root
+- [x] Correct build command
+- [x] `CONVEX_DEPLOY_KEY` private
+- [x] Production uses production Convex
+- [x] Deployment succeeds
+- [x] Route refresh works
 
 ## Production Test
 
@@ -1384,7 +1384,7 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 | 21 | Accessibility | Not started |  |  |
 | 22 | Security | Not started |  |  |
 | 23 | Testing | Not started |  |  |
-| 24 | Production | Not started |  |  |
+| 24 | Production | Blocked | Google OAuth registration and repository-owner Git connection | 2026-07-31 |
 
 ---
 
@@ -1392,33 +1392,36 @@ Use this file as the implementation, prompting, and testing tracker for the clea
 
 ## Current phase
 
-- [~] Phase: 15 — Progress and optional game layer foundation
+- [~] Phase: 24 — Production deployment
 
 ## Goal
 
-- [x] Goal: Define deterministic weighted progress and demonstrate an optional boss visual without creating a second source of truth.
+- [~] Goal: Publish the currently implemented MayLamDi scope with separate production Convex data and verified Google authentication.
 
 ## Blockers
 
-- [~] Persistent game progress awaits project, milestone, and task records from phases 9–14.
-- [x] The preview is clearly labelled as local and non-persistent.
+- [ ] Add `https://maylamdi.vercel.app` to the existing Google OAuth web client's authorised JavaScript origins.
+- [ ] Add `https://reminiscent-narwhal-80.convex.site/api/auth/callback/google` to its authorised redirect URIs.
+- [ ] The personal GitHub repository owner must connect the repository to Vercel; collaborator access cannot create that Git integration.
+- [~] Full project/task/upload/review/export/sound/AI smoke testing remains unavailable because those product phases are not implemented and this task forbids adding features.
 
 ## Codex result
 
-- Files changed: deterministic weighted-progress engine, practical project-state derivation, milestone calculation, responsive Game Functions Lab, boss-health presentation, reduced-motion-safe milestone and completion effects, integration in the team workspace, styles, and tests.
-- Packages: no new package.
-- Schema/index changes: none; persistent project integration is intentionally deferred until project/task records exist.
-- Fairness rules: optional tasks do not inflate progress; zero, negative, and invalid weights are ignored; no leaderboard, punitive XP, goblin log, goblin quota, or blocking game gate was introduced.
-- Commands: typecheck, lint, 23 tests, production build, diff validation, and production dependency audit.
-- Tests passed: weighted completion, optional-task exclusion, invalid-weight handling, milestone completion, practical active/at-risk/overdue/completed states, interactive boss-health reduction, overdue copy, typecheck, lint, 23 tests, production build, and zero production dependency vulnerabilities.
-- Tests failed: none.
-- Manual actions: refresh the team workspace and use the Game Functions Lab task controls to review the visual states.
-- Remaining issue: connect the deterministic engine to persisted project tasks and milestones after those product phases are implemented.
+- Public deployment: `https://maylamdi.vercel.app`.
+- Production Convex: `reminiscent-narwhal-80`, separate from development `resilient-mastiff-759`.
+- Files changed: Vercel production configuration, Vercel secret exclusions, Node runtime declaration, Convex-aware production build command, deployment documentation, and checklist status.
+- Packages: no package added or removed.
+- Schema/index changes: the current schema and functions were deployed unchanged to production.
+- Environment: production-only `CONVEX_DEPLOY_KEY` stored privately in Vercel; production Convex has `SITE_URL`, `JWT_PRIVATE_KEY`, `JWKS`, `AUTH_GOOGLE_ID`, and `AUTH_GOOGLE_SECRET`.
+- Tests passed: install/audit, Convex generation, typecheck, lint, 23 tests, production build, Vercel build, production Convex deployment and health query, public origin, logo, direct-route fallback, live frontend-to-production-Convex connection, and unauthenticated backend rejection.
+- Tests failed: production Google sign-in returns `redirect_uri_mismatch` until the production callback is added in Google Cloud.
+- Remaining issue: production launch cannot be declared complete until Google sign-in and two-account realtime persistence pass; unimplemented product phases remain outside this deployment-only task.
 
 ## Next action
 
-- [x] Review code
-- [x] Run automated tests
-- [x] Update checklist
-- [x] Commit and push working state
-- [ ] Integrate with persistent project/task data
+- [x] Create and configure the Vercel project
+- [x] Deploy the production Convex schema and functions
+- [x] Publish the current frontend
+- [ ] Complete the two Google Cloud OAuth entries
+- [ ] Have the repository owner connect GitHub to Vercel
+- [ ] Rerun production login and two-account realtime smoke tests
