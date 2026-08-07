@@ -9,7 +9,7 @@ export const CHARACTER_PALETTE = [
   "#121F25",
 ] as const;
 
-export const SPELL_TYPES = ["spark", "shield", "focus", "bloom"] as const;
+export const SPELL_TYPES = ["spark", "shield", "focus", "bloom", "fire", "lightning", "water", "nature", "star"] as const;
 
 export function validateCharacterColours(fill: string, outline: string) {
   const normalizedFill = fill.toUpperCase();

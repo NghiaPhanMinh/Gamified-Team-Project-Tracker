@@ -1,31 +1,6 @@
 import { GoogleSignInButton } from "../components/auth/GoogleSignInButton";
 import { BrandLogo } from "../components/brand/BrandLogo";
-import { ConvexStatus } from "../components/system/ConvexStatus";
 import { ThemeToggle } from "../components/theme/ThemeToggle";
-
-const principles = [
-  {
-    eyebrow: "Plan together",
-    title: "Turn a big brief into a clear path.",
-    detail:
-      "Shape phases, milestones, dependencies, and practical tasks without forcing every course into the same workflow.",
-    accent: "yellow",
-  },
-  {
-    eyebrow: "Share fairly",
-    title: "Allocate work with reasons, not guesses.",
-    detail:
-      "Balance skills, availability, preferences, and workload. Every suggestion stays editable by the team.",
-    accent: "pink",
-  },
-  {
-    eyebrow: "Keep the receipts",
-    title: "Preserve useful contribution evidence.",
-    detail:
-      "Capture task history, reviews, notes, links, images, and PDFs for reflection without ranking teammates.",
-    accent: "green",
-  },
-] as const;
 
 export function LandingPage() {
   return (
@@ -36,7 +11,6 @@ export function LandingPage() {
           <span>MayLamDi</span>
         </a>
         <div className="nav-actions">
-          <a href="#how-it-helps">How it helps</a>
           <ThemeToggle />
         </div>
       </nav>
@@ -44,7 +18,7 @@ export function LandingPage() {
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-copy">
           <p className="kicker">Group projects, without the guessing game.</p>
-          <h1 id="hero-title">
+          <h1 className="display-heading" id="hero-title">
             Make the work
             <span> feel shared.</span>
           </h1>
@@ -54,16 +28,8 @@ export function LandingPage() {
           </p>
           <div className="hero-actions">
             <GoogleSignInButton />
-            <a className="text-link" href="#how-it-helps">
-              See the plan
-            </a>
           </div>
-          <div className="foundation-note">
-            <ConvexStatus />
-            <p>
-              Clean-start foundation. No old QuestBoard code has been restored.
-            </p>
-          </div>
+          <p className="landing-flow-note">Create or join a project room, plan tasks together, submit evidence, review teammates, and defeat the project boss.</p>
         </div>
 
         <div className="hero-art" aria-label="MayLamDi brand mark">
@@ -72,32 +38,6 @@ export function LandingPage() {
           <span className="floating-chip chip-one">fairness-first</span>
           <span className="floating-chip chip-two">realtime</span>
           <span className="floating-chip chip-three">human control</span>
-        </div>
-      </section>
-
-      <section
-        className="principles-section"
-        id="how-it-helps"
-        aria-labelledby="principles-title"
-      >
-        <div className="section-heading">
-          <p className="kicker">Practical first. Playful on top.</p>
-          <h2 id="principles-title">A calmer way to carry the project.</h2>
-        </div>
-        <div className="principles-grid">
-          {principles.map((principle, index) => (
-            <article
-              className={`principle-card accent-${principle.accent}`}
-              key={principle.title}
-            >
-              <span className="card-number" aria-hidden="true">
-                0{index + 1}
-              </span>
-              <p className="card-eyebrow">{principle.eyebrow}</p>
-              <h3>{principle.title}</h3>
-              <p>{principle.detail}</p>
-            </article>
-          ))}
         </div>
       </section>
 

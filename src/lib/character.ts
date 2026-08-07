@@ -15,6 +15,11 @@ export const SPELL_OPTIONS = [
   { name: "Shield", value: "shield", glyph: "◇" },
   { name: "Focus", value: "focus", glyph: "◎" },
   { name: "Bloom", value: "bloom", glyph: "✿" },
+  { name: "Fire", value: "fire", glyph: "🔥" },
+  { name: "Lightning", value: "lightning", glyph: "⚡" },
+  { name: "Water", value: "water", glyph: "💧" },
+  { name: "Nature", value: "nature", glyph: "❧" },
+  { name: "Star magic", value: "star", glyph: "★" },
 ] as const;
 
 export type SpellType = Exclude<

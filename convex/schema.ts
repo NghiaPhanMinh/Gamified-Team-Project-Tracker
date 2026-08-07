@@ -8,6 +8,11 @@ const spellType = v.union(
   v.literal("shield"),
   v.literal("focus"),
   v.literal("bloom"),
+  v.literal("fire"),
+  v.literal("lightning"),
+  v.literal("water"),
+  v.literal("nature"),
+  v.literal("star"),
 );
 const activityAction = v.union(
   v.literal("team_created"),
@@ -16,6 +21,78 @@ const activityAction = v.union(
   v.literal("character_changed"),
   v.literal("framework_created"),
   v.literal("framework_updated"),
+  v.literal("project_created"),
+  v.literal("project_status_changed"),
+  v.literal("project_archived"),
+  v.literal("project_restored"),
+  v.literal("phase_status_changed"),
+  v.literal("milestone_created"),
+  v.literal("task_created"),
+  v.literal("task_updated"),
+  v.literal("task_reassigned"),
+  v.literal("task_deleted"),
+  v.literal("task_status_changed"),
+  v.literal("evidence_submitted"),
+  v.literal("review_requested"),
+  v.literal("review_approved"),
+  v.literal("review_changes_requested"),
+  v.literal("task_claimed"),
+  v.literal("task_damage_changed"),
+  v.literal("project_launched"),
+  v.literal("combat_event_created"),
+);
+const projectStatus = v.union(
+  v.literal("planning"),
+  v.literal("active"),
+  v.literal("at_risk"),
+  v.literal("overdue"),
+  v.literal("completed"),
+  v.literal("archived"),
+);
+const projectFrameworkType = v.union(
+  v.literal("none"),
+  v.literal("built_in"),
+  v.literal("custom"),
+);
+const workloadLevel = v.union(
+  v.literal("low"),
+  v.literal("medium"),
+  v.literal("high"),
+);
+const phaseStatus = v.union(
+  v.literal("not_started"),
+  v.literal("active"),
+  v.literal("completed"),
+);
+const milestoneStatus = v.union(
+  v.literal("planned"),
+  v.literal("completed"),
+);
+const taskStatus = v.union(
+  v.literal("todo"),
+  v.literal("in_progress"),
+  v.literal("blocked"),
+  v.literal("review"),
+  v.literal("completed"),
+  v.literal("submitted"),
+  v.literal("changes_requested"),
+  v.literal("verified"),
+);
+const taskSource = v.union(
+  v.literal("manual"),
+  v.literal("template"),
+  v.literal("ai"),
+);
+const evidenceType = v.union(
+  v.literal("note"),
+  v.literal("link"),
+  v.literal("image"),
+  v.literal("pdf"),
+);
+const reviewStatus = v.union(
+  v.literal("pending"),
+  v.literal("approved"),
+  v.literal("changes_requested"),
 );
 const customFrameworkPhase = v.object({
   key: v.string(),
@@ -83,8 +160,138 @@ export default defineSchema({
     .index("by_team", ["teamId"])
     .index("by_team_and_updated", ["teamId", "updatedAt"])
     .index("by_creator", ["creatorProfileId"]),
+  projects: defineTable({
+    teamId: v.id("teams"),
+    title: v.string(),
+    description: v.string(),
+    frameworkType: projectFrameworkType,
+    frameworkName: v.string(),
+    builtInFrameworkId: v.optional(v.string()),
+    customFrameworkId: v.optional(v.id("customFrameworks")),
+    startDate: v.string(),
+    deadline: v.string(),
+    status: projectStatus,
+    creatorProfileId: v.id("userProfiles"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    completedAt: v.optional(v.number()),
+    setupMode: v.optional(v.union(v.literal("manual"), v.literal("ai"))),
+    launchedAt: v.optional(v.number()),
+  })
+    .index("by_team_and_status", ["teamId", "status"])
+    .index("by_team_and_updated", ["teamId", "updatedAt"]),
+  projectMembers: defineTable({
+    projectId: v.id("projects"),
+    profileId: v.id("userProfiles"),
+    skills: v.array(v.string()),
+    availability: v.string(),
+    currentWorkload: workloadLevel,
+    preferences: v.string(),
+    weeklyCapacity: v.optional(v.number()),
+    joinedAt: v.number(),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_project_and_user", ["projectId", "profileId"]),
+  phases: defineTable({
+    projectId: v.id("projects"),
+    frameworkPhaseKey: v.string(),
+    title: v.string(),
+    description: v.string(),
+    order: v.number(),
+    startDate: v.optional(v.string()),
+    endDate: v.optional(v.string()),
+    status: phaseStatus,
+    canOverlap: v.boolean(),
+    reviewCheckpoint: v.boolean(),
+    dependencyKeys: v.array(v.string()),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_project_and_order", ["projectId", "order"]),
+  milestones: defineTable({
+    projectId: v.id("projects"),
+    phaseId: v.optional(v.id("phases")),
+    title: v.string(),
+    description: v.string(),
+    dueDate: v.string(),
+    status: milestoneStatus,
+    requiredTaskIds: v.array(v.id("tasks")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_project_and_due_date", ["projectId", "dueDate"]),
+  tasks: defineTable({
+    projectId: v.id("projects"),
+    phaseId: v.id("phases"),
+    milestoneId: v.optional(v.id("milestones")),
+    title: v.string(),
+    description: v.string(),
+    primaryOwnerProfileId: v.id("userProfiles"),
+    collaboratorProfileIds: v.array(v.id("userProfiles")),
+    requiredSkills: v.array(v.string()),
+    estimatedEffortHours: v.number(),
+    difficulty: v.number(),
+    weight: v.number(),
+    damage: v.optional(v.number()),
+    required: v.boolean(),
+    isOpenForClaiming: v.optional(v.boolean()),
+    collaboratorCanSubmit: v.optional(v.boolean()),
+    startDate: v.string(),
+    dueDate: v.string(),
+    status: taskStatus,
+    acceptanceStatus: v.optional(
+      v.union(v.literal("pending"), v.literal("accepted")),
+    ),
+    dependencyTaskIds: v.array(v.id("tasks")),
+    source: taskSource,
+    requiresReview: v.boolean(),
+    reviewerProfileId: v.optional(v.id("userProfiles")),
+    createdByProfileId: v.id("userProfiles"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_project_and_owner", ["projectId", "primaryOwnerProfileId"])
+    .index("by_project_and_status", ["projectId", "status"]),
+  taskEvidence: defineTable({
+    taskId: v.id("tasks"),
+    submitterProfileId: v.id("userProfiles"),
+    type: evidenceType,
+    note: v.optional(v.string()),
+    url: v.optional(v.string()),
+    storageId: v.optional(v.id("_storage")),
+    fileName: v.optional(v.string()),
+    contentType: v.optional(v.string()),
+    fileSize: v.optional(v.number()),
+    submittedAt: v.number(),
+  }).index("by_task", ["taskId"]),
+  taskReviews: defineTable({
+    taskId: v.id("tasks"),
+    reviewerProfileId: v.id("userProfiles"),
+    status: reviewStatus,
+    comment: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    reviewedAt: v.optional(v.number()),
+  })
+    .index("by_task_and_time", ["taskId", "createdAt"])
+    .index("by_reviewer_and_time", ["reviewerProfileId", "createdAt"]),
+  combatEvents: defineTable({
+    projectId: v.id("projects"),
+    taskId: v.id("tasks"),
+    attackerProfileId: v.id("userProfiles"),
+    reviewerProfileId: v.id("userProfiles"),
+    damage: v.number(),
+    spellType: spellType,
+    createdAt: v.number(),
+  })
+    .index("by_project_and_time", ["projectId", "createdAt"])
+    .index("by_task", ["taskId"]),
   activityLogs: defineTable({
     teamId: v.id("teams"),
+    projectId: v.optional(v.id("projects")),
     actorProfileId: v.id("userProfiles"),
     action: activityAction,
     metadata: v.object({
@@ -96,9 +303,41 @@ export default defineSchema({
       spellType: v.optional(spellType),
       customFrameworkId: v.optional(v.id("customFrameworks")),
       frameworkName: v.optional(v.string()),
+      projectId: v.optional(v.id("projects")),
+      projectTitle: v.optional(v.string()),
+      previousProjectStatus: v.optional(projectStatus),
+      projectStatus: v.optional(projectStatus),
+      phaseId: v.optional(v.id("phases")),
+      phaseTitle: v.optional(v.string()),
+      previousPhaseStatus: v.optional(phaseStatus),
+      phaseStatus: v.optional(phaseStatus),
+      milestoneId: v.optional(v.id("milestones")),
+      milestoneTitle: v.optional(v.string()),
+      taskId: v.optional(v.id("tasks")),
+      taskTitle: v.optional(v.string()),
+      previousTaskStatus: v.optional(taskStatus),
+      taskStatus: v.optional(taskStatus),
+      previousOwnerProfileId: v.optional(v.id("userProfiles")),
+      ownerProfileId: v.optional(v.id("userProfiles")),
+      evidenceId: v.optional(v.id("taskEvidence")),
+      evidenceType: v.optional(evidenceType),
+      reviewId: v.optional(v.id("taskReviews")),
+      reviewStatus: v.optional(reviewStatus),
+      damage: v.optional(v.number()),
+      previousDamage: v.optional(v.number()),
+      combatEventId: v.optional(v.id("combatEvents")),
     }),
     createdAt: v.number(),
   })
     .index("by_team_and_time", ["teamId", "createdAt"])
+    .index("by_project_and_time", ["projectId", "createdAt"])
     .index("by_actor_and_time", ["actorProfileId", "createdAt"]),
+  activityReadStates: defineTable({
+    teamId: v.id("teams"),
+    profileId: v.id("userProfiles"),
+    lastReadAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_team_and_profile", ["teamId", "profileId"])
+    .index("by_profile", ["profileId"]),
 });

@@ -22,7 +22,7 @@ vi.mock("convex/react", () => ({
   }),
 }));
 
-describe("MayLamDi clean scaffold", () => {
+describe("MayLamDi signed-out journey", () => {
   afterEach(cleanup);
 
   beforeEach(() => {
@@ -30,15 +30,15 @@ describe("MayLamDi clean scaffold", () => {
     document.documentElement.dataset.theme = "light";
   });
 
-  it("renders the supplied brand and clean-start message", () => {
+  it("shows one clear Google sign-in action and a short purpose statement", () => {
     render(<App />);
 
     expect(
       screen.getByRole("heading", { name: /make the work.*feel shared/i }),
     ).toBeInTheDocument();
     expect(screen.getAllByAltText("MayLamDi logo")).not.toHaveLength(0);
-    expect(screen.getByText(/no old questboard code/i)).toBeInTheDocument();
-    expect(screen.getByText(/live workspace connected/i)).toBeInTheDocument();
+    expect(screen.getByText(/create or join a project room/i)).toBeInTheDocument();
+    expect(screen.queryByText(/how it helps/i)).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /continue with google/i }),
     ).toBeInTheDocument();

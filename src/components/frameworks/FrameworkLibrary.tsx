@@ -13,6 +13,9 @@ export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
   const [selectedFrameworkId, setSelectedFrameworkId] = useState(
     BUILT_IN_FRAMEWORKS[0].id,
   );
+  const [query, setQuery] = useState("");
+  const [viewAll, setViewAll] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const selectedFramework =
     BUILT_IN_FRAMEWORKS.find(
       (framework) => framework.id === selectedFrameworkId,
@@ -27,13 +30,18 @@ export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
       ),
     [selectedFramework],
   );
+  const matchingFrameworks = BUILT_IN_FRAMEWORKS.filter((framework) => {
+    const needle = query.trim().toLowerCase();
+    return needle === "" || [framework.name, framework.shortName, ...framework.disciplines].some((value) => value.toLowerCase().includes(needle));
+  });
+  const visibleFrameworks = viewAll || query.trim() ? matchingFrameworks : matchingFrameworks.slice(0, 3);
 
   return (
     <section className="framework-library" aria-labelledby="framework-title">
       <div className="framework-library-heading">
         <div>
           <p className="kicker">Seven built-in frameworks</p>
-          <h2 id="framework-title">A strong structure, never a straitjacket.</h2>
+          <h2 className="display-heading" id="framework-title">A strong structure, never a straitjacket.</h2>
           <p>
             Preview typical phases, outputs, skills, dependencies, overlap, and
             review points. Every framework will use the same shared planning
@@ -45,12 +53,16 @@ export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
         </span>
       </div>
 
+      <div className="framework-library-controls">
+        <label><span>Search frameworks or disciplines</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="UX, agile, research…" /></label>
+        <button className="secondary-button" type="button" onClick={() => setViewAll((current) => !current)}>{viewAll ? "Show recommendations" : "View all frameworks"}</button>
+      </div>
       <div
         className="framework-picker"
         role="group"
         aria-label="Built-in framework templates"
       >
-        {BUILT_IN_FRAMEWORKS.map((framework, index) => (
+        {visibleFrameworks.map((framework, index) => (
           <button
             key={framework.id}
             className={`framework-picker-card framework-accent-${framework.accent}`}
@@ -84,7 +96,8 @@ export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
           </div>
         </header>
 
-        <ol className="framework-phase-list">
+        <button className="quiet-button framework-detail-toggle" type="button" onClick={() => setShowDetails((current) => !current)}>{showDetails ? "Hide phase details" : "View phase details"}</button>
+        {showDetails ? <ol className="framework-phase-list">
           {selectedFramework.phases.map((frameworkPhase, index) => (
             <li key={frameworkPhase.id}>
               <div className="phase-number">
@@ -139,7 +152,7 @@ export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
               </div>
             </li>
           ))}
-        </ol>
+        </ol> : null}
 
         <div className="framework-preview-note">
           <span>

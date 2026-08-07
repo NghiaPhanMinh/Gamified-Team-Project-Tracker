@@ -1,5 +1,9 @@
 # MayLamDi
 
+## Local fonts
+
+The repository does not currently contain licensed Blode Starkly or Glacial Indifference font files. The interface therefore uses reliable system fallbacks on every computer. To self-host the intended typography, provide licensed WOFF2 files at `public/fonts/BlodeStarkly.woff2` and `public/fonts/GlacialIndifference-Regular.woff2`; then add matching `@font-face` declarations in `src/styles/index.css`. Do not hotlink font-download websites.
+
 MayLamDi is a realtime project-planning platform for university teams. It helps
 teams structure long projects, allocate work transparently, track progress, and
 preserve contribution evidence without punitive ranking.
@@ -103,9 +107,26 @@ AUTH_GOOGLE_ID
 AUTH_GOOGLE_SECRET
 ```
 
-`OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, and
-`OPENROUTER_FALLBACK_MODEL` remain optional until the server-side AI action is
-implemented. Never add them to a `VITE_` variable.
+AI planning is optional. To enable it, set the private OpenRouter values on
+both Convex deployments. Omitting the model values uses the documented app
+defaults in this free-only order: `google/gemma-4-26b-a4b-it:free`,
+`google/gemma-4-31b-it:free`, `google/gemma-3-27b-it:free`, then
+`openrouter/free`. `OPENROUTER_FREE_FALLBACK_MODELS` accepts a comma-separated
+list and ignores non-free model identifiers:
+
+```sh
+npx convex env set OPENROUTER_API_KEY
+npx convex env set OPENROUTER_MODEL
+npx convex env set OPENROUTER_FALLBACK_MODEL
+npx convex env set OPENROUTER_FREE_FALLBACK_MODELS
+
+npx convex env set --prod OPENROUTER_API_KEY
+npx convex env set --prod OPENROUTER_MODEL
+npx convex env set --prod OPENROUTER_FALLBACK_MODEL
+npx convex env set --prod OPENROUTER_FREE_FALLBACK_MODELS
+```
+
+Never add OpenRouter values to a `VITE_` variable or commit them to a file.
 
 For Google OAuth, register:
 

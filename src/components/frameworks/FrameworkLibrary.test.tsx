@@ -14,8 +14,10 @@ describe("FrameworkLibrary", () => {
     expect(
       screen.getByRole("heading", { name: "Nonlinear Design Process" }),
     ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /View phase details/i }));
     expect(screen.getByText("Empathise")).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("button", { name: /View all frameworks/i }));
     fireEvent.click(
       screen.getByRole("button", { name: /Academic Research/i }),
     );

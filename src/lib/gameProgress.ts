@@ -3,7 +3,10 @@ export type PracticalTaskStatus =
   | "in_progress"
   | "blocked"
   | "review"
-  | "completed";
+  | "completed"
+  | "submitted"
+  | "changes_requested"
+  | "verified";
 
 export type WeightedProgressTask = {
   id: string;
@@ -41,7 +44,7 @@ export function calculateWeightedProgress(tasks: WeightedProgressTask[]) {
     0,
   );
   const completedWeight = requiredTasks
-    .filter((task) => task.status === "completed")
+    .filter((task) => task.status === "completed" || task.status === "verified")
     .reduce((total, task) => total + task.weight, 0);
   const progress =
     totalWeight === 0 ? 0 : Math.min(1, completedWeight / totalWeight);
@@ -61,7 +64,7 @@ export function calculateMilestoneProgress(
 ) {
   const completedTaskIds = new Set(
     tasks
-      .filter((task) => task.status === "completed")
+      .filter((task) => task.status === "completed" || task.status === "verified")
       .map((task) => task.id),
   );
   const milestoneStates = milestones.map((milestone) => ({
@@ -111,7 +114,7 @@ export function derivePracticalProjectStatus(input: {
   const hasOverdueRequiredTask = input.tasks.some(
     (task) =>
       task.required &&
-      task.status !== "completed" &&
+      task.status !== "completed" && task.status !== "verified" &&
       task.dueDate !== undefined &&
       isBeforeDate(task.dueDate, input.today),
   );
@@ -128,7 +131,7 @@ export function describeGameState(status: PracticalProjectStatus) {
     case "planning":
       return "Choose required work before the encounter begins.";
     case "active":
-      return "The boss is active. Every completed weighted task moves the team forward.";
+      return "The boss is active. Each reviewer-verified required task moves the team forward.";
     case "at_risk":
       return "The boss is pushing back. Resolve blocked or overdue required work.";
     case "overdue":

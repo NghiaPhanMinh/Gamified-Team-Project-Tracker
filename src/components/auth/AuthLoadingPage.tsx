@@ -5,7 +5,7 @@ export function AuthLoadingPage() {
     <main className="auth-state-page" aria-busy="true">
       <BrandLogo />
       <p className="kicker">Checking your session</p>
-      <h1>Loading MayLamDi.</h1>
+      <h1 className="display-heading">Loading MayLamDi.</h1>
       <p role="status">Connecting securely…</p>
     </main>
   );
