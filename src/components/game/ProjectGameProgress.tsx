@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   calculateMilestoneProgress,
   calculateWeightedProgress,
@@ -5,6 +6,15 @@ import {
   type PracticalProjectStatus,
   type PracticalTaskStatus,
 } from "../../lib/gameProgress";
+
+import { SVGDefs } from "./landscape/SVGDefs";
+import { LandscapeSky } from "./landscape/LandscapeSky";
+import { LandscapeTerrain } from "./landscape/LandscapeTerrain";
+import { LandscapeVillage } from "./landscape/LandscapeVillage";
+import { LandscapeGoblins } from "./landscape/LandscapeGoblins";
+import { LandscapePlayers } from "./landscape/LandscapePlayers";
+import { LandscapeDragon } from "./landscape/LandscapeDragon";
+import { LandscapeFX } from "./landscape/LandscapeFX";
 
 type GameTask = {
   _id: string;
@@ -34,14 +44,19 @@ export function ProjectGameProgress({
   tasks,
   milestones,
 }: ProjectGameProgressProps) {
-  const progressTasks = tasks.map((task) => ({
-    id: task._id,
-    title: task.title,
-    weight: task.weight,
-    required: task.required,
-    status: task.status,
-    dueDate: task.dueDate,
-  }));
+  const progressTasks = useMemo(
+    () =>
+      tasks.map((task) => ({
+        id: task._id,
+        title: task.title,
+        weight: task.weight,
+        required: task.required,
+        status: task.status,
+        dueDate: task.dueDate,
+      })),
+    [tasks],
+  );
+
   const progress = calculateWeightedProgress(progressTasks);
   const milestoneProgress = calculateMilestoneProgress(
     progressTasks,
@@ -51,41 +66,56 @@ export function ProjectGameProgress({
       requiredTaskIds: milestone.requiredTaskIds,
     })),
   );
-  const bossDefeated = status === "completed";
+
+  const bossDefeated = status === "completed" || progress.bossHealthPercent === 0;
+  const hpPercent = progress.bossHealthPercent;
+
+  // Deriving goblins from uncompleted required tasks
+  const uncompletedTasks = useMemo(
+    () => tasks.filter((t) => t.required && t.status !== "completed" && t.status !== "verified"),
+    [tasks],
+  );
+
+  const goblins = useMemo(
+    () =>
+      uncompletedTasks.slice(0, 6).map((task, index) => ({
+        id: task._id,
+        memberId: task._id,
+        memberName: task.title,
+        isDefeated: false,
+      })),
+    [uncompletedTasks],
+  );
 
   return (
     <section className="live-game-layer" aria-labelledby="live-game-title">
+      <SVGDefs />
+
       <div className="live-game-copy">
-        <p className="card-eyebrow">Live game layer</p>
+        <p className="card-eyebrow">Realtime encounter landscape</p>
         <h3 id="live-game-title">{projectTitle} encounter</h3>
         <p>
           Battle damage comes only from required tasks verified by their assigned reviewer.
-          Uploading evidence alone never changes boss health.
+          Defeating the dragon repels it back from the village.
         </p>
       </div>
-      <article
-        className={`boss-stage ${bossDefeated ? "boss-defeated" : ""} milestone-power-${milestoneProgress.completedCount}`}
+
+      <div
+        className={`boss-stage ${bossDefeated ? "boss-defeated" : ""}`}
+        style={{ padding: "0", background: "transparent", border: "none", boxShadow: "none" }}
       >
-        <div className="boss-status-row">
-          <span>Practical status</span>
-          <strong>{status.replace("_", " ")}</strong>
+        {/* Full 10-Layer Landscape Scene */}
+        <div className="landscape-scene-container" aria-label={`${projectTitle} interactive encounter scene`}>
+          <LandscapeSky />
+          <LandscapeTerrain />
+          <LandscapeVillage villageHpPercent={hpPercent} />
+          <LandscapeGoblins goblins={goblins} />
+          <LandscapePlayers members={[]} />
+          <LandscapeDragon bossHpPercent={hpPercent} isDefeated={bossDefeated} />
+          <LandscapeFX activeEvent={null} isVictory={bossDefeated} />
         </div>
-        <div className="boss-scene" aria-hidden="true">
-          <span className="boss-horn boss-horn-left" />
-          <span className="boss-horn boss-horn-right" />
-          <div
-            className="boss-creature"
-            style={{
-              transform: `scale(${0.72 + progress.bossHealthPercent / 360})`,
-            }}
-          >
-            <span className="boss-eye boss-eye-left" />
-            <span className="boss-eye boss-eye-right" />
-            <span className="boss-mouth" />
-          </div>
-          <span className="victory-burst">✦</span>
-        </div>
-        <div className="boss-health">
+
+        <div className="boss-health" style={{ marginTop: "1rem" }}>
           <div>
             <span>Boss health</span>
             <strong>{progress.bossHealthPercent}%</strong>
@@ -101,16 +131,18 @@ export function ProjectGameProgress({
             <span style={{ width: `${progress.bossHealthPercent}%` }} />
           </div>
         </div>
+
         <p className="boss-message" role="status">
           {describeGameState(status)}
         </p>
+
         <div className="live-game-stats">
           <span>{progress.progressPercent}% project progress</span>
           <span>
             {milestoneProgress.completedCount}/{milestoneProgress.totalCount} milestones cleared
           </span>
         </div>
-      </article>
+      </div>
     </section>
   );
 }

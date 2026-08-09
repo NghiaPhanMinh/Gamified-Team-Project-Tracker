@@ -8,6 +8,15 @@ import {
   type WeightedProgressTask,
 } from "../../lib/gameProgress";
 
+import { SVGDefs } from "./landscape/SVGDefs";
+import { LandscapeSky } from "./landscape/LandscapeSky";
+import { LandscapeTerrain } from "./landscape/LandscapeTerrain";
+import { LandscapeVillage } from "./landscape/LandscapeVillage";
+import { LandscapeGoblins } from "./landscape/LandscapeGoblins";
+import { LandscapePlayers } from "./landscape/LandscapePlayers";
+import { LandscapeDragon } from "./landscape/LandscapeDragon";
+import { LandscapeFX } from "./landscape/LandscapeFX";
+
 const PREVIEW_TASKS: Omit<WeightedProgressTask, "status">[] = [
   {
     id: "research",
@@ -89,8 +98,22 @@ export function GameLayerPreview() {
     });
   }
 
+  const previewGoblins = useMemo(
+    () =>
+      tasks
+        .filter((t) => t.status !== "completed")
+        .map((t) => ({
+          id: t.id,
+          memberId: t.id,
+          memberName: t.title,
+          isDefeated: false,
+        })),
+    [tasks],
+  );
+
   return (
     <section className="game-layer-preview" aria-labelledby="game-layer-title">
+      <SVGDefs />
       <div className="game-layer-heading">
         <div>
           <p className="kicker">Game functions lab</p>
@@ -114,20 +137,15 @@ export function GameLayerPreview() {
             <span>Practical status</span>
             <strong>{practicalStatus.replace("_", " ")}</strong>
           </div>
-          <div className="boss-scene" aria-hidden="true">
-            <span className="boss-horn boss-horn-left" />
-            <span className="boss-horn boss-horn-right" />
-            <div
-              className="boss-creature"
-              style={{
-                transform: `scale(${0.72 + progress.bossHealthPercent / 360})`,
-              }}
-            >
-              <span className="boss-eye boss-eye-left" />
-              <span className="boss-eye boss-eye-right" />
-              <span className="boss-mouth" />
-            </div>
-            <span className="victory-burst">✦</span>
+
+          <div className="landscape-scene-container" aria-label="Interactive preview encounter scene">
+            <LandscapeSky />
+            <LandscapeTerrain />
+            <LandscapeVillage villageHpPercent={progress.bossHealthPercent} />
+            <LandscapeGoblins goblins={previewGoblins} />
+            <LandscapePlayers members={[]} />
+            <LandscapeDragon bossHpPercent={progress.bossHealthPercent} isDefeated={bossDefeated} />
+            <LandscapeFX activeEvent={null} isVictory={bossDefeated} />
           </div>
 
           <div className="boss-health">
