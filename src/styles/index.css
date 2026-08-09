@@ -43,6 +43,18 @@
     "Glacial Indifference", Inter, "Avenir Next", Avenir, "Helvetica Neue",
     Arial, sans-serif;
   --font-heading: var(--font-body);
+  --color-sky-top: #6b8cae;
+  --color-sky-bottom: #cbe3f0;
+  --color-cloud: #f4efe6;
+  --color-cloud-near: #e5dec9;
+  --color-land: #4a6b53;
+  --color-land-dark: #354e3c;
+  --color-roof: #b8654b;
+  --color-roof-dark: #8c4632;
+  --color-dragon: #2c353f;
+  --color-dragon-accent: #3a4654;
+  --color-ember: #e65c3b;
+  --color-window-glow: #fadb5f;
   font-family: var(--font-body);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -59,6 +71,18 @@
   --color-error: #ff9bb0;
   --border-strong: 3px solid var(--color-cream);
   --shadow-card: 6px 6px 0 var(--color-blue);
+  --color-sky-top: #1a2a38;
+  --color-sky-bottom: #354d63;
+  --color-cloud: #2d3c4a;
+  --color-cloud-near: #3b4c5c;
+  --color-land: #263e2e;
+  --color-land-dark: #1b2d21;
+  --color-roof: #7a3e2c;
+  --color-roof-dark: #572a1d;
+  --color-dragon: #141a21;
+  --color-dragon-accent: #222c38;
+  --color-ember: #ff6b4a;
+  --color-window-glow: #f5cf47;
 }
 
 * {
@@ -4212,4 +4236,192 @@ footer {
 @media (prefers-reduced-motion: reduce) {
   .battle-sky i, .battle-character.is-attacking, .has-new-attack .dragon-boss, .spell-projectile, .floating-damage { animation: none !important; }
   .boss-hp-track span, .app-sidebar, .app-content { transition: none !important; }
+  .cloud-far, .cloud-near, .dragon-hover-bob, .dragon-wing-flap, .chimney-smoke-p, .goblin-idle-anim { animation: none !important; }
+  .dragon-group-motion, .house-structure-g { transition: none !important; }
 }
+
+/* Landscape Scene CSS */
+.landscape-scene-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  border: 3px solid var(--color-text);
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--color-sky-top);
+}
+
+.landscape-svg-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Parallax Cloud Animations */
+.cloud-far {
+  animation: landscape-far-drift 110s linear infinite;
+}
+
+.cloud-near {
+  animation: landscape-near-drift 65s linear infinite;
+}
+
+@keyframes landscape-far-drift {
+  0% { transform: translateX(0px); }
+  100% { transform: translateX(1300px); }
+}
+
+@keyframes landscape-near-drift {
+  0% { transform: translateX(0px); }
+  100% { transform: translateX(1300px); }
+}
+
+/* Village Tiers and Smoke */
+.house-structure-g {
+  transition: filter 1.5s ease, opacity 1.5s ease;
+}
+
+.house-tier-desaturated {
+  filter: saturate(0.4) opacity(0.9);
+}
+
+.house-tier-damaged {
+  filter: saturate(0.7);
+}
+
+.house-tier-burning {
+  filter: saturate(0.85);
+}
+
+.chimney-smoke-p {
+  animation: landscape-smoke-float 2.2s ease-out infinite;
+  transform-origin: center bottom;
+}
+
+@keyframes landscape-smoke-float {
+  0% {
+    transform: translateY(0) scale(0.7);
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-28px) scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* Goblins */
+.goblin-group {
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.goblin-idle-anim {
+  animation: landscape-goblin-bob 2s ease-in-out infinite alternate;
+}
+
+.goblin-defeated-anim {
+  animation: landscape-goblin-fade 0.5s ease-out forwards;
+}
+
+@keyframes landscape-goblin-bob {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-5px); }
+}
+
+@keyframes landscape-goblin-fade {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.2) translateY(-20px); opacity: 0; }
+}
+
+/* Dragon Motions */
+.dragon-group-motion {
+  transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.dragon-hover-bob {
+  animation: landscape-dragon-bob 2.8s ease-in-out infinite alternate;
+}
+
+.dragon-wing-flap {
+  transform-origin: 40px 30px;
+  animation: landscape-wing-flap 1.3s ease-in-out infinite alternate;
+}
+
+@keyframes landscape-dragon-bob {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-12px); }
+}
+
+@keyframes landscape-wing-flap {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-14deg); }
+}
+
+.dragon-victory-flyaway {
+  animation: landscape-dragon-victory 2.6s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+
+@keyframes landscape-dragon-victory {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  30% {
+    transform: translate(-40px, 30px) scale(1.05) rotate(-10deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(500px, -500px) scale(0.3) rotate(-35deg);
+    opacity: 0;
+  }
+}
+
+/* Floating FX */
+.landscape-toast-damage {
+  font-family: var(--font-display);
+  font-weight: 900;
+  fill: var(--color-ember);
+  stroke: var(--color-navy);
+  stroke-width: 2px;
+  animation: landscape-toast-float 1.6s ease-out forwards;
+}
+
+.landscape-toast-slain {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 13px;
+  fill: #ffffff;
+  stroke: var(--color-navy);
+  stroke-width: 1.5px;
+  animation: landscape-toast-float 1.4s ease-out forwards;
+}
+
+@keyframes landscape-toast-float {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0) scale(1.1);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-45px) scale(1);
+  }
+}
+
+@media (max-width: 600px) {
+  .cloud-far {
+    display: none;
+  }
+  .landscape-scene-container {
+    aspect-ratio: 16 / 9;
+  }
+}
+

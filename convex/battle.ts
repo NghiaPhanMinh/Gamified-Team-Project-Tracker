@@ -45,6 +45,22 @@ export const getState = query({
     const profileById = new Map(profiles.filter(Boolean).map((item) => [item!._id, item!]));
     const taskById = new Map(tasks.map((task) => [task._id, task]));
 
+    const startOfToday = new Date().setHours(0, 0, 0, 0);
+    const isOverdue = project.deadline ? new Date(`${project.deadline}T23:59:59Z`).getTime() < Date.now() : false;
+    const overdueTaskCount = requiredTasks.filter(
+      (task) => task.status !== "verified" && task.status !== "completed" && task.dueDate && new Date(`${task.dueDate}T23:59:59Z`).getTime() < Date.now(),
+    ).length;
+
+    const villageHpPercent = (maximumHp === 0 || maximumHp - damageDealt <= 0)
+      ? 100
+      : isOverdue
+      ? 20
+      : overdueTaskCount > 0
+      ? Math.max(25, 100 - overdueTaskCount * 25)
+      : 100;
+
+    const remainingHp = Math.max(0, maximumHp - damageDealt);
+
     return {
       project: {
         _id: project._id,
@@ -56,17 +72,30 @@ export const getState = query({
       currentProfileId: profile._id,
       maximumHp,
       damageDealt,
-      remainingHp: Math.max(0, maximumHp - damageDealt),
+      remainingHp,
+      villageHpPercent,
+      isOverdue,
       remainingRequiredTasks: requiredTasks.filter(
         (task) => task.status !== "verified" && task.status !== "completed",
       ).length,
-      members: memberships.map((member) => ({
-        profileId: member.profileId,
-        displayName: profileById.get(member.profileId)?.displayName ?? "Team member",
-        characterFill: member.characterFill,
-        characterOutline: member.characterOutline,
-        spellType: member.spellType ?? "spark",
-      })),
+      members: memberships.map((member) => {
+        const hasSubmittedToday = uniqueEvents.some(
+          (event) => event.attackerProfileId === member.profileId && event.createdAt >= startOfToday,
+        ) || tasks.some(
+          (task) => (task.primaryOwnerProfileId === member.profileId || task.collaboratorProfileIds.includes(member.profileId)) &&
+            (task.status === "submitted" || task.status === "verified" || task.status === "completed") &&
+            task.updatedAt >= startOfToday,
+        );
+        return {
+          profileId: member.profileId,
+          displayName: profileById.get(member.profileId)?.displayName ?? "Team member",
+          characterFill: member.characterFill,
+          characterOutline: member.characterOutline,
+          spellType: member.spellType ?? "spark",
+          hasSubmittedToday,
+          hasPendingGoblin: !hasSubmittedToday,
+        };
+      }),
       events: uniqueEvents.map((event) => ({
         ...event,
         attackerName: profileById.get(event.attackerProfileId)?.displayName ?? "Team member",

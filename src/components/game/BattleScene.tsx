@@ -4,33 +4,9 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 
-type BattleSceneProps = { projectId: Id<"projects"> };
+import { LandscapeScene } from "./LandscapeScene";
 
-function TeamCharacter({
-  name,
-  fill,
-  outline,
-  spell,
-  attacking,
-}: {
-  name: string;
-  fill: string;
-  outline: string;
-  spell: string;
-  attacking: boolean;
-}) {
-  return (
-    <figure className={`battle-character spell-${spell} ${attacking ? "is-attacking" : ""}`}>
-      <svg viewBox="0 0 100 150" role="img" aria-label={`${name}'s character`}>
-        <circle cx="50" cy="30" r="20" fill={fill} stroke={outline} strokeWidth="6" />
-        <path d="M27 62 Q50 48 73 62 L80 116 Q50 136 20 116Z" fill={fill} stroke={outline} strokeWidth="6" />
-        <path d="M28 72 L8 100 M72 72 L92 100 M35 118 L30 145 M65 118 L70 145" fill="none" stroke={outline} strokeWidth="8" strokeLinecap="round" />
-        <circle cx="43" cy="27" r="3" fill={outline} /><circle cx="57" cy="27" r="3" fill={outline} />
-      </svg>
-      <figcaption>{name}</figcaption>
-    </figure>
-  );
-}
+type BattleSceneProps = { projectId: Id<"projects"> };
 
 export function BattleScene({ projectId }: BattleSceneProps) {
   const state = useQuery(api.battle.getState, { projectId });
@@ -55,7 +31,7 @@ export function BattleScene({ projectId }: BattleSceneProps) {
   }, [state]);
 
   if (state === undefined) return <section className="battle-loading" aria-busy="true">Preparing the battle…</section>;
-  const activeEvent = state.events.find((event) => event._id === activeEventId);
+  const activeEvent = state.events.find((event) => event._id === activeEventId) ?? null;
   const hpPercent = state.maximumHp === 0 ? 100 : Math.round((state.remainingHp / state.maximumHp) * 100);
   const defeated = state.maximumHp > 0 && state.remainingHp === 0;
 
@@ -65,25 +41,17 @@ export function BattleScene({ projectId }: BattleSceneProps) {
         <div><p className="card-eyebrow">Realtime boss battle</p><h3 id="battle-title">{state.project.title}</h3></div>
         <dl><div><dt>Deadline</dt><dd>{state.project.deadline}</dd></div><div><dt>Tasks left</dt><dd>{state.remainingRequiredTasks}</dd></div></dl>
       </header>
-      <div className="battle-arena">
-        <div className="battle-sky" aria-hidden="true"><i /><i /><i /></div>
-        <div className="battle-party">
-          {state.members.map((member) => (
-            <TeamCharacter key={member.profileId} name={member.displayName} fill={member.characterFill} outline={member.characterOutline} spell={member.spellType} attacking={activeEvent?.attackerProfileId === member.profileId} />
-          ))}
-        </div>
-        <div className="dragon-wrap" aria-label={defeated ? "Boss defeated" : "Dragon boss"}>
-          <svg className="dragon-boss" viewBox="0 0 260 230" role="img" aria-hidden="true">
-            <path d="M55 120 Q5 65 50 42 Q90 20 110 78 Q150 12 202 38 Q250 63 205 122" fill="#fd39e4" stroke="#121f25" strokeWidth="8" />
-            <path d="M72 94 Q130 55 190 95 L210 176 Q130 226 52 176Z" fill="#feaa01" stroke="#121f25" strokeWidth="9" />
-            <path d="M94 55 L75 12 L120 45 M165 48 L205 13 L188 66" fill="#fff73f" stroke="#121f25" strokeWidth="8" strokeLinejoin="round" />
-            <circle cx="108" cy="112" r="8" fill="#121f25" /><circle cx="163" cy="112" r="8" fill="#121f25" />
-            <path d="M112 150 Q137 170 164 148" fill="none" stroke="#121f25" strokeWidth="7" strokeLinecap="round" />
-          </svg>
-          {activeEvent ? <><span className={`spell-projectile spell-${activeEvent.spellType}`} /><strong className="floating-damage">-{activeEvent.damage} HP</strong></> : null}
-        </div>
-        <div className="battle-ground" aria-hidden="true" />
-      </div>
+      <LandscapeScene
+        projectTitle={state.project.title}
+        remainingHp={state.remainingHp}
+        maximumHp={state.maximumHp}
+        villageHpPercent={state.villageHpPercent ?? 100}
+        members={state.members}
+        events={state.events}
+        activeEvent={activeEvent}
+        isOverdue={state.isOverdue ?? false}
+      />
+
       <div className="boss-hp-panel">
         <div><strong>Boss HP</strong><span>{state.remainingHp} / {state.maximumHp}</span></div>
         <div className="boss-hp-track" role="progressbar" aria-valuemin={0} aria-valuemax={state.maximumHp} aria-valuenow={state.remainingHp}><span style={{ width: `${hpPercent}%` }} /></div>
