@@ -4091,31 +4091,215 @@ footer {
 .inline-check-field { display: flex !important; align-items: center; gap: .5rem; }
 
 .battle-page { display: grid; gap: 1rem; }
+:root {
+  --scene-sky-top: #5c7c99;
+  --scene-sky-bottom: #d6c8b4;
+  --scene-cloud: #f4ede2;
+  --scene-cloud-near: #ffffff;
+  --scene-land: #4a6b53;
+  --scene-hills: #385241;
+  --scene-house-wall: #e3d5c3;
+  --scene-house-roof: #9c5a4c;
+  --scene-boss-slate: #2a343d;
+  --scene-ember-danger: #d9532f;
+  --scene-ember-gold: #f4a261;
+}
+
+:root[data-theme="dark"] {
+  --scene-sky-top: #1e293b;
+  --scene-sky-bottom: #334155;
+  --scene-cloud: #64748b;
+  --scene-cloud-near: #94a3b8;
+  --scene-land: #1e3a29;
+  --scene-hills: #14281d;
+  --scene-house-wall: #475569;
+  --scene-house-roof: #7f1d1d;
+  --scene-boss-slate: #0f172a;
+  --scene-ember-danger: #ef4444;
+  --scene-ember-gold: #f59e0b;
+}
+
 .battle-summary, .boss-hp-panel, .combat-log, .victory-panel { padding: 1rem 1.25rem; border: 3px solid var(--color-text); border-radius: 18px; background: var(--color-surface); }
 .battle-summary { display: flex; justify-content: space-between; align-items: end; gap: 1rem; }
 .battle-summary h3 { margin: 0; font-size: clamp(2rem, 5vw, 4rem); }
 .battle-summary dl { display: flex; gap: 1.5rem; margin: 0; }
 .battle-summary dl div { display: grid; }
-.battle-arena { position: relative; min-height: 470px; overflow: hidden; border: 3px solid var(--color-text); border-radius: 24px; background: linear-gradient(#8bd4ff 0 63%, #64cf62 63%); }
-:root[data-theme="dark"] .battle-arena { background: linear-gradient(#172b52 0 63%, #164f3a 63%); }
-.battle-sky i { position: absolute; width: 130px; height: 38px; border-radius: 999px; background: color-mix(in srgb, white 82%, transparent); animation: cloud-drift 18s linear infinite; }
-.battle-sky i:nth-child(1) { top: 12%; left: -10%; }.battle-sky i:nth-child(2) { top: 28%; left: 35%; animation-duration: 25s; }.battle-sky i:nth-child(3) { top: 8%; left: 75%; animation-duration: 30s; }
-.battle-party { position: absolute; z-index: 3; left: 3%; bottom: 3%; display: flex; align-items: end; max-width: 58%; }
-.battle-character { width: clamp(72px, 9vw, 120px); margin: 0 -.35rem 0 0; text-align: center; transition: transform 180ms ease; }
-.battle-character svg { width: 100%; filter: drop-shadow(4px 5px 0 color-mix(in srgb, #121f25 45%, transparent)); }
-.battle-character figcaption { overflow: hidden; font-size: .72rem; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
-.battle-character.is-attacking { animation: caster-jump .75s ease both; }
-.dragon-wrap { position: absolute; z-index: 2; right: 3%; bottom: 3%; width: min(38%, 330px); }
-.dragon-boss { width: 100%; transform-origin: 50% 100%; }
-.has-new-attack .dragon-boss { animation: boss-hit .55s ease .5s both; }
-.is-defeated .dragon-boss { opacity: .35; transform: rotate(12deg) translateY(28px); }
-.spell-projectile { position: absolute; left: -150%; top: 45%; width: 42px; height: 42px; border: 4px solid #121f25; border-radius: 50%; background: var(--color-yellow); animation: projectile-flight .7s ease-out both; }
-.spell-fire { background: #fe5b22; }.spell-lightning { background: #fff73f; }.spell-water { background: #4ca0fe; }.spell-nature, .spell-bloom { background: #1dd851; }.spell-star, .spell-focus { background: #ff8ae7; }
-.floating-damage { position: absolute; top: 10%; left: 45%; color: #fff; font-size: clamp(1.4rem, 4vw, 2.5rem); text-shadow: 3px 3px 0 #121f25; animation: damage-float 1.4s ease-out both; }
-.battle-ground { position: absolute; inset: 63% 0 0; border-top: 4px solid #121f25; pointer-events: none; }
+
+/* Landscape Scene Container & Layers */
+.landscape-scene-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 360px;
+  max-height: 600px;
+  overflow: hidden;
+  border: 3px solid var(--color-text);
+  border-radius: 24px;
+  background: linear-gradient(to bottom, var(--scene-sky-top) 0%, var(--scene-sky-bottom) 75%);
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.12);
+  user-select: none;
+}
+
+.landscape-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.layer-0-sky { z-index: 0; }
+.layer-1-far-clouds { z-index: 1; }
+.layer-2-near-clouds { z-index: 2; }
+.layer-3-hills { z-index: 3; }
+.layer-4-ground { z-index: 4; }
+.layer-5-village { z-index: 5; pointer-events: auto; }
+.layer-6-goblins { z-index: 6; pointer-events: auto; }
+.layer-7-players { z-index: 7; pointer-events: auto; }
+.layer-8-dragon { z-index: 8; pointer-events: auto; }
+.layer-9-fx { z-index: 9; pointer-events: none; }
+
+/* Parallax Cloud Animations */
+.cloud-far-wrapper {
+  position: absolute;
+  top: 8%;
+  left: -200px;
+  width: calc(100% + 400px);
+  height: 120px;
+  animation: landscape-cloud-drift-far 110s linear infinite;
+}
+
+.cloud-near-wrapper {
+  position: absolute;
+  top: 18%;
+  left: -250px;
+  width: calc(100% + 500px);
+  height: 140px;
+  animation: landscape-cloud-drift-near 65s linear infinite;
+}
+
+@keyframes landscape-cloud-drift-far {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(350px); }
+}
+
+@keyframes landscape-cloud-drift-near {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(450px); }
+}
+
+/* Village Smoke Animation */
+.village-smoke-wisp {
+  animation: village-smoke-rise 3.2s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+@keyframes village-smoke-rise {
+  0% { opacity: 0.2; transform: translateY(0) scale(0.8); }
+  50% { opacity: 0.75; transform: translateY(-10px) scale(1.1); }
+  100% { opacity: 0; transform: translateY(-22px) scale(1.4); }
+}
+
+/* House crossfade transition */
+.village-house {
+  transition: opacity 1.2s ease, filter 1.2s ease;
+}
+
+/* Dragon Animations */
+.dragon-container {
+  position: absolute;
+  bottom: 15%;
+  width: min(34%, 280px);
+  height: min(48%, 210px);
+  transition: left 1.2s cubic-bezier(0.25, 1, 0.5, 1), transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: left, transform;
+}
+
+.dragon-idle-bob {
+  animation: dragon-hover 3s ease-in-out infinite;
+  transform-origin: center center;
+}
+
+.dragon-wing-left {
+  animation: dragon-wing-flap-left 1.8s ease-in-out infinite alternate;
+  transform-origin: 90% 70%;
+}
+
+.dragon-wing-right {
+  animation: dragon-wing-flap-right 1.8s ease-in-out infinite alternate;
+  transform-origin: 10% 70%;
+}
+
+@keyframes dragon-hover {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes dragon-wing-flap-left {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-20deg) scaleY(0.9); }
+}
+
+@keyframes dragon-wing-flap-right {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(20deg) scaleY(0.9); }
+}
+
+/* Dragon Final Blow Victory Flight Arc */
+.dragon-final-blow {
+  animation: dragon-victory-flight 2.8s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+}
+
+@keyframes dragon-victory-flight {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  25% { transform: translate(-30px, -30px) rotate(-15deg) scale(1.05); opacity: 1; }
+  100% { transform: translate(700px, -500px) rotate(40deg) scale(0.3); opacity: 0; }
+}
+
+/* Goblin Defeat Animation */
+.goblin-item {
+  transition: all 0.3s ease;
+}
+
+.goblin-defeated {
+  animation: goblin-slain 0.55s ease-out forwards;
+}
+
+@keyframes goblin-slain {
+  0% { opacity: 1; transform: scale(1); }
+  40% { opacity: 0.9; transform: scale(1.35) translateY(-12px); }
+  100% { opacity: 0; transform: scale(0) translateY(12px); }
+}
+
+/* FX Floating damage & toasts */
+.floating-damage {
+  position: absolute;
+  top: 15%;
+  right: 25%;
+  color: var(--scene-ember-danger);
+  font-size: clamp(1.4rem, 4vw, 2.5rem);
+  font-weight: 900;
+  text-shadow: 2px 2px 0 var(--color-text), -2px -2px 0 var(--color-text), 2px -2px 0 var(--color-text), -2px 2px 0 var(--color-text);
+  animation: damage-float 1.5s ease-out forwards;
+}
+
+@keyframes damage-float {
+  0% { opacity: 0; transform: translateY(20px) scale(0.7); }
+  20% { opacity: 1; transform: translateY(0) scale(1.1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-50px) scale(1.2); }
+}
+
 .boss-hp-panel { display: grid; gap: .65rem; }.boss-hp-panel > div:first-child { display: flex; justify-content: space-between; }.boss-hp-track { height: 25px; overflow: hidden; border: 3px solid var(--color-text); border-radius: 999px; background: color-mix(in srgb, var(--color-text) 12%, transparent); }.boss-hp-track span { display: block; height: 100%; background: var(--color-magenta); transition: width .45s ease; }
 .combat-log > div { display: flex; justify-content: space-between; align-items: center; }.combat-log ol { display: grid; gap: .55rem; margin: 1rem 0 0; padding: 0; list-style: none; }.combat-log li { display: grid; gap: .15rem; padding: .65rem 0; border-top: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent); }.combat-log li span { color: var(--color-muted); font-size: .86rem; }
 .victory-panel { background: var(--color-yellow); color: var(--color-navy); }
+
+/* Reduced Motion Overrides */
+@media (prefers-reduced-motion: reduce) {
+  .cloud-far-wrapper, .cloud-near-wrapper, .village-smoke-wisp, .dragon-idle-bob, .dragon-wing-left, .dragon-wing-right {
+    animation: none !important;
+  }
+}
 
 /* Guided journey and simplified information architecture */
 .sidebar-room-tree { display: grid; margin: -.35rem 0 .35rem 1.15rem; padding-left: .55rem; border-left: 2px solid color-mix(in srgb, var(--color-text) 28%, transparent); }

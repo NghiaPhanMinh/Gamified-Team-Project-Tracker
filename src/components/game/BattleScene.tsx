@@ -1,10 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useQuery } from "convex/react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 
-import { LandscapeScene } from "./LandscapeScene";
+import { SVGDefs } from "./landscape/SVGDefs";
+import { LandscapeSky } from "./landscape/LandscapeSky";
+import { LandscapeTerrain } from "./landscape/LandscapeTerrain";
+import { LandscapeVillage } from "./landscape/LandscapeVillage";
+import { LandscapeGoblins } from "./landscape/LandscapeGoblins";
+import { LandscapePlayers } from "./landscape/LandscapePlayers";
+import { LandscapeDragon } from "./landscape/LandscapeDragon";
+import { LandscapeFX } from "./landscape/LandscapeFX";
 
 type BattleSceneProps = { projectId: Id<"projects"> };
 
@@ -30,38 +37,119 @@ export function BattleScene({ projectId }: BattleSceneProps) {
     }
   }, [state]);
 
-  if (state === undefined) return <section className="battle-loading" aria-busy="true">Preparing the battle…</section>;
-  const activeEvent = state.events.find((event) => event._id === activeEventId) ?? null;
+  const activeEvent = useMemo(
+    () => state?.events.find((event) => event._id === activeEventId) ?? null,
+    [state?.events, activeEventId],
+  );
+
+  const goblins = useMemo(() => {
+    if (!state) return [];
+    // Members who have not dealt combat damage yet have an active daily goblin threat
+    const memberAttackedSet = new Set(state.events.map((e) => e.attackerProfileId));
+    return state.members.map((member) => ({
+      id: member.profileId,
+      memberId: member.profileId,
+      memberName: member.displayName,
+      isDefeated: memberAttackedSet.has(member.profileId),
+    }));
+  }, [state]);
+
+  const players = useMemo(() => {
+    if (!state) return [];
+    const memberAttackedSet = new Set(state.events.map((e) => e.attackerProfileId));
+    return state.members.map((member) => ({
+      profileId: member.profileId,
+      displayName: member.displayName,
+      characterFill: member.characterFill,
+      characterOutline: member.characterOutline,
+      isActiveToday: memberAttackedSet.has(member.profileId),
+      isAttacking: activeEvent?.attackerProfileId === member.profileId,
+    }));
+  }, [state, activeEvent]);
+
+  if (state === undefined) {
+    return <section className="battle-loading" aria-busy="true">Preparing the battle scene…</section>;
+  }
+
   const hpPercent = state.maximumHp === 0 ? 100 : Math.round((state.remainingHp / state.maximumHp) * 100);
   const defeated = state.maximumHp > 0 && state.remainingHp === 0;
 
   return (
     <section className={`battle-page ${activeEvent ? "has-new-attack" : ""} ${defeated ? "is-defeated" : ""}`} aria-labelledby="battle-title">
+      <SVGDefs />
+
       <header className="battle-summary">
-        <div><p className="card-eyebrow">Realtime boss battle</p><h3 id="battle-title">{state.project.title}</h3></div>
-        <dl><div><dt>Deadline</dt><dd>{state.project.deadline}</dd></div><div><dt>Tasks left</dt><dd>{state.remainingRequiredTasks}</dd></div></dl>
+        <div>
+          <p className="card-eyebrow">Realtime encounter landscape</p>
+          <h3 id="battle-title">{state.project.title}</h3>
+        </div>
+        <dl>
+          <div><dt>Deadline</dt><dd>{state.project.deadline}</dd></div>
+          <div><dt>Tasks left</dt><dd>{state.remainingRequiredTasks}</dd></div>
+        </dl>
       </header>
-      <LandscapeScene
-        projectTitle={state.project.title}
-        remainingHp={state.remainingHp}
-        maximumHp={state.maximumHp}
-        villageHpPercent={state.villageHpPercent ?? 100}
-        members={state.members}
-        events={state.events}
-        activeEvent={activeEvent}
-        isOverdue={state.isOverdue ?? false}
-      />
+
+      {/* Main 10-Layer Geometric SVG Landscape Scene */}
+      <div className="landscape-scene-container" aria-label="Interactive project encounter scene">
+        {/* Layer 0, 1, 2: Sky & Parallax Clouds */}
+        <LandscapeSky />
+
+        {/* Layer 3, 4: Distant Hills & Moss Ground Plane */}
+        <LandscapeTerrain />
+
+        {/* Layer 5: Village Structures & HP Tiers */}
+        <LandscapeVillage villageHpPercent={hpPercent} />
+
+        {/* Layer 6: Daily Goblins Cluster */}
+        <LandscapeGoblins goblins={goblins} />
+
+        {/* Layer 7: Party Member Avatars */}
+        <LandscapePlayers members={players} />
+
+        {/* Layer 8: Dragon Silhouette & Victory Flight Arc */}
+        <LandscapeDragon bossHpPercent={hpPercent} isDefeated={defeated} />
+
+        {/* Layer 9: FX & Floating Damage Toasts */}
+        <LandscapeFX
+          activeEvent={activeEvent ? {
+            id: activeEvent._id,
+            attackerName: activeEvent.attackerName,
+            damage: activeEvent.damage,
+            spellType: activeEvent.spellType,
+          } : null}
+          isVictory={defeated}
+        />
+      </div>
 
       <div className="boss-hp-panel">
         <div><strong>Boss HP</strong><span>{state.remainingHp} / {state.maximumHp}</span></div>
-        <div className="boss-hp-track" role="progressbar" aria-valuemin={0} aria-valuemax={state.maximumHp} aria-valuenow={state.remainingHp}><span style={{ width: `${hpPercent}%` }} /></div>
-        <small>Boss HP = total verified task damage required. Damage is a game value, not a perfect measure of effort or fairness.</small>
+        <div className="boss-hp-track" role="progressbar" aria-valuemin={0} aria-valuemax={state.maximumHp} aria-valuenow={state.remainingHp}>
+          <span style={{ width: `${hpPercent}%` }} />
+        </div>
+        <small>Boss HP = total verified task damage required. Defeating the dragon repels it back from the village.</small>
       </div>
-      {defeated ? <section className="victory-panel"><p className="card-eyebrow">Project complete</p><h3>The boss is defeated!</h3><p>Every required task has been verified. Export the report or archive the project from the project tabs.</p></section> : null}
+
+      {defeated ? (
+        <section className="victory-panel">
+          <p className="card-eyebrow">Project complete</p>
+          <h3>The dragon has been repelled!</h3>
+          <p>Every required task has been verified. The village is safe. Export the report or archive the project from project settings.</p>
+        </section>
+      ) : null}
+
       <section className="combat-log" aria-labelledby="combat-log-title">
         <div><h4 id="combat-log-title">Combat log</h4><span>{state.events.length} verified attacks</span></div>
-        {state.events.length === 0 ? <p>No attacks yet. A submitted task deals damage only after its assigned reviewer verifies it.</p> : (
-          <ol>{[...state.events].reverse().map((event) => <li key={event._id}><strong>{event.attackerName} dealt {event.damage} damage</strong><span>{event.reviewerName} verified “{event.taskTitle}” · {new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(event.createdAt)}</span></li>)}</ol>
+        {state.events.length === 0 ? (
+          <p>No attacks yet. A submitted task deals damage only after its assigned reviewer verifies it.</p>
+        ) : (
+          <ol>
+            {[...state.events].reverse().map((event) => (
+              <li key={event._id}>
+                <strong>{event.attackerName} dealt {event.damage} damage</strong>
+                <span>{event.reviewerName} verified “{event.taskTitle}” · {new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(event.createdAt)}</span>
+              </li>
+            ))}
+          </ol>
         )}
       </section>
     </section>
