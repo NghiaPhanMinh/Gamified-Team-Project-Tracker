@@ -435,12 +435,16 @@ function ProjectWorkspaceReady({
           <button className="quiet-button" type="button" onClick={() => setBriefOpen(true)}>View brief</button>
           {workspace.canManageProject ? <button className="quiet-button" type="button" onClick={() => setActiveTab("settings")}>Project settings</button> : null}
         </div>
-        <ProjectGameProgress
-          projectTitle={workspace.project.title}
-          status={workspace.project.status}
-          tasks={workspace.tasks}
-          milestones={workspace.milestones}
-        />
+        {workspace.isLaunched ? (
+          <BattleScene projectId={workspace.project._id} />
+        ) : (
+          <ProjectGameProgress
+            projectTitle={workspace.project.title}
+            status={workspace.project.status}
+            tasks={workspace.tasks}
+            milestones={workspace.milestones}
+          />
+        )}
         <section className="next-action-card" aria-labelledby="next-action-title">
           <p className="card-eyebrow">Next action</p>
           {!workspace.isLaunched ? (
