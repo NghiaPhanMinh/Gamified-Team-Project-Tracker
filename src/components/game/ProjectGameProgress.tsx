@@ -78,7 +78,7 @@ export function ProjectGameProgress({
 
   const goblins = useMemo(
     () =>
-      uncompletedTasks.slice(0, 6).map((task, index) => ({
+      uncompletedTasks.slice(0, 6).map((task) => ({
         id: task._id,
         memberId: task._id,
         memberName: task.title,
@@ -88,60 +88,50 @@ export function ProjectGameProgress({
   );
 
   return (
-    <section className="live-game-layer" aria-labelledby="live-game-title">
+    <section className="live-game-layer-container" aria-labelledby="live-game-title">
       <SVGDefs />
 
-      <div className="live-game-copy">
-        <p className="card-eyebrow">Realtime encounter landscape</p>
-        <h3 id="live-game-title">{projectTitle} encounter</h3>
-        <p>
-          Battle damage comes only from required tasks verified by their assigned reviewer.
-          Defeating the dragon repels it back from the village.
-        </p>
-      </div>
-
-      <div
-        className={`boss-stage ${bossDefeated ? "boss-defeated" : ""}`}
-        style={{ padding: "0", background: "transparent", border: "none", boxShadow: "none" }}
-      >
-        {/* Full 10-Layer Landscape Scene */}
-        <div className="landscape-scene-container" aria-label={`${projectTitle} interactive encounter scene`}>
-          <LandscapeSky />
-          <LandscapeTerrain />
-          <LandscapeVillage villageHpPercent={hpPercent} />
-          <LandscapeGoblins goblins={goblins} />
-          <LandscapePlayers members={[]} />
-          <LandscapeDragon bossHpPercent={hpPercent} isDefeated={bossDefeated} />
-          <LandscapeFX activeEvent={null} isVictory={bossDefeated} />
+      <header className="live-game-header">
+        <div>
+          <p className="card-eyebrow">Realtime encounter landscape</p>
+          <h3 id="live-game-title">{projectTitle} encounter</h3>
         </div>
-
-        <div className="boss-health" style={{ marginTop: "1rem" }}>
-          <div>
-            <span>Boss health</span>
-            <strong>{progress.bossHealthPercent}%</strong>
-          </div>
-          <div
-            className="boss-health-track"
-            role="progressbar"
-            aria-label={`${projectTitle} boss health`}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={progress.bossHealthPercent}
-          >
-            <span style={{ width: `${progress.bossHealthPercent}%` }} />
-          </div>
-        </div>
-
-        <p className="boss-message" role="status">
-          {describeGameState(status)}
-        </p>
-
-        <div className="live-game-stats">
-          <span>{progress.progressPercent}% project progress</span>
-          <span>
+        <div className="live-game-badges">
+          <span className="status-pill">{status.replace("_", " ")}</span>
+          <span className="stat-pill">{progress.progressPercent}% project progress</span>
+          <span className="stat-pill">
             {milestoneProgress.completedCount}/{milestoneProgress.totalCount} milestones cleared
           </span>
         </div>
+      </header>
+
+      {/* Full 10-Layer Landscape Scene */}
+      <div className="landscape-scene-container" aria-label={`${projectTitle} interactive encounter scene`}>
+        <LandscapeSky />
+        <LandscapeTerrain />
+        <LandscapeVillage villageHpPercent={hpPercent} />
+        <LandscapeGoblins goblins={goblins} />
+        <LandscapePlayers members={[]} />
+        <LandscapeDragon bossHpPercent={hpPercent} isDefeated={bossDefeated} />
+        <LandscapeFX activeEvent={null} isVictory={bossDefeated} />
+      </div>
+
+      <div className="boss-hp-panel" style={{ marginTop: "0.5rem" }}>
+        <div>
+          <strong>Boss HP</strong>
+          <span>{progress.bossHealthPercent}%</span>
+        </div>
+        <div
+          className="boss-hp-track"
+          role="progressbar"
+          aria-label={`${projectTitle} boss health`}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progress.bossHealthPercent}
+        >
+          <span style={{ width: `${progress.bossHealthPercent}%` }} />
+        </div>
+        <small>{describeGameState(status)}</small>
       </div>
     </section>
   );

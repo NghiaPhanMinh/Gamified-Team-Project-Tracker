@@ -2841,6 +2841,7 @@ footer {
   font-weight: 800;
 }
 
+.live-game-layer-container,
 .live-game-layer {
   display: flex;
   flex-direction: column;
@@ -2853,21 +2854,52 @@ footer {
   box-shadow: 6px 6px 0 var(--color-navy);
 }
 
+.live-game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.live-game-header h3 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+}
+
 .live-game-copy {
-  padding: 0;
+  padding: clamp(0.25rem, 1vw, 0.75rem);
 }
 
 .live-game-copy h3 {
   margin: 0;
-  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-size: clamp(2.2rem, 4vw, 4rem);
 }
 
 .live-game-copy > p:last-child {
   line-height: 1.6;
 }
 
-.live-game-layer .boss-stage {
-  width: 100%;
+.live-game-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.status-pill, .stat-pill {
+  padding: 0.35rem 0.65rem;
+  border: 2px solid var(--color-text);
+  border-radius: 999px;
+  background: var(--color-yellow);
+  color: var(--color-navy);
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.stat-pill {
+  background: var(--color-page);
+  color: var(--color-text);
 }
 
 .live-game-stats {
