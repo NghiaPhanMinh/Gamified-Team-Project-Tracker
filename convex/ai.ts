@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 
 import { internal } from "./_generated/api";
 import { action } from "./_generated/server";
@@ -248,7 +248,10 @@ async function requestPlan(input: {
         ...(input.mode === "structured"
           ? { response_format: { type: "json_schema", json_schema: planSchema } }
           : {}),
-        reasoning: { effort: "minimal", exclude: true },
+        // This task needs a bounded JSON result, not a hidden reasoning trace.
+        // Free reasoning models can otherwise spend the entire output budget on
+        // excluded thinking and return an empty final response.
+        reasoning: { effort: "none", exclude: true },
         temperature: 0.2,
         max_completion_tokens: 6_000,
       }),
@@ -382,14 +385,13 @@ export const generateProjectPlan = action({
       };
     } catch (error) {
       if (error instanceof AiRouteFailure && error.kind === "key_rejected") {
-        throw new Error(
+        throw new ConvexError(
           "The OpenRouter key was rejected. Update the private Convex environment variable.",
-          { cause: error },
         );
       }
       if (error instanceof FreeAiRoutesExhausted) {
         console.error("Free AI routes exhausted", JSON.stringify({ failures: error.failures }));
-        throw new Error(error.message, { cause: error });
+        throw new ConvexError(error.message);
       }
       throw error;
     }
