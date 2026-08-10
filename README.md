@@ -110,9 +110,11 @@ AUTH_GOOGLE_SECRET
 AI planning is optional. To enable it, set the private OpenRouter values on
 both Convex deployments. Omitting the model values uses the documented app
 defaults in this free-only order: `google/gemma-4-26b-a4b-it:free`,
-`google/gemma-4-31b-it:free`, `google/gemma-3-27b-it:free`, then
-`openrouter/free`. `OPENROUTER_FREE_FALLBACK_MODELS` accepts a comma-separated
-list and ignores non-free model identifiers:
+`nvidia/nemotron-3-super-120b-a12b:free`,
+`nvidia/nemotron-3-ultra-550b-a55b:free`,
+`nvidia/nemotron-3-nano-30b-a3b:free`, then `openrouter/free`.
+`OPENROUTER_FREE_FALLBACK_MODELS` accepts a comma-separated list and ignores
+non-free model identifiers:
 
 ```sh
 npx convex env set OPENROUTER_API_KEY
