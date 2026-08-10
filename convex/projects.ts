@@ -94,6 +94,7 @@ export const create = mutation({
     phases: v.array(projectPhaseValidator),
     members: v.array(projectMemberValidator),
     setupMode: v.optional(v.union(v.literal("manual"), v.literal("ai"))),
+    targetMemberCount: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const { profile } = await requireTeamMember(ctx, args.teamId);
@@ -120,7 +121,7 @@ export const create = mutation({
       ]);
     } else if (args.frameworkType === "built_in") {
       if (!args.builtInFrameworkId || args.customFrameworkId) {
-        throw new Error("Choose exactly one built-in framework.");
+        throw new Error("Choose a built-in framework.");
       }
 
       const validated = validateBuiltInFramework(
@@ -133,7 +134,7 @@ export const create = mutation({
       builtInFrameworkId = args.builtInFrameworkId;
     } else {
       if (!args.customFrameworkId || args.builtInFrameworkId) {
-        throw new Error("Choose exactly one custom framework.");
+        throw new Error("Choose a custom framework.");
       }
 
       const customFramework = await ctx.db.get(args.customFrameworkId);
@@ -197,6 +198,7 @@ export const create = mutation({
       customFrameworkId,
       status: "planning",
       setupMode: args.setupMode,
+      targetMemberCount: args.targetMemberCount,
       creatorProfileId: profile._id,
       createdAt: now,
       updatedAt: now,

@@ -61,6 +61,15 @@ export const getState = query({
 
     const remainingHp = Math.max(0, maximumHp - damageDealt);
 
+    const targetMemberCount = project.targetMemberCount || Math.max(1, memberships.length);
+    const hpSharePerPlayer = maximumHp > 0 ? Math.round(maximumHp / targetMemberCount) : 0;
+
+    const memberDamageMap = new Map<string, number>();
+    for (const event of uniqueEvents) {
+      const current = memberDamageMap.get(event.attackerProfileId) ?? 0;
+      memberDamageMap.set(event.attackerProfileId, current + event.damage);
+    }
+
     return {
       project: {
         _id: project._id,
@@ -68,6 +77,7 @@ export const getState = query({
         deadline: project.deadline,
         status: project.status,
         launchedAt: project.launchedAt,
+        targetMemberCount,
       },
       currentProfileId: profile._id,
       maximumHp,
@@ -75,6 +85,7 @@ export const getState = query({
       remainingHp,
       villageHpPercent,
       isOverdue,
+      hpSharePerPlayer,
       remainingRequiredTasks: requiredTasks.filter(
         (task) => task.status !== "verified" && task.status !== "completed",
       ).length,
@@ -86,6 +97,7 @@ export const getState = query({
             (task.status === "submitted" || task.status === "verified" || task.status === "completed") &&
             task.updatedAt >= startOfToday,
         );
+        const memberDamage = memberDamageMap.get(member.profileId) ?? 0;
         return {
           profileId: member.profileId,
           displayName: profileById.get(member.profileId)?.displayName ?? "Team member",
@@ -94,6 +106,9 @@ export const getState = query({
           spellType: member.spellType ?? "spark",
           hasSubmittedToday,
           hasPendingGoblin: !hasSubmittedToday,
+          damageDealt: memberDamage,
+          targetHpShare: hpSharePerPlayer,
+          isShareComplete: hpSharePerPlayer > 0 && memberDamage >= hpSharePerPlayer,
         };
       }),
       events: uniqueEvents.map((event) => ({

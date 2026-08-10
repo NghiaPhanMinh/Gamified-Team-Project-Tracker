@@ -122,11 +122,37 @@ export function BattleScene({ projectId }: BattleSceneProps) {
       </div>
 
       <div className="boss-hp-panel">
-        <div><strong>Boss HP</strong><span>{state.remainingHp} / {state.maximumHp}</span></div>
+        <div><strong>Boss HP</strong><span>{state.remainingHp} / {state.maximumHp} ({hpPercent}%)</span></div>
         <div className="boss-hp-track" role="progressbar" aria-valuemin={0} aria-valuemax={state.maximumHp} aria-valuenow={state.remainingHp}>
           <span style={{ width: `${hpPercent}%` }} />
         </div>
-        <small>Boss HP = total verified task damage required. Defeating the dragon repels it back from the village.</small>
+        {state.members && state.members.length > 0 ? (
+          <div className="member-hp-shares" style={{ marginTop: "0.85rem", paddingTop: "0.75rem", borderTop: "1px solid rgba(0, 0, 0, 0.1)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" }}>
+              <span style={{ fontWeight: 700, fontSize: "0.85rem" }}>Player Contribution Target</span>
+              <span style={{ fontSize: "0.8rem", opacity: 0.8 }}>Target share: {state.hpSharePerPlayer} HP per player</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.5rem" }}>
+              {state.members.map((member) => {
+                const sharePercent = member.targetHpShare > 0 ? Math.min(100, Math.round((member.damageDealt / member.targetHpShare) * 100)) : 0;
+                return (
+                  <div key={member.profileId} style={{ background: "rgba(255, 255, 255, 0.7)", padding: "0.4rem 0.6rem", borderRadius: "6px", fontSize: "0.8rem", border: "1px solid rgba(0,0,0,0.08)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
+                      <strong>{member.displayName}</strong>
+                      <span style={{ fontWeight: 600, color: member.isShareComplete ? "#15803d" : "#334155" }}>
+                        {member.damageDealt}/{member.targetHpShare} HP ({sharePercent}%)
+                      </span>
+                    </div>
+                    <div style={{ height: "6px", background: "rgba(0,0,0,0.1)", borderRadius: "3px", overflow: "hidden" }}>
+                      <div style={{ width: `${sharePercent}%`, height: "100%", background: member.isShareComplete ? "#22c55e" : "#2563eb", borderRadius: "3px", transition: "width 0.3s ease" }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+        <small style={{ marginTop: "0.6rem", display: "block" }}>Boss HP is split equally among players. Every member must contribute verified task work to defeat the dragon together.</small>
       </div>
 
       {defeated ? (

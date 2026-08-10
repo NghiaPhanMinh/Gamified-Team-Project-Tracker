@@ -131,6 +131,7 @@ export function ProjectOnboarding({
   const [title, setTitle] = useState("");
   const [brief, setBrief] = useState("");
   const [deadline, setDeadline] = useState(dateAfter(14));
+  const [targetMemberCount, setTargetMemberCount] = useState("4");
   const [allocationMode, setAllocationMode] = useState<"ai" | "manual" | null>(null);
   const [preferences, setPreferences] = useState<Preferences>(EMPTY_PREFERENCES);
   const [joinCode, setJoinCode] = useState("");
@@ -211,6 +212,7 @@ export function ProjectOnboarding({
         description: brief.trim(),
         startDate: new Date().toISOString().slice(0, 10),
         deadline,
+        targetMemberCount: Number(targetMemberCount),
         frameworkType: selectedFramework.type,
         builtInFrameworkId:
           selectedFramework.type === "built_in" ? selectedFramework.id : undefined,
@@ -344,6 +346,18 @@ export function ProjectOnboarding({
             <div className="guided-field-grid">
               <label><span>Project name</span><input required maxLength={100} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Prototype testing" /></label>
               <label><span>Deadline</span><input required type="date" min={dateAfter(1)} value={deadline} onChange={(event) => setDeadline(event.target.value)} /></label>
+              <label className="guided-field-wide">
+                <span>Target team size / Player count</span>
+                <select value={targetMemberCount} onChange={(event) => setTargetMemberCount(event.target.value)}>
+                  <option value="2">2 players (50% HP share each)</option>
+                  <option value="3">3 players (33% HP share each)</option>
+                  <option value="4">4 players (25% HP share each)</option>
+                  <option value="5">5 players (20% HP share each)</option>
+                  <option value="6">6 players (16% HP share each)</option>
+                  <option value="8">8 players (12.5% HP share each)</option>
+                  <option value="10">10 players (10% HP share each)</option>
+                </select>
+              </label>
               <label className="guided-field-wide"><span>Project brief</span><textarea required maxLength={8000} value={brief} onChange={(event) => setBrief(event.target.value)} placeholder="What does your team need to make?" /></label>
               <div className="deadline-shortcuts guided-field-wide" role="group" aria-label="Quick deadline options">
                 <button className="quiet-button" type="button" onClick={() => setDeadline(dateAfter(7))}>7 days</button>

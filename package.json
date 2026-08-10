@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "sync": "node scripts/auto-sync.js"
+    "sync": "node scripts/auto-sync.js",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@auth/core": "^0.41.3",

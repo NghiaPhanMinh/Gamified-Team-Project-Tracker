@@ -177,6 +177,7 @@ export default defineSchema({
     completedAt: v.optional(v.number()),
     setupMode: v.optional(v.union(v.literal("manual"), v.literal("ai"))),
     launchedAt: v.optional(v.number()),
+    targetMemberCount: v.optional(v.number()),
   })
     .index("by_team_and_status", ["teamId", "status"])
     .index("by_team_and_updated", ["teamId", "updatedAt"]),
