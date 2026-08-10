@@ -40,8 +40,9 @@ describe("runFreeModelFallback", () => {
   it("walks the complete chain, retries transient failures once, then switches to JSON-only mode", async () => {
     const models = [
       "google/gemma-4-26b-a4b-it:free",
-      "google/gemma-4-31b-it:free",
-      "google/gemma-3-27b-it:free",
+      "nvidia/nemotron-3-super-120b-a12b:free",
+      "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "nvidia/nemotron-3-nano-30b-a3b:free",
       "openrouter/free",
     ];
     const calls: Array<{ model: string; mode: string; retry: number }> = [];
@@ -78,6 +79,16 @@ describe("runFreeModelFallback", () => {
       { model: models[1], mode: "structured", retry: 0 },
       { model: models[2], mode: "json_only", retry: 0 },
       { model: models[3], mode: "json_only", retry: 0 },
+    ]);
+  });
+
+  it("uses the tested provider-diverse production defaults in order", () => {
+    expect(buildFreeModelChain({})).toEqual([
+      "google/gemma-4-26b-a4b-it:free",
+      "nvidia/nemotron-3-super-120b-a12b:free",
+      "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "nvidia/nemotron-3-nano-30b-a3b:free",
+      "openrouter/free",
     ]);
   });
 
