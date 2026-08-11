@@ -11,8 +11,11 @@
 import type * as activity from "../activity.js";
 import type * as ai from "../ai.js";
 import type * as aiContext from "../aiContext.js";
+import type * as aiDrafts from "../aiDrafts.js";
+import type * as aiUsage from "../aiUsage.js";
 import type * as allocation from "../allocation.js";
 import type * as auth from "../auth.js";
+import type * as availability from "../availability.js";
 import type * as battle from "../battle.js";
 import type * as customFrameworks from "../customFrameworks.js";
 import type * as evidence from "../evidence.js";
@@ -32,6 +35,7 @@ import type * as lib_taskValidation from "../lib/taskValidation.js";
 import type * as lib_teamValidation from "../lib/teamValidation.js";
 import type * as profiles from "../profiles.js";
 import type * as projects from "../projects.js";
+import type * as taskTrades from "../taskTrades.js";
 import type * as tasks from "../tasks.js";
 import type * as teams from "../teams.js";
 
@@ -45,8 +49,11 @@ declare const fullApi: ApiFromModules<{
   activity: typeof activity;
   ai: typeof ai;
   aiContext: typeof aiContext;
+  aiDrafts: typeof aiDrafts;
+  aiUsage: typeof aiUsage;
   allocation: typeof allocation;
   auth: typeof auth;
+  availability: typeof availability;
   battle: typeof battle;
   customFrameworks: typeof customFrameworks;
   evidence: typeof evidence;
@@ -66,6 +73,7 @@ declare const fullApi: ApiFromModules<{
   "lib/teamValidation": typeof lib_teamValidation;
   profiles: typeof profiles;
   projects: typeof projects;
+  taskTrades: typeof taskTrades;
   tasks: typeof tasks;
   teams: typeof teams;
 }>;

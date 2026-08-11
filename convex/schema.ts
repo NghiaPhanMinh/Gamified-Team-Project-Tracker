@@ -37,6 +37,11 @@ const activityAction = v.union(
   v.literal("review_approved"),
   v.literal("review_changes_requested"),
   v.literal("task_claimed"),
+  v.literal("task_declined"),
+  v.literal("task_trade_requested"),
+  v.literal("task_trade_resolved"),
+  v.literal("availability_updated"),
+  v.literal("meeting_plan_saved"),
   v.literal("task_damage_changed"),
   v.literal("project_launched"),
   v.literal("combat_event_created"),
@@ -176,6 +181,10 @@ export default defineSchema({
     updatedAt: v.number(),
     completedAt: v.optional(v.number()),
     setupMode: v.optional(v.union(v.literal("manual"), v.literal("ai"))),
+    taskCreationMode: v.optional(v.union(v.literal("manual"), v.literal("ai"))),
+    allocationStrategy: v.optional(
+      v.union(v.literal("ai"), v.literal("manual"), v.literal("self_selection")),
+    ),
     launchedAt: v.optional(v.number()),
     targetMemberCount: v.optional(v.number()),
   })
@@ -189,6 +198,11 @@ export default defineSchema({
     currentWorkload: workloadLevel,
     preferences: v.string(),
     weeklyCapacity: v.optional(v.number()),
+    timezone: v.optional(v.string()),
+    meetingDurationMinutes: v.optional(v.number()),
+    meetingCadence: v.optional(
+      v.union(v.literal("weekly"), v.literal("fortnightly"), v.literal("as_needed")),
+    ),
     joinedAt: v.number(),
   })
     .index("by_project", ["projectId"])
@@ -242,7 +256,7 @@ export default defineSchema({
     dueDate: v.string(),
     status: taskStatus,
     acceptanceStatus: v.optional(
-      v.union(v.literal("pending"), v.literal("accepted")),
+      v.union(v.literal("pending"), v.literal("accepted"), v.literal("declined")),
     ),
     dependencyTaskIds: v.optional(v.array(v.id("tasks"))),
     source: taskSource,
@@ -270,7 +284,7 @@ export default defineSchema({
   }).index("by_task", ["taskId"]),
   taskReviews: defineTable({
     taskId: v.id("tasks"),
-    reviewerProfileId: v.id("userProfiles"),
+    reviewerProfileId: v.optional(v.id("userProfiles")),
     status: reviewStatus,
     comment: v.optional(v.string()),
     createdAt: v.number(),
@@ -341,4 +355,64 @@ export default defineSchema({
   })
     .index("by_team_and_profile", ["teamId", "profileId"])
     .index("by_profile", ["profileId"]),
+  availabilityBlocks: defineTable({
+    projectId: v.id("projects"),
+    profileId: v.id("userProfiles"),
+    dayOfWeek: v.number(),
+    startMinute: v.number(),
+    endMinute: v.number(),
+    timezone: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_project_and_profile", ["projectId", "profileId"]),
+  meetingPlans: defineTable({
+    projectId: v.id("projects"),
+    createdByProfileId: v.id("userProfiles"),
+    title: v.string(),
+    dayOfWeek: v.number(),
+    startMinute: v.number(),
+    durationMinutes: v.number(),
+    timezone: v.string(),
+    attendeeProfileIds: v.array(v.id("userProfiles")),
+    source: v.union(v.literal("deterministic"), v.literal("ai"), v.literal("manual")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_project", ["projectId"]),
+  taskTrades: defineTable({
+    projectId: v.id("projects"),
+    taskId: v.id("tasks"),
+    requestedByProfileId: v.id("userProfiles"),
+    requestedToProfileId: v.id("userProfiles"),
+    offeredTaskId: v.optional(v.id("tasks")),
+    message: v.optional(v.string()),
+    status: v.union(v.literal("pending"), v.literal("accepted"), v.literal("declined"), v.literal("cancelled")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    resolvedAt: v.optional(v.number()),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_task", ["taskId"])
+    .index("by_recipient_and_status", ["requestedToProfileId", "status"]),
+  subscriptions: defineTable({
+    profileId: v.id("userProfiles"),
+    tier: v.union(v.literal("free"), v.literal("plus"), v.literal("pro")),
+    status: v.union(v.literal("active"), v.literal("cancelled"), v.literal("expired")),
+    source: v.union(v.literal("demo"), v.literal("admin"), v.literal("billing")),
+    startedAt: v.number(),
+    updatedAt: v.number(),
+    expiresAt: v.optional(v.number()),
+  }).index("by_profile", ["profileId"]),
+  aiUsage: defineTable({
+    projectId: v.id("projects"),
+    profileId: v.id("userProfiles"),
+    source: v.union(v.literal("platform"), v.literal("byok")),
+    operation: v.union(v.literal("project_plan"), v.literal("plan_adjustment"), v.literal("meeting_interpretation")),
+    model: v.string(),
+    success: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_project_and_source", ["projectId", "source"])
+    .index("by_profile_and_time", ["profileId", "createdAt"]),
 });

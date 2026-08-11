@@ -75,6 +75,7 @@ export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
             <small>
               {framework.phases.length}{" "}
               {framework.phases.length === 1 ? "phase" : "phases"}
+              {" · "}{framework.disciplines.slice(0, 2).join(" · ")}
             </small>
           </button>
         ))}

@@ -11,7 +11,7 @@ vi.mock("convex/react", () => ({
 describe("ProjectOnboarding", () => {
   afterEach(cleanup);
 
-  it("uses the required five-step creator order and retains earlier input", () => {
+  it("keeps task creation separate from allocation and retains earlier input", () => {
     render(
       <ProjectOnboarding
         mode="create"
@@ -25,9 +25,10 @@ describe("ProjectOnboarding", () => {
     expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
       "1Framework",
       "2Project",
-      "3Allocation",
-      "4Preferences",
-      "5Create Room",
+      "3Tasks",
+      "4Allocation",
+      "5Preferences",
+      "6Create Room",
     ]);
 
     fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));

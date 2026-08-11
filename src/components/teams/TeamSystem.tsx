@@ -6,6 +6,7 @@ import type { MainSection, ProjectsView } from "../../lib/navigation";
 import { PersonalTasks } from "../projects/PersonalTasks";
 import { ProjectOnboarding } from "../projects/ProjectOnboarding";
 import { TeamWorkspace } from "./TeamWorkspace";
+import { ProfileCenter } from "../profile/ProfileCenter";
 
 type RoomSummary = {
   _id: Id<"teams">;
@@ -87,14 +88,7 @@ export function TeamSystem({
 
   if (activeSection === "profile") {
     if (!selectedRoomId) {
-      return (
-        <section className="focused-empty-page">
-          <p className="kicker">Profile</p>
-          <h1 className="display-heading">Your maker profile</h1>
-          <p>Create or join a room before customising your game character.</p>
-          <button className="primary-button" type="button" onClick={() => onOpenProjects("join")}>Join a project</button>
-        </section>
-      );
+      return <ProfileCenter />;
     }
     return <TeamWorkspace selectedTeamId={selectedRoomId} teams={rooms} onAddTeam={() => onOpenProjects("create")} onSelectTeam={onOpenRoom} activeSection="profile" />;
   }

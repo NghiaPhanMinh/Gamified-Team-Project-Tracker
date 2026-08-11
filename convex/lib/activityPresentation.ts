@@ -117,6 +117,16 @@ export function describeActivity(activity: Activity, actorName: string) {
       };
     case "task_claimed":
       return { title: `${actorName} claimed a task`, detail: activity.metadata.taskTitle ?? "An open task now has an owner." };
+    case "task_declined":
+      return { title: `${actorName} declined an assignment`, detail: `${activity.metadata.taskTitle ?? "Task"} is now open for a teammate to claim.` };
+    case "task_trade_requested":
+      return { title: `${actorName} requested a task trade`, detail: activity.metadata.taskTitle ?? "A teammate has a new trade request." };
+    case "task_trade_resolved":
+      return { title: `${actorName} resolved a task trade`, detail: activity.metadata.taskTitle ?? "A trade request was updated." };
+    case "availability_updated":
+      return { title: `${actorName} updated availability`, detail: "The project meeting overlap has been recalculated." };
+    case "meeting_plan_saved":
+      return { title: `${actorName} saved a meeting plan`, detail: "A shared meeting slot was added to the project." };
     case "task_damage_changed":
       return { title: `${actorName} changed task damage`, detail: `${activity.metadata.taskTitle ?? "Task"}: ${activity.metadata.previousDamage ?? "?"} → ${activity.metadata.damage ?? "?"} damage.` };
     case "project_launched":

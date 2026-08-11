@@ -127,16 +127,18 @@ export function AuthenticatedHome() {
       </aside>
       {mobileMenuOpen ? <button className="nav-scrim" type="button" aria-label="Close navigation" onClick={() => setMobileMenuOpen(false)} /> : null}
       <div className="app-content">
-        <TeamSystem
-          profile={profile}
-          activeSection={activeSection}
-          projectsView={projectsView}
-          rooms={availableRooms}
-          selectedRoomId={activeRoomId}
-          onNavigateHome={() => setActiveSection("home")}
-          onOpenProjects={(view) => openProjects(view)}
-          onOpenRoom={(roomId) => openProjects("room", roomId)}
-        />
+        <div className="content-container">
+          <TeamSystem
+            profile={profile}
+            activeSection={activeSection}
+            projectsView={projectsView}
+            rooms={availableRooms}
+            selectedRoomId={activeRoomId}
+            onNavigateHome={() => setActiveSection("home")}
+            onOpenProjects={(view) => openProjects(view)}
+            onOpenRoom={(roomId) => openProjects("room", roomId)}
+          />
+        </div>
       </div>
     </main>
   );

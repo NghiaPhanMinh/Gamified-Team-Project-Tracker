@@ -35,7 +35,7 @@ const projectMemberValidator = v.object({
 export const listForTeam = query({
   args: { teamId: v.id("teams") },
   handler: async (ctx, args) => {
-    await requireTeamMember(ctx, args.teamId);
+    const { membership, profile } = await requireTeamMember(ctx, args.teamId);
     const projects = await ctx.db
       .query("projects")
       .withIndex("by_team_and_updated", (indexQuery) =>
@@ -70,6 +70,8 @@ export const listForTeam = query({
             canOverlap: phase.canOverlap,
             reviewCheckpoint: phase.reviewCheckpoint,
           })),
+          canManageProject:
+            membership.role === "owner" || project.creatorProfileId === profile._id,
         };
       }),
     );
@@ -94,6 +96,8 @@ export const create = mutation({
     phases: v.array(projectPhaseValidator),
     members: v.array(projectMemberValidator),
     setupMode: v.optional(v.union(v.literal("manual"), v.literal("ai"))),
+    taskCreationMode: v.optional(v.union(v.literal("manual"), v.literal("ai"))),
+    allocationStrategy: v.optional(v.union(v.literal("ai"), v.literal("manual"), v.literal("self_selection"))),
     targetMemberCount: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -198,6 +202,8 @@ export const create = mutation({
       customFrameworkId,
       status: "planning",
       setupMode: args.setupMode,
+      taskCreationMode: args.taskCreationMode ?? args.setupMode,
+      allocationStrategy: args.allocationStrategy ?? (args.setupMode === "ai" ? "ai" : "manual"),
       targetMemberCount: args.targetMemberCount,
       creatorProfileId: profile._id,
       createdAt: now,
@@ -395,6 +401,66 @@ export const setArchived = mutation({
       createdAt: now,
     });
 
+    return project._id;
+  },
+});
+
+export const rename = mutation({
+  args: { projectId: v.id("projects"), title: v.string() },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("This project no longer exists.");
+    const { membership, profile } = await requireTeamMember(ctx, project.teamId);
+    if (membership.role !== "owner" && project.creatorProfileId !== profile._id) {
+      throw new Error("Only the project creator or team owner can rename this project.");
+    }
+    const title = args.title.trim();
+    if (!title || title.length > 100) throw new Error("Use a project name from 1–100 characters.");
+    await ctx.db.patch(project._id, { title, updatedAt: Date.now() });
+    return project._id;
+  },
+});
+
+export const deletePermanently = mutation({
+  args: { projectId: v.id("projects"), confirmationName: v.string() },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("This project no longer exists.");
+    const { membership, profile } = await requireTeamMember(ctx, project.teamId);
+    if (membership.role !== "owner" && project.creatorProfileId !== profile._id) {
+      throw new Error("Only the project creator or team owner can permanently delete this project.");
+    }
+    if (args.confirmationName.trim() !== project.title) {
+      throw new Error("Type the exact project name to confirm permanent deletion.");
+    }
+    const [tasks, milestones, phases, members, blocks, plans, trades, usage, activity, combat] = await Promise.all([
+      ctx.db.query("tasks").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
+      ctx.db.query("milestones").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
+      ctx.db.query("phases").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
+      ctx.db.query("projectMembers").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
+      ctx.db.query("availabilityBlocks").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
+      ctx.db.query("meetingPlans").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
+      ctx.db.query("taskTrades").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
+      ctx.db.query("aiUsage").withIndex("by_project_and_source", (q) => q.eq("projectId", project._id)).collect(),
+      ctx.db.query("activityLogs").withIndex("by_project_and_time", (q) => q.eq("projectId", project._id)).collect(),
+      ctx.db.query("combatEvents").withIndex("by_project_and_time", (q) => q.eq("projectId", project._id)).collect(),
+    ]);
+    for (const task of tasks) {
+      const [evidence, reviews] = await Promise.all([
+        ctx.db.query("taskEvidence").withIndex("by_task", (q) => q.eq("taskId", task._id)).collect(),
+        ctx.db.query("taskReviews").withIndex("by_task_and_time", (q) => q.eq("taskId", task._id)).collect(),
+      ]);
+      for (const item of evidence) {
+        if (item.storageId) await ctx.storage.delete(item.storageId);
+        await ctx.db.delete(item._id);
+      }
+      for (const review of reviews) await ctx.db.delete(review._id);
+      await ctx.db.delete(task._id);
+    }
+    for (const docs of [milestones, phases, members, blocks, plans, trades, usage, activity, combat]) {
+      for (const doc of docs) await ctx.db.delete(doc._id);
+    }
+    await ctx.db.delete(project._id);
     return project._id;
   },
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { friendlyAiError } from "./AIPlanningAssistant";
+import { friendlyAiError } from "../../lib/aiErrors";
 
 describe("friendlyAiError", () => {
   it("shows the safe server message carried by a Convex error", () => {

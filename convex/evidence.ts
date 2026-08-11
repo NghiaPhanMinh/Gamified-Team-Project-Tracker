@@ -123,6 +123,11 @@ export const listForTask = query({
             context.task.collaboratorProfileIds.includes(context.profile._id))),
       isAssignedReviewer:
         context.task.reviewerProfileId === context.profile._id,
+      canReview:
+        context.canWrite &&
+        context.task.primaryOwnerProfileId !== context.profile._id &&
+        ["review", "submitted"].includes(context.task.status) &&
+        reviews[0]?.status === "pending",
       isTaskOwner: context.task.primaryOwnerProfileId === context.profile._id,
     };
   },
@@ -247,16 +252,17 @@ export const submitReview = mutation({
       throw new Error("This task does not have a pending review request.");
     }
 
-    if (review.reviewerProfileId !== context.profile._id) {
-      throw new Error("Only the assigned reviewer can review this task.");
-    }
     if (context.task.primaryOwnerProfileId === context.profile._id) {
       throw new Error("A task owner cannot review their own task.");
+    }
+    if (!context.canWrite) {
+      throw new Error("Only a current project teammate can review this task.");
     }
 
     const comment = validateReviewComment(args.status, args.comment);
     const now = Date.now();
     await ctx.db.patch(review._id, {
+      reviewerProfileId: context.profile._id,
       status: args.status,
       comment,
       updatedAt: now,
@@ -346,8 +352,8 @@ export const submitForReview = mutation({
     if (context.task.acceptanceStatus === "pending") {
       throw new Error("Accept this task before submitting it for review.");
     }
-    if (!context.task.requiresReview || !context.task.reviewerProfileId) {
-      throw new Error("Assign a reviewer before submitting this task.");
+    if (!context.task.requiresReview) {
+      throw new Error("Enable peer review before submitting this task.");
     }
     if (!["todo", "in_progress", "changes_requested"].includes(context.task.status)) {
       throw new Error("This task cannot be submitted from its current state.");
@@ -361,7 +367,6 @@ export const submitForReview = mutation({
     const now = Date.now();
     const reviewId = await ctx.db.insert("taskReviews", {
       taskId: context.task._id,
-      reviewerProfileId: context.task.reviewerProfileId,
       status: "pending",
       createdAt: now,
       updatedAt: now,

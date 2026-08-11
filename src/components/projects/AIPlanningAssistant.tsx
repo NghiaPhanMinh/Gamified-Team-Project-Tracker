@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from "react";
-import { useAction } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 
 import { api } from "../../../convex/_generated/api";
 import { getErrorMessage } from "../../lib/errors";
+import { getByokSession } from "../../lib/byokSession";
+import { friendlyAiError } from "../../lib/aiErrors";
 
 type Workspace = FunctionReturnType<typeof api.tasks.getWorkspace>;
 type AiPlan = FunctionReturnType<typeof api.ai.generateProjectPlan>;
@@ -16,32 +18,22 @@ type AIPlanningAssistantProps = {
   onUseMilestone: (milestone: AiMilestoneSuggestion) => void;
 };
 
-export function friendlyAiError(error: unknown) {
-  const fallback = "The AI draft could not be generated. Manual planning remains available.";
-  if (
-    typeof error === "object"
-    && error !== null
-    && "data" in error
-    && typeof error.data === "string"
-  ) {
-    return error.data;
-  }
-  const message = getErrorMessage(error, fallback);
-  return /^\[CONVEX A\(ai:generateProjectPlan\)\].*Server Error$/i.test(message)
-    ? fallback
-    : message;
-}
-
 export function AIPlanningAssistant({
   workspace,
   onUseTask,
   onUseMilestone,
 }: AIPlanningAssistantProps) {
   const generateProjectPlan = useAction(api.ai.generateProjectPlan);
+  const generateProjectPlanWithKey = useAction(api.ai.generateProjectPlanWithKey);
+  const savePlan = useMutation(api.aiDrafts.savePlan);
+  const usage = useQuery(api.aiUsage.getProjectUsage, { projectId: workspace.project._id });
   const [brief, setBrief] = useState(workspace.project.description);
   const [draft, setDraft] = useState<AiPlan | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [adjustment, setAdjustment] = useState("");
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const byokActive = getByokSession() !== null;
 
   async function handleGenerate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -49,13 +41,48 @@ export function AIPlanningAssistant({
     setIsGenerating(true);
 
     try {
-      const result = await generateProjectPlan({
-        projectId: workspace.project._id,
-        brief,
-      });
+      const byok = getByokSession();
+      const result = byok
+        ? await generateProjectPlanWithKey({ projectId: workspace.project._id, brief, apiKey: byok.apiKey, model: byok.model })
+        : await generateProjectPlan({ projectId: workspace.project._id, brief });
       setDraft(result);
+      setSaveMessage(null);
     } catch (caughtError) {
       setError(friendlyAiError(caughtError));
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  async function handleAdjustment() {
+    if (!adjustment.trim()) return;
+    setError(null);
+    setIsGenerating(true);
+    try {
+      const adjustedBrief = `${brief}\n\nHuman adjustment request: ${adjustment.trim()}`.slice(0, 8000);
+      const byok = getByokSession();
+      const result = byok
+        ? await generateProjectPlanWithKey({ projectId: workspace.project._id, brief: adjustedBrief, apiKey: byok.apiKey, model: byok.model })
+        : await generateProjectPlan({ projectId: workspace.project._id, brief: adjustedBrief });
+      setDraft(result);
+      setAdjustment("");
+      setSaveMessage("A revised draft is ready. Review it before saving.");
+    } catch (caughtError) {
+      setError(friendlyAiError(caughtError));
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  async function handleSavePlan() {
+    if (!draft) return;
+    setError(null);
+    setIsGenerating(true);
+    try {
+      const result = await savePlan({ projectId: workspace.project._id, plan: draft });
+      setSaveMessage(`${result.taskCount} tasks and ${result.milestoneCount} milestones were saved. Assigned teammates can now accept or decline.`);
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError, "The reviewed AI plan could not be saved."));
     } finally {
       setIsGenerating(false);
     }
@@ -95,6 +122,7 @@ export function AIPlanningAssistant({
       <p className="ai-safety-note">
         AI suggestions are temporary and editable. Nothing is saved, assigned, or treated as fair until a person moves it into the manual form and confirms it.
       </p>
+      {usage && !usage.platformGenerationAvailable && !byokActive ? <div className="feature-gate-card" role="status"><strong>AI GENERATION USED</strong><p>This Free project has used its platform AI draft. Editing and unlimited manual planning remain available, or activate a session-only key in Profile → AI Settings.</p></div> : null}
 
       <form className="ai-brief-form" onSubmit={handleGenerate}>
         <label>
@@ -113,7 +141,7 @@ export function AIPlanningAssistant({
           <button
             className="primary-button"
             type="submit"
-            disabled={isGenerating || workspace.project.status === "archived"}
+            disabled={isGenerating || workspace.project.status === "archived" || (usage !== undefined && !usage.platformGenerationAvailable && !byokActive)}
           >
             {isGenerating ? "Building a draft…" : draft ? "Generate a fresh draft" : "Generate AI draft"}
           </button>
@@ -123,17 +151,23 @@ export function AIPlanningAssistant({
 
       {draft ? (
         <div className="ai-draft" aria-live="polite">
-          <header>
+          <header className="ai-output-card ai-brief-interpretation">
             <div>
-              <span>Suggested framework</span>
+              <span>Brief interpretation</span>
               <h4>{draft.recommendedFramework}</h4>
               <p>{draft.frameworkReason}</p>
+              <dl className="ai-interpretation-summary">
+                <div><dt>Likely deliverables</dt><dd>{draft.tasks.slice(0, 4).map((task) => task.title).join(" · ")}</dd></div>
+                <div><dt>Constraints to verify</dt><dd>{draft.assumptions.slice(0, 3).join(" · ") || "No extra constraints identified."}</dd></div>
+              </dl>
             </div>
             <button className="quiet-button" type="button" onClick={() => setDraft(null)}>
               Discard AI draft
             </button>
           </header>
 
+          <section className="ai-output-card ai-plan-output" aria-labelledby="ai-plan-output-title">
+            <div className="ai-draft-section-heading"><h4 id="ai-plan-output-title">Tasks & milestones</h4><span>{draft.tasks.length + draft.milestones.length}</span></div>
           <section className="ai-draft-section" aria-labelledby="ai-milestone-title">
             <div className="ai-draft-section-heading">
               <h4 id="ai-milestone-title">Suggested milestones</h4>
@@ -243,7 +277,10 @@ export function AIPlanningAssistant({
               ))}
             </div>
           </section>
+          </section>
 
+          <section className="ai-output-card ai-risk-output" aria-labelledby="ai-risk-output-title">
+          <div className="ai-draft-section-heading"><h4 id="ai-risk-output-title">Risks, assumptions & meeting suggestions</h4><span>Check</span></div>
           <div className="ai-notes-grid">
             <section>
               <h4>Risks to check</h4>
@@ -253,8 +290,23 @@ export function AIPlanningAssistant({
               <h4>Assumptions to verify</h4>
               <ul>{draft.assumptions.map((assumption) => <li key={assumption}>{assumption}</li>)}</ul>
             </section>
+            <section>
+              <h4>Meeting suggestions</h4>
+              <p>Open Team Members to use the deterministic calendar overlap. AI can explain those saved windows, but never invent availability.</p>
+            </section>
           </div>
           <p className="ai-model-note">Generated through a free AI route. This draft is not saved.</p>
+          </section>
+          <section className="ai-adjust-plan" aria-labelledby="ai-adjust-title">
+            <div><h4 id="ai-adjust-title">Adjust Plan</h4><p>Describe one change and generate a fresh, fully validated draft.</p></div>
+            <textarea maxLength={1500} value={adjustment} onChange={(event) => setAdjustment(event.target.value)} placeholder="For example: reduce the plan to eight tasks and keep testing in week three." />
+            <button className="secondary-button" type="button" disabled={isGenerating || !adjustment.trim()} onClick={() => void handleAdjustment()}>{isGenerating ? "Revising…" : "Generate adjusted draft"}</button>
+          </section>
+          <div className="ai-save-actions">
+            <p>Saving is a human confirmation. Invalid or partial output is rejected by the server.</p>
+            <button className="primary-button" type="button" disabled={isGenerating} onClick={() => void handleSavePlan()}>{isGenerating ? "Saving…" : "Save reviewed plan"}</button>
+          </div>
+          {saveMessage ? <p className="form-success" role="status">{saveMessage}</p> : null}
         </div>
       ) : null}
     </section>

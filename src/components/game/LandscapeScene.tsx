@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useMemo } from "react";
 
 export type SceneMember = {
   profileId: string;
@@ -65,28 +65,15 @@ export function LandscapeScene({
   maximumHp,
   villageHpPercent,
   members,
-  events,
   activeEvent,
-  isOverdue = false,
 }: LandscapeSceneProps) {
   const skyGradId = useId();
   const cloudSeed = projectTitle || "default-game-seed";
-  const { farClouds, nearClouds } = useRef(getCloudPositions(cloudSeed)).current;
+  const { farClouds, nearClouds } = useMemo(() => getCloudPositions(cloudSeed), [cloudSeed]);
 
   // Track boss defeat sequence
   const isBossDefeated = maximumHp > 0 && remainingHp === 0;
-  const [hasPlayedVictory, setHasPlayedVictory] = useState(false);
-  const victoryTriggeredRef = useRef(false);
-
-  useEffect(() => {
-    if (isBossDefeated && !victoryTriggeredRef.current) {
-      victoryTriggeredRef.current = true;
-      setHasPlayedVictory(true);
-    } else if (!isBossDefeated) {
-      victoryTriggeredRef.current = false;
-      setHasPlayedVictory(false);
-    }
-  }, [isBossDefeated]);
+  const hasPlayedVictory = isBossDefeated;
 
   // Dragon horizontal placement based on Boss HP ratio
   // 100% Boss HP -> dragon raid position at x=880 (close to village/center)
