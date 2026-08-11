@@ -3,10 +3,6 @@ import { v } from "convex/values";
 import { query } from "./_generated/server";
 import { requireTeamMember } from "./lib/auth";
 
-function damageFor(task: { damage?: number; difficulty: number }) {
-  return task.damage ?? (task.difficulty <= 1 ? 10 : task.difficulty === 2 ? 20 : 30);
-}
-
 export const getState = query({
   args: { projectId: v.id("projects") },
   handler: async (ctx, args) => {
@@ -19,24 +15,53 @@ export const getState = query({
       ctx.db.query("combatEvents").withIndex("by_project_and_time", (q) => q.eq("projectId", project._id)).order("asc").collect(),
       ctx.db.query("teamMembers").withIndex("by_team", (q) => q.eq("teamId", project.teamId)).collect(),
     ]);
+
     const requiredTasks = tasks.filter((task) => task.required);
-    const maximumHp = requiredTasks.reduce((sum, task) => sum + damageFor(task), 0);
+    const userCount = Math.max(1, memberships.length);
+    const hpSharePerPlayer = 100;
+    const maximumHp = userCount * hpSharePerPlayer; // Each user in the room = 100 HP share
+
+    // Count required tasks assigned to each user
+    const requiredTaskCountByOwner = new Map<string, number>();
+    for (const task of requiredTasks) {
+      const ownerId = task.primaryOwnerProfileId;
+      requiredTaskCountByOwner.set(ownerId, (requiredTaskCountByOwner.get(ownerId) ?? 0) + 1);
+    }
+
     const appliedTaskIds = new Set<string>();
     const uniqueEvents = events.filter((event) => {
       if (appliedTaskIds.has(event.taskId)) return false;
       appliedTaskIds.add(event.taskId);
       return true;
     });
-    const eventTaskIds = new Set(uniqueEvents.map((event) => event.taskId));
-    const legacyVerifiedDamage = project.launchedAt === undefined
-      ? requiredTasks
-          .filter((task) => task.status === "completed" && !eventTaskIds.has(task._id))
-          .reduce((sum, task) => sum + damageFor(task), 0)
-      : 0;
+
+    // Track damage dealt per user (each user capped at 100 HP max)
+    const memberDamageMap = new Map<string, number>();
+
+    for (const event of uniqueEvents) {
+      const attackerId = event.attackerProfileId;
+      const ownerTaskCount = requiredTaskCountByOwner.get(attackerId) ?? 1;
+      const damageForTask = Math.max(1, Math.round(100 / ownerTaskCount));
+      const current = memberDamageMap.get(attackerId) ?? 0;
+      memberDamageMap.set(attackerId, Math.min(100, current + damageForTask));
+    }
+
+    const eventTaskIds = new Set(uniqueEvents.map((e) => e.taskId));
+    for (const task of requiredTasks) {
+      if ((task.status === "completed" || task.status === "verified") && !eventTaskIds.has(task._id)) {
+        const ownerId = task.primaryOwnerProfileId;
+        const ownerTaskCount = requiredTaskCountByOwner.get(ownerId) ?? 1;
+        const damageForTask = Math.max(1, Math.round(100 / ownerTaskCount));
+        const current = memberDamageMap.get(ownerId) ?? 0;
+        memberDamageMap.set(ownerId, Math.min(100, current + damageForTask));
+      }
+    }
+
     const damageDealt = Math.min(
       maximumHp,
-      uniqueEvents.reduce((sum, event) => sum + event.damage, 0) + legacyVerifiedDamage,
+      [...memberDamageMap.values()].reduce((sum, val) => sum + val, 0),
     );
+
     const profileIds = new Set([
       ...memberships.map((member) => member.profileId),
       ...uniqueEvents.flatMap((event) => [event.attackerProfileId, event.reviewerProfileId]),
@@ -61,15 +86,6 @@ export const getState = query({
 
     const remainingHp = Math.max(0, maximumHp - damageDealt);
 
-    const targetMemberCount = project.targetMemberCount || Math.max(1, memberships.length);
-    const hpSharePerPlayer = maximumHp > 0 ? Math.round(maximumHp / targetMemberCount) : 0;
-
-    const memberDamageMap = new Map<string, number>();
-    for (const event of uniqueEvents) {
-      const current = memberDamageMap.get(event.attackerProfileId) ?? 0;
-      memberDamageMap.set(event.attackerProfileId, current + event.damage);
-    }
-
     return {
       project: {
         _id: project._id,
@@ -77,7 +93,7 @@ export const getState = query({
         deadline: project.deadline,
         status: project.status,
         launchedAt: project.launchedAt,
-        targetMemberCount,
+        targetMemberCount: userCount,
       },
       currentProfileId: profile._id,
       maximumHp,
@@ -108,7 +124,7 @@ export const getState = query({
           hasPendingGoblin: !hasSubmittedToday,
           damageDealt: memberDamage,
           targetHpShare: hpSharePerPlayer,
-          isShareComplete: hpSharePerPlayer > 0 && memberDamage >= hpSharePerPlayer,
+          isShareComplete: memberDamage >= hpSharePerPlayer,
         };
       }),
       events: uniqueEvents.map((event) => ({

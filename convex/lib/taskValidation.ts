@@ -43,9 +43,9 @@ export function validateMilestoneInput(input: {
 export function validateTaskInput(input: {
   title: string;
   description: string;
-  requiredSkills: string[];
-  estimatedEffortHours: number;
-  difficulty: number;
+  requiredSkills?: string[];
+  estimatedEffortHours?: number;
+  difficulty?: number;
   weight: number;
   startDate: string;
   dueDate: string;
@@ -63,15 +63,18 @@ export function validateTaskInput(input: {
     throw new Error("Task due date cannot be before its start date.");
   }
 
+  const estimatedEffortHours = input.estimatedEffortHours ?? 1;
+  const difficulty = input.difficulty ?? 1;
+
   if (
-    !Number.isFinite(input.estimatedEffortHours) ||
-    input.estimatedEffortHours <= 0 ||
-    input.estimatedEffortHours > 2_000
+    !Number.isFinite(estimatedEffortHours) ||
+    estimatedEffortHours <= 0 ||
+    estimatedEffortHours > 2_000
   ) {
     throw new Error("Estimated effort must be between 0 and 2,000 hours.");
   }
 
-  if (!Number.isInteger(input.difficulty) || input.difficulty < 1 || input.difficulty > 5) {
+  if (!Number.isInteger(difficulty) || difficulty < 1 || difficulty > 5) {
     throw new Error("Task difficulty must be a whole number from 1 to 5.");
   }
 
@@ -80,7 +83,7 @@ export function validateTaskInput(input: {
   }
 
   const requiredSkills = [
-    ...new Set(input.requiredSkills.map((skill) => skill.trim()).filter(Boolean)),
+    ...new Set((input.requiredSkills ?? []).map((skill) => skill.trim()).filter(Boolean)),
   ]
     .slice(0, 20)
     .map((skill) => normaliseText(skill, "Required skill", 60));
@@ -89,8 +92,8 @@ export function validateTaskInput(input: {
     title,
     description: normaliseText(input.description, "Task description", 1_500),
     requiredSkills,
-    estimatedEffortHours: input.estimatedEffortHours,
-    difficulty: input.difficulty,
+    estimatedEffortHours,
+    difficulty,
     weight: input.weight,
     startDate,
     dueDate,

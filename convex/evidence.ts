@@ -71,7 +71,7 @@ function requireEvidenceWriteAccess(context: TaskContext) {
 }
 
 function taskDamage(task: Doc<"tasks">) {
-  return task.damage ?? (task.difficulty <= 1 ? 10 : task.difficulty === 2 ? 20 : 30);
+  return task.damage ?? ((task.difficulty ?? 1) <= 1 ? 10 : task.difficulty === 2 ? 20 : 30);
 }
 
 export const listForTask = query({

@@ -138,7 +138,7 @@ function ProjectWorkspaceReady({
         query.length === 0 ||
         task.title.toLowerCase().includes(query) ||
         task.description.toLowerCase().includes(query) ||
-        task.requiredSkills.some((skill) => skill.toLowerCase().includes(query));
+        (task.requiredSkills ?? []).some((skill) => skill.toLowerCase().includes(query));
       return (
         matchesSearch &&
         (statusFilter === "all" || task.status === statusFilter) &&
@@ -186,17 +186,17 @@ function ProjectWorkspaceReady({
     setTaskMilestoneId(task.milestoneId ?? "");
     setTaskOwnerId(task.primaryOwnerProfileId);
     setCollaboratorIds(new Set(task.collaboratorProfileIds));
-    setRequiredSkills(task.requiredSkills.join(", "));
-    setEstimatedEffort(String(task.estimatedEffortHours));
-    setDifficulty(String(task.difficulty));
+    setRequiredSkills((task.requiredSkills ?? []).join(", "));
+    setEstimatedEffort(String(task.estimatedEffortHours ?? 1));
+    setDifficulty(String(task.difficulty ?? 1));
     setWeight(String(task.weight));
-    setDamage(String(task.damage ?? (task.difficulty <= 1 ? 10 : task.difficulty === 2 ? 20 : 30)));
+    setDamage(String(task.damage ?? ((task.difficulty ?? 1) <= 1 ? 10 : task.difficulty === 2 ? 20 : 30)));
     setIsOpenForClaiming(task.isOpenForClaiming ?? false);
     setCollaboratorCanSubmit(task.collaboratorCanSubmit ?? false);
     setRequired(task.required);
     setTaskStartDate(task.startDate);
     setTaskDueDate(task.dueDate);
-    setDependencyIds(new Set(task.dependencyTaskIds));
+    setDependencyIds(new Set(task.dependencyTaskIds ?? []));
     setRequiresReview(task.requiresReview);
     setReviewerId(
       task.reviewerProfileId === task.primaryOwnerProfileId
@@ -598,27 +598,9 @@ function ProjectWorkspaceReady({
               <input type="checkbox" checked={isOpenForClaiming} onChange={(event) => setIsOpenForClaiming(event.target.checked)} />
               <span>Open for claiming</span>
             </label>
-            <label>
-              <span>Required skills</span>
-              <input value={requiredSkills} onChange={(event) => setRequiredSkills(event.target.value)} placeholder="Editing, research" />
-            </label>
-            <label>
-              <span>Estimated effort (hours)</span>
-              <input required type="number" min="0.5" max="2000" step="0.5" value={estimatedEffort} onChange={(event) => setEstimatedEffort(event.target.value)} />
-            </label>
-            <label>
-              <span>Difficulty</span>
-              <select value={difficulty} onChange={(event) => {
-                const next = event.target.value;
-                setDifficulty(next);
-                if (next === "1") setDamage("10");
-                if (next === "2") setDamage("20");
-                if (next === "3") setDamage("30");
-              }}><option value="1">Easy — 10 damage</option><option value="2">Medium — 20 damage</option><option value="3">Hard — 30 damage</option><option value="4">Custom</option></select>
-            </label>
-            <label>
-              <span>Damage value</span>
-              <input required type="number" min="1" max="999" step="1" value={damage} onChange={(event) => { setDamage(event.target.value); if (!["10", "20", "30"].includes(event.target.value)) setDifficulty("4"); }} />
+            <label className="inline-check-field">
+              <input type="checkbox" checked={isOpenForClaiming} onChange={(event) => setIsOpenForClaiming(event.target.checked)} />
+              <span>Open for claiming</span>
             </label>
             <label>
               <span>Progress weight</span>
@@ -654,19 +636,6 @@ function ProjectWorkspaceReady({
                 </label>
               ))}
             </fieldset>
-            <fieldset>
-              <legend>Dependencies</legend>
-              {workspace.tasks.filter((task) => task._id !== editingTaskId).length === 0 ? <span>No other tasks yet.</span> : workspace.tasks.filter((task) => task._id !== editingTaskId).map((task) => (
-                <label key={task._id}>
-                  <input type="checkbox" checked={dependencyIds.has(task._id)} onChange={(event) => setDependencyIds((current) => {
-                    const next = new Set(current);
-                    if (event.target.checked) next.add(task._id); else next.delete(task._id);
-                    return next;
-                  })} />
-                  {task.title}
-                </label>
-              ))}
-            </fieldset>
           </div>
 
           <div className="task-review-row">
@@ -695,7 +664,19 @@ function ProjectWorkspaceReady({
               Allow collaborators to add evidence
             </label>
           </div>
-          <button className="primary-button" type="submit" disabled={isSaving}>{isSaving ? "Saving task…" : editingTaskId ? "Save task changes" : "Create task"}</button>
+          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginTop: "1rem" }}>
+            <button className="primary-button" type="submit" disabled={isSaving}>{isSaving ? "Saving task…" : editingTaskId ? "Save task changes" : "Create task"}</button>
+            {editingTaskId ? (
+              <button
+                className="secondary-button danger-button"
+                type="button"
+                disabled={isSaving}
+                onClick={() => void handleDeleteTask(editingTaskId)}
+              >
+                Delete task
+              </button>
+            ) : null}
+          </div>
         </form>
       ) : null}
 
@@ -738,17 +719,14 @@ function ProjectWorkspaceReady({
               <article key={task._id} className={`task-card task-${task.status}`}>
                 <div className="task-card-topline">
                   <span>{phaseNameById.get(task.phaseId)}</span>
-                  <span>{task.damage ?? (task.difficulty <= 1 ? 10 : task.difficulty === 2 ? 20 : 30)} damage</span>
                 </div>
                 <h4>{task.title}</h4>
                 <p>{task.description || "No description."}</p>
                 <dl>
                   <div><dt>Owner</dt><dd>{task.isOpenForClaiming ? "Open for claiming" : memberNameById.get(task.primaryOwnerProfileId)}</dd></div>
                   <div><dt>Reviewer</dt><dd>{task.reviewerProfileId ? memberNameById.get(task.reviewerProfileId) : "Not required"}</dd></div>
-                  <div><dt>Effort</dt><dd>{task.estimatedEffortHours}h · difficulty {task.difficulty}/5</dd></div>
                   <div><dt>Dates</dt><dd>{task.startDate} → {task.dueDate}</dd></div>
                 </dl>
-                {task.requiredSkills.length > 0 ? <div className="task-skill-list">{task.requiredSkills.map((skill) => <span key={skill}>{skill}</span>)}</div> : null}
                 {["submitted", "review", "changes_requested", "verified"].includes(task.status) ? (
                   <div className="task-status-control"><span>Status</span><strong className={`review-state review-${task.status}`}>{TASK_STATUSES.find((status) => status.value === task.status)?.label ?? task.status}</strong></div>
                 ) : (

@@ -104,7 +104,7 @@ function assertNoDependencyCycle(
       task._id as string,
       (task._id === editedTaskId
         ? proposedDependencyIds
-        : task.dependencyTaskIds
+        : task.dependencyTaskIds ?? []
       ).map((taskId) => taskId as string),
     ]),
   );
@@ -416,14 +416,14 @@ export const createTask = mutation({
     description: v.string(),
     primaryOwnerProfileId: v.id("userProfiles"),
     collaboratorProfileIds: v.array(v.id("userProfiles")),
-    requiredSkills: v.array(v.string()),
-    estimatedEffortHours: v.number(),
-    difficulty: v.number(),
+    requiredSkills: v.optional(v.array(v.string())),
+    estimatedEffortHours: v.optional(v.number()),
+    difficulty: v.optional(v.number()),
     weight: v.number(),
     required: v.boolean(),
     startDate: v.string(),
     dueDate: v.string(),
-    dependencyTaskIds: v.array(v.id("tasks")),
+    dependencyTaskIds: v.optional(v.array(v.id("tasks"))),
     requiresReview: v.boolean(),
     reviewerProfileId: v.optional(v.id("userProfiles")),
     damage: v.optional(v.number()),
@@ -556,14 +556,14 @@ export const updateTask = mutation({
     description: v.string(),
     primaryOwnerProfileId: v.id("userProfiles"),
     collaboratorProfileIds: v.array(v.id("userProfiles")),
-    requiredSkills: v.array(v.string()),
-    estimatedEffortHours: v.number(),
-    difficulty: v.number(),
+    requiredSkills: v.optional(v.array(v.string())),
+    estimatedEffortHours: v.optional(v.number()),
+    difficulty: v.optional(v.number()),
     weight: v.number(),
     required: v.boolean(),
     startDate: v.string(),
     dueDate: v.string(),
-    dependencyTaskIds: v.array(v.id("tasks")),
+    dependencyTaskIds: v.optional(v.array(v.id("tasks"))),
     requiresReview: v.boolean(),
     reviewerProfileId: v.optional(v.id("userProfiles")),
     damage: v.optional(v.number()),
@@ -686,7 +686,7 @@ export const updateTask = mutation({
       projectId: project._id,
       actorProfileId: profile._id,
       action:
-        (existing.damage ?? defaultDamage(existing.difficulty)) !== damage
+        (existing.damage ?? defaultDamage(existing.difficulty ?? 1)) !== damage
           ? "task_damage_changed"
           : "task_updated",
       metadata: {
@@ -694,7 +694,7 @@ export const updateTask = mutation({
         taskId: existing._id,
         taskTitle: task.title,
         taskStatus: existing.status,
-        previousDamage: existing.damage ?? defaultDamage(existing.difficulty),
+        previousDamage: existing.damage ?? defaultDamage(existing.difficulty ?? 1),
         damage,
       },
       createdAt: now,
@@ -749,7 +749,7 @@ export const deleteTask = mutation({
       )
       .collect();
     const dependentTask = projectTasks.find((candidate) =>
-      candidate.dependencyTaskIds.includes(task._id),
+      (candidate.dependencyTaskIds ?? []).includes(task._id),
     );
 
     if (dependentTask) {

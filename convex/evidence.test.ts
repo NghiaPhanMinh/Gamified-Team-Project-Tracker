@@ -177,7 +177,7 @@ describe("task evidence and review", () => {
     ]);
     const battle = await reviewer.asUser.query(api.battle.getState, { projectId });
     expect(battle.events).toHaveLength(1);
-    expect(battle).toMatchObject({ maximumHp: 30, damageDealt: 30, remainingHp: 0 });
+    expect(battle).toMatchObject({ maximumHp: 300, damageDealt: 100, remainingHp: 200 });
     await expect(reviewer.asUser.mutation(api.evidence.submitReview, { taskId, status: "approved", comment: "Duplicate" })).rejects.toThrow(/not currently waiting/i);
   });
 

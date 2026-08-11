@@ -60,7 +60,7 @@ export const getForProject = query({
       openEffortByOwner.set(
         task.primaryOwnerProfileId,
         (openEffortByOwner.get(task.primaryOwnerProfileId) ?? 0) +
-          task.estimatedEffortHours,
+          (task.estimatedEffortHours ?? 1),
       );
     }
 
@@ -94,9 +94,9 @@ export const getForProject = query({
             id: task._id,
             title: task.title,
             description: task.description,
-            requiredSkills: task.requiredSkills,
-            estimatedEffortHours: task.estimatedEffortHours,
-            dependencyTaskIds: task.dependencyTaskIds.map(String),
+            requiredSkills: task.requiredSkills ?? [],
+            estimatedEffortHours: task.estimatedEffortHours ?? 1,
+            dependencyTaskIds: (task.dependencyTaskIds ?? []).map(String),
           },
           completedTaskIds,
         }),
@@ -115,7 +115,7 @@ export const getForProject = query({
           phaseTitle: phaseTitleById.get(phaseId) ?? "Unknown phase",
           effortHours: memberTasks
             .filter((task) => task.phaseId === phaseId)
-            .reduce((sum, task) => sum + task.estimatedEffortHours, 0),
+            .reduce((sum, task) => sum + (task.estimatedEffortHours ?? 1), 0),
         }))
         .sort((first, second) => second.effortHours - first.effortHours);
       const overloaded =
@@ -183,7 +183,7 @@ export const getForProject = query({
         });
       }
 
-      const incompleteDependencies = task.dependencyTaskIds.filter(
+      const incompleteDependencies = (task.dependencyTaskIds ?? []).filter(
         (dependencyId) => taskById.get(dependencyId)?.status !== "completed",
       );
 
@@ -228,7 +228,7 @@ export const getForProject = query({
 
     for (const task of openTasks.filter(
       (candidate) =>
-        candidate.estimatedEffortHours >= 8 || candidate.difficulty >= 4,
+        (candidate.estimatedEffortHours ?? 1) >= 8 || (candidate.difficulty ?? 1) >= 4,
     )) {
       const key = `${task.primaryOwnerProfileId}:${task.dueDate}`;
       heavyTasksByOwnerAndDate.set(key, [
