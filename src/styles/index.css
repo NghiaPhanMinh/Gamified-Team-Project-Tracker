@@ -3908,6 +3908,42 @@ footer {
   }
 }
 
+/* Light cream surfaces stay light in dark mode, so their inherited text must stay dark. */
+:root[data-theme="dark"] :where(
+  .activity-item,
+  .activity-empty,
+  .activity-loading-more,
+  .notification-scope-note,
+  .quest-preview-card,
+  .preview-quest-list label,
+  .fair-play-rules span,
+  .custom-framework-grid article,
+  .project-setup,
+  .project-setup fieldset,
+  .preview-quest-list li,
+  .custom-framework-builder,
+  .selected-framework-preview,
+  .project-empty,
+  .project-card-grid > article,
+  .phase-status-grid > article,
+  .ai-safety-note,
+  .ai-error,
+  .ai-milestone-grid article,
+  .ai-task-list details,
+  .compact-plan-form,
+  .task-card,
+  .upload-progress,
+  .review-panel blockquote,
+  .evidence-empty,
+  .workload-card,
+  .risk-empty,
+  .suggestion-task,
+  .risk-item > span,
+  .candidate-score-grid span
+) {
+  color: var(--color-navy);
+}
+
 /* Usability revision: fixed application navigation and calmer action hierarchy. */
 .app-shell {
   --app-header-height: 76px;
