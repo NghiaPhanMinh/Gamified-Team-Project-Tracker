@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 
@@ -6,6 +6,7 @@ import { api } from "../../../convex/_generated/api";
 import { getErrorMessage } from "../../lib/errors";
 import { getByokSession } from "../../lib/byokSession";
 import { friendlyAiError } from "../../lib/aiErrors";
+import { AI_RETRY_DELAYS_MS, isRetryablePlatformAiError } from "../../lib/aiRetry";
 
 type Workspace = FunctionReturnType<typeof api.tasks.getWorkspace>;
 type AiPlan = FunctionReturnType<typeof api.ai.generateProjectPlan>;
@@ -33,22 +34,54 @@ export function AIPlanningAssistant({
   const [error, setError] = useState<string | null>(null);
   const [adjustment, setAdjustment] = useState("");
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [retryNotice, setRetryNotice] = useState<string | null>(null);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const byokActive = getByokSession() !== null;
+
+  useEffect(() => () => {
+    if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+  }, []);
+
+  async function generateDraft(nextBrief: string) {
+    const byok = getByokSession();
+    let retryCount = 0;
+
+    while (true) {
+      try {
+        const result = byok
+          ? await generateProjectPlanWithKey({ projectId: workspace.project._id, brief: nextBrief, apiKey: byok.apiKey, model: byok.model })
+          : await generateProjectPlan({ projectId: workspace.project._id, brief: nextBrief });
+        setRetryNotice(null);
+        return result;
+      } catch (caughtError) {
+        if (byok || !isRetryablePlatformAiError(caughtError) || retryCount >= AI_RETRY_DELAYS_MS.length) throw caughtError;
+
+        const delay = AI_RETRY_DELAYS_MS[retryCount];
+        retryCount += 1;
+        setRetryNotice(`Free AI providers are busy. Retrying automatically in ${Math.round(delay / 1000)} seconds (${retryCount}/${AI_RETRY_DELAYS_MS.length})…`);
+        await new Promise<void>((resolve) => {
+          retryTimerRef.current = setTimeout(() => {
+            retryTimerRef.current = null;
+            resolve();
+          }, delay);
+        });
+      }
+    }
+  }
 
   async function handleGenerate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setRetryNotice(null);
     setIsGenerating(true);
 
     try {
-      const byok = getByokSession();
-      const result = byok
-        ? await generateProjectPlanWithKey({ projectId: workspace.project._id, brief, apiKey: byok.apiKey, model: byok.model })
-        : await generateProjectPlan({ projectId: workspace.project._id, brief });
+      const result = await generateDraft(brief);
       setDraft(result);
       setSaveMessage(null);
     } catch (caughtError) {
       setError(friendlyAiError(caughtError));
+      setRetryNotice(null);
     } finally {
       setIsGenerating(false);
     }
@@ -57,18 +90,17 @@ export function AIPlanningAssistant({
   async function handleAdjustment() {
     if (!adjustment.trim()) return;
     setError(null);
+    setRetryNotice(null);
     setIsGenerating(true);
     try {
       const adjustedBrief = `${brief}\n\nHuman adjustment request: ${adjustment.trim()}`.slice(0, 8000);
-      const byok = getByokSession();
-      const result = byok
-        ? await generateProjectPlanWithKey({ projectId: workspace.project._id, brief: adjustedBrief, apiKey: byok.apiKey, model: byok.model })
-        : await generateProjectPlan({ projectId: workspace.project._id, brief: adjustedBrief });
+      const result = await generateDraft(adjustedBrief);
       setDraft(result);
       setAdjustment("");
       setSaveMessage("A revised draft is ready. Review it before saving.");
     } catch (caughtError) {
       setError(friendlyAiError(caughtError));
+      setRetryNotice(null);
     } finally {
       setIsGenerating(false);
     }
@@ -77,6 +109,7 @@ export function AIPlanningAssistant({
   async function handleSavePlan() {
     if (!draft) return;
     setError(null);
+    setRetryNotice(null);
     setIsGenerating(true);
     try {
       const result = await savePlan({ projectId: workspace.project._id, plan: draft });
@@ -148,6 +181,7 @@ export function AIPlanningAssistant({
         </div>
       </form>
       {error ? <p className="form-error ai-error" role="alert">{error}</p> : null}
+      {retryNotice ? <p className="ai-retry-notice" role="status">{retryNotice}</p> : null}
 
       {draft ? (
         <div className="ai-draft" aria-live="polite">

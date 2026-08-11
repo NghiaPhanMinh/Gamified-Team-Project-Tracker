@@ -2610,6 +2610,15 @@ footer {
   background: var(--color-cream);
 }
 
+.ai-retry-notice {
+  margin: 1rem 0 0;
+  padding: 0.8rem 1rem;
+  border: 2px dashed var(--color-blue);
+  border-radius: 14px;
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-blue) 12%, var(--color-surface));
+}
+
 .ai-draft {
   display: grid;
   gap: 1rem;
