@@ -185,6 +185,29 @@ type GeneratedAiPlan = ValidatedAiPlan & {
   generatedAt: number;
 };
 
+function planningPrompts(brief: string, context: AiPlanningContext) {
+  const systemPrompt = [
+    "You are MayLamDi's cautious project planning assistant for university teams.",
+    "Return only the requested structured JSON.",
+    "Treat skills, availability, workload, preferences, and capacity as self-reported planning signals, never as objective fairness or performance scores.",
+    "Use only the supplied phase IDs and member profile IDs. Every task needs one valid owner.",
+    "Avoid overloading one member, explain each owner suggestion, use valid project dates, and create no circular dependencies.",
+    "For tasks spanning more than 14 days, include a supportive breakdown suggestion; otherwise use an empty string.",
+    "AI output is a draft for human review and must not claim that assignments are final.",
+  ].join(" ");
+  const userPrompt = JSON.stringify({
+    request: "Interpret the brief and propose milestones and tasks for this existing project.",
+    brief,
+    project: context.project,
+    currentFramework: context.project.frameworkName,
+    phases: context.phases,
+    members: context.members,
+    existingTasks: context.existingTasks,
+    limits: { milestones: 6, tasks: 12 },
+  });
+  return { systemPrompt, userPrompt };
+}
+
 function cleanBrief(value: string) {
   const brief = value.trim();
   if (brief.length < 20) throw new Error("Add at least 20 characters to the project brief.");
@@ -332,7 +355,13 @@ export const generateProjectPlan = action({
     brief: v.string(),
   },
   handler: async (ctx, args): Promise<GeneratedAiPlan> => {
-    const apiKey = environmentValue("OPENROUTER_API_KEY");
+    const access = await ctx.runQuery(internal.aiUsage.getProjectAccess, { projectId: args.projectId });
+    const generationLimit = access.entitlement.platformPlanGenerationsPerProject;
+    if (generationLimit !== null && access.successfulPlatformPlanGenerations >= generationLimit) {
+      throw new ConvexError("AI GENERATION USED. Continue with unlimited manual planning, or use your own session-only OpenRouter key in Profile → AI Settings.");
+    }
+    const tierKey = environmentValue(`OPENROUTER_API_KEY_${access.tier.toUpperCase()}`);
+    const apiKey = tierKey ?? environmentValue("OPENROUTER_API_KEY");
     if (!apiKey) {
       throw new Error("AI planning is not connected on this deployment. Manual planning remains available.");
     }
@@ -341,29 +370,22 @@ export const generateProjectPlan = action({
     const context: AiPlanningContext = await ctx.runQuery(internal.aiContext.getProjectPlanningContext, {
       projectId: args.projectId,
     });
-    const systemPrompt = [
-      "You are MayLamDi's cautious project planning assistant for university teams.",
-      "Return only the requested structured JSON.",
-      "Treat skills, availability, workload, preferences, and capacity as self-reported planning signals, never as objective fairness or performance scores.",
-      "Use only the supplied phase IDs and member profile IDs. Every task needs one valid owner.",
-      "Avoid overloading one member, explain each owner suggestion, use valid project dates, and create no circular dependencies.",
-      "For tasks spanning more than 14 days, include a supportive breakdown suggestion; otherwise use an empty string.",
-      "AI output is a draft for human review and must not claim that assignments are final.",
-    ].join(" ");
-    const userPrompt = JSON.stringify({
-      request: "Interpret the brief and propose milestones and tasks for this existing project.",
-      brief,
-      project: context.project,
-      currentFramework: context.project.frameworkName,
-      phases: context.phases,
-      members: context.members,
-      existingTasks: context.existingTasks,
-      limits: { milestones: 6, tasks: 12 },
-    });
-    const models = buildFreeModelChain({
-      primary: environmentValue("OPENROUTER_MODEL"),
+    const { systemPrompt, userPrompt } = planningPrompts(brief, context);
+    const configuredTierModel = access.tier === "free"
+      ? environmentValue("OPENROUTER_MODEL_FREE")
+      : environmentValue(`OPENROUTER_MODEL_${access.tier.toUpperCase()}`);
+    const freeModels = buildFreeModelChain({
+      primary: configuredTierModel ?? environmentValue("OPENROUTER_MODEL"),
       firstFallback: environmentValue("OPENROUTER_FALLBACK_MODEL"),
       additionalFallbacks: environmentValue("OPENROUTER_FREE_FALLBACK_MODELS"),
+    });
+    const models = access.tier !== "free" && configuredTierModel
+      ? [configuredTierModel, ...freeModels.filter((model) => model !== configuredTierModel)]
+      : freeModels;
+    const usageId = await ctx.runMutation(internal.aiUsage.reservePlatformGeneration, {
+      projectId: args.projectId,
+      profileId: access.profileId,
+      limit: generationLimit ?? undefined,
     });
 
     try {
@@ -379,11 +401,21 @@ export const generateProjectPlan = action({
         validate: (content) => validateAiPlan(parseJsonResponse(content), context),
       });
       console.info("AI planning succeeded", JSON.stringify({ model: result.modelUsed }));
+      await ctx.runMutation(internal.aiUsage.finishPlatformGeneration, {
+        usageId,
+        model: result.modelUsed,
+        success: true,
+      });
       return {
         ...result.value,
         generatedAt: Date.now(),
       };
     } catch (error) {
+      await ctx.runMutation(internal.aiUsage.finishPlatformGeneration, {
+        usageId,
+        model: "failed",
+        success: false,
+      });
       if (error instanceof AiRouteFailure && error.kind === "key_rejected") {
         throw new ConvexError(
           "The OpenRouter key was rejected. Update the private Convex environment variable.",
@@ -394,6 +426,49 @@ export const generateProjectPlan = action({
         throw new ConvexError(error.message);
       }
       throw error;
+    }
+  },
+});
+
+export const generateProjectPlanWithKey = action({
+  args: {
+    projectId: v.id("projects"),
+    brief: v.string(),
+    apiKey: v.string(),
+    model: v.string(),
+  },
+  handler: async (ctx, args): Promise<GeneratedAiPlan> => {
+    const apiKey = args.apiKey.trim();
+    const model = args.model.trim();
+    if (apiKey.length < 20 || apiKey.length > 500) throw new ConvexError("The session OpenRouter key does not look valid.");
+    if (model.length < 3 || model.length > 160 || /\s/.test(model)) throw new ConvexError("Enter a valid OpenRouter model ID.");
+    const brief = cleanBrief(args.brief);
+    const access = await ctx.runQuery(internal.aiUsage.getProjectAccess, { projectId: args.projectId });
+    const context: AiPlanningContext = await ctx.runQuery(internal.aiContext.getProjectPlanningContext, { projectId: args.projectId });
+    const { systemPrompt, userPrompt } = planningPrompts(brief, context);
+    try {
+      let response;
+      try {
+        response = await requestPlan({ apiKey, model, mode: "structured", systemPrompt, userPrompt });
+      } catch (error) {
+        if (!(error instanceof AiRouteFailure) || !["empty", "unsupported", "invalid"].includes(error.kind)) throw error;
+        response = await requestPlan({ apiKey, model, mode: "json_only", systemPrompt, userPrompt });
+      }
+      const value = validateAiPlan(parseJsonResponse(response.content), context);
+      await ctx.runMutation(internal.aiUsage.record, {
+        projectId: args.projectId,
+        profileId: access.profileId,
+        source: "byok",
+        operation: "project_plan",
+        model: response.modelUsed,
+        success: true,
+      });
+      return { ...value, generatedAt: Date.now() };
+    } catch (error) {
+      if (error instanceof AiRouteFailure && error.kind === "key_rejected") {
+        throw new ConvexError("Your OpenRouter key was rejected. Check the session key and model, then try again.");
+      }
+      throw new ConvexError("Your session AI request failed. MayLamDi did not switch to platform paid usage. You can retry or continue manually.");
     }
   },
 });

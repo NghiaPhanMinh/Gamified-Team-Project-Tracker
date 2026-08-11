@@ -28,8 +28,8 @@ export function LandingPage() {
           </p>
           <div className="hero-actions">
             <GoogleSignInButton />
+            <p>Sign in once to create or join a project room and keep your contribution trail private.</p>
           </div>
-          <p className="landing-flow-note">Create or join a project room, plan tasks together, submit evidence, review teammates, and defeat the project boss.</p>
         </div>
 
         <div className="hero-art" aria-label="MayLamDi brand mark">
@@ -39,6 +39,13 @@ export function LandingPage() {
           <span className="floating-chip chip-two">realtime</span>
           <span className="floating-chip chip-three">human control</span>
         </div>
+      </section>
+
+      <section className="landing-intro-grid" aria-label="How MayLamDi helps">
+        <h2 className="landing-intro-heading">How MayLamDi helps</h2>
+        <article><span>01</span><h2>Plan together</h2><p>Turn a brief into editable phases, tasks, deadlines, and clear meeting windows.</p></article>
+        <article><span>02</span><h2>Share work fairly</h2><p>Use skills, availability, workload, self-selection, or explainable AI suggestions.</p></article>
+        <article><span>03</span><h2>Prove progress</h2><p>Submit evidence, get a teammate review, and turn verified work into boss damage.</p></article>
       </section>
 
       <footer>

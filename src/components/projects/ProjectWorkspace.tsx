@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useRef, useState, type FormEvent } from "react";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 
@@ -14,6 +14,7 @@ import {
   type AiTaskSuggestion,
 } from "./AIPlanningAssistant";
 import { TaskEvidencePanel } from "./TaskEvidencePanel";
+import { ProjectTeamMembers } from "./ProjectTeamMembers";
 
 type ProjectWorkspaceProps = {
   projectId: Id<"projects">;
@@ -22,7 +23,7 @@ type ProjectWorkspaceProps = {
 };
 
 type TaskStatus = "todo" | "in_progress" | "blocked" | "review" | "completed" | "submitted" | "changes_requested" | "verified";
-export type ProjectTab = "overview" | "tasks" | "review" | "battle" | "plan" | "report" | "settings";
+export type ProjectTab = "overview" | "tasks" | "members" | "review" | "battle" | "plan" | "report" | "settings";
 
 const TASK_STATUSES: { value: TaskStatus; label: string }[] = [
   { value: "todo", label: "To do" },
@@ -37,6 +38,7 @@ const TASK_STATUSES: { value: TaskStatus; label: string }[] = [
 const PROJECT_TABS: { value: ProjectTab; label: string }[] = [
   { value: "overview", label: "Overview" },
   { value: "tasks", label: "Team Tasks" },
+  { value: "members", label: "Team Members" },
   { value: "review", label: "Peer Review" },
   { value: "battle", label: "Battle" },
 ];
@@ -88,6 +90,8 @@ function ProjectWorkspaceReady({
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<Id<"tasks"> | null>(null);
   const [deleteConfirmTaskId, setDeleteConfirmTaskId] = useState<Id<"tasks"> | null>(null);
+  const [taskActionsId, setTaskActionsId] = useState<Id<"tasks"> | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [openEvidenceTaskId, setOpenEvidenceTaskId] = useState<Id<"tasks"> | null>(null);
   const [milestoneTitle, setMilestoneTitle] = useState("");
   const [milestoneDescription, setMilestoneDescription] = useState("");
@@ -168,7 +172,7 @@ function ProjectWorkspaceReady({
     setDifficulty("2");
     setWeight("1");
     setDamage("20");
-    setIsOpenForClaiming(false);
+    setIsOpenForClaiming(workspace.project.allocationStrategy === "self_selection");
     setCollaboratorCanSubmit(false);
     setRequired(true);
     setTaskStartDate("");
@@ -396,6 +400,16 @@ function ProjectWorkspaceReady({
     }
   }
 
+  function startLongPress(taskId: Id<"tasks">) {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    longPressTimer.current = setTimeout(() => setTaskActionsId(taskId), 550);
+  }
+
+  function cancelLongPress() {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    longPressTimer.current = null;
+  }
+
   return (
     <section className="project-workspace" aria-labelledby="open-project-title">
       <header className="open-project-header">
@@ -445,6 +459,14 @@ function ProjectWorkspaceReady({
             milestones={workspace.milestones}
           />
         )}
+        {workspace.project.status === "completed" ? (
+          <section className="project-completion-card" aria-labelledby="project-complete-title">
+            <p className="card-eyebrow">Project complete</p>
+            <h3 className="display-heading" id="project-complete-title">Your team defeated the project boss!</h3>
+            <p>Every required task is complete. Evidence, reviews, combat history, and the report stay preserved when you close the project.</p>
+            <div><button className="primary-button" type="button" onClick={() => setActiveTab("report")}>View report</button>{workspace.canManageProject ? <button className="secondary-button" type="button" disabled={isArchiving} onClick={() => void handleArchiveChange(true)}>Archive / close project</button> : null}<button className="quiet-button" type="button" onClick={onClose}>Start new project</button></div>
+          </section>
+        ) : null}
         <section className="next-action-card" aria-labelledby="next-action-title">
           <p className="card-eyebrow">Next action</p>
           {!workspace.isLaunched ? (
@@ -453,7 +475,7 @@ function ProjectWorkspaceReady({
               <p>{workspace.members.length} {workspace.members.length === 1 ? "member has" : "members have"} added planning preferences. Nothing becomes active until the plan is confirmed.</p>
               {workspace.canManageProject ? <button className={workspace.project.setupMode === "ai" ? "ai-action-button" : "primary-button"} type="button" onClick={() => setActiveTab("plan")}>{workspace.project.setupMode === "ai" ? "Generate task plan" : "Create tasks"}</button> : <span className="waiting-label">Waiting for the room owner to confirm the plan</span>}
             </>
-          ) : workspace.tasks.some((task) => task.reviewerProfileId === workspace.currentProfileId && ["submitted", "review"].includes(task.status)) ? (
+          ) : workspace.tasks.some((task) => task.primaryOwnerProfileId !== workspace.currentProfileId && ["submitted", "review"].includes(task.status)) ? (
             <><h3 id="next-action-title">A teammate is waiting for your review</h3><p>Review the submitted evidence before any boss damage is applied.</p><button className="primary-button" type="button" onClick={() => setActiveTab("review")}>Open peer review</button></>
           ) : workspace.tasks.some((task) => task.primaryOwnerProfileId === workspace.currentProfileId && task.status !== "verified") ? (
             <><h3 id="next-action-title">Continue your assigned work</h3><p>Open My Tasks from the Projects menu for your focused task view.</p><button className="primary-button" type="button" onClick={() => setActiveTab("tasks")}>View team tasks</button></>
@@ -598,10 +620,6 @@ function ProjectWorkspaceReady({
               <input type="checkbox" checked={isOpenForClaiming} onChange={(event) => setIsOpenForClaiming(event.target.checked)} />
               <span>Open for claiming</span>
             </label>
-            <label className="inline-check-field">
-              <input type="checkbox" checked={isOpenForClaiming} onChange={(event) => setIsOpenForClaiming(event.target.checked)} />
-              <span>Open for claiming</span>
-            </label>
             <label>
               <span>Progress weight</span>
               <input required type="number" min="0.5" max="100" step="0.5" value={weight} onChange={(event) => setWeight(event.target.value)} />
@@ -652,9 +670,9 @@ function ProjectWorkspaceReady({
             </label>
             {requiresReview ? (
               <label>
-                <span>Reviewer</span>
-                <select required value={reviewerId} onChange={(event) => setReviewerId(event.target.value)}>
-                  <option value="">Choose reviewer</option>
+                <span>Preferred reviewer (optional)</span>
+                <select value={reviewerId} onChange={(event) => setReviewerId(event.target.value)}>
+                  <option value="">Open to any teammate</option>
                   {workspace.members.filter((member) => member.profileId !== effectiveOwnerId).map((member) => <option key={member.profileId} value={member.profileId}>{member.displayName}</option>)}
                 </select>
               </label>
@@ -716,7 +734,15 @@ function ProjectWorkspaceReady({
         {filteredTasks.length === 0 ? <div className="project-empty"><strong>No matching tasks.</strong><p>Create a task or change the filters.</p></div> : (
           <div className="task-card-grid" aria-live="polite">
             {filteredTasks.map((task) => (
-              <article key={task._id} className={`task-card task-${task.status}`}>
+              <article
+                key={task._id}
+                className={`task-card task-${task.status}`}
+                onDoubleClick={() => setTaskActionsId((current) => current === task._id ? null : task._id)}
+                onPointerDown={() => startLongPress(task._id)}
+                onPointerUp={cancelLongPress}
+                onPointerLeave={cancelLongPress}
+                onPointerCancel={cancelLongPress}
+              >
                 <div className="task-card-topline">
                   <span>{phaseNameById.get(task.phaseId)}</span>
                 </div>
@@ -740,7 +766,7 @@ function ProjectWorkspaceReady({
                   </label>
                 )}
                 {task.isOpenForClaiming ? <button className="primary-button" type="button" onClick={() => void handleClaim(task._id)}>Claim task</button> : null}
-                {workspace.canWrite && (workspace.isTeamOwner || (!workspace.isLaunched && task.createdByProfileId === workspace.currentProfileId)) ? (
+                {workspace.canWrite && (workspace.isTeamOwner || (!workspace.isLaunched && task.createdByProfileId === workspace.currentProfileId)) && taskActionsId === task._id ? (
                   <div className="task-card-actions">
                     <button
                       className="quiet-button"
@@ -779,6 +805,7 @@ function ProjectWorkspaceReady({
                     )}
                   </div>
                 ) : null}
+                {workspace.canWrite && (workspace.isTeamOwner || (!workspace.isLaunched && task.createdByProfileId === workspace.currentProfileId)) && taskActionsId !== task._id ? <small className="task-action-hint">Double-click or long-press for task actions</small> : null}
                 <button
                   className="evidence-toggle-button"
                   type="button"
@@ -812,17 +839,18 @@ function ProjectWorkspaceReady({
         )}
       </section></> : null}
 
+      {activeTab === "members" ? <ProjectTeamMembers projectId={workspace.project._id} /> : null}
+
       {activeTab === "review" ? (
         <section className="evidence-workspace peer-review-page" aria-labelledby="peer-review-title">
           <div className="project-list-heading"><div><p className="card-eyebrow">Peer review</p><h3 id="peer-review-title">Waiting for me</h3></div></div>
-          {workspace.tasks.filter((task) => task.reviewerProfileId === workspace.currentProfileId && ["submitted", "review", "changes_requested"].includes(task.status)).length === 0 ? <div className="project-empty"><strong>No reviews are waiting.</strong><p>Submitted work assigned to you will appear here.</p></div> : workspace.tasks.filter((task) => task.reviewerProfileId === workspace.currentProfileId && ["submitted", "review", "changes_requested"].includes(task.status)).map((task) => (
+          {workspace.tasks.filter((task) => task.primaryOwnerProfileId !== workspace.currentProfileId && ["submitted", "review"].includes(task.status)).length === 0 ? <div className="project-empty"><strong>No reviews are waiting.</strong><p>Submitted work from teammates will appear here.</p></div> : workspace.tasks.filter((task) => task.primaryOwnerProfileId !== workspace.currentProfileId && ["submitted", "review"].includes(task.status)).map((task) => (
             <article key={task._id} className="evidence-task-row">
-              <div><strong>{task.title}</strong><span>{memberNameById.get(task.primaryOwnerProfileId)} · due {task.dueDate} · {task.damage ?? 20} damage</span></div>
               <TaskEvidencePanel taskId={task._id} taskTitle={task.title} taskStatus={task.status} requiresReview={task.requiresReview} reviewerName={task.reviewerProfileId ? memberNameById.get(task.reviewerProfileId) : undefined} />
             </article>
           ))}
           <div className="project-list-heading"><div><p className="card-eyebrow">History</p><h3>Completed reviews</h3></div></div>
-          {workspace.tasks.filter((task) => task.reviewerProfileId === workspace.currentProfileId && task.status === "verified").map((task) => <article key={task._id} className="evidence-task-row is-complete"><div><strong>{task.title}</strong><span>Verified · {task.damage ?? 20} boss damage applied</span></div></article>)}
+          {workspace.tasks.filter((task) => task.status === "verified").map((task) => <article key={task._id} className="evidence-task-row is-complete"><div><strong>{task.title}</strong><span>Verified · {task.damage ?? 20} boss damage applied</span></div></article>)}
         </section>
       ) : null}
 

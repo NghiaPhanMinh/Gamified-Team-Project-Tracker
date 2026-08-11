@@ -11,6 +11,7 @@ import { ProjectHub } from "../projects/ProjectHub";
 import { ActivityCenter } from "./ActivityCenter";
 import { CharacterCustomizer } from "./CharacterCustomizer";
 import type { SpellType } from "../../lib/character";
+import { ProfileCenter } from "../profile/ProfileCenter";
 
 type RoomSummary = {
   _id: Id<"teams">;
@@ -46,13 +47,10 @@ export function TeamWorkspace({
 
   if (activeSection === "profile") {
     return (
-      <section className="profile-page" aria-labelledby="profile-page-title">
-        <header className="focused-page-heading">
-          <div><p className="kicker">Profile</p><h1 className="display-heading" id="profile-page-title">Your game character</h1><p>Character changes appear live to everyone in this room.</p></div>
-          <label className="compact-room-select"><span>Room</span><select value={selectedTeamId} onChange={(event) => onSelectTeam(event.target.value as Id<"teams">)}>{teams.map((team) => <option key={team._id} value={team._id}>{team.name}</option>)}</select></label>
-        </header>
-        {currentMember ? <CharacterCustomizer key={`${selectedTeamId}:${currentMember.characterFill}:${currentMember.characterOutline}:${currentMember.spellType ?? "none"}`} teamId={selectedTeamId} member={{ displayName: currentMember.displayName, characterFill: currentMember.characterFill, characterOutline: currentMember.characterOutline, spellType: currentMember.spellType as SpellType | undefined }} /> : null}
-      </section>
+      <ProfileCenter
+        roomControl={<label className="compact-room-select"><span>Room</span><select value={selectedTeamId} onChange={(event) => onSelectTeam(event.target.value as Id<"teams">)}>{teams.map((team) => <option key={team._id} value={team._id}>{team.name}</option>)}</select></label>}
+        character={currentMember ? <CharacterCustomizer key={`${selectedTeamId}:${currentMember.characterFill}:${currentMember.characterOutline}:${currentMember.spellType ?? "none"}`} teamId={selectedTeamId} member={{ displayName: currentMember.displayName, characterFill: currentMember.characterFill, characterOutline: currentMember.characterOutline, spellType: currentMember.spellType as SpellType | undefined }} /> : undefined}
+      />
     );
   }
 

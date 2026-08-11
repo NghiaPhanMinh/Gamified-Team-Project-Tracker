@@ -150,7 +150,7 @@ describe("task evidence and review", () => {
         status: "approved",
         comment: "Looks good.",
       }),
-    ).rejects.toThrow(/assigned reviewer/i);
+    ).rejects.toThrow(/cannot review their own/i);
     await reviewer.asUser.mutation(api.evidence.submitReview, {
       taskId,
       status: "changes_requested",
@@ -179,6 +179,18 @@ describe("task evidence and review", () => {
     expect(battle.events).toHaveLength(1);
     expect(battle).toMatchObject({ maximumHp: 300, damageDealt: 100, remainingHp: 200 });
     await expect(reviewer.asUser.mutation(api.evidence.submitReview, { taskId, status: "approved", comment: "Duplicate" })).rejects.toThrow(/not currently waiting/i);
+  });
+
+  it("lets any eligible teammate make the first atomic review decision", async () => {
+    const testDatabase = convexTest(schema, modules);
+    const { reviewer, owner, collaborator, taskId, projectId } = await setupReviewTask(testDatabase);
+    await reviewer.asUser.mutation(api.projects.launch, { projectId });
+    await owner.asUser.mutation(api.evidence.add, { taskId, type: "note", note: "Ready for any teammate to verify." });
+    await owner.asUser.mutation(api.evidence.submitForReview, { taskId });
+    await collaborator.asUser.mutation(api.evidence.submitReview, { taskId, status: "approved", comment: "Evidence is complete." });
+    await expect(reviewer.asUser.mutation(api.evidence.submitReview, { taskId, status: "approved", comment: "Second decision" })).rejects.toThrow(/not currently waiting/i);
+    const details = await collaborator.asUser.query(api.evidence.listForTask, { taskId });
+    expect(details.latestReview).toMatchObject({ reviewerProfileId: collaborator.profileId, status: "approved" });
   });
 
   it("prevents other members and unpermitted collaborators from submitting owner evidence", async () => {

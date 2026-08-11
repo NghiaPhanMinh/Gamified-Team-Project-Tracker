@@ -172,10 +172,7 @@ export function TaskEvidencePanel({
     return <div className="task-evidence-panel" aria-busy="true">Loading evidence…</div>;
   }
 
-  const pendingAssignedReview =
-    details.isAssignedReviewer &&
-    (taskStatus === "review" || taskStatus === "submitted") &&
-    details.latestReview?.status === "pending";
+  const canReviewNow = details.canReview;
 
   return (
     <section className="task-evidence-panel" aria-label={`Evidence and review for ${taskTitle}`}>
@@ -269,8 +266,9 @@ export function TaskEvidencePanel({
 
       {requiresReview ? (
         <div className="review-panel">
-          <strong>Assigned reviewer: {reviewerName ?? "Not assigned"}</strong>
-          {pendingAssignedReview ? (
+          <strong>{reviewerName ? `Preferred reviewer: ${reviewerName}` : "Open peer review"}</strong>
+          <p>The first eligible teammate to submit a review records the final outcome atomically. The task owner cannot review their own work.</p>
+          {canReviewNow ? (
             <>
               <label>
                 <span>Review comment</span>
@@ -282,12 +280,26 @@ export function TaskEvidencePanel({
               </div>
             </>
           ) : taskStatus === "review" || taskStatus === "submitted" ? (
-            <p>Waiting for the assigned reviewer.</p>
+            <p>Waiting for another teammate to review this work.</p>
           ) : (
-            <p>Use the task status control to send this task to review when it is ready.</p>
+            <p>Add evidence, then use Submit for Review when the work is ready.</p>
           )}
           {details.latestReview?.comment ? (
             <blockquote>{details.latestReview.comment}</blockquote>
+          ) : null}
+          {details.reviews.length > 0 ? (
+            <details className="review-history">
+              <summary>Review history ({details.reviews.length})</summary>
+              <ol>
+                {details.reviews.map((review) => (
+                  <li key={review._id}>
+                    <strong>{review.status.replace("_", " ")}</strong>
+                    {review.comment ? <span>{review.comment}</span> : null}
+                    <time>{new Date(review.updatedAt).toLocaleString()}</time>
+                  </li>
+                ))}
+              </ol>
+            </details>
           ) : null}
         </div>
       ) : null}

@@ -5,6 +5,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { getErrorMessage } from "../../lib/errors";
 import { TaskEvidencePanel } from "./TaskEvidencePanel";
+import { TaskTradePanel } from "./TaskTradePanel";
 
 export function PersonalTasks({
   onOpenRoom,
@@ -56,6 +57,7 @@ export function PersonalTasks({
               <div><small>{group.roomName}</small><h2>{group.projectTitle}</h2></div>
               <button className="quiet-button" type="button" onClick={() => onOpenRoom(group.roomId)}>Open room</button>
             </header>
+            <TaskTradePanel projectId={group.projectId} />
             <div className="personal-task-list">
               {group.tasks.map((task) => (
                 <article key={task._id} className={`personal-task-card task-${task.status}`}>

@@ -14,7 +14,7 @@ type ProjectOnboardingProps = {
 };
 
 type Preferences = {
-  skills: string;
+  skills: string[];
   availability: string;
   workType: string;
   workload: "low" | "medium" | "high";
@@ -23,13 +23,19 @@ type Preferences = {
 };
 
 const EMPTY_PREFERENCES: Preferences = {
-  skills: "",
+  skills: [],
   availability: "",
   workType: "",
   workload: "medium",
   weeklyCapacity: "",
   meetingTimes: "",
 };
+
+const SKILL_OPTIONS = [
+  "Research", "Writing", "Presentation", "Project management", "UX/UI",
+  "Graphic design", "Prototyping", "Video", "Animation", "Data analysis",
+  "Coding", "Testing", "Marketing", "Finance", "Illustration", "Facilitation",
+];
 
 function dateAfter(days: number) {
   const date = new Date();
@@ -45,17 +51,25 @@ function PreferenceFields({
   value: Preferences;
   onChange: (patch: Partial<Preferences>) => void;
 }) {
+  const [skillQuery, setSkillQuery] = useState("");
+  const suggestions = SKILL_OPTIONS.filter((skill) =>
+    skill.toLowerCase().includes(skillQuery.trim().toLowerCase()) && !value.skills.includes(skill),
+  ).slice(0, 8);
+
+  function addSkill(skill: string) {
+    const cleaned = skill.trim().slice(0, 50);
+    if (!cleaned || value.skills.some((item) => item.toLowerCase() === cleaned.toLowerCase())) return;
+    onChange({ skills: [...value.skills, cleaned].slice(0, 12) });
+    setSkillQuery("");
+  }
+
   return (
     <div className="guided-field-grid">
-      <label>
-        <span>Skills</span>
-        <input
-          required
-          value={value.skills}
-          onChange={(event) => onChange({ skills: event.target.value })}
-          placeholder="Research, writing, illustration"
-        />
-      </label>
+      <div className="guided-field-wide skill-picker">
+        <label><span>Skills</span><input value={skillQuery} onChange={(event) => setSkillQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addSkill(skillQuery); } }} placeholder="Search or type a skill, then press Enter" /></label>
+        <div className="skill-suggestions" aria-label="Suggested skills">{suggestions.map((skill) => <button key={skill} type="button" onClick={() => addSkill(skill)}>+ {skill}</button>)}</div>
+        <div className="skill-chip-list" aria-live="polite">{value.skills.map((skill) => <button key={skill} type="button" onClick={() => onChange({ skills: value.skills.filter((item) => item !== skill) })}>{skill}<span aria-hidden="true"> ×</span><span className="sr-only">Remove</span></button>)}</div>
+      </div>
       <label>
         <span>Availability</span>
         <input
@@ -132,7 +146,8 @@ export function ProjectOnboarding({
   const [brief, setBrief] = useState("");
   const [deadline, setDeadline] = useState(dateAfter(14));
   const [targetMemberCount, setTargetMemberCount] = useState("4");
-  const [allocationMode, setAllocationMode] = useState<"ai" | "manual" | null>(null);
+  const [taskCreationMode, setTaskCreationMode] = useState<"ai" | "manual" | null>(null);
+  const [allocationMode, setAllocationMode] = useState<"ai" | "manual" | "self_selection" | null>(null);
   const [preferences, setPreferences] = useState<Preferences>(EMPTY_PREFERENCES);
   const [joinCode, setJoinCode] = useState("");
   const [joinedTeamId, setJoinedTeamId] = useState<Id<"teams"> | null>(null);
@@ -178,10 +193,11 @@ export function ProjectOnboarding({
     if (step === 2 && (!title.trim() || !brief.trim() || !deadline)) {
       return "Add a project name, brief, and deadline to continue.";
     }
-    if (step === 3 && allocationMode === null) return "Choose AI Assisted or Manual allocation.";
+    if (step === 3 && taskCreationMode === null) return "Choose how tasks should be created.";
+    if (step === 4 && allocationMode === null) return "Choose how tasks should be allocated.";
     if (
-      step === 4 &&
-      (!preferences.skills.trim() || !preferences.availability.trim() || !preferences.workType.trim())
+      step === 5 &&
+      (preferences.skills.length === 0 || !preferences.availability.trim() || !preferences.workType.trim())
     ) {
       return "Add your skills, availability, and preferred work type.";
     }
@@ -197,12 +213,12 @@ export function ProjectOnboarding({
       return;
     }
 
-    if (step < 5) {
+    if (step < 6) {
       setStep((current) => current + 1);
       return;
     }
 
-    if (!selectedFramework || allocationMode === null) return;
+    if (!selectedFramework || allocationMode === null || taskCreationMode === null) return;
     setIsSaving(true);
     try {
       const teamId = await createTeam({ name: title.trim() });
@@ -218,11 +234,13 @@ export function ProjectOnboarding({
           selectedFramework.type === "built_in" ? selectedFramework.id : undefined,
         frameworkName: selectedFramework.name,
         phases: selectedFramework.phases,
-        setupMode: allocationMode,
+        setupMode: taskCreationMode,
+        taskCreationMode,
+        allocationStrategy: allocationMode,
         members: [
           {
             profileId: currentProfileId,
-            skills: preferences.skills.split(",").map((skill) => skill.trim()).filter(Boolean),
+            skills: preferences.skills,
             availability: preferences.availability,
             currentWorkload: preferences.workload,
             preferences: [preferences.workType, preferences.meetingTimes].filter(Boolean).join(" · "),
@@ -250,13 +268,13 @@ export function ProjectOnboarding({
         setJoinedTeamId(teamId);
         setStep(2);
       } else if (joinedTeamId) {
-        if (!preferences.skills.trim() || !preferences.availability.trim() || !preferences.workType.trim()) {
+        if (preferences.skills.length === 0 || !preferences.availability.trim() || !preferences.workType.trim()) {
           setError("Add your skills, availability, and preferred work type.");
           return;
         }
         await joinProject({
           teamId: joinedTeamId,
-          skills: preferences.skills.split(",").map((skill) => skill.trim()).filter(Boolean),
+          skills: preferences.skills,
           availability: preferences.availability,
           currentWorkload: preferences.workload,
           preferences: [preferences.workType, preferences.meetingTimes].filter(Boolean).join(" · "),
@@ -305,7 +323,7 @@ export function ProjectOnboarding({
     );
   }
 
-  const stepLabels = ["Framework", "Project", "Allocation", "Preferences", "Create Room"];
+  const stepLabels = ["Framework", "Project", "Tasks", "Allocation", "Preferences", "Create Room"];
   return (
     <section className="guided-flow" aria-labelledby="create-flow-title">
       <button className="guided-back-link" type="button" onClick={step === 1 ? onCancel : () => { setStep((current) => current - 1); setError(null); }}>← Back</button>
@@ -370,14 +388,14 @@ export function ProjectOnboarding({
 
         {step === 3 ? (
           <>
-            <p className="kicker">Step 3 · Allocation</p>
-            <h1 className="display-heading" id="create-flow-title">How should tasks be planned?</h1>
+            <p className="kicker">Step 3 · Task creation</p>
+            <h1 className="display-heading" id="create-flow-title">How should the task list be created?</h1>
             <div className="allocation-mode-grid">
-              <button className={allocationMode === "ai" ? "allocation-mode-card ai-mode is-selected" : "allocation-mode-card ai-mode"} type="button" onClick={() => setAllocationMode("ai")}>
-                <strong>AI Assisted</strong><span>Build an editable task draft after everyone adds their preferences.</span>
+              <button className={taskCreationMode === "ai" ? "allocation-mode-card ai-mode is-selected" : "allocation-mode-card ai-mode"} type="button" onClick={() => setTaskCreationMode("ai")}>
+                <strong>AI task draft</strong><span>Interpret the brief and suggest editable milestones and tasks.</span>
               </button>
-              <button className={allocationMode === "manual" ? "allocation-mode-card is-selected" : "allocation-mode-card"} type="button" onClick={() => setAllocationMode("manual")}>
-                <strong>Manual</strong><span>Create tasks, owners, reviewers, dates, and damage yourself.</span>
+              <button className={taskCreationMode === "manual" ? "allocation-mode-card is-selected" : "allocation-mode-card"} type="button" onClick={() => setTaskCreationMode("manual")}>
+                <strong>Manual task list</strong><span>Create compact task rows yourself, then allocate them separately.</span>
               </button>
             </div>
           </>
@@ -385,29 +403,42 @@ export function ProjectOnboarding({
 
         {step === 4 ? (
           <>
-            <p className="kicker">Step 4 · Your preferences</p>
-            <h1 className="display-heading" id="create-flow-title">Tell your team how you work</h1>
-            <PreferenceFields value={preferences} onChange={updatePreferences} />
+            <p className="kicker">Step 4 · Allocation</p>
+            <h1 className="display-heading" id="create-flow-title">How should owners be chosen?</h1>
+            <div className="allocation-mode-grid allocation-mode-grid-three">
+              <button className={allocationMode === "ai" ? "allocation-mode-card ai-mode is-selected" : "allocation-mode-card ai-mode"} type="button" onClick={() => setAllocationMode("ai")}><strong>AI suggestion</strong><span>Use skills, calendar availability, workload, and preferences. People still confirm.</span></button>
+              <button className={allocationMode === "manual" ? "allocation-mode-card is-selected" : "allocation-mode-card"} type="button" onClick={() => setAllocationMode("manual")}><strong>Manual allocation</strong><span>The creator proposes an owner for each task.</span></button>
+              <button className={allocationMode === "self_selection" ? "allocation-mode-card is-selected" : "allocation-mode-card"} type="button" onClick={() => setAllocationMode("self_selection")}><strong>Self-selection</strong><span>Tasks start open and teammates claim them atomically.</span></button>
+            </div>
           </>
         ) : null}
 
         {step === 5 ? (
           <>
-            <p className="kicker">Step 5 · Create room</p>
+            <p className="kicker">Step 5 · Your preferences</p>
+            <h1 className="display-heading" id="create-flow-title">Tell your team how you work</h1>
+            <PreferenceFields value={preferences} onChange={updatePreferences} />
+          </>
+        ) : null}
+
+        {step === 6 ? (
+          <>
+            <p className="kicker">Step 6 · Create room</p>
             <h1 className="display-heading" id="create-flow-title">Ready to invite your team?</h1>
             <dl className="guided-summary">
               <div><dt>Project</dt><dd>{title}</dd></div>
               <div><dt>Framework</dt><dd>{selectedFramework?.name}</dd></div>
               <div><dt>Deadline</dt><dd>{deadline}</dd></div>
-              <div><dt>Allocation mode</dt><dd>{allocationMode === "ai" ? "AI Assisted" : "Manual"}</dd></div>
-              <div><dt>Your preferences</dt><dd>{preferences.skills} · {preferences.workType}</dd></div>
+              <div><dt>Task creation</dt><dd>{taskCreationMode === "ai" ? "AI task draft" : "Manual task list"}</dd></div>
+              <div><dt>Allocation</dt><dd>{allocationMode === "ai" ? "AI suggestion" : allocationMode === "self_selection" ? "Self-selection" : "Manual"}</dd></div>
+              <div><dt>Your preferences</dt><dd>{preferences.skills.join(", ")} · {preferences.workType}</dd></div>
             </dl>
           </>
         ) : null}
 
         {error ? <p className="form-error" role="alert">{error}</p> : null}
         <button className="primary-button guided-primary" type="submit" disabled={isSaving}>
-          {isSaving ? "Creating room…" : step === 5 ? "Create room" : "Continue"}
+          {isSaving ? "Creating room…" : step === 6 ? "Create room" : "Continue"}
         </button>
       </form>
     </section>

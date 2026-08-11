@@ -469,10 +469,6 @@ export const createTask = mutation({
       throw new Error("Every task owner, collaborator, and reviewer must be a project member.");
     }
 
-    if (args.requiresReview && !args.reviewerProfileId) {
-      throw new Error("Choose a reviewer when review is required.");
-    }
-
     if (!args.requiresReview && args.reviewerProfileId) {
       throw new Error("Remove the reviewer or enable review for this task.");
     }
@@ -621,10 +617,6 @@ export const updateTask = mutation({
 
     if (assignedProfileIds.some((profileId) => !projectMemberIds.has(profileId))) {
       throw new Error("Every task owner, collaborator, and reviewer must be a project member.");
-    }
-
-    if (args.requiresReview && !args.reviewerProfileId) {
-      throw new Error("Choose a reviewer when review is required.");
     }
 
     if (!args.requiresReview && args.reviewerProfileId) {
@@ -890,14 +882,14 @@ export const declineTask = mutation({
     const now = Date.now();
     await ctx.db.patch(task._id, {
       isOpenForClaiming: true,
-      acceptanceStatus: "accepted",
+      acceptanceStatus: "declined",
       updatedAt: now,
     });
     await ctx.db.insert("activityLogs", {
       teamId: project.teamId,
       projectId: project._id,
       actorProfileId: profile._id,
-      action: "task_updated",
+      action: "task_declined",
       metadata: { projectId: project._id, taskId: task._id, taskTitle: task.title, taskStatus: task.status },
       createdAt: now,
     });
