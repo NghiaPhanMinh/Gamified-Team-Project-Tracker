@@ -28,6 +28,7 @@ const activityAction = v.union(
   v.literal("phase_status_changed"),
   v.literal("milestone_created"),
   v.literal("task_created"),
+  v.literal("task_accepted"),
   v.literal("task_updated"),
   v.literal("task_reassigned"),
   v.literal("task_deleted"),
@@ -36,12 +37,17 @@ const activityAction = v.union(
   v.literal("review_requested"),
   v.literal("review_approved"),
   v.literal("review_changes_requested"),
+  v.literal("creator_approved_task"),
+  v.literal("creator_rejected_task"),
   v.literal("task_claimed"),
   v.literal("task_declined"),
   v.literal("task_trade_requested"),
   v.literal("task_trade_resolved"),
   v.literal("availability_updated"),
   v.literal("meeting_plan_saved"),
+  v.literal("meeting_vote_recorded"),
+  v.literal("meeting_selected"),
+  v.literal("project_updated"),
   v.literal("task_damage_changed"),
   v.literal("project_launched"),
   v.literal("combat_event_created"),
@@ -82,6 +88,7 @@ const taskStatus = v.union(
   v.literal("submitted"),
   v.literal("changes_requested"),
   v.literal("verified"),
+  v.literal("awaiting_creator"),
 );
 const taskSource = v.union(
   v.literal("manual"),
@@ -118,6 +125,10 @@ export default defineSchema({
     displayName: v.string(),
     email: v.string(),
     imageUrl: v.optional(v.string()),
+    skills: v.optional(v.array(v.string())),
+    softwareSkills: v.optional(v.array(v.string())),
+    weeklyCapacity: v.optional(v.number()),
+    profileCompletedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -203,6 +214,9 @@ export default defineSchema({
     meetingCadence: v.optional(
       v.union(v.literal("weekly"), v.literal("fortnightly"), v.literal("as_needed")),
     ),
+    availabilityMode: v.optional(
+      v.union(v.literal("available"), v.literal("busy")),
+    ),
     joinedAt: v.number(),
   })
     .index("by_project", ["projectId"])
@@ -258,6 +272,14 @@ export default defineSchema({
     acceptanceStatus: v.optional(
       v.union(v.literal("pending"), v.literal("accepted"), v.literal("declined")),
     ),
+    assignmentState: v.optional(
+      v.union(
+        v.literal("assigned"),
+        v.literal("proposed"),
+        v.literal("open"),
+        v.literal("unassigned"),
+      ),
+    ),
     dependencyTaskIds: v.optional(v.array(v.id("tasks"))),
     source: taskSource,
     requiresReview: v.boolean(),
@@ -287,6 +309,7 @@ export default defineSchema({
     reviewerProfileId: v.optional(v.id("userProfiles")),
     status: reviewStatus,
     comment: v.optional(v.string()),
+    evidenceIds: v.optional(v.array(v.id("taskEvidence"))),
     createdAt: v.number(),
     updatedAt: v.number(),
     reviewedAt: v.optional(v.number()),
@@ -377,9 +400,24 @@ export default defineSchema({
     timezone: v.string(),
     attendeeProfileIds: v.array(v.id("userProfiles")),
     source: v.union(v.literal("deterministic"), v.literal("ai"), v.literal("manual")),
+    meetingMode: v.optional(v.union(v.literal("online"), v.literal("offline"))),
+    status: v.optional(
+      v.union(v.literal("candidate"), v.literal("selected"), v.literal("cancelled")),
+    ),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_project", ["projectId"]),
+  meetingVotes: defineTable({
+    projectId: v.id("projects"),
+    meetingPlanId: v.id("meetingPlans"),
+    profileId: v.id("userProfiles"),
+    suitable: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_project", ["projectId"])
+    .index("by_plan", ["meetingPlanId"])
+    .index("by_plan_and_profile", ["meetingPlanId", "profileId"]),
   taskTrades: defineTable({
     projectId: v.id("projects"),
     taskId: v.id("tasks"),

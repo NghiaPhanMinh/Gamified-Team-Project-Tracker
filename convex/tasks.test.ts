@@ -21,6 +21,10 @@ async function addProfile(
       authUserId,
       displayName,
       email,
+      skills: ["Communication"],
+      softwareSkills: [],
+      weeklyCapacity: 8,
+      profileCompletedAt: now,
       createdAt: now,
       updatedAt: now,
     });
@@ -102,21 +106,13 @@ async function setupProject(testDatabase: TaskTestDatabase) {
   return { owner, member, other, outsider, teamId, projectId, workspace };
 }
 
-describe("milestone and task backend", () => {
-  it("creates long tasks, updates live progress, and completes milestones", async () => {
+describe("phase and task backend", () => {
+  it("creates required phase tasks and completes them only after creator approval", async () => {
     const testDatabase = convexTest(schema, modules);
     const { owner, member, projectId, workspace } = await setupProject(testDatabase);
-    const milestoneId = await owner.asUser.mutation(api.tasks.createMilestone, {
+    const taskId = await owner.asUser.mutation(api.tasks.createTask, {
       projectId,
       phaseId: workspace.phases[0]._id,
-      title: "Research signed off",
-      description: "The team accepts the evidence base.",
-      dueDate: "2026-09-15",
-    });
-    const taskId = await member.asUser.mutation(api.tasks.createTask, {
-      projectId,
-      phaseId: workspace.phases[0]._id,
-      milestoneId,
       title: "Complete audience research",
       description: "Interview and synthesise the intended audience.",
       primaryOwnerProfileId: member.profileId,
@@ -134,16 +130,14 @@ describe("milestone and task backend", () => {
     });
 
     const liveWorkspace = await owner.asUser.query(api.tasks.getWorkspace, { projectId });
-    expect(liveWorkspace.project.status).toBe("planning");
+    expect(liveWorkspace.project.status).toBe("active");
     expect(liveWorkspace.tasks[0]).toMatchObject({
       _id: taskId,
       source: "manual",
       status: "todo",
       weight: 4,
     });
-    expect(liveWorkspace.milestones[0].requiredTaskIds).toEqual([taskId]);
-
-    await owner.asUser.mutation(api.projects.launch, { projectId });
+    await member.asUser.mutation(api.tasks.acceptTask, { taskId });
     await member.asUser.mutation(api.evidence.add, {
       taskId,
       type: "note",
@@ -157,10 +151,12 @@ describe("milestone and task backend", () => {
       status: "approved",
       comment: "The research evidence is ready to use.",
     });
+    const awaitingWorkspace = await member.asUser.query(api.tasks.getWorkspace, { projectId });
+    expect(awaitingWorkspace.tasks[0].status).toBe("awaiting_creator");
+    await owner.asUser.mutation(api.evidence.decideCompletion, { taskId, decision: "approve" });
     const completedWorkspace = await member.asUser.query(api.tasks.getWorkspace, { projectId });
     expect(completedWorkspace.project.status).toBe("completed");
-    expect(completedWorkspace.tasks[0].status).toBe("verified");
-    expect(completedWorkspace.milestones[0].status).toBe("completed");
+    expect(completedWorkspace.tasks[0].status).toBe("completed");
     const lifecycleEvents = await testDatabase.run(async (ctx) =>
       ctx.db
         .query("activityLogs")
@@ -296,16 +292,9 @@ describe("milestone and task backend", () => {
     const testDatabase = convexTest(schema, modules);
     const { owner, member, projectId, workspace, teamId } =
       await setupProject(testDatabase);
-    const milestoneId = await owner.asUser.mutation(api.tasks.createMilestone, {
-      projectId,
-      title: "Prototype ready",
-      description: "",
-      dueDate: "2026-10-01",
-    });
     const firstTaskId = await owner.asUser.mutation(api.tasks.createTask, {
       projectId,
       phaseId: workspace.phases[0]._id,
-      milestoneId,
       title: "Research draft",
       description: "Initial research.",
       primaryOwnerProfileId: owner.profileId,
@@ -342,7 +331,6 @@ describe("milestone and task backend", () => {
       owner.asUser.mutation(api.tasks.updateTask, {
         taskId: firstTaskId,
         phaseId: workspace.phases[0]._id,
-        milestoneId,
         title: "Research draft updated",
         description: "Updated research.",
         primaryOwnerProfileId: member.profileId,
@@ -363,7 +351,6 @@ describe("milestone and task backend", () => {
     await owner.asUser.mutation(api.tasks.updateTask, {
       taskId: firstTaskId,
       phaseId: workspace.phases[0]._id,
-      milestoneId,
       title: "Research draft updated",
       description: "Updated research.",
       primaryOwnerProfileId: member.profileId,
@@ -423,7 +410,7 @@ describe("milestone and task backend", () => {
         .collect(),
     );
     expect(afterDelete.tasks.map((task) => task._id)).toEqual([secondTaskId]);
-    expect(afterDelete.milestones[0].requiredTaskIds).toEqual([]);
+    expect(afterDelete.milestones).toEqual([]);
     expect(activity.map((event) => event.action)).toContain("task_reassigned");
     expect(activity.map((event) => event.action)).toContain("task_deleted");
   });
@@ -431,7 +418,7 @@ describe("milestone and task backend", () => {
   it("enforces creator, owner, and admin task permissions before and after launch", async () => {
     const testDatabase = convexTest(schema, modules);
     const { owner, member, other, projectId, workspace } = await setupProject(testDatabase);
-    const taskId = await member.asUser.mutation(api.tasks.createTask, {
+    const taskInput = {
       projectId,
       phaseId: workspace.phases[0]._id,
       title: "Member-owned draft",
@@ -448,12 +435,14 @@ describe("milestone and task backend", () => {
       dueDate: "2026-08-20",
       dependencyTaskIds: [],
       requiresReview: false,
-    });
+    };
 
-    await expect(other.asUser.mutation(api.tasks.deleteTask, { taskId })).rejects.toThrow(/task creator/i);
+    await expect(member.asUser.mutation(api.tasks.createTask, taskInput)).rejects.toThrow(/room creator/i);
+    const taskId = await owner.asUser.mutation(api.tasks.createTask, taskInput);
+
+    await expect(other.asUser.mutation(api.tasks.deleteTask, { taskId })).rejects.toThrow(/room creator/i);
     await expect(other.asUser.mutation(api.tasks.updateTaskStatus, { taskId, status: "in_progress" })).rejects.toThrow(/assigned owner/i);
-    await owner.asUser.mutation(api.projects.launch, { projectId });
-    await expect(member.asUser.mutation(api.tasks.deleteTask, { taskId })).rejects.toThrow(/team owner/i);
+    await expect(member.asUser.mutation(api.tasks.deleteTask, { taskId })).rejects.toThrow(/room creator/i);
     await owner.asUser.mutation(api.tasks.deleteTask, { taskId });
   });
 

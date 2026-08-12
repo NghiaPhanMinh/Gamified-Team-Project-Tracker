@@ -7,6 +7,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { BrandLogo } from "../brand/BrandLogo";
 import { TeamSystem } from "../teams/TeamSystem";
 import { ThemeToggle } from "../theme/ThemeToggle";
+import { ProfileCenter } from "../profile/ProfileCenter";
 import { MAIN_NAV_ITEMS, type MainSection, type ProjectsView } from "../../lib/navigation";
 
 export function AuthenticatedHome() {
@@ -59,6 +60,23 @@ export function AuthenticatedHome() {
         <p className="kicker">Setting up your workspace</p>
         <h1 className="display-heading">Making room for your team.</h1>
         <p role="status">Preparing your MayLamDi profile…</p>
+      </main>
+    );
+  }
+
+  const profileComplete =
+    profile.profileCompletedAt !== undefined &&
+    profile.weeklyCapacity !== undefined &&
+    (profile.skills?.length ?? 0) + (profile.softwareSkills?.length ?? 0) > 0;
+
+  if (!profileComplete) {
+    return (
+      <main className="authenticated-shell profile-gate-shell">
+        <header className="app-header">
+          <a className="nav-brand" href="/" aria-label="MayLamDi home"><BrandLogo compact /><span>MayLamDi</span></a>
+          <div className="nav-actions"><ThemeToggle /><button className="secondary-button" type="button" onClick={() => void signOut()}>Sign out</button></div>
+        </header>
+        <div className="profile-gate-content"><ProfileCenter setupRequired /></div>
       </main>
     );
   }

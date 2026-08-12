@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 
 import { mutation, query } from "./_generated/server";
-import { requireTeamMember } from "./lib/auth";
+import { requireCompleteUserProfile, requireTeamMember } from "./lib/auth";
 import { deriveProjectStatus } from "./lib/projectProgress";
 import {
   validateBuiltInFramework,
@@ -35,7 +35,7 @@ const projectMemberValidator = v.object({
 export const listForTeam = query({
   args: { teamId: v.id("teams") },
   handler: async (ctx, args) => {
-    const { membership, profile } = await requireTeamMember(ctx, args.teamId);
+    const { profile } = await requireTeamMember(ctx, args.teamId);
     const projects = await ctx.db
       .query("projects")
       .withIndex("by_team_and_updated", (indexQuery) =>
@@ -70,8 +70,7 @@ export const listForTeam = query({
             canOverlap: phase.canOverlap,
             reviewCheckpoint: phase.reviewCheckpoint,
           })),
-          canManageProject:
-            membership.role === "owner" || project.creatorProfileId === profile._id,
+          canManageProject: project.creatorProfileId === profile._id,
         };
       }),
     );
@@ -83,7 +82,7 @@ export const create = mutation({
     teamId: v.id("teams"),
     title: v.string(),
     description: v.string(),
-    startDate: v.string(),
+    startDate: v.optional(v.string()),
     deadline: v.string(),
     frameworkType: v.union(
       v.literal("none"),
@@ -94,7 +93,7 @@ export const create = mutation({
     customFrameworkId: v.optional(v.id("customFrameworks")),
     frameworkName: v.string(),
     phases: v.array(projectPhaseValidator),
-    members: v.array(projectMemberValidator),
+    members: v.optional(v.array(projectMemberValidator)),
     setupMode: v.optional(v.union(v.literal("manual"), v.literal("ai"))),
     taskCreationMode: v.optional(v.union(v.literal("manual"), v.literal("ai"))),
     allocationStrategy: v.optional(v.union(v.literal("ai"), v.literal("manual"), v.literal("self_selection"))),
@@ -102,6 +101,7 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const { profile } = await requireTeamMember(ctx, args.teamId);
+    await requireCompleteUserProfile(ctx);
     const details = validateProjectDetails(args);
     let frameworkName: string;
     let phases;
@@ -164,15 +164,24 @@ export const create = mutation({
       customFrameworkId = customFramework._id;
     }
 
-    if (args.members.length < 1) {
+    const requestedMembers = args.members ?? [{
+      profileId: profile._id,
+      skills: [...(profile.skills ?? []), ...(profile.softwareSkills ?? [])],
+      availability: "",
+      currentWorkload: "medium" as const,
+      preferences: "",
+      weeklyCapacity: profile.weeklyCapacity,
+    }];
+
+    if (requestedMembers.length < 1) {
       throw new Error("Choose at least one project member.");
     }
 
     const uniqueProfileIds = new Set(
-      args.members.map((member) => member.profileId),
+      requestedMembers.map((member) => member.profileId),
     );
 
-    if (uniqueProfileIds.size !== args.members.length) {
+    if (uniqueProfileIds.size !== requestedMembers.length) {
       throw new Error("Each project member can only be added once.");
     }
 
@@ -187,7 +196,7 @@ export const create = mutation({
     );
 
     if (
-      args.members.some((member) => !teamProfileIds.has(member.profileId))
+      requestedMembers.some((member) => !teamProfileIds.has(member.profileId))
     ) {
       throw new Error("Every project member must belong to the team.");
     }
@@ -200,11 +209,12 @@ export const create = mutation({
       frameworkName,
       builtInFrameworkId,
       customFrameworkId,
-      status: "planning",
+      status: "active",
       setupMode: args.setupMode,
       taskCreationMode: args.taskCreationMode ?? args.setupMode,
       allocationStrategy: args.allocationStrategy ?? (args.setupMode === "ai" ? "ai" : "manual"),
       targetMemberCount: args.targetMemberCount,
+      launchedAt: now,
       creatorProfileId: profile._id,
       createdAt: now,
       updatedAt: now,
@@ -224,11 +234,12 @@ export const create = mutation({
       });
     }
 
-    for (const member of args.members) {
+    for (const member of requestedMembers) {
       await ctx.db.insert("projectMembers", {
         projectId,
         profileId: member.profileId,
         ...validateMemberPlanning(member),
+        availabilityMode: "busy",
         joinedAt: now,
       });
     }
@@ -261,13 +272,14 @@ export const joinLatestWithPreferences = mutation({
   },
   handler: async (ctx, args) => {
     const { profile } = await requireTeamMember(ctx, args.teamId);
+    await requireCompleteUserProfile(ctx);
     const planning = validateMemberPlanning({
       profileId: profile._id,
-      skills: args.skills,
-      availability: args.availability,
+      skills: [...(profile.skills ?? []), ...(profile.softwareSkills ?? [])],
+      availability: "",
       currentWorkload: args.currentWorkload,
-      preferences: args.preferences,
-      weeklyCapacity: args.weeklyCapacity,
+      preferences: "",
+      weeklyCapacity: profile.weeklyCapacity,
     });
     const projects = await ctx.db
       .query("projects")
@@ -289,12 +301,13 @@ export const joinLatestWithPreferences = mutation({
     const now = Date.now();
 
     if (existing) {
-      await ctx.db.patch(existing._id, planning);
+      await ctx.db.patch(existing._id, { ...planning, availabilityMode: "busy" });
     } else {
       await ctx.db.insert("projectMembers", {
         projectId: project._id,
         profileId: profile._id,
         ...planning,
+        availabilityMode: "busy",
         joinedAt: now,
       });
     }
@@ -310,9 +323,9 @@ export const launch = mutation({
     const project = await ctx.db.get(args.projectId);
     if (project === null) throw new Error("This project no longer exists.");
 
-    const { membership, profile } = await requireTeamMember(ctx, project.teamId);
-    if (membership.role !== "owner" && project.creatorProfileId !== profile._id) {
-      throw new Error("Only the project creator or team owner can launch this project.");
+    const { profile } = await requireTeamMember(ctx, project.teamId);
+    if (project.creatorProfileId !== profile._id) {
+      throw new Error("Only the room creator can launch this project.");
     }
     if (project.status === "archived") {
       throw new Error("Restore this project before launching it.");
@@ -354,16 +367,9 @@ export const setArchived = mutation({
       throw new Error("This project no longer exists.");
     }
 
-    const { membership, profile } = await requireTeamMember(ctx, project.teamId);
-    const projectMembership = await ctx.db
-      .query("projectMembers")
-      .withIndex("by_project_and_user", (indexQuery) =>
-        indexQuery.eq("projectId", project._id).eq("profileId", profile._id),
-      )
-      .unique();
-
-    if (membership.role !== "owner" && projectMembership === null) {
-      throw new Error("Only project members or the team owner can archive this project.");
+    const { profile } = await requireTeamMember(ctx, project.teamId);
+    if (project.creatorProfileId !== profile._id) {
+      throw new Error("Only the room creator can archive this project.");
     }
 
     if ((project.status === "archived") === args.archived) {
@@ -410,13 +416,52 @@ export const rename = mutation({
   handler: async (ctx, args) => {
     const project = await ctx.db.get(args.projectId);
     if (!project) throw new Error("This project no longer exists.");
-    const { membership, profile } = await requireTeamMember(ctx, project.teamId);
-    if (membership.role !== "owner" && project.creatorProfileId !== profile._id) {
-      throw new Error("Only the project creator or team owner can rename this project.");
+    const { profile } = await requireTeamMember(ctx, project.teamId);
+    if (project.creatorProfileId !== profile._id) {
+      throw new Error("Only the room creator can rename this project.");
     }
     const title = args.title.trim();
     if (!title || title.length > 100) throw new Error("Use a project name from 1–100 characters.");
     await ctx.db.patch(project._id, { title, updatedAt: Date.now() });
+    return project._id;
+  },
+});
+
+export const updateBrief = mutation({
+  args: {
+    projectId: v.id("projects"),
+    title: v.string(),
+    description: v.string(),
+    deadline: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("This project no longer exists.");
+    const { profile } = await requireTeamMember(ctx, project.teamId);
+    if (project.creatorProfileId !== profile._id) {
+      throw new Error("Only the room creator can edit the project brief.");
+    }
+    const details = validateProjectDetails({
+      title: args.title,
+      description: args.description,
+      startDate: project.startDate,
+      deadline: args.deadline,
+    });
+    const now = Date.now();
+    await ctx.db.patch(project._id, {
+      title: details.title,
+      description: details.description,
+      deadline: details.deadline,
+      updatedAt: now,
+    });
+    await ctx.db.insert("activityLogs", {
+      teamId: project.teamId,
+      projectId: project._id,
+      actorProfileId: profile._id,
+      action: "project_updated",
+      metadata: { projectId: project._id, projectTitle: details.title },
+      createdAt: now,
+    });
     return project._id;
   },
 });
@@ -426,20 +471,21 @@ export const deletePermanently = mutation({
   handler: async (ctx, args) => {
     const project = await ctx.db.get(args.projectId);
     if (!project) throw new Error("This project no longer exists.");
-    const { membership, profile } = await requireTeamMember(ctx, project.teamId);
-    if (membership.role !== "owner" && project.creatorProfileId !== profile._id) {
-      throw new Error("Only the project creator or team owner can permanently delete this project.");
+    const { profile } = await requireTeamMember(ctx, project.teamId);
+    if (project.creatorProfileId !== profile._id) {
+      throw new Error("Only the room creator can permanently delete this project.");
     }
     if (args.confirmationName.trim() !== project.title) {
       throw new Error("Type the exact project name to confirm permanent deletion.");
     }
-    const [tasks, milestones, phases, members, blocks, plans, trades, usage, activity, combat] = await Promise.all([
+    const [tasks, milestones, phases, members, blocks, plans, votes, trades, usage, activity, combat] = await Promise.all([
       ctx.db.query("tasks").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("milestones").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("phases").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("projectMembers").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("availabilityBlocks").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("meetingPlans").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
+      ctx.db.query("meetingVotes").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("taskTrades").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("aiUsage").withIndex("by_project_and_source", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("activityLogs").withIndex("by_project_and_time", (q) => q.eq("projectId", project._id)).collect(),
@@ -457,7 +503,7 @@ export const deletePermanently = mutation({
       for (const review of reviews) await ctx.db.delete(review._id);
       await ctx.db.delete(task._id);
     }
-    for (const docs of [milestones, phases, members, blocks, plans, trades, usage, activity, combat]) {
+    for (const docs of [milestones, phases, members, blocks, votes, plans, trades, usage, activity, combat]) {
       for (const doc of docs) await ctx.db.delete(doc._id);
     }
     await ctx.db.delete(project._id);

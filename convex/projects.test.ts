@@ -24,6 +24,10 @@ async function addProfile(
       authUserId,
       displayName,
       email,
+      skills: ["Communication"],
+      softwareSkills: [],
+      weeklyCapacity: 8,
+      profileCompletedAt: now,
       createdAt: now,
       updatedAt: now,
     });
@@ -144,7 +148,7 @@ describe("project creation foundation", () => {
     expect(memberProjects).toHaveLength(1);
     expect(memberProjects[0]).toMatchObject({
       _id: projectId,
-      status: "planning",
+      status: "active",
       phaseCount: 2,
       memberCount: 2,
       frameworkName: "Nonlinear Design Process",
@@ -256,7 +260,7 @@ describe("project creation foundation", () => {
     });
   });
 
-  it("adds a joining member's own preferences to the latest room project", async () => {
+  it("reuses a joining member's saved profile in the latest room project", async () => {
     const testDatabase = convexTest(schema, modules);
     const { owner, member, teamId } = await createTeamWithMember(testDatabase);
     const projectId = await owner.asUser.mutation(api.projects.create, {
@@ -289,10 +293,10 @@ describe("project creation foundation", () => {
 
     const saved = await member.asUser.query(api.tasks.getWorkspace, { projectId });
     expect(saved.members.find((projectMember) => projectMember.profileId === member.profileId)).toMatchObject({
-      skills: ["Illustration"],
-      availability: "Weekends",
-      preferences: "Visual work",
-      weeklyCapacity: 9,
+      skills: ["Communication"],
+      availability: "",
+      preferences: "",
+      weeklyCapacity: 8,
     });
   });
 });

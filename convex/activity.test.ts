@@ -21,6 +21,10 @@ async function addProfile(
       authUserId,
       displayName,
       email,
+      skills: ["Communication"],
+      softwareSkills: [],
+      weeklyCapacity: 8,
+      profileCompletedAt: now,
       createdAt: now,
       updatedAt: now,
     });

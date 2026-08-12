@@ -13,7 +13,7 @@ export const getForProject = query({
       throw new Error("This project no longer exists.");
     }
 
-    const { membership, profile } = await requireTeamMember(ctx, project.teamId);
+    const { profile } = await requireTeamMember(ctx, project.teamId);
     const [projectMembers, tasks, phases, milestones] = await Promise.all([
       ctx.db
         .query("projectMembers")
@@ -282,8 +282,7 @@ export const getForProject = query({
     return {
       canWrite:
         project.status !== "archived" &&
-        (membership.role === "owner" ||
-          projectMembers.some((member) => member.profileId === profile._id)),
+        project.creatorProfileId === profile._id,
       caveat:
         "These suggestions are transparent decision support, not an objective measure of fairness or teammate performance.",
       scoreWeights: {

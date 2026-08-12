@@ -176,7 +176,7 @@ type AiPlanningContext = {
     title: string;
     phaseId: string;
     ownerProfileId: string;
-    status: "todo" | "in_progress" | "blocked" | "review" | "completed" | "submitted" | "changes_requested" | "verified";
+    status: "todo" | "in_progress" | "blocked" | "review" | "completed" | "submitted" | "changes_requested" | "verified" | "awaiting_creator";
     dueDate: string;
   }>;
 };
@@ -194,16 +194,18 @@ function planningPrompts(brief: string, context: AiPlanningContext) {
     "Avoid overloading one member, explain each owner suggestion, use valid project dates, and create no circular dependencies.",
     "For tasks spanning more than 14 days, include a supportive breakdown suggestion; otherwise use an empty string.",
     "AI output is a draft for human review and must not claim that assignments are final.",
+    "Do not create milestones. Return an empty milestones array and connect every task directly to a supplied phase.",
+    "Every task is required and needs peer review. A reviewer may be null so the task owner can choose an eligible reviewer later.",
   ].join(" ");
   const userPrompt = JSON.stringify({
-    request: "Interpret the brief and propose milestones and tasks for this existing project.",
+    request: "Interpret the brief and propose phase-based tasks for this existing project.",
     brief,
     project: context.project,
     currentFramework: context.project.frameworkName,
     phases: context.phases,
     members: context.members,
     existingTasks: context.existingTasks,
-    limits: { milestones: 6, tasks: 12 },
+    limits: { milestones: 0, tasks: 12 },
   });
   return { systemPrompt, userPrompt };
 }

@@ -1,5 +1,19 @@
+import { v } from "convex/values";
+
 import { mutation, query } from "./_generated/server";
-import { requireAuthUser } from "./lib/auth";
+import { requireAuthUser, requireUserProfile } from "./lib/auth";
+
+function cleanSkills(values: string[], label: string) {
+  const skills = [...new Set(values.map((value) => value.trim()))]
+    .filter(Boolean)
+    .slice(0, 30);
+
+  if (skills.some((skill) => skill.length > 60)) {
+    throw new Error(`${label} must be 60 characters or fewer.`);
+  }
+
+  return skills;
+}
 
 export const getOrNull = query({
   args: {},
@@ -63,5 +77,40 @@ export const ensureCurrent = mutation({
       createdAt: now,
       updatedAt: now,
     });
+  },
+});
+
+export const saveCurrent = mutation({
+  args: {
+    skills: v.array(v.string()),
+    softwareSkills: v.array(v.string()),
+    weeklyCapacity: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const profile = await requireUserProfile(ctx);
+    const skills = cleanSkills(args.skills, "Skills");
+    const softwareSkills = cleanSkills(args.softwareSkills, "Software skills");
+
+    if (skills.length === 0 && softwareSkills.length === 0) {
+      throw new Error("Choose at least one skill so your team knows how you work.");
+    }
+    if (
+      !Number.isFinite(args.weeklyCapacity) ||
+      args.weeklyCapacity <= 0 ||
+      args.weeklyCapacity > 168
+    ) {
+      throw new Error("Weekly capacity must be between 1 and 168 hours.");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(profile._id, {
+      skills,
+      softwareSkills,
+      weeklyCapacity: args.weeklyCapacity,
+      profileCompletedAt: profile.profileCompletedAt ?? now,
+      updatedAt: now,
+    });
+
+    return profile._id;
   },
 });

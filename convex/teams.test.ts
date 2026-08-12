@@ -24,6 +24,10 @@ async function addProfile(
       authUserId,
       displayName,
       email,
+      skills: ["Communication"],
+      softwareSkills: [],
+      weeklyCapacity: 8,
+      profileCompletedAt: now,
       createdAt: now,
       updatedAt: now,
     });
@@ -42,6 +46,38 @@ async function addProfile(
 }
 
 describe("team backend gate", () => {
+  it("blocks room creation and joining until the reusable profile is complete", async () => {
+    const testDatabase = convexTest(schema, modules);
+    const owner = await addProfile(testDatabase, "Owner One", "owner@example.com");
+    const teamId = await owner.asUser.mutation(api.teams.create, { name: "Profile Gate Team" });
+    const workspace = await owner.asUser.query(api.teams.getWorkspace, { teamId });
+    const incompleteAuthUserId = await testDatabase.run(async (ctx) => {
+      const authUserId = await ctx.db.insert("users", {
+        name: "Incomplete",
+        email: "incomplete@example.com",
+      });
+      const now = Date.now();
+      await ctx.db.insert("userProfiles", {
+        authUserId,
+        displayName: "Incomplete",
+        email: "incomplete@example.com",
+        createdAt: now,
+        updatedAt: now,
+      });
+      return authUserId;
+    });
+    const incomplete = testDatabase.withIdentity({
+      subject: `${incompleteAuthUserId}|test-session`,
+      name: "Incomplete",
+      email: "incomplete@example.com",
+    });
+
+    await expect(incomplete.mutation(api.teams.create, { name: "Blocked Team" }))
+      .rejects.toThrow(/complete and save your MayLamDi profile/i);
+    await expect(incomplete.mutation(api.teams.joinByCode, { code: workspace.team.joinCode }))
+      .rejects.toThrow(/complete and save your MayLamDi profile/i);
+  });
+
   it("creates unique join codes and makes the creator an owner", async () => {
     const testDatabase = convexTest(schema, modules);
     const owner = await addProfile(

@@ -2,7 +2,11 @@ import { v } from "convex/values";
 
 import { mutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
-import { requireTeamMember, requireUserProfile } from "./lib/auth";
+import {
+  requireCompleteUserProfile,
+  requireTeamMember,
+  requireUserProfile,
+} from "./lib/auth";
 import {
   SPELL_TYPES,
   validateCharacterColours,
@@ -148,7 +152,7 @@ export const getWorkspace = query({
 export const create = mutation({
   args: { name: v.string() },
   handler: async (ctx, args) => {
-    const profile = await requireUserProfile(ctx);
+    const profile = await requireCompleteUserProfile(ctx);
     const name = normalizeTeamName(args.name);
     const joinCode = await createUniqueJoinCode(ctx);
     const now = Date.now();
@@ -190,7 +194,7 @@ export const create = mutation({
 export const joinByCode = mutation({
   args: { code: v.string() },
   handler: async (ctx, args) => {
-    const profile = await requireUserProfile(ctx);
+    const profile = await requireCompleteUserProfile(ctx);
     const joinCode = assertValidJoinCode(args.code);
     const team = await ctx.db
       .query("teams")
@@ -221,6 +225,37 @@ export const joinByCode = mutation({
       characterFill: DEFAULT_CHARACTER_FILL,
       characterOutline: DEFAULT_CHARACTER_OUTLINE,
     });
+
+    const projects = await ctx.db
+      .query("projects")
+      .withIndex("by_team_and_updated", (query) => query.eq("teamId", team._id))
+      .order("desc")
+      .take(50);
+    const activeProject = projects.find((project) => project.status !== "archived");
+
+    if (activeProject) {
+      const existingProjectMember = await ctx.db
+        .query("projectMembers")
+        .withIndex("by_project_and_user", (query) =>
+          query.eq("projectId", activeProject._id).eq("profileId", profile._id),
+        )
+        .unique();
+
+      if (!existingProjectMember) {
+        await ctx.db.insert("projectMembers", {
+          projectId: activeProject._id,
+          profileId: profile._id,
+          skills: [...(profile.skills ?? []), ...(profile.softwareSkills ?? [])],
+          availability: "",
+          currentWorkload: "medium",
+          preferences: "",
+          weeklyCapacity: profile.weeklyCapacity,
+          availabilityMode: "busy",
+          joinedAt: now,
+        });
+        await ctx.db.patch(activeProject._id, { updatedAt: now });
+      }
+    }
     await ctx.db.patch(team._id, { updatedAt: now });
     await ctx.db.insert("activityLogs", {
       teamId: team._id,

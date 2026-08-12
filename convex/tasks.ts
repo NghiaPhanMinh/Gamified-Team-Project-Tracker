@@ -4,10 +4,7 @@ import { mutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import { requireTeamMember, requireUserProfile } from "./lib/auth";
-import {
-  validateMilestoneInput,
-  validateTaskInput,
-} from "./lib/taskValidation";
+import { validateTaskInput } from "./lib/taskValidation";
 import { refreshProjectProgress } from "./lib/projectProgress";
 
 const taskStatusValidator = v.union(
@@ -19,6 +16,7 @@ const taskStatusValidator = v.union(
   v.literal("submitted"),
   v.literal("changes_requested"),
   v.literal("verified"),
+  v.literal("awaiting_creator"),
 );
 const phaseStatusValidator = v.union(
   v.literal("not_started"),
@@ -48,11 +46,70 @@ async function requireProjectWriteAccess(
     )
     .unique();
 
-  if (membership.role !== "owner" && projectMembership === null) {
-    throw new Error("Only project members or the team owner can change this project.");
+  if (projectMembership === null) {
+    throw new Error("Only project members can change this project.");
   }
 
   return { project, profile, membership, projectMembership };
+}
+
+async function requireProjectCreatorAccess(
+  ctx: MutationCtx,
+  projectId: Id<"projects">,
+) {
+  const access = await requireProjectWriteAccess(ctx, projectId);
+  if (access.project.creatorProfileId !== access.profile._id) {
+    throw new Error("Only the room creator can change phases or task definitions.");
+  }
+  return access;
+}
+
+async function assertBalancedReviewer(
+  ctx: MutationCtx,
+  projectId: Id<"projects">,
+  ownerProfileId: Id<"userProfiles">,
+  reviewerProfileId: Id<"userProfiles">,
+  editedTaskId?: Id<"tasks">,
+) {
+  if (ownerProfileId === reviewerProfileId) {
+    throw new Error("A task owner cannot review their own task.");
+  }
+  const [members, tasks] = await Promise.all([
+    ctx.db.query("projectMembers").withIndex("by_project", (query) =>
+      query.eq("projectId", projectId),
+    ).collect(),
+    ctx.db.query("tasks").withIndex("by_project", (query) =>
+      query.eq("projectId", projectId),
+    ).collect(),
+  ]);
+  const eligible = members.filter((member) => member.profileId !== ownerProfileId);
+  if (!eligible.some((member) => member.profileId === reviewerProfileId)) {
+    throw new Error("Choose a current project member who is not the task owner.");
+  }
+
+  const otherTasks = tasks.filter((task) => task._id !== editedTaskId);
+  const reviewCounts = new Map<Id<"userProfiles">, number>();
+  for (const task of otherTasks) {
+    if (task.reviewerProfileId) {
+      reviewCounts.set(
+        task.reviewerProfileId,
+        (reviewCounts.get(task.reviewerProfileId) ?? 0) + 1,
+      );
+    }
+  }
+  const totalReviewTasks = otherTasks.filter((task) => task.requiresReview).length + 1;
+  let capacity = Math.max(1, Math.ceil(totalReviewTasks / Math.max(1, members.length)));
+  const eligibleCounts = eligible.map((member) => reviewCounts.get(member.profileId) ?? 0);
+  if (eligibleCounts.every((count) => count >= capacity)) {
+    capacity = Math.min(...eligibleCounts) + 1;
+  }
+  const selectedCount = reviewCounts.get(reviewerProfileId) ?? 0;
+  const someoneHasRoom = eligible.some(
+    (member) => (reviewCounts.get(member.profileId) ?? 0) < capacity,
+  );
+  if (selectedCount >= capacity && someoneHasRoom) {
+    throw new Error("Reviewer capacity reached. Choose a teammate with fewer reviews.");
+  }
 }
 
 function isProjectLaunched(project: Doc<"projects">) {
@@ -218,21 +275,37 @@ export const getWorkspace = query({
               ...member,
               displayName: profile.displayName,
               imageUrl: profile.imageUrl,
+              profileSkills: profile.skills ?? [],
+              softwareSkills: profile.softwareSkills ?? [],
+              profileWeeklyCapacity: profile.weeklyCapacity,
             };
       }),
     );
 
     const isProjectMember = projectMembers.some((member) => member.profileId === profile._id);
-    const canManageProject = membership.role === "owner" || project.creatorProfileId === profile._id;
+    const canManageProject = project.creatorProfileId === profile._id;
     const launched = isProjectLaunched(project);
+    const reviewCounts = new Map<Id<"userProfiles">, number>();
+    for (const task of tasks) {
+      if (task.reviewerProfileId) {
+        reviewCounts.set(task.reviewerProfileId, (reviewCounts.get(task.reviewerProfileId) ?? 0) + 1);
+      }
+    }
+    const reviewTaskCount = tasks.filter((task) => task.requiresReview).length;
+    const fairReviewCapacity = Math.max(1, Math.ceil(reviewTaskCount / Math.max(1, projectMembers.length)));
 
     return {
       project,
       currentProfileId: profile._id,
       canManageProject,
-      canWrite: project.status !== "archived" && (membership.role === "owner" || isProjectMember),
+      canWrite: project.status !== "archived" && isProjectMember,
       isTeamOwner: membership.role === "owner",
       isLaunched: launched,
+      fairReviewCapacity,
+      reviewerLoads: projectMembers.map((member) => ({
+        profileId: member.profileId,
+        reviewCount: reviewCounts.get(member.profileId) ?? 0,
+      })),
       phases,
       milestones,
       tasks: tasks.sort((first, second) => first.createdAt - second.createdAt),
@@ -286,13 +359,24 @@ export const listMineAcrossRooms = query({
           .withIndex("by_project", (query) => query.eq("projectId", project._id))
           .collect();
         const tasks = [
-          ...ownedTasks,
+          ...ownedTasks.filter((task) => task.assignmentState !== "unassigned"),
           ...allTasks.filter((task) => task.isOpenForClaiming),
+          ...allTasks.filter((task) => task.reviewerProfileId === profile._id),
         ].filter((task, index, collection) =>
           collection.findIndex((candidate) => candidate._id === task._id) === index,
         );
         if (tasks.length === 0) continue;
         const phaseNames = new Map(phases.map((phase) => [phase._id, phase.title]));
+        const projectMembers = await ctx.db
+          .query("projectMembers")
+          .withIndex("by_project", (query) => query.eq("projectId", project._id))
+          .collect();
+        const memberProfiles = await Promise.all(
+          projectMembers.map((member) => ctx.db.get(member.profileId)),
+        );
+        const memberNames = new Map(
+          memberProfiles.filter((item) => item !== null).map((item) => [item._id, item.displayName]),
+        );
         groups.push({
           roomId: room._id,
           roomName: room.name,
@@ -304,6 +388,10 @@ export const listMineAcrossRooms = query({
               ...task,
               phaseName: phaseNames.get(task.phaseId) ?? "Project work",
               isMine: task.primaryOwnerProfileId === profile._id,
+              isReviewer: task.reviewerProfileId === profile._id,
+              reviewerName: task.reviewerProfileId
+                ? (memberNames.get(task.reviewerProfileId) ?? "Reviewer")
+                : "Owner chooses later",
             })),
         });
       }
@@ -325,7 +413,7 @@ export const updatePhaseStatus = mutation({
       throw new Error("This phase no longer exists.");
     }
 
-    const { project, profile } = await requireProjectWriteAccess(
+    const { project, profile } = await requireProjectCreatorAccess(
       ctx,
       phase.projectId,
     );
@@ -355,6 +443,71 @@ export const updatePhaseStatus = mutation({
   },
 });
 
+export const createPhase = mutation({
+  args: {
+    projectId: v.id("projects"),
+    title: v.string(),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { project, profile } = await requireProjectCreatorAccess(ctx, args.projectId);
+    const title = args.title.trim().replace(/\s+/g, " ");
+    const description = args.description?.trim().replace(/\s+/g, " ") ?? "";
+    if (title.length < 2 || title.length > 100) {
+      throw new Error("Phase name must contain 2–100 characters.");
+    }
+    if (description.length > 800) {
+      throw new Error("Phase description must be 800 characters or fewer.");
+    }
+    const phases = await ctx.db
+      .query("phases")
+      .withIndex("by_project_and_order", (query) => query.eq("projectId", project._id))
+      .collect();
+    if (phases.length >= 20) throw new Error("A project can contain at most 20 phases.");
+    if (phases.some((phase) => phase.title.toLowerCase() === title.toLowerCase())) {
+      throw new Error("Use a unique phase name.");
+    }
+    const now = Date.now();
+    const phaseId = await ctx.db.insert("phases", {
+      projectId: project._id,
+      frameworkPhaseKey: `custom-${now}`,
+      title,
+      description,
+      order: phases.length,
+      status: "not_started",
+      canOverlap: true,
+      reviewCheckpoint: true,
+      dependencyKeys: [],
+    });
+    await ctx.db.patch(project._id, { updatedAt: now });
+    await ctx.db.insert("activityLogs", {
+      teamId: project.teamId,
+      projectId: project._id,
+      actorProfileId: profile._id,
+      action: "phase_status_changed",
+      metadata: { projectId: project._id, phaseId, phaseTitle: title, phaseStatus: "not_started" },
+      createdAt: now,
+    });
+    return phaseId;
+  },
+});
+
+export const renamePhase = mutation({
+  args: { phaseId: v.id("phases"), title: v.string() },
+  handler: async (ctx, args) => {
+    const phase = await ctx.db.get(args.phaseId);
+    if (!phase) throw new Error("This phase no longer exists.");
+    const { project } = await requireProjectCreatorAccess(ctx, phase.projectId);
+    const title = args.title.trim().replace(/\s+/g, " ");
+    if (title.length < 2 || title.length > 100) {
+      throw new Error("Phase name must contain 2–100 characters.");
+    }
+    await ctx.db.patch(phase._id, { title });
+    await ctx.db.patch(project._id, { updatedAt: Date.now() });
+    return phase._id;
+  },
+});
+
 export const createMilestone = mutation({
   args: {
     projectId: v.id("projects"),
@@ -364,46 +517,8 @@ export const createMilestone = mutation({
     dueDate: v.string(),
   },
   handler: async (ctx, args) => {
-    const { project, profile } = await requireProjectWriteAccess(
-      ctx,
-      args.projectId,
-    );
-    const milestone = validateMilestoneInput(args);
-    assertDateWithinProject(milestone.dueDate, project, "Milestone due date");
-
-    if (args.phaseId) {
-      const phase = await ctx.db.get(args.phaseId);
-
-      if (phase === null || phase.projectId !== project._id) {
-        throw new Error("Choose a phase from this project.");
-      }
-    }
-
-    const now = Date.now();
-    const milestoneId = await ctx.db.insert("milestones", {
-      projectId: project._id,
-      phaseId: args.phaseId,
-      ...milestone,
-      status: "planned",
-      requiredTaskIds: [],
-      createdAt: now,
-      updatedAt: now,
-    });
-    await ctx.db.patch(project._id, { updatedAt: now });
-    await ctx.db.insert("activityLogs", {
-      teamId: project.teamId,
-      projectId: project._id,
-      actorProfileId: profile._id,
-      action: "milestone_created",
-      metadata: {
-        projectId: project._id,
-        milestoneId,
-        milestoneTitle: milestone.title,
-      },
-      createdAt: now,
-    });
-
-    return milestoneId;
+    await requireProjectCreatorAccess(ctx, args.projectId);
+    throw new Error("Milestones are read-only legacy data. Add a phase checkpoint instead.");
   },
 });
 
@@ -429,9 +544,15 @@ export const createTask = mutation({
     damage: v.optional(v.number()),
     isOpenForClaiming: v.optional(v.boolean()),
     collaboratorCanSubmit: v.optional(v.boolean()),
+    assignmentState: v.optional(v.union(
+      v.literal("assigned"),
+      v.literal("proposed"),
+      v.literal("open"),
+      v.literal("unassigned"),
+    )),
   },
   handler: async (ctx, args) => {
-    const { project, profile } = await requireProjectWriteAccess(
+    const { project, profile } = await requireProjectCreatorAccess(
       ctx,
       args.projectId,
     );
@@ -445,14 +566,8 @@ export const createTask = mutation({
       throw new Error("Choose a phase from this project.");
     }
 
-    let milestone: Doc<"milestones"> | null = null;
-
     if (args.milestoneId) {
-      milestone = await ctx.db.get(args.milestoneId);
-
-      if (milestone === null || milestone.projectId !== project._id) {
-        throw new Error("Choose a milestone from this project.");
-      }
+      throw new Error("New tasks belong directly to phases, not milestones.");
     }
 
     const projectMemberIds = await getProjectMemberIds(ctx, project._id);
@@ -469,15 +584,16 @@ export const createTask = mutation({
       throw new Error("Every task owner, collaborator, and reviewer must be a project member.");
     }
 
-    if (!args.requiresReview && args.reviewerProfileId) {
-      throw new Error("Remove the reviewer or enable review for this task.");
+    if (args.reviewerProfileId) {
+      await assertBalancedReviewer(
+        ctx,
+        project._id,
+        args.primaryOwnerProfileId,
+        args.reviewerProfileId,
+      );
     }
 
-    if (args.reviewerProfileId === args.primaryOwnerProfileId) {
-      throw new Error("A task owner cannot review their own task.");
-    }
-
-    const dependencyTaskIds = [...new Set(args.dependencyTaskIds)];
+    const dependencyTaskIds = [...new Set(args.dependencyTaskIds ?? [])];
     const dependencies = await Promise.all(
       dependencyTaskIds.map((taskId) => ctx.db.get(taskId)),
     );
@@ -495,34 +611,35 @@ export const createTask = mutation({
     const taskId = await ctx.db.insert("tasks", {
       projectId: project._id,
       phaseId: phase._id,
-      milestoneId: milestone?._id,
+      milestoneId: undefined,
       ...task,
       damage,
       primaryOwnerProfileId: args.primaryOwnerProfileId,
       collaboratorProfileIds,
-      required: args.required,
+      required: true,
       status: "todo",
       acceptanceStatus:
-        args.isOpenForClaiming || args.primaryOwnerProfileId === profile._id
+        args.assignmentState === "unassigned" || args.isOpenForClaiming || args.primaryOwnerProfileId === profile._id
           ? "accepted"
           : "pending",
+      assignmentState:
+        args.assignmentState === "unassigned"
+          ? "unassigned"
+          : args.isOpenForClaiming
+            ? "open"
+            : args.primaryOwnerProfileId === profile._id
+              ? "assigned"
+              : "proposed",
       dependencyTaskIds,
       source: "manual",
-      requiresReview: args.requiresReview,
+      requiresReview: true,
       reviewerProfileId: args.reviewerProfileId,
       isOpenForClaiming: args.isOpenForClaiming ?? false,
-      collaboratorCanSubmit: args.collaboratorCanSubmit ?? false,
+      collaboratorCanSubmit: false,
       createdByProfileId: profile._id,
       createdAt: now,
       updatedAt: now,
     });
-
-    if (milestone) {
-      await ctx.db.patch(milestone._id, {
-        requiredTaskIds: [...milestone.requiredTaskIds, taskId],
-        updatedAt: now,
-      });
-    }
 
     await ctx.db.insert("activityLogs", {
       teamId: project.teamId,
@@ -565,6 +682,12 @@ export const updateTask = mutation({
     damage: v.optional(v.number()),
     isOpenForClaiming: v.optional(v.boolean()),
     collaboratorCanSubmit: v.optional(v.boolean()),
+    assignmentState: v.optional(v.union(
+      v.literal("assigned"),
+      v.literal("proposed"),
+      v.literal("open"),
+      v.literal("unassigned"),
+    )),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db.get(args.taskId);
@@ -573,18 +696,10 @@ export const updateTask = mutation({
       throw new Error("This task no longer exists.");
     }
 
-    const { project, profile, membership } = await requireProjectWriteAccess(
+    const { project, profile } = await requireProjectCreatorAccess(
       ctx,
       existing.projectId,
     );
-    if (membership.role !== "owner") {
-      if (isProjectLaunched(project)) {
-        throw new Error("After launch, only the team owner can edit task details.");
-      }
-      if (existing.createdByProfileId !== profile._id) {
-        throw new Error("Only the task creator can edit this task before launch.");
-      }
-    }
     const task = validateTaskInput(args);
     const damage = validateDamage(args.damage, task.difficulty);
     assertDateWithinProject(task.startDate, project, "Task start date");
@@ -595,14 +710,8 @@ export const updateTask = mutation({
       throw new Error("Choose a phase from this project.");
     }
 
-    let milestone: Doc<"milestones"> | null = null;
-
     if (args.milestoneId) {
-      milestone = await ctx.db.get(args.milestoneId);
-
-      if (milestone === null || milestone.projectId !== project._id) {
-        throw new Error("Choose a milestone from this project.");
-      }
+      throw new Error("New task edits use phases instead of milestones.");
     }
 
     const projectMemberIds = await getProjectMemberIds(ctx, project._id);
@@ -619,15 +728,17 @@ export const updateTask = mutation({
       throw new Error("Every task owner, collaborator, and reviewer must be a project member.");
     }
 
-    if (!args.requiresReview && args.reviewerProfileId) {
-      throw new Error("Remove the reviewer or enable review for this task.");
+    if (args.reviewerProfileId) {
+      await assertBalancedReviewer(
+        ctx,
+        project._id,
+        args.primaryOwnerProfileId,
+        args.reviewerProfileId,
+        existing._id,
+      );
     }
 
-    if (args.reviewerProfileId === args.primaryOwnerProfileId) {
-      throw new Error("A task owner cannot review their own task.");
-    }
-
-    const dependencyTaskIds = [...new Set(args.dependencyTaskIds)];
+    const dependencyTaskIds = [...new Set(args.dependencyTaskIds ?? [])];
 
     if (dependencyTaskIds.includes(existing._id)) {
       throw new Error("A task cannot depend on itself.");
@@ -646,31 +757,36 @@ export const updateTask = mutation({
     }
 
     assertNoDependencyCycle(projectTasks, existing._id, dependencyTaskIds);
-    await syncTaskMilestone(ctx, existing, milestone);
+    await syncTaskMilestone(ctx, existing, null);
     const now = Date.now();
     await ctx.db.patch(existing._id, {
       phaseId: phase._id,
-      milestoneId: milestone?._id,
+      milestoneId: undefined,
       ...task,
       damage,
       primaryOwnerProfileId: args.primaryOwnerProfileId,
       collaboratorProfileIds,
-      required: args.required,
+      required: true,
       dependencyTaskIds,
-      requiresReview: args.requiresReview,
+      requiresReview: true,
       reviewerProfileId: args.reviewerProfileId,
       isOpenForClaiming: args.isOpenForClaiming ?? false,
-      collaboratorCanSubmit: args.collaboratorCanSubmit ?? false,
+      collaboratorCanSubmit: false,
       acceptanceStatus:
-        args.isOpenForClaiming || args.primaryOwnerProfileId === profile._id
+        args.assignmentState === "unassigned" || args.isOpenForClaiming || args.primaryOwnerProfileId === profile._id
           ? "accepted"
           : existing.primaryOwnerProfileId !== args.primaryOwnerProfileId
             ? "pending"
             : (existing.acceptanceStatus ?? "accepted"),
-      status:
-        !args.requiresReview && existing.status === "review"
-          ? "in_progress"
-          : existing.status,
+      assignmentState:
+        args.assignmentState === "unassigned"
+          ? "unassigned"
+          : args.isOpenForClaiming
+            ? "open"
+            : existing.primaryOwnerProfileId !== args.primaryOwnerProfileId
+              ? "proposed"
+              : "assigned",
+      status: existing.status,
       updatedAt: now,
     });
     await ctx.db.insert("activityLogs", {
@@ -723,17 +839,10 @@ export const deleteTask = mutation({
       throw new Error("This task no longer exists.");
     }
 
-    const { project, profile, membership } = await requireProjectWriteAccess(
+    const { project, profile } = await requireProjectCreatorAccess(
       ctx,
       task.projectId,
     );
-    const launched = isProjectLaunched(project);
-    if (launched && membership.role !== "owner") {
-      throw new Error("After launch, only the team owner can delete a task.");
-    }
-    if (!launched && membership.role !== "owner" && task.createdByProfileId !== profile._id) {
-      throw new Error("Only the task creator can delete this task before launch.");
-    }
     const projectTasks = await ctx.db
       .query("tasks")
       .withIndex("by_project", (indexQuery) =>
@@ -795,12 +904,12 @@ export const updateTaskStatus = mutation({
       throw new Error("This task no longer exists.");
     }
 
-    const { project, profile, membership } = await requireProjectWriteAccess(
+    const { project, profile } = await requireProjectWriteAccess(
       ctx,
       task.projectId,
     );
 
-    if (membership.role !== "owner" && task.primaryOwnerProfileId !== profile._id) {
+    if (task.primaryOwnerProfileId !== profile._id) {
       throw new Error("Only the assigned owner can update this task's progress.");
     }
     if (task.isOpenForClaiming) {
@@ -817,19 +926,15 @@ export const updateTaskStatus = mutation({
     if (args.status === "review" || args.status === "submitted") {
       throw new Error("Use Submit for Review after adding evidence.");
     }
-    if (args.status === "changes_requested" || args.status === "verified") {
-      throw new Error("Only the assigned reviewer can set a review outcome.");
-    }
-
-    if (args.status === "completed" && task.requiresReview) {
-      throw new Error("The assigned reviewer must approve this task before completion.");
+    if (["changes_requested", "verified", "awaiting_creator", "completed"].includes(args.status)) {
+      throw new Error("Review and creator approval controls manage this task status.");
     }
 
     const now = Date.now();
     await ctx.db.patch(task._id, {
       status: args.status,
       updatedAt: now,
-      completedAt: args.status === "completed" ? now : undefined,
+      completedAt: undefined,
     });
     await ctx.db.insert("activityLogs", {
       teamId: project.teamId,
@@ -856,13 +961,26 @@ export const acceptTask = mutation({
   handler: async (ctx, args) => {
     const task = await ctx.db.get(args.taskId);
     if (!task) throw new Error("This task no longer exists.");
-    const { profile } = await requireProjectWriteAccess(ctx, task.projectId);
+    const { project, profile } = await requireProjectWriteAccess(ctx, task.projectId);
     if (task.primaryOwnerProfileId !== profile._id) {
       throw new Error("Only the proposed task owner can accept this task.");
     }
     if (task.isOpenForClaiming) throw new Error("Claim this open task instead.");
     if (task.acceptanceStatus !== "pending") return task._id;
-    await ctx.db.patch(task._id, { acceptanceStatus: "accepted", updatedAt: Date.now() });
+    const now = Date.now();
+    await ctx.db.patch(task._id, {
+      acceptanceStatus: "accepted",
+      assignmentState: "assigned",
+      updatedAt: now,
+    });
+    await ctx.db.insert("activityLogs", {
+      teamId: project.teamId,
+      projectId: project._id,
+      actorProfileId: profile._id,
+      action: "task_accepted",
+      metadata: { projectId: project._id, taskId: task._id, taskTitle: task.title },
+      createdAt: now,
+    });
     return task._id;
   },
 });
@@ -883,6 +1001,7 @@ export const declineTask = mutation({
     await ctx.db.patch(task._id, {
       isOpenForClaiming: true,
       acceptanceStatus: "declined",
+      assignmentState: "open",
       updatedAt: now,
     });
     await ctx.db.insert("activityLogs", {
@@ -911,6 +1030,9 @@ export const claimTask = mutation({
       primaryOwnerProfileId: profile._id,
       isOpenForClaiming: false,
       acceptanceStatus: "accepted",
+      assignmentState: "assigned",
+      reviewerProfileId:
+        task.reviewerProfileId === profile._id ? undefined : task.reviewerProfileId,
       updatedAt: now,
     });
     await ctx.db.insert("activityLogs", {
@@ -926,6 +1048,37 @@ export const claimTask = mutation({
         ownerProfileId: profile._id,
       },
       createdAt: now,
+    });
+    return task._id;
+  },
+});
+
+export const chooseReviewer = mutation({
+  args: {
+    taskId: v.id("tasks"),
+    reviewerProfileId: v.id("userProfiles"),
+  },
+  handler: async (ctx, args) => {
+    const task = await ctx.db.get(args.taskId);
+    if (!task) throw new Error("This task no longer exists.");
+    const { project, profile } = await requireProjectWriteAccess(ctx, task.projectId);
+    if (task.primaryOwnerProfileId !== profile._id) {
+      throw new Error("Only the task owner can choose a reviewer later.");
+    }
+    if (["submitted", "review", "awaiting_creator", "completed", "verified"].includes(task.status)) {
+      throw new Error("Choose the reviewer before submitting evidence for review.");
+    }
+    await assertBalancedReviewer(
+      ctx,
+      project._id,
+      task.primaryOwnerProfileId,
+      args.reviewerProfileId,
+      task._id,
+    );
+    await ctx.db.patch(task._id, {
+      reviewerProfileId: args.reviewerProfileId,
+      requiresReview: true,
+      updatedAt: Date.now(),
     });
     return task._id;
   },

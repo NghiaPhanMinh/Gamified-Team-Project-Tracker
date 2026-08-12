@@ -1,71 +1,230 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { useQuery } from "convex/react";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useMutation, useQuery } from "convex/react";
 
 import { api } from "../../../convex/_generated/api";
+import { getErrorMessage } from "../../lib/errors";
 import { clearByokSession, getByokSession, setByokSession } from "../../lib/byokSession";
 
-type ProfileTab = "character" | "ai" | "subscription";
+const SKILL_CATEGORIES = {
+  Creative: [
+    "Graphic Design", "Illustration", "Typography", "Layout", "Branding",
+    "UI Design", "UX Design", "Interaction Design", "Photography", "Videography",
+    "Video Editing", "Motion Graphics", "2D Animation", "3D Animation",
+    "Storyboarding", "Sound Design", "Scriptwriting",
+  ],
+  "Research / Strategy": [
+    "User Research", "Market Research", "Academic Research", "Competitor Analysis",
+    "Data Analysis", "Survey Design", "Interviewing", "Strategy", "Campaign Planning",
+  ],
+  General: [
+    "Writing", "Copywriting", "Presentation", "Public Speaking", "Communication",
+    "Organisation", "Project Management", "Leadership", "Documentation",
+  ],
+} as const;
 
-const PLANS = [
-  { id: "free", name: "Free", price: "0 VND", description: "Every manual planning and collaboration tool, plus one free-model AI plan per project.", features: ["Unlimited manual planning", "Frameworks and team rooms", "Claims, trades, calendar and review", "Battle and basic report", "1 platform AI plan per project"] },
-  { id: "plus", name: "Student Plus", price: "49,000 VND / month", description: "Faster AI support for students who want ongoing planning assistance.", features: ["Unlimited AI allocation", "AI brief and task breakdown", "Meeting recommendations", "AI rebalancing", "Enhanced report export"] },
-  { id: "pro", name: "Student Pro", price: "99,000 VND / month", description: "Advanced reasoning, risk, scheduling, dependencies, and cross-project insights.", features: ["Everything in Plus", "Advanced risk detection", "Schedule optimisation", "Project comparisons", "Richer contribution reports"] },
+const SOFTWARE_SKILLS = [
+  "Photoshop", "Illustrator", "InDesign", "Figma", "After Effects", "Premiere Pro",
+  "Blender", "Maya", "Cinema 4D", "Procreate", "DaVinci Resolve", "HTML/CSS",
+  "JavaScript", "React", "GitHub", "Excel", "PowerPoint", "Canva",
+];
+
+const RECOMMENDED_SKILLS = [
+  "Communication", "Organisation", "Project Management", "Presentation",
+  "User Research", "UI Design", "UX Design", "Writing",
+];
+const ALL_GENERAL_SKILLS = Object.values(SKILL_CATEGORIES).flat();
+
+const CAPACITY_OPTIONS = [
+  { value: 4, label: "Under 5 hours" },
+  { value: 8, label: "5–10 hours" },
+  { value: 13, label: "10–15 hours" },
+  { value: 18, label: "15–20 hours" },
+  { value: 24, label: "20+ hours" },
 ] as const;
 
-export function ProfileCenter({ character, roomControl }: { character?: ReactNode; roomControl?: ReactNode }) {
-  const subscription = useQuery(api.aiUsage.getCurrent);
-  const [tab, setTab] = useState<ProfileTab>("character");
+function toggleInList(values: string[], value: string) {
+  return values.includes(value)
+    ? values.filter((item) => item !== value)
+    : [...values, value];
+}
+
+function SkillPicker({
+  skills,
+  softwareSkills,
+  onSkillsChange,
+  onSoftwareSkillsChange,
+}: {
+  skills: string[];
+  softwareSkills: string[];
+  onSkillsChange: (skills: string[]) => void;
+  onSoftwareSkillsChange: (skills: string[]) => void;
+}) {
+  const [mode, setMode] = useState<"recommended" | "search" | "all" | "other">("recommended");
+  const [query, setQuery] = useState("");
+  const [other, setOther] = useState("");
+  const searchResults = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return [];
+    return [...ALL_GENERAL_SKILLS, ...SOFTWARE_SKILLS]
+      .filter((skill) => skill.toLowerCase().includes(normalized))
+      .slice(0, 12);
+  }, [query]);
+
+  function toggle(skill: string) {
+    if (SOFTWARE_SKILLS.includes(skill as (typeof SOFTWARE_SKILLS)[number])) {
+      onSoftwareSkillsChange(toggleInList(softwareSkills, skill));
+    } else {
+      onSkillsChange(toggleInList(skills, skill));
+    }
+  }
+
+  function addOther() {
+    const cleaned = other.trim().replace(/\s+/g, " ").slice(0, 60);
+    if (!cleaned || skills.some((skill) => skill.toLowerCase() === cleaned.toLowerCase())) return;
+    onSkillsChange([...skills, cleaned]);
+    setOther("");
+  }
+
+  const choices = mode === "recommended"
+    ? RECOMMENDED_SKILLS
+    : mode === "search"
+      ? searchResults
+      : [];
+
+  return (
+    <div className="profile-skill-picker">
+      <div className="profile-skill-toolbar" role="tablist" aria-label="Skill picker views">
+        {(["recommended", "search", "all", "other"] as const).map((item) => (
+          <button key={item} type="button" role="tab" aria-selected={mode === item} className={mode === item ? "is-active" : ""} onClick={() => setMode(item)}>
+            {item === "all" ? "View All" : item[0].toUpperCase() + item.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {mode === "search" ? (
+        <label className="profile-skill-search"><span>Search skills</span><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Try Figma, writing, research…" /></label>
+      ) : null}
+      {mode === "other" ? (
+        <div className="profile-other-skill"><label><span>Other skill</span><input value={other} maxLength={60} onChange={(event) => setOther(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addOther(); } }} /></label><button className="quiet-button" type="button" onClick={addOther}>Add skill</button></div>
+      ) : null}
+      {mode === "all" ? (
+        <div className="profile-skill-categories">
+          {Object.entries(SKILL_CATEGORIES).map(([category, categorySkills]) => (
+            <section key={category}><h4>{category}</h4><div className="profile-skill-options">{categorySkills.map((skill) => <button key={skill} type="button" className={skills.includes(skill) ? "is-selected" : ""} aria-pressed={skills.includes(skill)} onClick={() => toggle(skill)}>{skill}</button>)}</div></section>
+          ))}
+          <section><h4>Software</h4><div className="profile-skill-options">{SOFTWARE_SKILLS.map((skill) => <button key={skill} type="button" className={softwareSkills.includes(skill) ? "is-selected" : ""} aria-pressed={softwareSkills.includes(skill)} onClick={() => toggle(skill)}>{skill}</button>)}</div></section>
+        </div>
+      ) : null}
+      {mode === "recommended" || mode === "search" ? (
+        <div className="profile-skill-options">{choices.length ? choices.map((skill) => { const selected = skills.includes(skill) || softwareSkills.includes(skill); return <button key={skill} type="button" className={selected ? "is-selected" : ""} aria-pressed={selected} onClick={() => toggle(skill)}>{skill}</button>; }) : <p>{mode === "search" ? "Type a skill to search." : "No recommendations available."}</p>}</div>
+      ) : null}
+      <div className="selected-profile-skills" aria-live="polite">
+        {[...skills, ...softwareSkills].map((skill) => <button key={skill} type="button" onClick={() => toggle(skill)}>{skill}<span aria-hidden="true"> ×</span></button>)}
+      </div>
+    </div>
+  );
+}
+
+export function ProfileCenter({
+  character,
+  roomControl,
+  setupRequired = false,
+}: {
+  character?: ReactNode;
+  roomControl?: ReactNode;
+  setupRequired?: boolean;
+}) {
+  const profile = useQuery(api.profiles.getOrNull);
+  const saveProfile = useMutation(api.profiles.saveCurrent);
+  const [skills, setSkills] = useState<string[]>(profile?.skills ?? []);
+  const [softwareSkills, setSoftwareSkills] = useState<string[]>(profile?.softwareSkills ?? []);
+  const [weeklyCapacity, setWeeklyCapacity] = useState(profile?.weeklyCapacity ?? 8);
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const profileHydrated = useRef(false);
   const initialByok = getByokSession();
   const [useOwnKey, setUseOwnKey] = useState(initialByok !== null);
   const [apiKey, setApiKey] = useState(initialByok?.apiKey ?? "");
   const [model, setModel] = useState(initialByok?.model ?? "google/gemma-3-27b-it:free");
-  const [previewTier, setPreviewTier] = useState<"free" | "plus" | "pro">("free");
+
+  /* Realtime profile data arrives after the first render; hydrate once without
+     overwriting edits made while the save request is in flight. */
+  useEffect(() => {
+    if (!profile || profileHydrated.current) return;
+    profileHydrated.current = true;
+    setSkills(profile.skills ?? []);
+    setSoftwareSkills(profile.softwareSkills ?? []);
+    setWeeklyCapacity(profile.weeklyCapacity ?? 8);
+  }, [profile]);
 
   useEffect(() => {
     if (useOwnKey && apiKey.trim() && model.trim()) setByokSession({ apiKey, model });
     else clearByokSession();
   }, [apiKey, model, useOwnKey]);
 
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSaving(true);
+    setError(null);
+    setMessage(null);
+    try {
+      await saveProfile({ skills, softwareSkills, weeklyCapacity });
+      setMessage("Profile saved. Project creation and joining are now unlocked.");
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError, "Your profile could not be saved."));
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <section className="profile-page profile-center" aria-labelledby="profile-page-title">
       <header className="focused-page-heading">
-        <div><p className="kicker">Profile</p><h1 className="display-heading" id="profile-page-title">Your MayLamDi settings</h1><p>Character, private session AI, and plan information live here—not in the main navigation.</p></div>
+        <div><p className="kicker">{setupRequired ? "Required first step" : "Profile"}</p><h1 className="display-heading" id="profile-page-title">{setupRequired ? "Complete your profile" : "How you work"}</h1><p>Save these preferences once. MayLamDi reuses them when planning fair project work.</p></div>
         {roomControl}
       </header>
-      <nav className="profile-tabs" aria-label="Profile sections">
-        <button type="button" className={tab === "character" ? "is-active" : ""} onClick={() => setTab("character")}>Character</button>
-        <button type="button" className={tab === "ai" ? "is-active" : ""} onClick={() => setTab("ai")}>AI Settings</button>
-        <button type="button" className={tab === "subscription" ? "is-active" : ""} onClick={() => setTab("subscription")}>Subscription</button>
-      </nav>
 
-      {tab === "character" ? character ?? <div className="project-empty"><strong>No room character yet.</strong><p>Create or join a room first. AI Settings and Subscription are still available above.</p></div> : null}
-
-      {tab === "ai" ? (
-        <section className="profile-settings-card ai-settings-card" aria-labelledby="ai-settings-title">
-          <p className="card-eyebrow">Bring your own key</p><h2 id="ai-settings-title">AI Settings</h2>
-          <label className="toggle-field"><input type="checkbox" checked={useOwnKey} onChange={(event) => setUseOwnKey(event.target.checked)} /><span>Use my own AI key</span></label>
-          <div className="guided-field-grid">
-            <label><span>OpenRouter API key</span><input disabled={!useOwnKey} type="password" autoComplete="off" spellCheck={false} value={apiKey} onChange={(event) => setApiKey(event.target.value)} placeholder="sk-or-v1-…" /></label>
-            <label><span>Model ID</span><input disabled={!useOwnKey} value={model} onChange={(event) => setModel(event.target.value)} placeholder="provider/model" /></label>
+      <form className="profile-setup-form" onSubmit={submit}>
+        <section className="profile-basic-card" aria-labelledby="basic-profile-title">
+          <div className="profile-identity">
+            {profile?.imageUrl ? <img src={profile.imageUrl} alt="" /> : <span className="member-avatar">{profile?.displayName.slice(0, 1).toUpperCase()}</span>}
+            <div><p className="card-eyebrow">Google profile</p><h2 id="basic-profile-title">{profile?.displayName}</h2><span>{profile?.email}</span></div>
           </div>
-          <p className="ai-security-note">Your API key is used for this session only and is not saved by MayLamDi. It is never added to activity, analytics, or console output. If your request fails, MayLamDi will not silently use paid platform AI.</p>
-          <span className={useOwnKey && apiKey.trim() && model.trim() ? "session-key-state is-ready" : "session-key-state"}>{useOwnKey && apiKey.trim() && model.trim() ? "Session key ready" : "Platform routing active"}</span>
+          {character ? <details className="compact-character-settings"><summary>Customise my character</summary>{character}</details> : <p className="profile-character-note">Character customisation becomes available after you enter a room.</p>}
         </section>
-      ) : null}
 
-      {tab === "subscription" ? (
-        <section className="subscription-page" aria-labelledby="subscription-title">
-          <p className="card-eyebrow">University MVP preview</p><h2 id="subscription-title">Subscription</h2>
-          <p>Your authenticated server entitlement is <strong>{subscription?.tier ?? "free"}</strong>. The controls below preview differences only; no payment processing is configured.</p>
-          <div className="pricing-grid">{PLANS.map((plan) => (
-            <article key={plan.id} className={previewTier === plan.id ? "is-previewed" : ""}>
-              <span>{subscription?.tier === plan.id ? "Current plan" : "Plan preview"}</span><h3>{plan.name}</h3><strong>{plan.price}</strong><p>{plan.description}</p>
-              <ul>{plan.features.map((feature) => <li key={feature}>{feature}</li>)}</ul>
-              <button className="quiet-button" type="button" onClick={() => setPreviewTier(plan.id)}>Preview {plan.name}</button>
-            </article>
-          ))}</div>
-          {previewTier !== "free" && subscription?.tier === "free" ? <div className="feature-gate-card"><strong>Preview only</strong><p>Payments are not connected for this assignment demo. Manual alternatives remain fully available.</p><button className="quiet-button" type="button" onClick={() => setPreviewTier("free")}>Continue manually</button></div> : null}
+        <section className="profile-settings-card" aria-labelledby="work-profile-title">
+          <p className="card-eyebrow">Reusable preferences</p><h2 id="work-profile-title">Tell your team how you work</h2>
+          <SkillPicker skills={skills} softwareSkills={softwareSkills} onSkillsChange={setSkills} onSoftwareSkillsChange={setSoftwareSkills} />
         </section>
+
+        <section className="profile-settings-card" aria-labelledby="capacity-title">
+          <p className="card-eyebrow">Weekly capacity</p><h2 id="capacity-title">How much time can you contribute each week?</h2>
+          <p>Used to avoid giving one teammate significantly more work than they can manage.</p>
+          <div className="capacity-options">{CAPACITY_OPTIONS.map((option) => <button key={option.value} type="button" className={weeklyCapacity === option.value ? "is-selected" : ""} aria-pressed={weeklyCapacity === option.value} onClick={() => setWeeklyCapacity(option.value)}>{option.label}</button>)}</div>
+        </section>
+
+        {error ? <p className="form-error" role="alert">{error}</p> : null}
+        {message ? <p className="form-success" role="status">{message}</p> : null}
+        <button className="primary-button profile-save-button" type="submit" disabled={isSaving}>{isSaving ? "Saving…" : "Save My Profile"}</button>
+      </form>
+
+      {!setupRequired ? (
+        <div className="profile-context-settings">
+          <details className="profile-secondary-settings">
+            <summary>Subscription</summary>
+            <section className="profile-settings-card"><p className="card-eyebrow">Current plan</p><h2>Free assignment demo</h2><p>Manual planning remains unlimited. AI assistance stays optional and uses free routes only.</p></section>
+          </details>
+          <details className="profile-secondary-settings">
+            <summary>AI settings</summary>
+            <section className="profile-settings-card ai-settings-card">
+            <label className="toggle-field"><input type="checkbox" checked={useOwnKey} onChange={(event) => setUseOwnKey(event.target.checked)} /><span>Use my own AI key for this session</span></label>
+            <div className="guided-field-grid"><label><span>OpenRouter API key</span><input disabled={!useOwnKey} type="password" autoComplete="off" value={apiKey} onChange={(event) => setApiKey(event.target.value)} /></label><label><span>Model ID</span><input disabled={!useOwnKey} value={model} onChange={(event) => setModel(event.target.value)} /></label></div>
+            <p className="ai-security-note">This key stays in this browser session and is never stored with your profile.</p>
+            </section>
+          </details>
+        </div>
       ) : null}
     </section>
   );

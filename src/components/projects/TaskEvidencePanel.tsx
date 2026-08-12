@@ -10,7 +10,7 @@ type EvidenceType = "note" | "link" | "image" | "pdf";
 type TaskEvidencePanelProps = {
   taskId: Id<"tasks">;
   taskTitle: string;
-  taskStatus: "todo" | "in_progress" | "blocked" | "review" | "completed" | "submitted" | "changes_requested" | "verified";
+  taskStatus: "todo" | "in_progress" | "blocked" | "review" | "completed" | "submitted" | "changes_requested" | "verified" | "awaiting_creator";
   requiresReview: boolean;
   reviewerName?: string;
 };
@@ -70,12 +70,14 @@ export function TaskEvidencePanel({
   const addEvidence = useMutation(api.evidence.add);
   const submitReview = useMutation(api.evidence.submitReview);
   const submitForReview = useMutation(api.evidence.submitForReview);
+  const chooseReviewer = useMutation(api.tasks.chooseReviewer);
   const [type, setType] = useState<EvidenceType>("note");
   const [note, setNote] = useState("");
   const [url, setUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
+  const [selectedReviewerId, setSelectedReviewerId] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -163,6 +165,23 @@ export function TaskEvidencePanel({
       await submitForReview({ taskId });
     } catch (caughtError) {
       setError(getErrorMessage(caughtError, "The task could not be submitted for review."));
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleChooseReviewer() {
+    if (!selectedReviewerId) return;
+    setError(null);
+    setIsSaving(true);
+    try {
+      await chooseReviewer({
+        taskId,
+        reviewerProfileId: selectedReviewerId as Id<"userProfiles">,
+      });
+      setSelectedReviewerId("");
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError, "The reviewer could not be assigned."));
     } finally {
       setIsSaving(false);
     }
@@ -258,16 +277,36 @@ export function TaskEvidencePanel({
         <p className="evidence-empty">No evidence has been added to this task.</p>
       )}
 
+      {requiresReview && details.isTaskOwner && !reviewerName && ["todo", "in_progress", "changes_requested"].includes(taskStatus) ? (
+        <div className="reviewer-picker">
+          <label>
+            <span>Choose your reviewer</span>
+            <select value={selectedReviewerId} onChange={(event) => setSelectedReviewerId(event.target.value)}>
+              <option value="">Select a teammate</option>
+              {details.eligibleReviewers.map((reviewer) => (
+                <option key={reviewer.profileId} value={reviewer.profileId} disabled={reviewer.atCapacity}>
+                  {reviewer.displayName} · {reviewer.reviewCount}/{details.fairReviewCapacity} reviews{reviewer.atCapacity ? " · at capacity" : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="secondary-button" type="button" disabled={isSaving || !selectedReviewerId} onClick={() => void handleChooseReviewer()}>
+            Assign reviewer
+          </button>
+          <small>Capacity is recalculated from the team’s current review load.</small>
+        </div>
+      ) : null}
+
       {requiresReview && details.isTaskOwner && ["todo", "in_progress", "changes_requested"].includes(taskStatus) ? (
-        <button className="primary-button submit-review-button" type="button" disabled={isSaving || details.evidence.length === 0} onClick={() => void handleSubmitForReview()}>
+        <button className="primary-button submit-review-button" type="button" disabled={isSaving || details.evidence.length === 0 || !reviewerName} onClick={() => void handleSubmitForReview()}>
           Submit for Review
         </button>
       ) : null}
 
       {requiresReview ? (
         <div className="review-panel">
-          <strong>{reviewerName ? `Preferred reviewer: ${reviewerName}` : "Open peer review"}</strong>
-          <p>The first eligible teammate to submit a review records the final outcome atomically. The task owner cannot review their own work.</p>
+          <strong>{reviewerName ? `Assigned reviewer: ${reviewerName}` : "Reviewer not selected yet"}</strong>
+          <p>The assigned reviewer recommends completion or requests changes. Final completion stays with the room creator.</p>
           {canReviewNow ? (
             <>
               <label>
@@ -275,12 +314,14 @@ export function TaskEvidencePanel({
                 <textarea maxLength={1000} rows={3} value={reviewComment} onChange={(event) => setReviewComment(event.target.value)} placeholder="What works, or what should change?" />
               </label>
               <div className="review-actions">
-                <button className="primary-button" type="button" disabled={isSaving} onClick={() => void handleReview("approved")}>Approve task</button>
+                <button className="primary-button" type="button" disabled={isSaving} onClick={() => void handleReview("approved")}>Recommend complete</button>
                 <button className="secondary-button" type="button" disabled={isSaving} onClick={() => void handleReview("changes_requested")}>Request changes</button>
               </div>
             </>
           ) : taskStatus === "review" || taskStatus === "submitted" ? (
-            <p>Waiting for another teammate to review this work.</p>
+            <p>Waiting for {reviewerName ?? "the assigned reviewer"}.</p>
+          ) : taskStatus === "awaiting_creator" ? (
+            <p>The reviewer recommended completion. Waiting for the room creator’s final decision.</p>
           ) : (
             <p>Add evidence, then use Submit for Review when the work is ready.</p>
           )}
@@ -293,7 +334,7 @@ export function TaskEvidencePanel({
               <ol>
                 {details.reviews.map((review) => (
                   <li key={review._id}>
-                    <strong>{review.status.replace("_", " ")}</strong>
+                    <strong>{review.reviewerName}: {review.status === "approved" ? "recommended complete" : review.status.replace("_", " ")}</strong>
                     {review.comment ? <span>{review.comment}</span> : null}
                     <time>{new Date(review.updatedAt).toLocaleString()}</time>
                   </li>

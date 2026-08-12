@@ -45,6 +45,8 @@ export function describeActivity(activity: Activity, actorName: string) {
         title: `${actorName} created a project`,
         detail: activity.metadata.projectTitle ?? "A new project is ready.",
       };
+    case "project_updated":
+      return { title: `${actorName} updated the project brief`, detail: activity.metadata.projectTitle ?? "Project details changed." };
     case "project_status_changed":
       return {
         title: `${actorName} changed project progress`,
@@ -107,8 +109,8 @@ export function describeActivity(activity: Activity, actorName: string) {
       };
     case "review_approved":
       return {
-        title: `${actorName} approved a task`,
-        detail: activity.metadata.taskTitle ?? "The review was approved.",
+        title: `${actorName} recommended completion`,
+        detail: `${activity.metadata.taskTitle ?? "Task"} is awaiting the room creator.`,
       };
     case "review_changes_requested":
       return {
@@ -117,6 +119,8 @@ export function describeActivity(activity: Activity, actorName: string) {
       };
     case "task_claimed":
       return { title: `${actorName} claimed a task`, detail: activity.metadata.taskTitle ?? "An open task now has an owner." };
+    case "task_accepted":
+      return { title: `${actorName} accepted a task`, detail: activity.metadata.taskTitle ?? "A task assignment was accepted." };
     case "task_declined":
       return { title: `${actorName} declined an assignment`, detail: `${activity.metadata.taskTitle ?? "Task"} is now open for a teammate to claim.` };
     case "task_trade_requested":
@@ -127,6 +131,14 @@ export function describeActivity(activity: Activity, actorName: string) {
       return { title: `${actorName} updated availability`, detail: "The project meeting overlap has been recalculated." };
     case "meeting_plan_saved":
       return { title: `${actorName} saved a meeting plan`, detail: "A shared meeting slot was added to the project." };
+    case "meeting_vote_recorded":
+      return { title: `${actorName} voted on a meeting`, detail: "The meeting candidate vote was updated." };
+    case "meeting_selected":
+      return { title: `${actorName} selected the final meeting`, detail: "The final meeting is highlighted for the project team." };
+    case "creator_approved_task":
+      return { title: `${actorName} completed a task`, detail: `${activity.metadata.taskTitle ?? "Task"} was approved and its combat event was created.` };
+    case "creator_rejected_task":
+      return { title: `${actorName} returned a task`, detail: `${activity.metadata.taskTitle ?? "Task"} moved back to in progress.` };
     case "task_damage_changed":
       return { title: `${actorName} changed task damage`, detail: `${activity.metadata.taskTitle ?? "Task"}: ${activity.metadata.previousDamage ?? "?"} → ${activity.metadata.damage ?? "?"} damage.` };
     case "project_launched":

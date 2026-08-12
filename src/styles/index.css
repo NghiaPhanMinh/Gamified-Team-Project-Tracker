@@ -4731,3 +4731,113 @@ footer {
     aspect-ratio: 16 / 9;
   }
 }
+
+/* Profile-first room flow, creator task controls, reviews, and meeting votes. */
+.profile-gate-content { width: min(100%, 1080px); margin: 0 auto; padding: calc(var(--app-header-height, 76px) + 1.5rem) 1rem 2rem; }
+.profile-setup-form, .profile-context-settings { display: grid; gap: 1rem; }
+.profile-basic-card { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem; border: 2px solid var(--color-text); border-radius: 20px; background: var(--color-surface); color: var(--color-text); }
+.profile-identity { display: flex; align-items: center; gap: 1rem; }
+.profile-identity img { width: 68px; height: 68px; border: 2px solid var(--color-text); border-radius: 50%; object-fit: cover; }
+.profile-identity h2 { margin: .15rem 0; }
+.compact-character-settings, .profile-secondary-settings { padding: .85rem 1rem; border: 2px solid var(--color-text); border-radius: 14px; background: var(--color-surface); color: var(--color-text); }
+.compact-character-settings summary, .profile-secondary-settings summary { cursor: pointer; font-weight: 900; }
+.profile-skill-picker { display: grid; gap: 1rem; }
+.profile-skill-toolbar { display: flex; flex-wrap: wrap; gap: .45rem; }
+.profile-skill-toolbar button, .profile-skill-options button, .selected-profile-skills button, .capacity-options button { min-height: 40px; padding: .5rem .75rem; border: 2px solid var(--color-text); border-radius: 999px; background: var(--color-page); color: var(--color-text); cursor: pointer; font-weight: 800; }
+.profile-skill-toolbar button.is-active, .profile-skill-options button.is-selected, .capacity-options button.is-selected { background: var(--color-yellow); color: var(--color-navy); box-shadow: 2px 2px 0 var(--color-text); }
+.profile-skill-search label, .profile-other-skill label { display: grid; gap: .35rem; }
+.profile-skill-search input, .profile-other-skill input { min-height: 46px; padding: .65rem .8rem; border: 2px solid var(--color-text); border-radius: 11px; background: var(--color-page); color: var(--color-text); }
+.profile-other-skill { display: flex; align-items: end; gap: .6rem; }
+.profile-other-skill label { flex: 1; }
+.profile-skill-options, .selected-profile-skills, .capacity-options { display: flex; flex-wrap: wrap; gap: .5rem; }
+.selected-profile-skills { padding-top: .8rem; border-top: 1px solid color-mix(in srgb, var(--color-text) 25%, transparent); }
+.selected-profile-skills button { background: var(--color-blue); color: var(--text-on-blue); }
+.profile-skill-categories { display: grid; gap: 1rem; }
+.profile-skill-categories h4 { margin: 0 0 .45rem; }
+.profile-save-button { justify-self: end; min-width: 190px; }
+.custom-framework-quick-form { margin-top: 1rem; }
+.onboarding-task-builder { margin-top: 1rem; padding: 1rem; border: 2px dashed var(--color-text); border-radius: 16px; }
+.onboarding-draft-list { display: grid; gap: .55rem; margin-top: .8rem; }
+.onboarding-draft-list article { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .7rem; border: 1px solid color-mix(in srgb, var(--color-text) 30%, transparent); border-radius: 11px; }
+.onboarding-draft-list article > div { display: grid; }
+.home-create-cta, .home-join-cta { min-width: min(100%, 240px); min-height: 54px; font-size: 1rem; }
+
+.workspace-saving { position: sticky; z-index: 30; top: 68px; width: fit-content; margin-left: auto; padding: .35rem .65rem; border-radius: 999px; background: var(--color-yellow); color: var(--color-navy); font-weight: 900; }
+.project-overview-flow { display: grid; gap: 1rem; }
+.completion-request-panel, .task-request-panel { display: grid; gap: .75rem; padding: 1rem; border: 3px solid var(--color-text); border-radius: 18px; background: var(--color-pink); color: var(--text-on-pink); box-shadow: 5px 5px 0 var(--color-blue); }
+.completion-request-panel h3 { margin: 0; font-size: clamp(1.5rem, 3vw, 2.3rem); }
+.completion-request-panel article, .task-request-panel article { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem; border: 2px solid currentColor; border-radius: 13px; background: color-mix(in srgb, white 28%, transparent); }
+.completion-request-panel article > div, .task-request-panel article > div { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; }
+.completion-request-panel article > div:first-child, .task-request-panel article > div:first-child { display: grid; }
+.overview-game-section, .project-context-settings, .phase-manager, .personal-trade-details { padding: 1rem; border: 2px solid var(--color-text); border-radius: 16px; background: var(--color-surface); color: var(--color-text); }
+.overview-game-section > summary, .project-context-settings > summary, .phase-manager > summary, .personal-trade-details > summary { cursor: pointer; font-weight: 900; }
+.phase-chip-editor { display: flex; flex-wrap: wrap; gap: .55rem; margin: 1rem 0; }
+.phase-chip-editor > div, .phase-chip-editor form { display: flex; align-items: center; gap: .4rem; padding: .4rem .6rem; border: 2px solid var(--color-text); border-radius: 999px; }
+.phase-chip-editor input, .inline-phase-form input { min-height: 40px; padding: .45rem .6rem; border: 2px solid var(--color-text); border-radius: 9px; background: var(--color-page); color: var(--color-text); }
+.inline-phase-form { display: flex; flex-wrap: wrap; gap: .6rem; }
+.inline-phase-form input { flex: 1 1 220px; }
+.task-form-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
+.task-filter-bar { display: grid; grid-template-columns: minmax(180px, 1.4fr) repeat(2, minmax(150px, .8fr)) minmax(150px, .7fr); gap: .7rem; margin: 1rem 0; }
+.task-filter-bar label { display: grid; gap: .35rem; font-weight: 800; }
+.task-filter-bar input, .task-filter-bar select { min-height: 44px; padding: .55rem .7rem; border: 2px solid var(--color-text); border-radius: 10px; background: var(--color-surface); color: var(--color-text); }
+.task-card-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 1rem; }
+.project-task-card { min-width: 0; padding: 1rem; border: 3px solid var(--color-text); border-radius: 18px; background: var(--color-surface); color: var(--color-text); box-shadow: 4px 4px 0 var(--color-blue); }
+.project-task-card.task-in_progress { background: var(--color-blue); color: var(--text-on-blue); }
+.project-task-card.task-blocked, .project-task-card.task-changes_requested { background: var(--color-orange); color: var(--text-on-orange); }
+.project-task-card.task-submitted, .project-task-card.task-review, .project-task-card.task-awaiting_creator { background: var(--color-pink); color: var(--text-on-pink); }
+.project-task-card.task-completed, .project-task-card.task-verified { background: var(--color-green); color: var(--text-on-green); }
+.task-card-top, .personal-task-room { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.task-card-top > div, .personal-task-room > div { display: grid; gap: .3rem; }
+.task-weight-badge { padding: .35rem .55rem; border: 2px solid currentColor; border-radius: 999px; font-weight: 900; white-space: nowrap; }
+.project-task-card h4 { margin: .75rem 0 .35rem; font-size: clamp(1.55rem, 3vw, 2.3rem); }
+.project-task-card dl { display: grid; gap: .4rem; }
+.project-task-card dl div { display: flex; justify-content: space-between; gap: .8rem; }
+.project-task-card dd { margin: 0; text-align: right; }
+.reviewer-picker { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: .65rem; padding: .8rem; border: 2px dashed var(--color-navy); border-radius: 12px; }
+.reviewer-picker label { display: grid; gap: .35rem; }
+.reviewer-picker small { grid-column: 1 / -1; }
+.reviewer-picker select { min-height: 44px; padding: .55rem; border: 2px solid var(--color-navy); border-radius: 10px; background: var(--color-cream); color: var(--color-navy); }
+
+.personal-status-section { display: grid; gap: .8rem; margin-bottom: 1.25rem; padding: 1rem; border: 2px solid var(--color-text); border-radius: 18px; background: var(--color-surface); color: var(--color-text); }
+.personal-status-section > header { display: flex; align-items: center; justify-content: space-between; }
+.personal-status-section > header h2 { margin: 0; }
+.personal-status-section > header span { display: grid; place-items: center; min-width: 34px; height: 34px; border-radius: 50%; background: var(--color-yellow); color: var(--color-navy); font-weight: 900; }
+.personal-action-needed { border-color: var(--color-pink); }
+.personal-waiting-creator { border-color: var(--color-orange); }
+.personal-complete { border-color: var(--color-green); }
+.personal-task-room { padding-bottom: .6rem; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 25%, transparent); }
+
+.full-day-busy-row { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; margin-bottom: .7rem; }
+.availability-row button.is-selected.is-busy { background: #d93649; box-shadow: inset 0 0 0 3px var(--color-surface); }
+.meeting-mode-field { display: grid; gap: .35rem; max-width: 260px; margin: .8rem 0; font-weight: 800; }
+.meeting-mode-field select { min-height: 44px; padding: .55rem; border: 2px solid var(--color-text); border-radius: 10px; background: var(--color-page); color: var(--color-text); }
+.saved-meeting-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.saved-meeting-plans h5 { grid-column: 1 / -1; }
+.saved-meeting-plans article { display: grid; gap: .65rem; padding: .85rem; border: 2px solid var(--color-text); border-radius: 13px; }
+.saved-meeting-plans article > div { display: flex; flex-wrap: wrap; gap: .5rem; }
+.saved-meeting-plans article > div:first-child { display: grid; }
+.saved-meeting-plans article.is-selected { background: #d93649; color: #fff; }
+.final-meeting-overlay { position: sticky; z-index: 24; top: 68px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; padding: .8rem 1rem; border: 3px solid #fff; border-radius: 15px; background: #d93649; color: #fff; box-shadow: 4px 4px 0 var(--color-text); }
+.member-profile-card { grid-template-rows: auto auto; }
+.member-profile-card > div:nth-child(n+3) { grid-column: 2; }
+
+.brief-drawer form { display: grid; gap: .8rem; }
+.brief-drawer form label { display: grid; gap: .35rem; font-weight: 800; }
+.brief-drawer form input, .brief-drawer form textarea { min-height: 46px; padding: .65rem; border: 2px solid var(--color-text); border-radius: 10px; background: var(--color-page); color: var(--color-text); }
+.brief-drawer form textarea { min-height: 200px; resize: vertical; }
+
+/* Cream forms deliberately remain light in dark mode. Keep their controls dark and legible. */
+:root[data-theme="dark"] .compact-plan-form,
+:root[data-theme="dark"] .task-evidence-panel,
+:root[data-theme="dark"] .ai-safety-note { color: var(--color-navy); }
+:root[data-theme="dark"] .compact-plan-form input,
+:root[data-theme="dark"] .compact-plan-form textarea,
+:root[data-theme="dark"] .compact-plan-form select { background: #fff; color: var(--color-navy); border-color: var(--color-navy); }
+
+@media (max-width: 760px) {
+  .profile-basic-card, .completion-request-panel article, .task-request-panel article, .final-meeting-overlay { align-items: stretch; flex-direction: column; }
+  .task-filter-bar { grid-template-columns: 1fr; }
+  .task-card-top, .personal-task-room { align-items: flex-start; flex-direction: column; }
+  .reviewer-picker { grid-template-columns: 1fr; }
+  .reviewer-picker small { grid-column: auto; }
+}

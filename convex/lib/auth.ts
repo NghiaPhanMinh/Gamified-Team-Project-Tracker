@@ -44,6 +44,22 @@ export async function requireUserProfile(
   return profile;
 }
 
+export async function requireCompleteUserProfile(
+  ctx: DatabaseContext,
+): Promise<Doc<"userProfiles">> {
+  const profile = await requireUserProfile(ctx);
+
+  if (
+    profile.profileCompletedAt === undefined ||
+    profile.weeklyCapacity === undefined ||
+    (profile.skills?.length ?? 0) + (profile.softwareSkills?.length ?? 0) === 0
+  ) {
+    throw new Error("Complete and save your MayLamDi profile before creating or joining a project.");
+  }
+
+  return profile;
+}
+
 export async function requireTeamMember(
   ctx: DatabaseContext,
   teamId: GenericId<"teams">,

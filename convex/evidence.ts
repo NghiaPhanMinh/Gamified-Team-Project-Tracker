@@ -15,7 +15,6 @@ type TaskContext = {
   project: Doc<"projects">;
   profile: Doc<"userProfiles">;
   canWrite: boolean;
-  isTeamOwner: boolean;
 };
 
 async function getTaskContext(
@@ -34,7 +33,7 @@ async function getTaskContext(
     throw new Error("This project no longer exists.");
   }
 
-  const { membership, profile } = await requireTeamMember(ctx, project.teamId);
+  const { profile } = await requireTeamMember(ctx, project.teamId);
   const projectMembership = await ctx.db
     .query("projectMembers")
     .withIndex("by_project_and_user", (indexQuery) =>
@@ -46,10 +45,7 @@ async function getTaskContext(
     task,
     project,
     profile,
-    canWrite:
-      project.status !== "archived" &&
-      (membership.role === "owner" || projectMembership !== null),
-    isTeamOwner: membership.role === "owner",
+    canWrite: project.status !== "archived" && projectMembership !== null,
   };
 }
 
@@ -59,14 +55,11 @@ function requireEvidenceWriteAccess(context: TaskContext) {
   }
 
   const isOwner = context.task.primaryOwnerProfileId === context.profile._id;
-  const isAllowedCollaborator =
-    context.task.collaboratorCanSubmit === true &&
-    context.task.collaboratorProfileIds.includes(context.profile._id);
   if (context.task.acceptanceStatus === "pending") {
     throw new Error("Accept this task before adding evidence.");
   }
-  if (!context.canWrite || context.task.isOpenForClaiming || (!isOwner && !isAllowedCollaborator)) {
-    throw new Error("Only the assigned owner or an explicitly permitted collaborator can submit evidence.");
+  if (!context.canWrite || context.task.isOpenForClaiming || !isOwner) {
+    throw new Error("Only the assigned task owner can submit evidence.");
   }
 }
 
@@ -108,27 +101,79 @@ export const listForTask = query({
         };
       }),
     );
+    const decoratedReviews = await Promise.all(
+      reviews.map(async (review) => {
+        const reviewer = review.reviewerProfileId
+          ? await ctx.db.get(review.reviewerProfileId)
+          : null;
+        return {
+          ...review,
+          reviewerName: reviewer?.displayName ?? "Waiting for reviewer",
+        };
+      }),
+    );
+    const [projectMembers, projectTasks] = await Promise.all([
+      ctx.db.query("projectMembers").withIndex("by_project", (query) =>
+        query.eq("projectId", context.project._id),
+      ).collect(),
+      ctx.db.query("tasks").withIndex("by_project", (query) =>
+        query.eq("projectId", context.project._id),
+      ).collect(),
+    ]);
+    const reviewCounts = new Map<Id<"userProfiles">, number>();
+    for (const task of projectTasks) {
+      if (task.reviewerProfileId && task._id !== context.task._id) {
+        reviewCounts.set(task.reviewerProfileId, (reviewCounts.get(task.reviewerProfileId) ?? 0) + 1);
+      }
+    }
+    const totalReviewTasks = projectTasks.filter((task) => task.requiresReview).length;
+    let fairCapacity = Math.max(1, Math.ceil(totalReviewTasks / Math.max(1, projectMembers.length)));
+    const eligibleMembers = projectMembers.filter(
+      (member) => member.profileId !== context.task.primaryOwnerProfileId,
+    );
+    if (eligibleMembers.length && eligibleMembers.every(
+      (member) => (reviewCounts.get(member.profileId) ?? 0) >= fairCapacity,
+    )) {
+      fairCapacity = Math.min(...eligibleMembers.map(
+        (member) => reviewCounts.get(member.profileId) ?? 0,
+      )) + 1;
+    }
+    const eligibleReviewers = await Promise.all(eligibleMembers.map(async (member) => {
+      const memberProfile = await ctx.db.get(member.profileId);
+      const reviewCount = reviewCounts.get(member.profileId) ?? 0;
+      return {
+        profileId: member.profileId,
+        displayName: memberProfile?.displayName ?? "Team member",
+        reviewCount,
+        atCapacity: reviewCount >= fairCapacity && eligibleMembers.some(
+          (candidate) => (reviewCounts.get(candidate.profileId) ?? 0) < fairCapacity,
+        ),
+      };
+    }));
 
     return {
       evidence,
-      reviews,
-      latestReview: reviews[0] ?? null,
+      reviews: decoratedReviews,
+      latestReview: decoratedReviews[0] ?? null,
       currentProfileId: context.profile._id,
       canSubmit:
         context.canWrite &&
+        context.task.assignmentState !== "unassigned" &&
         !context.task.isOpenForClaiming &&
         context.task.acceptanceStatus !== "pending" &&
-        (context.task.primaryOwnerProfileId === context.profile._id ||
-          (context.task.collaboratorCanSubmit === true &&
-            context.task.collaboratorProfileIds.includes(context.profile._id))),
+        context.task.primaryOwnerProfileId === context.profile._id &&
+        ["todo", "in_progress", "changes_requested"].includes(context.task.status),
       isAssignedReviewer:
         context.task.reviewerProfileId === context.profile._id,
       canReview:
         context.canWrite &&
+        context.task.reviewerProfileId === context.profile._id &&
         context.task.primaryOwnerProfileId !== context.profile._id &&
         ["review", "submitted"].includes(context.task.status) &&
         reviews[0]?.status === "pending",
       isTaskOwner: context.task.primaryOwnerProfileId === context.profile._id,
+      eligibleReviewers,
+      fairReviewCapacity: fairCapacity,
     };
   },
 });
@@ -255,8 +300,8 @@ export const submitReview = mutation({
     if (context.task.primaryOwnerProfileId === context.profile._id) {
       throw new Error("A task owner cannot review their own task.");
     }
-    if (!context.canWrite) {
-      throw new Error("Only a current project teammate can review this task.");
+    if (!context.canWrite || context.task.reviewerProfileId !== context.profile._id) {
+      throw new Error("Only the assigned reviewer can review this task.");
     }
 
     const comment = validateReviewComment(args.status, args.comment);
@@ -265,57 +310,18 @@ export const submitReview = mutation({
       reviewerProfileId: context.profile._id,
       status: args.status,
       comment,
+      evidenceIds: (await ctx.db
+        .query("taskEvidence")
+        .withIndex("by_task", (query) => query.eq("taskId", context.task._id))
+        .collect()).map((evidence) => evidence._id),
       updatedAt: now,
       reviewedAt: now,
     });
     await ctx.db.patch(context.task._id, {
-      status: args.status === "approved" ? "verified" : "changes_requested",
+      status: args.status === "approved" ? "awaiting_creator" : "in_progress",
       updatedAt: now,
-      completedAt: args.status === "approved" ? now : undefined,
+      completedAt: undefined,
     });
-    let combatEventId: Id<"combatEvents"> | undefined;
-    if (args.status === "approved") {
-      const existingCombatEvent = await ctx.db
-        .query("combatEvents")
-        .withIndex("by_task", (query) => query.eq("taskId", context.task._id))
-        .unique();
-      if (existingCombatEvent === null) {
-        if (context.project.status === "completed") {
-          throw new Error("This project is already complete; no additional damage can be applied.");
-        }
-        const attackerMembership = await ctx.db
-          .query("teamMembers")
-          .withIndex("by_team_and_user", (query) =>
-            query
-              .eq("teamId", context.project.teamId)
-              .eq("profileId", context.task.primaryOwnerProfileId),
-          )
-          .unique();
-        combatEventId = await ctx.db.insert("combatEvents", {
-          projectId: context.project._id,
-          taskId: context.task._id,
-          attackerProfileId: context.task.primaryOwnerProfileId,
-          reviewerProfileId: context.profile._id,
-          damage: taskDamage(context.task),
-          spellType: attackerMembership?.spellType ?? "spark",
-          createdAt: now,
-        });
-        await ctx.db.insert("activityLogs", {
-          teamId: context.project.teamId,
-          projectId: context.project._id,
-          actorProfileId: context.profile._id,
-          action: "combat_event_created",
-          metadata: {
-            projectId: context.project._id,
-            taskId: context.task._id,
-            taskTitle: context.task.title,
-            combatEventId,
-            damage: taskDamage(context.task),
-          },
-          createdAt: now,
-        });
-      }
-    }
     await ctx.db.insert("activityLogs", {
       teamId: context.project.teamId,
       projectId: context.project._id,
@@ -330,13 +336,10 @@ export const submitReview = mutation({
         taskTitle: context.task.title,
         reviewId: review._id,
         reviewStatus: args.status,
-        combatEventId,
-        damage: args.status === "approved" ? taskDamage(context.task) : undefined,
+        taskStatus: args.status === "approved" ? "awaiting_creator" : "in_progress",
       },
       createdAt: now,
     });
-    await refreshProjectProgress(ctx, context.project, context.profile._id);
-
     return review._id;
   },
 });
@@ -353,7 +356,10 @@ export const submitForReview = mutation({
       throw new Error("Accept this task before submitting it for review.");
     }
     if (!context.task.requiresReview) {
-      throw new Error("Enable peer review before submitting this task.");
+      throw new Error("Every task must use peer review before completion.");
+    }
+    if (!context.task.reviewerProfileId) {
+      throw new Error("Choose an eligible reviewer before submitting this task.");
     }
     if (!["todo", "in_progress", "changes_requested"].includes(context.task.status)) {
       throw new Error("This task cannot be submitted from its current state.");
@@ -367,6 +373,7 @@ export const submitForReview = mutation({
     const now = Date.now();
     const reviewId = await ctx.db.insert("taskReviews", {
       taskId: context.task._id,
+      reviewerProfileId: context.task.reviewerProfileId,
       status: "pending",
       createdAt: now,
       updatedAt: now,
@@ -387,5 +394,113 @@ export const submitForReview = mutation({
       createdAt: now,
     });
     return reviewId;
+  },
+});
+
+export const decideCompletion = mutation({
+  args: {
+    taskId: v.id("tasks"),
+    decision: v.union(v.literal("approve"), v.literal("reject")),
+    comment: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const context = await getTaskContext(ctx, args.taskId);
+    if (context.project.creatorProfileId !== context.profile._id) {
+      throw new Error("Only the room creator can approve final task completion.");
+    }
+    if (context.task.status !== "awaiting_creator") {
+      throw new Error("This task is not awaiting creator approval.");
+    }
+    const now = Date.now();
+
+    if (args.decision === "reject") {
+      await ctx.db.patch(context.task._id, {
+        status: "in_progress",
+        completedAt: undefined,
+        updatedAt: now,
+      });
+      await ctx.db.insert("activityLogs", {
+        teamId: context.project.teamId,
+        projectId: context.project._id,
+        actorProfileId: context.profile._id,
+        action: "creator_rejected_task",
+        metadata: {
+          projectId: context.project._id,
+          taskId: context.task._id,
+          taskTitle: context.task.title,
+          taskStatus: "in_progress",
+        },
+        createdAt: now,
+      });
+      await refreshProjectProgress(ctx, context.project, context.profile._id);
+      return context.task._id;
+    }
+
+    const existingCombatEvent = await ctx.db
+      .query("combatEvents")
+      .withIndex("by_task", (query) => query.eq("taskId", context.task._id))
+      .unique();
+    let combatEventId = existingCombatEvent?._id;
+    if (!existingCombatEvent) {
+      const latestApprovedReview = (await ctx.db
+        .query("taskReviews")
+        .withIndex("by_task_and_time", (query) => query.eq("taskId", context.task._id))
+        .order("desc")
+        .collect()).find((review) => review.status === "approved");
+      if (!latestApprovedReview?.reviewerProfileId) {
+        throw new Error("An approved peer review is required before final completion.");
+      }
+      const attackerMembership = await ctx.db
+        .query("teamMembers")
+        .withIndex("by_team_and_user", (query) =>
+          query.eq("teamId", context.project.teamId).eq("profileId", context.task.primaryOwnerProfileId),
+        )
+        .unique();
+      combatEventId = await ctx.db.insert("combatEvents", {
+        projectId: context.project._id,
+        taskId: context.task._id,
+        attackerProfileId: context.task.primaryOwnerProfileId,
+        reviewerProfileId: latestApprovedReview.reviewerProfileId,
+        damage: taskDamage(context.task),
+        spellType: attackerMembership?.spellType ?? "spark",
+        createdAt: now,
+      });
+      await ctx.db.insert("activityLogs", {
+        teamId: context.project.teamId,
+        projectId: context.project._id,
+        actorProfileId: context.profile._id,
+        action: "combat_event_created",
+        metadata: {
+          projectId: context.project._id,
+          taskId: context.task._id,
+          taskTitle: context.task.title,
+          combatEventId,
+          damage: taskDamage(context.task),
+        },
+        createdAt: now,
+      });
+    }
+    await ctx.db.patch(context.task._id, {
+      status: "completed",
+      completedAt: now,
+      updatedAt: now,
+    });
+    await ctx.db.insert("activityLogs", {
+      teamId: context.project.teamId,
+      projectId: context.project._id,
+      actorProfileId: context.profile._id,
+      action: "creator_approved_task",
+      metadata: {
+        projectId: context.project._id,
+        taskId: context.task._id,
+        taskTitle: context.task.title,
+        taskStatus: "completed",
+        combatEventId,
+        damage: taskDamage(context.task),
+      },
+      createdAt: now,
+    });
+    await refreshProjectProgress(ctx, context.project, context.profile._id);
+    return context.task._id;
   },
 });

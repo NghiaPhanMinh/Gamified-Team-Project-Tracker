@@ -144,8 +144,8 @@ export function validateAiPlan(value: unknown, context: PlanningContext): Valida
     if (typeof item.requiresReview !== "boolean" || typeof item.required !== "boolean") {
       throw new Error("AI task flags are invalid.");
     }
-    if (item.requiresReview && (!reviewerProfileId || !memberIds.has(reviewerProfileId))) {
-      throw new Error("AI review-required tasks need a valid reviewer.");
+    if (reviewerProfileId && !memberIds.has(reviewerProfileId)) {
+      throw new Error("AI selected an unknown reviewer.");
     }
     if (!item.requiresReview && reviewerProfileId) {
       throw new Error("AI supplied a reviewer for a task without review.");
@@ -168,11 +168,11 @@ export function validateAiPlan(value: unknown, context: PlanningContext): Valida
       estimatedEffortHours: numberInRange(item.estimatedEffortHours, "task effort", 0.5, 2_000),
       difficulty,
       weight: numberInRange(item.weight, "task weight", 0.5, 100),
-      required: item.required,
+      required: true,
       startDate,
       dueDate,
       dependencyTempIds: textArray(item.dependencyTempIds, "task dependencies", 12),
-      requiresReview: item.requiresReview,
+      requiresReview: true,
       reviewerProfileId,
       allocationExplanation: text(item.allocationExplanation, "allocation explanation", 600),
       longTaskBreakdown: typeof item.longTaskBreakdown === "string"

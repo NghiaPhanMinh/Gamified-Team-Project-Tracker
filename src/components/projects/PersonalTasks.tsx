@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 
 import { api } from "../../../convex/_generated/api";
@@ -7,11 +7,9 @@ import { getErrorMessage } from "../../lib/errors";
 import { TaskEvidencePanel } from "./TaskEvidencePanel";
 import { TaskTradePanel } from "./TaskTradePanel";
 
-export function PersonalTasks({
-  onOpenRoom,
-}: {
-  onOpenRoom: (roomId: Id<"teams">) => void;
-}) {
+type SectionName = "Action Needed" | "In Progress" | "Waiting Review" | "Waiting Creator" | "Complete";
+
+export function PersonalTasks({ onOpenRoom }: { onOpenRoom: (roomId: Id<"teams">) => void }) {
   const groups = useQuery(api.tasks.listMineAcrossRooms);
   const claimTask = useMutation(api.tasks.claimTask);
   const acceptTask = useMutation(api.tasks.acceptTask);
@@ -24,80 +22,55 @@ export function PersonalTasks({
   async function run(taskId: Id<"tasks">, action: () => Promise<unknown>) {
     setPendingTaskId(taskId);
     setError(null);
-    try {
-      await action();
-    } catch (caughtError) {
-      setError(getErrorMessage(caughtError, "The task could not be updated."));
-    } finally {
-      setPendingTaskId(null);
-    }
+    try { await action(); } catch (caughtError) { setError(getErrorMessage(caughtError, "The task could not be updated.")); } finally { setPendingTaskId(null); }
   }
+
+  const taskSections = useMemo(() => {
+    const sections = new Map<SectionName, Array<NonNullable<typeof groups>[number]["tasks"][number] & { roomId: Id<"teams">; roomName: string; projectId: Id<"projects">; projectTitle: string }>>([
+      ["Action Needed", []], ["In Progress", []], ["Waiting Review", []], ["Waiting Creator", []], ["Complete", []],
+    ]);
+    for (const group of groups ?? []) {
+      for (const task of group.tasks) {
+        const decorated = { ...task, roomId: group.roomId, roomName: group.roomName, projectId: group.projectId, projectTitle: group.projectTitle };
+        if (task.acceptanceStatus === "pending" || task.isOpenForClaiming || (task.isReviewer && ["submitted", "review"].includes(task.status))) sections.get("Action Needed")!.push(decorated);
+        else if (["submitted", "review"].includes(task.status)) sections.get("Waiting Review")!.push(decorated);
+        else if (task.status === "awaiting_creator") sections.get("Waiting Creator")!.push(decorated);
+        else if (["completed", "verified"].includes(task.status)) sections.get("Complete")!.push(decorated);
+        else sections.get("In Progress")!.push(decorated);
+      }
+    }
+    return sections;
+  }, [groups]);
 
   return (
     <section className="personal-tasks-page" aria-labelledby="personal-tasks-title">
-      <header className="focused-page-heading">
-        <div>
-          <p className="kicker">Across every room</p>
-          <h1 className="display-heading" id="personal-tasks-title">My tasks</h1>
-          <p>Only work assigned to you and tasks that are open to claim.</p>
-        </div>
-      </header>
+      <header className="focused-page-heading"><div><p className="kicker">Across every room</p><h1 className="display-heading" id="personal-tasks-title">My Tasks</h1><p>Assignments, reviews, requests, and open work in one focused place.</p></div></header>
       {error ? <p className="form-error" role="alert">{error}</p> : null}
       {groups === undefined ? <p aria-busy="true">Loading your tasks…</p> : null}
-      {groups?.length === 0 ? (
-        <div className="project-empty">
-          <strong>You are all clear.</strong>
-          <p>Assigned work will appear here as soon as a project plan is confirmed.</p>
-        </div>
-      ) : null}
-      <div className="personal-task-groups">
-        {groups?.map((group) => (
-          <section key={group.projectId} className="personal-task-group">
-            <header>
-              <div><small>{group.roomName}</small><h2>{group.projectTitle}</h2></div>
-              <button className="quiet-button" type="button" onClick={() => onOpenRoom(group.roomId)}>Open room</button>
-            </header>
-            <TaskTradePanel projectId={group.projectId} />
-            <div className="personal-task-list">
-              {group.tasks.map((task) => (
-                <article key={task._id} className={`personal-task-card task-${task.status}`}>
-                  <div>
-                    <span className="project-status">{task.status.replaceAll("_", " ")}</span>
-                    <small>{task.phaseName} · due {task.dueDate}</small>
-                  </div>
-                  <h3>{task.title}</h3>
-                  <p>{task.description || "No task description."}</p>
-                  <dl>
-                    <div><dt>Difficulty</dt><dd>{task.difficulty}/5</dd></div>
-                    <div><dt>Damage</dt><dd>{task.damage ?? 20} HP</dd></div>
-                  </dl>
-                  <div className="personal-task-actions">
-                    {task.isMine && task.acceptanceStatus === "pending" ? (
-                      <>
-                        <button className="primary-button" type="button" disabled={pendingTaskId === task._id} onClick={() => void run(task._id, () => acceptTask({ taskId: task._id }))}>Accept task</button>
-                        <button className="quiet-button" type="button" disabled={pendingTaskId === task._id} onClick={() => void run(task._id, () => declineTask({ taskId: task._id }))}>Decline</button>
-                      </>
-                    ) : null}
-                    {task.isOpenForClaiming ? (
-                      <button className="primary-button" type="button" disabled={pendingTaskId === task._id} onClick={() => void run(task._id, () => claimTask({ taskId: task._id }))}>Claim task</button>
-                    ) : null}
-                    {task.isMine && task.status === "todo" && task.acceptanceStatus !== "pending" ? (
-                      <button className="primary-button" type="button" disabled={pendingTaskId === task._id} onClick={() => void run(task._id, () => updateStatus({ taskId: task._id, status: "in_progress" }))}>Start task</button>
-                    ) : null}
-                    {task.isMine && ["in_progress", "changes_requested"].includes(task.status) ? (
-                      <button className="primary-button" type="button" onClick={() => setOpenTaskId((current) => current === task._id ? null : task._id)}>{task.status === "changes_requested" ? "Resubmit" : "Submit for review"}</button>
-                    ) : null}
-                    {["submitted", "review"].includes(task.status) ? <span className="waiting-label">Waiting for review</span> : null}
-                  </div>
-                  {openTaskId === task._id ? (
-                    <TaskEvidencePanel taskId={task._id} taskTitle={task.title} taskStatus={task.status} requiresReview={task.requiresReview} />
-                  ) : null}
-                </article>
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
+      {groups?.length === 0 ? <div className="project-empty"><strong>You are all clear.</strong><p>Assigned work and review requests will appear here.</p></div> : null}
+
+      {[...taskSections.entries()].map(([section, tasks]) => tasks.length ? (
+        <section key={section} className={`personal-status-section personal-${section.toLowerCase().replaceAll(" ", "-")}`}>
+          <header><h2>{section}</h2><span>{tasks.length}</span></header>
+          <div className="personal-task-list">{tasks.map((task) => (
+            <article key={task._id} className={`personal-task-card task-${task.status}`}>
+              <div className="personal-task-room"><div><small>{task.roomName} · {task.projectTitle}</small><strong>{task.phaseName} · due {task.dueDate}</strong></div><button className="text-link" type="button" onClick={() => onOpenRoom(task.roomId)}>Open room</button></div>
+              <h3>{task.title}</h3><p>{task.description || "No task description."}</p>
+              <dl><div><dt>Weight</dt><dd>{task.weight}</dd></div><div><dt>Reviewer</dt><dd>{task.reviewerName}</dd></div><div><dt>Skills</dt><dd>{(task.requiredSkills ?? []).join(", ") || "None specified"}</dd></div></dl>
+              <div className="personal-task-actions">
+                {task.isMine && task.acceptanceStatus === "pending" ? <><button className="primary-button" type="button" disabled={pendingTaskId === task._id} onClick={() => void run(task._id, () => acceptTask({ taskId: task._id }))}>Accept Task</button><button className="quiet-button" type="button" disabled={pendingTaskId === task._id} onClick={() => void run(task._id, () => declineTask({ taskId: task._id }))}>Decline</button></> : null}
+                {task.isOpenForClaiming ? <button className="primary-button" type="button" disabled={pendingTaskId === task._id} onClick={() => void run(task._id, () => claimTask({ taskId: task._id }))}>Claim Task</button> : null}
+                {task.isMine && task.status === "todo" && task.acceptanceStatus !== "pending" ? <button className="primary-button" type="button" disabled={pendingTaskId === task._id} onClick={() => void run(task._id, () => updateStatus({ taskId: task._id, status: "in_progress" }))}>Start Task</button> : null}
+                {(task.isMine || task.isReviewer) && !["completed", "verified"].includes(task.status) ? <button className="secondary-button" type="button" onClick={() => setOpenTaskId((current) => current === task._id ? null : task._id)}>{task.isReviewer && ["submitted", "review"].includes(task.status) ? "Review Evidence" : "Evidence & Review"}</button> : null}
+                {task.status === "awaiting_creator" ? <span className="waiting-label">Waiting for room creator</span> : null}
+              </div>
+              {openTaskId === task._id ? <TaskEvidencePanel taskId={task._id} taskTitle={task.title} taskStatus={task.status} requiresReview={task.requiresReview} reviewerName={task.reviewerName === "Owner chooses later" ? undefined : task.reviewerName} /> : null}
+            </article>
+          ))}</div>
+        </section>
+      ) : null)}
+
+      {groups?.map((group) => <details key={group.projectId} className="personal-trade-details"><summary>{group.projectTitle} task trades</summary><TaskTradePanel projectId={group.projectId} /></details>)}
     </section>
   );
 }

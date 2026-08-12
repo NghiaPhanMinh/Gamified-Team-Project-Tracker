@@ -11,18 +11,15 @@ import { AI_RETRY_DELAYS_MS, isRetryablePlatformAiError } from "../../lib/aiRetr
 type Workspace = FunctionReturnType<typeof api.tasks.getWorkspace>;
 type AiPlan = FunctionReturnType<typeof api.ai.generateProjectPlan>;
 export type AiTaskSuggestion = AiPlan["tasks"][number];
-export type AiMilestoneSuggestion = AiPlan["milestones"][number];
 
 type AIPlanningAssistantProps = {
   workspace: Workspace;
   onUseTask: (task: AiTaskSuggestion) => void;
-  onUseMilestone: (milestone: AiMilestoneSuggestion) => void;
 };
 
 export function AIPlanningAssistant({
   workspace,
   onUseTask,
-  onUseMilestone,
 }: AIPlanningAssistantProps) {
   const generateProjectPlan = useAction(api.ai.generateProjectPlan);
   const generateProjectPlanWithKey = useAction(api.ai.generateProjectPlanWithKey);
@@ -113,23 +110,12 @@ export function AIPlanningAssistant({
     setIsGenerating(true);
     try {
       const result = await savePlan({ projectId: workspace.project._id, plan: draft });
-      setSaveMessage(`${result.taskCount} tasks and ${result.milestoneCount} milestones were saved. Assigned teammates can now accept or decline.`);
+      setSaveMessage(`${result.taskCount} tasks were saved. Assigned teammates can now accept or decline.`);
     } catch (caughtError) {
       setError(getErrorMessage(caughtError, "The reviewed AI plan could not be saved."));
     } finally {
       setIsGenerating(false);
     }
-  }
-
-  function updateMilestone(tempId: string, patch: Partial<AiMilestoneSuggestion>) {
-    setDraft((current) => current
-      ? {
-          ...current,
-          milestones: current.milestones.map((milestone) =>
-            milestone.tempId === tempId ? { ...milestone, ...patch } : milestone,
-          ),
-        }
-      : current);
   }
 
   function updateTask(tempId: string, patch: Partial<AiTaskSuggestion>) {
@@ -201,44 +187,7 @@ export function AIPlanningAssistant({
           </header>
 
           <section className="ai-output-card ai-plan-output" aria-labelledby="ai-plan-output-title">
-            <div className="ai-draft-section-heading"><h4 id="ai-plan-output-title">Tasks & milestones</h4><span>{draft.tasks.length + draft.milestones.length}</span></div>
-          <section className="ai-draft-section" aria-labelledby="ai-milestone-title">
-            <div className="ai-draft-section-heading">
-              <h4 id="ai-milestone-title">Suggested milestones</h4>
-              <span>{draft.milestones.length}</span>
-            </div>
-            {draft.milestones.length === 0 ? <p>No new milestones suggested.</p> : (
-              <div className="ai-milestone-grid">
-                {draft.milestones.map((milestone) => (
-                  <article key={milestone.tempId}>
-                    <label>
-                      <span>Title</span>
-                      <input value={milestone.title} onChange={(event) => updateMilestone(milestone.tempId, { title: event.target.value })} />
-                    </label>
-                    <label>
-                      <span>Description</span>
-                      <textarea value={milestone.description} onChange={(event) => updateMilestone(milestone.tempId, { description: event.target.value })} />
-                    </label>
-                    <div className="ai-inline-fields">
-                      <label>
-                        <span>Phase</span>
-                        <select value={milestone.phaseId} onChange={(event) => updateMilestone(milestone.tempId, { phaseId: event.target.value })}>
-                          {workspace.phases.map((phase) => <option key={phase._id} value={phase._id}>{phase.title}</option>)}
-                        </select>
-                      </label>
-                      <label>
-                        <span>Due</span>
-                        <input type="date" min={workspace.project.startDate} max={workspace.project.deadline} value={milestone.dueDate} onChange={(event) => updateMilestone(milestone.tempId, { dueDate: event.target.value })} />
-                      </label>
-                    </div>
-                    <button className="secondary-button" type="button" onClick={() => onUseMilestone(milestone)}>
-                      Review in milestone form
-                    </button>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
+            <div className="ai-draft-section-heading"><h4 id="ai-plan-output-title">Suggested tasks</h4><span>{draft.tasks.length}</span></div>
 
           <section className="ai-draft-section" aria-labelledby="ai-task-title">
             <div className="ai-draft-section-heading">
@@ -286,12 +235,8 @@ export function AIPlanningAssistant({
                       <input type="number" min="1" max="5" step="1" value={task.difficulty} onChange={(event) => updateTask(task.tempId, { difficulty: Number(event.target.value) })} />
                     </label>
                     <label>
-                      <span>Start date</span>
-                      <input type="date" min={workspace.project.startDate} max={workspace.project.deadline} value={task.startDate} onChange={(event) => updateTask(task.tempId, { startDate: event.target.value })} />
-                    </label>
-                    <label>
                       <span>Due date</span>
-                      <input type="date" min={task.startDate} max={workspace.project.deadline} value={task.dueDate} onChange={(event) => updateTask(task.tempId, { dueDate: event.target.value })} />
+                      <input type="date" max={workspace.project.deadline} value={task.dueDate} onChange={(event) => updateTask(task.tempId, { dueDate: event.target.value })} />
                     </label>
                     <label className="ai-field-wide">
                       <span>Required skills</span>
@@ -300,7 +245,7 @@ export function AIPlanningAssistant({
                     <div className="ai-explanation ai-field-wide">
                       <strong>Why this owner?</strong>
                       <p>{task.allocationExplanation}</p>
-                      <small>Dependencies: {task.dependencyTempIds.length ? task.dependencyTempIds.join(", ") : "none"} · Collaborators: {task.collaboratorProfileIds.length}{task.milestoneTempId ? ` · Suggested milestone: ${task.milestoneTempId}` : ""}</small>
+                      <small>Dependencies: {task.dependencyTempIds.length ? task.dependencyTempIds.join(", ") : "none"} · Collaborators: {task.collaboratorProfileIds.length}</small>
                     </div>
                     {task.longTaskBreakdown ? <p className="long-task-guidance ai-field-wide">{task.longTaskBreakdown}</p> : null}
                     <button className="primary-button ai-field-wide" type="button" onClick={() => onUseTask(task)}>

@@ -22,6 +22,10 @@ async function addProfile(
       authUserId,
       displayName,
       email,
+      skills: ["Communication"],
+      softwareSkills: [],
+      weeklyCapacity: 8,
+      profileCompletedAt: now,
       createdAt: now,
       updatedAt: now,
     });
@@ -71,7 +75,7 @@ async function setupReviewTask(testDatabase: EvidenceTestDatabase) {
     ],
   });
   const workspace = await reviewer.asUser.query(api.tasks.getWorkspace, { projectId });
-  const taskId = await owner.asUser.mutation(api.tasks.createTask, {
+  const taskId = await reviewer.asUser.mutation(api.tasks.createTask, {
     projectId,
     phaseId: workspace.phases[0]._id,
     title: "Prepare design evidence",
@@ -89,6 +93,7 @@ async function setupReviewTask(testDatabase: EvidenceTestDatabase) {
     requiresReview: true,
     reviewerProfileId: reviewer.profileId,
   });
+  await owner.asUser.mutation(api.tasks.acceptTask, { taskId });
 
   return { reviewer, owner, collaborator, outsider, projectId, taskId };
 }
@@ -127,14 +132,12 @@ describe("task evidence and review", () => {
   it("enforces assigned review, changes requested, and approval completion", async () => {
     const testDatabase = convexTest(schema, modules);
     const { reviewer, owner, taskId, projectId } = await setupReviewTask(testDatabase);
-    await reviewer.asUser.mutation(api.projects.launch, { projectId });
-
     await expect(
       owner.asUser.mutation(api.tasks.updateTaskStatus, {
         taskId,
         status: "completed",
       }),
-    ).rejects.toThrow(/reviewer must approve/i);
+    ).rejects.toThrow(/review and creator approval/i);
 
     await owner.asUser.mutation(api.evidence.add, {
       taskId,
@@ -157,7 +160,7 @@ describe("task evidence and review", () => {
       comment: "Please label the final interaction state.",
     });
     let workspace = await owner.asUser.query(api.tasks.getWorkspace, { projectId });
-    expect(workspace.tasks[0].status).toBe("changes_requested");
+    expect(workspace.tasks[0].status).toBe("in_progress");
 
     await owner.asUser.mutation(api.evidence.submitForReview, {
       taskId,
@@ -169,7 +172,10 @@ describe("task evidence and review", () => {
     });
     workspace = await owner.asUser.query(api.tasks.getWorkspace, { projectId });
     const details = await reviewer.asUser.query(api.evidence.listForTask, { taskId });
-    expect(workspace.tasks[0].status).toBe("verified");
+    expect(workspace.tasks[0].status).toBe("awaiting_creator");
+    await reviewer.asUser.mutation(api.evidence.decideCompletion, { taskId, decision: "approve" });
+    workspace = await owner.asUser.query(api.tasks.getWorkspace, { projectId });
+    expect(workspace.tasks[0].status).toBe("completed");
     expect(workspace.project.status).toBe("completed");
     expect(details.reviews.map((review) => review.status)).toEqual([
       "approved",
@@ -181,23 +187,22 @@ describe("task evidence and review", () => {
     await expect(reviewer.asUser.mutation(api.evidence.submitReview, { taskId, status: "approved", comment: "Duplicate" })).rejects.toThrow(/not currently waiting/i);
   });
 
-  it("lets any eligible teammate make the first atomic review decision", async () => {
+  it("allows only the assigned reviewer to make the atomic review decision", async () => {
     const testDatabase = convexTest(schema, modules);
-    const { reviewer, owner, collaborator, taskId, projectId } = await setupReviewTask(testDatabase);
-    await reviewer.asUser.mutation(api.projects.launch, { projectId });
+    const { reviewer, owner, collaborator, taskId } = await setupReviewTask(testDatabase);
     await owner.asUser.mutation(api.evidence.add, { taskId, type: "note", note: "Ready for any teammate to verify." });
     await owner.asUser.mutation(api.evidence.submitForReview, { taskId });
-    await collaborator.asUser.mutation(api.evidence.submitReview, { taskId, status: "approved", comment: "Evidence is complete." });
-    await expect(reviewer.asUser.mutation(api.evidence.submitReview, { taskId, status: "approved", comment: "Second decision" })).rejects.toThrow(/not currently waiting/i);
+    await expect(collaborator.asUser.mutation(api.evidence.submitReview, { taskId, status: "approved", comment: "Evidence is complete." })).rejects.toThrow(/assigned reviewer/i);
+    await reviewer.asUser.mutation(api.evidence.submitReview, { taskId, status: "approved", comment: "Assigned decision" });
     const details = await collaborator.asUser.query(api.evidence.listForTask, { taskId });
-    expect(details.latestReview).toMatchObject({ reviewerProfileId: collaborator.profileId, status: "approved" });
+    expect(details.latestReview).toMatchObject({ reviewerProfileId: reviewer.profileId, status: "approved" });
   });
 
   it("prevents other members and unpermitted collaborators from submitting owner evidence", async () => {
     const testDatabase = convexTest(schema, modules);
     const { reviewer, owner, collaborator, taskId, projectId } = await setupReviewTask(testDatabase);
-    await expect(reviewer.asUser.mutation(api.evidence.add, { taskId, type: "note", note: "Admin cannot submit for the owner." })).rejects.toThrow(/assigned owner/i);
-    await expect(collaborator.asUser.mutation(api.evidence.add, { taskId, type: "note", note: "Not explicitly permitted." })).rejects.toThrow(/assigned owner/i);
+    await expect(reviewer.asUser.mutation(api.evidence.add, { taskId, type: "note", note: "Admin cannot submit for the owner." })).rejects.toThrow(/assigned task owner/i);
+    await expect(collaborator.asUser.mutation(api.evidence.add, { taskId, type: "note", note: "Not explicitly permitted." })).rejects.toThrow(/assigned task owner/i);
 
     const workspace = await reviewer.asUser.query(api.tasks.getWorkspace, { projectId });
     const task = workspace.tasks[0];
@@ -221,7 +226,7 @@ describe("task evidence and review", () => {
       requiresReview: true,
       reviewerProfileId: reviewer.profileId,
     });
-    await collaborator.asUser.mutation(api.evidence.add, { taskId, type: "note", note: "Explicit collaborator contribution." });
+    await expect(collaborator.asUser.mutation(api.evidence.add, { taskId, type: "note", note: "Explicit collaborator contribution." })).rejects.toThrow(/assigned task owner/i);
     await expect(collaborator.asUser.mutation(api.evidence.submitForReview, { taskId })).rejects.toThrow(/assigned task owner/i);
   });
 

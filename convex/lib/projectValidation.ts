@@ -41,7 +41,7 @@ function normaliseText(value: string, label: string, maxLength: number) {
 export function validateProjectDetails(input: {
   title: string;
   description: string;
-  startDate: string;
+  startDate?: string;
   deadline: string;
 }) {
   const title = normaliseText(input.title, "Project title", 100);
@@ -55,21 +55,20 @@ export function validateProjectDetails(input: {
     throw new Error("Project title must contain at least 2 characters.");
   }
 
-  if (
-    !ISO_DATE_PATTERN.test(input.startDate) ||
-    !ISO_DATE_PATTERN.test(input.deadline)
-  ) {
+  const startDate = input.startDate ?? new Date().toISOString().slice(0, 10);
+
+  if (!ISO_DATE_PATTERN.test(startDate) || !ISO_DATE_PATTERN.test(input.deadline)) {
     throw new Error("Project dates must use the YYYY-MM-DD format.");
   }
 
-  if (input.deadline < input.startDate) {
+  if (input.deadline < startDate) {
     throw new Error("Project deadline cannot be before the start date.");
   }
 
   return {
     title,
     description,
-    startDate: input.startDate,
+    startDate,
     deadline: input.deadline,
   };
 }

@@ -16,9 +16,9 @@ export const savePlan = mutation({
     const project = await ctx.db.get(args.projectId);
     if (!project) throw new Error("This project no longer exists.");
     if (project.status === "archived") throw new Error("Restore this project before saving a plan.");
-    const { membership, profile } = await requireTeamMember(ctx, project.teamId);
-    if (membership.role !== "owner" && project.creatorProfileId !== profile._id) {
-      throw new Error("Only the project creator or team owner can save an AI plan.");
+    const { profile } = await requireTeamMember(ctx, project.teamId);
+    if (project.creatorProfileId !== profile._id) {
+      throw new Error("Only the room creator can save an AI plan.");
     }
     const [phases, members, existingTasks] = await Promise.all([
       ctx.db.query("phases").withIndex("by_project_and_order", (q) => q.eq("projectId", project._id)).collect(),
@@ -34,29 +34,13 @@ export const savePlan = mutation({
       members: members.map((member) => ({ profileId: member.profileId })),
     });
     const now = Date.now();
-    const milestoneIds = new Map<string, Id<"milestones">>();
-    for (const milestone of plan.milestones) {
-      const milestoneId = await ctx.db.insert("milestones", {
-        projectId: project._id,
-        phaseId: milestone.phaseId as Id<"phases">,
-        title: milestone.title,
-        description: milestone.description,
-        dueDate: milestone.dueDate,
-        status: "planned",
-        requiredTaskIds: [],
-        createdAt: now,
-        updatedAt: now,
-      });
-      milestoneIds.set(milestone.tempId, milestoneId);
-    }
-
     const taskIds = new Map<string, Id<"tasks">>();
     for (const task of plan.tasks) {
       const isOpenForClaiming = project.allocationStrategy === "self_selection";
       const taskId = await ctx.db.insert("tasks", {
         projectId: project._id,
         phaseId: task.phaseId as Id<"phases">,
-        milestoneId: task.milestoneTempId ? milestoneIds.get(task.milestoneTempId) : undefined,
+        milestoneId: undefined,
         title: task.title,
         description: task.description,
         primaryOwnerProfileId: task.primaryOwnerProfileId as Id<"userProfiles">,
@@ -66,16 +50,21 @@ export const savePlan = mutation({
         difficulty: task.difficulty,
         weight: task.weight,
         damage: damageForDifficulty(task.difficulty),
-        required: task.required,
+        required: true,
         isOpenForClaiming,
         collaboratorCanSubmit: false,
         startDate: task.startDate,
         dueDate: task.dueDate,
         status: "todo",
         acceptanceStatus: isOpenForClaiming || task.primaryOwnerProfileId === profile._id ? "accepted" : "pending",
+        assignmentState: isOpenForClaiming
+          ? "open"
+          : task.primaryOwnerProfileId === profile._id
+            ? "assigned"
+            : "proposed",
         dependencyTaskIds: [],
         source: "ai",
-        requiresReview: task.requiresReview,
+        requiresReview: true,
         reviewerProfileId: task.reviewerProfileId
           ? (task.reviewerProfileId as Id<"userProfiles">)
           : undefined,
@@ -91,11 +80,6 @@ export const savePlan = mutation({
       await ctx.db.patch(taskId, {
         dependencyTaskIds: task.dependencyTempIds.map((tempId) => taskIds.get(tempId)!),
       });
-      if (task.milestoneTempId) {
-        const milestoneId = milestoneIds.get(task.milestoneTempId)!;
-        const milestone = await ctx.db.get(milestoneId);
-        if (milestone) await ctx.db.patch(milestoneId, { requiredTaskIds: [...milestone.requiredTaskIds, taskId] });
-      }
       await ctx.db.insert("activityLogs", {
         teamId: project.teamId,
         projectId: project._id,
@@ -106,6 +90,6 @@ export const savePlan = mutation({
       });
     }
     await refreshProjectProgress(ctx, project, profile._id);
-    return { taskCount: plan.tasks.length, milestoneCount: plan.milestones.length };
+    return { taskCount: plan.tasks.length, milestoneCount: 0 };
   },
 });

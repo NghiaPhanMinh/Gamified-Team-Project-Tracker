@@ -16,7 +16,7 @@ export const getProjectPlanningContext = internalQuery({
       throw new Error("Restore this archived project before asking AI for a plan.");
     }
 
-    const { membership, profile } = await requireTeamMember(ctx, project.teamId);
+    const { profile } = await requireTeamMember(ctx, project.teamId);
     const [projectMembers, phases, existingTasks] = await Promise.all([
       ctx.db
         .query("projectMembers")
@@ -41,8 +41,8 @@ export const getProjectPlanningContext = internalQuery({
       (member) => member.profileId === profile._id,
     );
 
-    if (membership.role !== "owner" && !isProjectMember) {
-      throw new Error("Only project members or the team owner can use AI planning.");
+    if (!isProjectMember || project.creatorProfileId !== profile._id) {
+      throw new Error("Only the room creator can use AI planning.");
     }
 
     const members = await Promise.all(

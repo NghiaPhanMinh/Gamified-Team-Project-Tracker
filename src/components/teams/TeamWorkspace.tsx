@@ -79,7 +79,7 @@ export function TeamWorkspace({
 
       <div className="room-switch-row">
         <label><span>Current room</span><select value={selectedTeamId} onChange={(event) => onSelectTeam(event.target.value as Id<"teams">)}>{teams.map((team) => <option key={team._id} value={team._id}>{team.name} · {team.memberCount}</option>)}</select></label>
-        <button className="quiet-button" type="button" onClick={onAddTeam}>Create another project</button>
+        <button className="primary-button" type="button" onClick={onAddTeam}>Create Another Project</button>
       </div>
 
       <ProjectHub
