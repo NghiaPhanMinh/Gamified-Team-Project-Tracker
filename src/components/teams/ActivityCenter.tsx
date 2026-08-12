@@ -59,6 +59,7 @@ export function ActivityCenter({ teamId }: ActivityCenterProps) {
       <button
         className="activity-center-toggle"
         type="button"
+        aria-label={isOpen ? "Close activity and notifications" : "Open activity and notifications"}
         aria-expanded={isOpen}
         onClick={() => setIsOpen((current) => !current)}
       >
@@ -66,13 +67,16 @@ export function ActivityCenter({ teamId }: ActivityCenterProps) {
           <small>Realtime team history</small>
           <strong id="activity-center-title">Activity & notifications</strong>
         </span>
-        <span className={unread?.count ? "notification-count has-unread" : "notification-count"}>
-          {unread === undefined
-            ? "…"
-            : unread.count === 0
-              ? "All read"
-              : `${unread.count}${unread.hasMore ? "+" : ""} new`}
+        <span className="activity-bell" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
+          </svg>
         </span>
+        {unread !== undefined && unread.count > 0 ? (
+          <span className="notification-count has-unread" aria-label={`${unread.count}${unread.hasMore ? "+" : ""} unread notifications`}>
+            {unread.count > 99 ? "99+" : unread.count}
+          </span>
+        ) : null}
       </button>
 
       {isOpen ? (

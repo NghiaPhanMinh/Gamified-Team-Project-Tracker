@@ -4082,12 +4082,19 @@ footer {
 .task-card.task-changes_requested { background: var(--color-pink); color: var(--text-on-pink); }
 
 .activity-center { position: relative; display: flex; justify-content: flex-end; margin-bottom: .75rem; }
-.activity-center-toggle { width: 48px; height: 48px; overflow: visible; padding: 0; border-radius: 50%; background: var(--color-surface); cursor: pointer; }
-.activity-center-toggle::before { content: "🔔"; font-size: 1.15rem; }
+.activity-center-toggle { position: relative; display: grid; place-items: center; width: 52px; height: 52px; overflow: visible; padding: 0; border: 3px solid var(--color-text); border-radius: 16px; background: var(--color-surface); color: var(--color-text); box-shadow: 3px 3px 0 var(--color-blue); cursor: pointer; }
 .activity-center-toggle > span:first-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.activity-center-toggle .notification-count { position: absolute; inset: -7px -8px auto auto; min-width: 24px; padding: .15rem .35rem; border: 2px solid var(--color-text); border-radius: 999px; background: var(--color-yellow); color: var(--color-navy); font-size: .65rem; white-space: nowrap; }
+.activity-bell { display: grid; place-items: center; width: 25px; height: 25px; }
+.activity-bell svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.activity-center-toggle .notification-count { position: absolute; top: -9px; right: -9px; display: grid; place-items: center; min-width: 23px; height: 23px; padding: 0 .28rem; border: 2px solid var(--color-text); border-radius: 999px; background: var(--color-pink); color: var(--color-navy); font-size: .64rem; font-weight: 900; line-height: 1; white-space: nowrap; }
 .activity-drawer { position: absolute; z-index: 55; top: 55px; right: 0; width: min(92vw, 520px); max-height: 70vh; overflow: auto; background: var(--color-surface); color: var(--color-text); box-shadow: 7px 7px 0 var(--color-text); }
 .activity-item, .activity-empty, .notification-scope-note, .activity-controls .quiet-button { color: var(--color-text); }
+
+:root[data-theme="dark"] .activity-item:not(.is-unread),
+:root[data-theme="dark"] .notification-scope-note,
+:root[data-theme="dark"] .activity-controls .quiet-button {
+  color: var(--color-navy);
+}
 
 .setup-progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; margin: 0 0 1.5rem; padding: 0; list-style: none; }
 .setup-progress li { display: flex; align-items: center; gap: .45rem; color: var(--color-muted); font-weight: 800; }
