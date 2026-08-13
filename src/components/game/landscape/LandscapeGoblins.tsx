@@ -14,10 +14,10 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
   return (
     <div className="landscape-layer layer-6-goblins" aria-label="Daily goblins wave defense">
       <svg viewBox="0 0 1000 400" width="100%" height="100%">
-        {/* Center battlefield face-off area (x = 420px to 620px) */}
-        <g transform="translate(420, 220)">
+        {/* Right-center battlefield face-off area (x = 480px to 620px) facing player avatars directly */}
+        <g transform="translate(480, 220)">
           {goblins.map((goblin, index) => {
-            const offsetX = index * 55;
+            const offsetX = index * 45;
             const offsetY = (index % 2) * 14;
             const isGhost = goblin.goblinState === "ghost" || (goblin.isDefeated ?? false);
 

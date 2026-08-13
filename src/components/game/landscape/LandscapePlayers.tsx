@@ -12,18 +12,17 @@ type LandscapePlayersProps = {
 };
 
 export function LandscapePlayers({ members }: LandscapePlayersProps) {
-  // Section 6: Deterministic Layout Grid - auto-arranges with clean even spacing as player count changes
+  // Left-center battlefield zone (x = 320px to 460px)
   const count = Math.max(1, members.length);
-  const startX = 170;
-  const availableWidth = 260;
-  const spacing = Math.min(50, availableWidth / count);
+  const startX = 320;
+  const availableWidth = 140;
+  const spacing = Math.min(45, availableWidth / count);
 
   return (
     <div className="landscape-layer layer-7-players" aria-label="Party members roster">
       <svg viewBox="0 0 1000 400" width="100%" height="100%">
         <g>
           {members.map((member, index) => {
-            // Deterministic row positioning
             const offsetX = startX + index * spacing;
             const offsetY = 220 + (index % 2) * 16;
             const fill = member.characterFill || "#4ca0fe";
@@ -38,7 +37,7 @@ export function LandscapePlayers({ members }: LandscapePlayersProps) {
                 role="img"
                 aria-label={`${member.displayName} (${active ? "Active today" : "Idle"})`}
               >
-                {/* Section 6: Game ID Tag Pill rendered directly above avatar */}
+                {/* Game ID Tag Pill rendered directly above avatar */}
                 <g transform="translate(15, -12)">
                   <rect
                     x="-24"

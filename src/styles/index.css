@@ -4841,3 +4841,39 @@ footer {
   .reviewer-picker { grid-template-columns: 1fr; }
   .reviewer-picker small { grid-column: auto; }
 }
+
+/* Ambient Background Combat Exchange Keyframe Animations */
+.fx-flying-arrows {
+  animation: ambient-arrow-fly 4s linear infinite;
+}
+
+.fx-fire-burst {
+  animation: ambient-fire-burst 4s linear infinite;
+}
+
+.fx-clash-sparks {
+  animation: ambient-spark-clash 4s ease-out infinite;
+}
+
+@keyframes ambient-arrow-fly {
+  0% { transform: translate(180px, 225px); opacity: 0; }
+  20% { opacity: 0.85; }
+  50% { transform: translate(500px, 215px); opacity: 0.9; }
+  60% { opacity: 0; }
+  100% { transform: translate(500px, 215px); opacity: 0; }
+}
+
+@keyframes ambient-fire-burst {
+  0% { transform: translate(750px, 190px); opacity: 0; }
+  20% { opacity: 0.85; }
+  50% { transform: translate(500px, 215px); opacity: 0.9; }
+  60% { opacity: 0; }
+  100% { transform: translate(500px, 215px); opacity: 0; }
+}
+
+@keyframes ambient-spark-clash {
+  0%, 45% { opacity: 0; transform: translate(500px, 215px) scale(0.2); }
+  50% { opacity: 1; transform: translate(500px, 215px) scale(1.4); }
+  58% { opacity: 0; transform: translate(500px, 215px) scale(0.4); }
+  100% { opacity: 0; transform: translate(500px, 215px) scale(0.2); }
+}

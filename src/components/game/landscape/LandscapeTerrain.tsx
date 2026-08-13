@@ -1,34 +1,53 @@
 export function LandscapeTerrain() {
   return (
     <>
-      {/* Layer 3: Top 1/4 Sky Horizon & Distant Mountain Ridges */}
+      {/* Layer 3: Smooth Organic Distant Mountain Ridges */}
       <div className="landscape-layer layer-3-hills" aria-hidden="true">
         <svg viewBox="0 0 1000 400" preserveAspectRatio="none" width="100%" height="100%">
-          {/* Distant mountain ridges at y = 100 (top 25% boundary) */}
           <polygon
-            points="0,115 90,85 190,105 320,70 450,100 580,65 710,95 840,75 950,90 1000,80 1000,400 0,400"
+            points="0,120 110,85 220,110 360,70 510,105 640,65 790,95 910,75 1000,88 1000,400 0,400"
             fill="var(--scene-hills)"
-            opacity="0.85"
+            opacity="0.75"
           />
           <polygon
-            points="0,120 140,105 280,118 410,90 560,110 720,85 890,108 1000,100 1000,400 0,400"
+            points="0,130 160,105 310,122 450,92 600,115 760,88 920,112 1000,102 1000,400 0,400"
             fill="var(--scene-hills)"
+            opacity="0.9"
           />
         </svg>
       </div>
 
-      {/* Layer 4: Section 4 — Top-Down (Bird's-Eye) Grassland Occupying Bottom 3/4 (y = 100 to 400) */}
+      {/* Layer 4: Seamless Grassland (No Hard Separator Line & No Grid Lines) */}
       <div className="landscape-layer layer-4-ground" aria-hidden="true">
         <svg viewBox="0 0 1000 400" preserveAspectRatio="none" width="100%" height="100%">
-          {/* Top-down 3/4 grassland field rectangle */}
-          <rect x="0" y="100" width="1000" height="300" fill="var(--scene-land)" />
+          <defs>
+            {/* Soft Gradient Blend between Horizon and Grassland */}
+            <linearGradient id="seamless-grass-blend" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#41693d" stopOpacity="0.8" />
+              <stop offset="20%" stopColor="var(--scene-land)" stopOpacity="1" />
+              <stop offset="100%" stopColor="#254228" stopOpacity="1" />
+            </linearGradient>
+          </defs>
 
-          {/* Top-down perspective grass texture grid lines & depth contours */}
-          <path d="M 0 160 L 1000 160 M 0 220 L 1000 220 M 0 280 L 1000 280 M 0 340 L 1000 340" stroke="#3a5a40" strokeWidth="1" opacity="0.3" />
-          <path d="M 150 100 L 50 400 M 350 100 L 250 400 M 550 100 L 500 400 M 750 100 L 750 400 M 900 100 L 950 400" stroke="#3a5a40" strokeWidth="1" opacity="0.2" />
+          {/* Seamless Top-Down Grassland Base (y = 100 to 400) */}
+          <rect x="0" y="100" width="1000" height="300" fill="url(#seamless-grass-blend)" />
 
-          {/* Border horizon trim line at y = 100 */}
-          <line x1="0" y1="100" x2="1000" y2="100" stroke="var(--scene-boss-slate)" strokeWidth="3" opacity="0.5" />
+          {/* Organic Rolling Grass Mounds */}
+          <path
+            d="M 0 140 Q 250 110 500 135 Q 750 115 1000 130 L 1000 400 L 0 400 Z"
+            fill="#3a5f36"
+            opacity="0.5"
+          />
+          <path
+            d="M 0 190 Q 300 165 600 185 Q 850 170 1000 180 L 1000 400 L 0 400 Z"
+            fill="#32542e"
+            opacity="0.4"
+          />
+          <path
+            d="M 0 260 Q 200 235 450 255 Q 700 240 1000 250 L 1000 400 L 0 400 Z"
+            fill="#284425"
+            opacity="0.3"
+          />
         </svg>
       </div>
     </>
