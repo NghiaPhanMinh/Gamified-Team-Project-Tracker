@@ -12,10 +12,10 @@ type LandscapePlayersProps = {
 };
 
 export function LandscapePlayers({ members }: LandscapePlayersProps) {
-  // Grounded in left-center zone of middle field (x = 300px to 440px, grounded at y = 250px)
+  // Left-center middle field zone (x = 320px to 450px), grounded at baseline y = 270px
   const count = Math.max(1, members.length);
-  const startX = 300;
-  const availableWidth = 140;
+  const startX = 320;
+  const availableWidth = 130;
   const spacing = Math.min(45, availableWidth / count);
 
   return (
@@ -24,7 +24,7 @@ export function LandscapePlayers({ members }: LandscapePlayersProps) {
         <g>
           {members.map((member, index) => {
             const offsetX = startX + index * spacing;
-            const offsetY = 245 + (index % 2) * 12;
+            const offsetY = 270 + (index % 2) * 12;
             const fill = member.characterFill || "#4ca0fe";
             const outline = member.characterOutline || "var(--scene-boss-slate)";
             const active = member.isActiveToday;
@@ -40,25 +40,25 @@ export function LandscapePlayers({ members }: LandscapePlayersProps) {
                 {/* Game ID Tag Pill rendered directly above avatar */}
                 <g transform="translate(15, -14)">
                   <rect
-                    x="-26"
+                    x="-24"
                     y="-12"
-                    width="52"
-                    height="16"
-                    rx="8"
+                    width="48"
+                    height="15"
+                    rx="7.5"
                     fill="var(--scene-boss-slate)"
-                    stroke="rgba(255, 255, 255, 0.4)"
-                    strokeWidth="1.5"
+                    stroke="rgba(255, 255, 255, 0.3)"
+                    strokeWidth="1"
                   />
                   <text
                     x="0"
-                    y="-0.5"
+                    y="-1.5"
                     textAnchor="middle"
                     fill="#fff"
-                    fontSize="9.5"
-                    fontWeight="700"
+                    fontSize="9"
+                    fontWeight="600"
                     fontFamily="sans-serif"
                   >
-                    {member.displayName.slice(0, 8)}
+                    {member.displayName.slice(0, 7)}
                   </text>
                 </g>
 
