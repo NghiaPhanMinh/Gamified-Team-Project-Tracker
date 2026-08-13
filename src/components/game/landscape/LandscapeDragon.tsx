@@ -17,61 +17,69 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
   }, [isDefeated, hasPlayedFinalBlow]);
 
   // Dragon anchored at far right end:
-  // At 100% HP, sits at far right (~72%)
-  // At 0% HP, repelled to extreme right (~86%)
+  // At 100% HP, right offset is 15px
+  // At 0% HP, repelled to 5px
   const damageClearedFraction = (100 - bossHpPercent) / 100;
-  const minLeftPercent = 72;
-  const maxLeftPercent = 86;
-  const calculatedLeftPercent = minLeftPercent + damageClearedFraction * (maxLeftPercent - minLeftPercent);
+  const rightPx = Math.max(5, Math.round(15 - damageClearedFraction * 10));
 
   const showFinalBlowArc = isDefeated && hasPlayedFinalBlow;
 
   return (
     <div
       className="landscape-layer layer-8-dragon"
+      style={{
+        position: "absolute",
+        right: `${rightPx}px`,
+        bottom: "10px",
+        width: "320px",
+        height: "240px",
+        pointerEvents: "none",
+        zIndex: 18,
+      }}
       aria-label={isDefeated ? "Medieval dragon repelled and defeated" : `Medieval dragon raiding village (${bossHpPercent}% HP left)`}
     >
       <div
         className={`dragon-container ${showFinalBlowArc ? "dragon-final-blow" : ""}`}
         style={{
-          left: `${calculatedLeftPercent}%`,
+          width: "100%",
+          height: "100%",
           opacity: isDefeated && !showFinalBlowArc ? 0.35 : 1,
         }}
       >
-        <div className="dragon-idle-bob">
+        <div className="dragon-idle-bob" style={{ width: "100%", height: "100%" }}>
           <svg viewBox="0 0 340 260" width="100%" height="100%">
             <g transform="translate(10, 10)" className="medieval-dragon">
 
-              {/* --- BACKGROUND LAYER 1: Left Bat-Wing (Behind Torso, Head & Chest) --- */}
-              <g className="dragon-wing-left" transform="translate(10, -10)">
-                {/* Large Sweeping Bat Membrane with Jagged Cutouts */}
+              {/* --- BACKGROUND LAYER 1: Left Sweeping Bat Wing (BEHIND Head, Neck & Torso Z-Layer) --- */}
+              <g className="dragon-wing-left" transform="translate(15, -12)">
+                {/* Large Sweeping Bat Membrane */}
                 <path
-                  d="M 130 100 L 270 -25 L 240 25 Q 215 35 190 70 Q 160 80 130 100 Z"
+                  d="M 130 100 L 270 -28 L 240 22 Q 215 32 190 68 Q 160 78 130 100 Z"
                   fill="#0b0f17"
                   stroke="#020617"
                   strokeWidth="3.5"
                   strokeLinejoin="round"
                 />
                 {/* Wing Bone Struts */}
-                <line x1="130" y1="100" x2="270" y2="-25" stroke="#334155" strokeWidth="3" />
-                <path d="M 270 -25 Q 215 35 190 70" fill="none" stroke="#334155" strokeWidth="2.5" />
-                <path d="M 270 -25 Q 175 55 130 100" fill="none" stroke="#334155" strokeWidth="2" />
+                <line x1="130" y1="100" x2="270" y2="-28" stroke="#334155" strokeWidth="3" />
+                <path d="M 270 -28 Q 215 32 190 68" fill="none" stroke="#334155" strokeWidth="2.5" />
+                <path d="M 270 -28 Q 175 52 130 100" fill="none" stroke="#334155" strokeWidth="2" />
                 {/* Sharp Wing-Tip Claw Spur */}
-                <polygon points="270,-25 284,-35 272,-15" fill="#ef4444" stroke="#020617" strokeWidth="1.5" />
+                <polygon points="270,-28 284,-38 272,-18" fill="#ef4444" stroke="#020617" strokeWidth="1.5" />
               </g>
 
-              {/* --- BACKGROUND LAYER 2: Right Bat-Wing (Behind Head & Chest) --- */}
-              <g className="dragon-wing-right" transform="translate(-25, -15)">
+              {/* --- BACKGROUND LAYER 2: Right Sweeping Bat Wing (BEHIND Head & Chest Z-Layer) --- */}
+              <g className="dragon-wing-right" transform="translate(-20, -18)">
                 <path
-                  d="M 140 105 L 10 -20 L 50 30 Q 80 65 110 95 Z"
+                  d="M 140 105 L 10 -25 L 50 25 Q 80 60 110 92 Z"
                   fill="#1e293b"
                   stroke="#020617"
                   strokeWidth="3.5"
                   strokeLinejoin="round"
                 />
-                <line x1="140" y1="105" x2="10" y2="-20" stroke="#020617" strokeWidth="3" />
-                <path d="M 10 -20 Q 70 35 110 95" fill="none" stroke="#020617" strokeWidth="2" />
-                <polygon points="10,-20 0,-28 8,-12" fill="#ef4444" stroke="#020617" strokeWidth="1.5" />
+                <line x1="140" y1="105" x2="10" y2="-25" stroke="#020617" strokeWidth="3" />
+                <path d="M 10 -25 Q 70 30 110 92" fill="none" stroke="#020617" strokeWidth="2" />
+                <polygon points="10,-25 0,-33 8,-17" fill="#ef4444" stroke="#020617" strokeWidth="1.5" />
               </g>
 
               {/* --- LAYER 3: Seamless Reattached Barbed Tail --- */}
@@ -87,7 +95,7 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
                 <path d="M 200 205 Q 190 195 182 203 Q 192 213 200 205 Z" fill="#ef4444" stroke="#020617" strokeWidth="2" />
               </g>
 
-              {/* --- LAYER 4: Back Spine Spikes (Following Neck & Spine Curve) --- */}
+              {/* --- LAYER 4: Back Spine Spikes (Directly Along Spinal Curve) --- */}
               <g className="dragon-spine-spikes">
                 <path
                   d="M 42 22 Q 52 35 75 75 Q 110 100 165 112 Q 210 135 240 165"
@@ -102,6 +110,7 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
               {/* --- LAYER 5: Back Hind Leg (Limb 1/4) --- */}
               <g className="dragon-back-leg">
                 <path d="M 185 155 Q 215 185 200 215 L 175 220" fill="none" stroke="#0f172a" strokeWidth="15" strokeLinecap="round" />
+                {/* Organic Curved Claws */}
                 <path d="M 175 220 Q 165 228 158 232" fill="none" stroke="#d9c3b0" strokeWidth="3.5" strokeLinecap="round" />
                 <path d="M 178 222 Q 170 231 165 236" fill="none" stroke="#d9c3b0" strokeWidth="3.5" strokeLinecap="round" />
               </g>
@@ -127,11 +136,12 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
               {/* --- LAYER 8: Front Hind Leg (Limb 3/4) --- */}
               <g className="dragon-front-leg">
                 <path d="M 170 155 Q 205 185 190 220 L 160 225" fill="none" stroke="var(--scene-boss-slate)" strokeWidth="16" strokeLinecap="round" />
+                {/* Organic Curved Claws */}
                 <path d="M 160 225 Q 148 234 140 238" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" />
                 <path d="M 164 227 Q 155 237 148 242" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" />
               </g>
 
-              {/* --- LAYER 9: Menacing Dragon Head, Snout, Mouth & Horns (100% VISIBLE IN FOREGROUND) --- */}
+              {/* --- LAYER 9: Menacing Dragon Head, Snout, Mouth & Horns (100% VISIBLE FOREGROUND) --- */}
               <g className="dragon-head-neck">
                 {/* Thick Muscular Neck */}
                 <path
@@ -141,9 +151,9 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
                   strokeWidth="4.5"
                 />
 
-                {/* Protruding Menacing Snout & Upper Jaw */}
+                {/* Protruding Predator Snout & Upper Jaw */}
                 <path
-                  d="M 50 42 L -6 24 L 20 12 L 64 30 Z"
+                  d="M 50 42 L -8 24 L 18 10 L 64 28 Z"
                   fill="var(--scene-boss-slate)"
                   stroke="#020617"
                   strokeWidth="4"
@@ -152,7 +162,7 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
 
                 {/* Open Ferocious Lower Jaw */}
                 <path
-                  d="M 42 54 L -10 38 L 18 62 Z"
+                  d="M 42 54 L -12 38 L 16 62 Z"
                   fill="var(--scene-boss-slate)"
                   stroke="#020617"
                   strokeWidth="3.5"
@@ -160,8 +170,8 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
                 />
 
                 {/* Fiery Inner Mouth Cavity & Flame Tongue */}
-                <polygon points="36,46 0,32 14,48" fill="#7f1d1d" />
-                <path d="M 24 45 Q 4 38 8 46" fill="none" stroke="#ef4444" strokeWidth="3" />
+                <polygon points="36,46 -2,32 14,48" fill="#7f1d1d" />
+                <path d="M 24 45 Q 2 38 6 46" fill="none" stroke="#ef4444" strokeWidth="3" />
 
                 {/* Sharp Curved Fangs (INSIDE Mouth Jaws) */}
                 <path d="M 6 28 Q 4 35 8 34" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
@@ -170,22 +180,23 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
                 <path d="M 4 37 Q 2 32 6 39" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
                 <path d="M 12 40 Q 10 35 14 42" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
 
-                {/* Dual Menacing Curved Head Horns */}
-                <path d="M 45 28 C 30 10 10 -10 -2 -22 C 14 -10 28 3 42 20 Z" fill="#ef4444" stroke="#020617" strokeWidth="2.5" />
-                <path d="M 54 26 C 44 6 26 -16 12 -28 C 28 -16 42 0 52 18 Z" fill="#ef4444" stroke="#020617" strokeWidth="2.5" />
+                {/* Dual Menacing Sweeping Head Horns */}
+                <path d="M 45 28 C 30 10 10 -10 -4 -24 C 14 -10 28 3 42 20 Z" fill="#ef4444" stroke="#020617" strokeWidth="2.5" />
+                <path d="M 54 26 C 44 6 26 -16 10 -30 C 28 -16 42 0 52 18 Z" fill="#ef4444" stroke="#020617" strokeWidth="2.5" />
 
                 {/* Nostril Ridge */}
-                <ellipse cx="4" cy="20" rx="2" ry="1.2" fill="#020617" />
+                <ellipse cx="2" cy="18" rx="2.2" ry="1.2" fill="#020617" />
 
-                {/* Ferocious Glowing Red/Gold Eye */}
-                <ellipse cx="36" cy="22" rx="8" ry="6" fill="#f59e0b" stroke="#020617" strokeWidth="2" />
-                <ellipse cx="36" cy="22" rx="2" ry="5" fill="#020617" />
-                <circle cx="34" cy="20" r="1.8" fill="#fff" />
+                {/* Ferocious Glowing Crimson/Gold Eye with Slitted Pupil */}
+                <ellipse cx="36" cy="20" rx="8.5" ry="6.5" fill="#f59e0b" stroke="#020617" strokeWidth="2" />
+                <ellipse cx="36" cy="20" rx="2.2" ry="5.5" fill="#020617" />
+                <circle cx="34" cy="18" r="1.8" fill="#fff" />
               </g>
 
               {/* --- LAYER 10: Front Claw Arm (Limb 4/4) --- */}
               <g className="dragon-front-arm">
                 <path d="M 105 140 L 72 175 L 50 168" fill="none" stroke="var(--scene-boss-slate)" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
+                {/* Organic Curved Claws */}
                 <path d="M 50 168 Q 38 174 34 180" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" />
                 <path d="M 53 171 Q 42 179 38 186" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" />
               </g>

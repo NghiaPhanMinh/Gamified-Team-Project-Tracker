@@ -1,175 +1,128 @@
-import { useMemo } from "react";
-
-type VillageHpTier = "healthy" | "normal" | "damaged" | "critical";
-
 type LandscapeVillageProps = {
   villageHpPercent: number; // 0 to 100
 };
 
 export function LandscapeVillage({ villageHpPercent }: LandscapeVillageProps) {
-  const tier: VillageHpTier = useMemo(() => {
-    if (villageHpPercent > 75) return "healthy";
-    if (villageHpPercent >= 50) return "normal";
-    if (villageHpPercent >= 25) return "damaged";
-    return "critical";
-  }, [villageHpPercent]);
-
-  const isHealthy = tier === "healthy";
-  const isDamaged = tier === "damaged" || tier === "critical";
-  const isCritical = tier === "critical";
+  // Village HP status color
+  const hpColor =
+    villageHpPercent > 70
+      ? "#22c55e"
+      : villageHpPercent > 40
+        ? "#f59e0b"
+        : "#ef4444";
 
   return (
-    <div className={`landscape-layer layer-5-village village-tier-${tier}`} aria-label={`Village state: ${villageHpPercent}% HP (${tier})`}>
-      {/* --- Section 3: Village HP Bar Visually Anchored Directly to Village Structure --- */}
-      <div className="village-hp-anchored-badge">
-        <div className="village-hp-badge-header">
-          <span className="village-hp-icon">🏰</span>
-          <span className="village-hp-title">Village HP</span>
-          <strong className="village-hp-val">{villageHpPercent}%</strong>
-        </div>
-        <div className="village-hp-bar-track" role="progressbar" aria-valuenow={villageHpPercent} aria-valuemin={0} aria-valuemax={100}>
-          <div
-            className={`village-hp-bar-fill fill-${tier}`}
-            style={{ width: `${villageHpPercent}%` }}
-          />
-        </div>
-      </div>
-
+    <div className="landscape-layer layer-5-village" aria-label="Grounded fortified village">
+      {/* Grounded Palisade Fence & Spread-Out Village SVG Structure */}
       <svg viewBox="0 0 1000 400" width="100%" height="100%">
-        {/* Village Group on Left ~28% (Grounded directly on ground plane y = 295) */}
-        <g transform="translate(25, 0)">
-          {/* Section 5: Background Palisade Fence Line (Top/Back of Perimeter Box) */}
-          <use href="#background-fence-shape" x="10" y="245" />
-          <use href="#background-fence-shape" x="50" y="245" />
-          <use href="#background-fence-shape" x="90" y="245" />
-          <use href="#background-fence-shape" x="130" y="245" />
-          <use href="#background-fence-shape" x="170" y="245" />
-          <use href="#background-fence-shape" x="210" y="245" />
+        <g transform="translate(20, 150)">
+          {/* Palisade & Split-Rail Outer Fence Box */}
+          <g className="village-fence-box">
+            {/* Back Fence Line */}
+            <path
+              d="M 5 80 L 235 80"
+              stroke="#5c3a21"
+              strokeWidth="4"
+              strokeDasharray="6 4"
+            />
+            {/* Left Palisade Wall */}
+            <path
+              d="M 10 140 L 10 70 M 20 140 L 20 65 M 30 140 L 30 70 M 40 140 L 40 65 M 50 140 L 50 70"
+              stroke="#3d2314"
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
+            {/* Right Palisade Wall */}
+            <path
+              d="M 190 140 L 190 65 M 200 140 L 200 70 M 210 140 L 210 65 M 220 140 L 220 70 M 230 140 L 230 65"
+              stroke="#3d2314"
+              strokeWidth="5"
+              strokeLinecap="round"
+            />
+          </g>
 
-          {/* Watchtower on Left Perimeter Corner */}
-          <use href="#watchtower-shape" x="5" y="175" />
-
-          {/* Chimney Smoke Wisp (Only when healthy >75%) */}
-          {isHealthy ? (
-            <g transform="translate(150, 175)" className="village-smoke-wisp">
-              <circle cx="0" cy="0" r="4.5" fill="var(--scene-cloud)" opacity="0.65" />
-              <circle cx="-3" cy="-10" r="6.5" fill="var(--scene-cloud)" opacity="0.5" />
-              <circle cx="2" cy="-22" r="8.5" fill="var(--scene-cloud)" opacity="0.3" />
+          {/* Spread-Out Village Buildings (Grounded on grass baseline) */}
+          <g className="village-buildings">
+            {/* Watchtower (Left) */}
+            <g transform="translate(25, 30)">
+              <rect x="0" y="20" width="34" height="85" fill="#334155" stroke="#0f172a" strokeWidth="2.5" />
+              <polygon points="-4,20 17,0 38,20" fill="#dc2626" stroke="#0f172a" strokeWidth="2" />
+              <rect x="10" y="35" width="14" height="18" rx="2" fill="#fef08a" />
+              <line x1="17" y1="0" x2="17" y2="-12" stroke="#0f172a" strokeWidth="2" />
+              <polygon points="17,-12 32,-8 17,-4" fill="#dc2626" />
             </g>
-          ) : null}
 
-          {/* Ember particles rising when <= 25% HP */}
-          {isCritical ? (
-            <g transform="translate(140, 190)" className="village-smoke-wisp">
-              <circle cx="20" cy="10" r="3" fill="var(--scene-ember-danger)" opacity="0.9" />
-              <circle cx="60" cy="20" r="3.5" fill="var(--scene-ember-gold)" opacity="0.8" />
-              <circle cx="110" cy="15" r="2.5" fill="var(--scene-ember-danger)" opacity="0.95" />
+            {/* Cottage 1 (Center-Left) */}
+            <g transform="translate(68, 65)">
+              <rect x="0" y="15" width="42" height="55" fill="#f8fafc" stroke="#0f172a" strokeWidth="2.5" />
+              <polygon points="-6,15 21,0 48,15" fill="#ea580c" stroke="#0f172a" strokeWidth="2" />
+              <rect x="14" y="35" width="14" height="35" fill="#475569" />
+              <rect x="8" y="24" width="10" height="10" rx="1" fill="#fef08a" />
             </g>
-          ) : null}
 
-          {/* Section 5: Individual Houses Spread Out Inside Fence */}
-          {/* House 1: Left Timber Cottage */}
-          <g
-            transform="translate(58, 230)"
-            className="village-house"
-            style={{ filter: tier === "normal" ? "saturate(0.7)" : "none" }}
-          >
-            <rect x="0" y="20" width="48" height="45" fill="var(--scene-house-wall)" stroke="var(--scene-boss-slate)" strokeWidth="3" rx="1" />
-            <line x1="0" y1="20" x2="48" y2="65" stroke="var(--scene-boss-slate)" strokeWidth="1.5" opacity="0.4" />
-            <line x1="48" y1="20" x2="0" y2="65" stroke="var(--scene-boss-slate)" strokeWidth="1.5" opacity="0.4" />
-            <polygon
-              points="-4,22 24,0 52,22"
-              fill={isCritical ? "var(--scene-ember-danger)" : "var(--scene-house-roof)"}
-              stroke="var(--scene-boss-slate)"
-              strokeWidth="3"
-              strokeLinejoin="round"
-            />
-            <rect x="18" y="42" width="12" height="23" fill="var(--scene-boss-slate)" />
-            <rect
-              x="6"
-              y="30"
-              width="10"
-              height="10"
-              rx="1"
-              fill={isHealthy ? "var(--scene-ember-gold)" : "#475569"}
-              stroke="var(--scene-boss-slate)"
-              strokeWidth="1.5"
-            />
+            {/* Town Hall (Center) */}
+            <g transform="translate(115, 45)">
+              <rect x="0" y="25" width="58" height="65" fill="#f8fafc" stroke="#0f172a" strokeWidth="2.5" />
+              <polygon points="-8,25 29,0 66,25" fill="#c2410c" stroke="#0f172a" strokeWidth="2" />
+              <rect x="20" y="42" width="18" height="48" rx="9" fill="#1e293b" />
+              <circle cx="29" cy="18" r="7" fill="#fef08a" stroke="#0f172a" strokeWidth="1.5" />
+            </g>
+
+            {/* Stone Forge (Right) */}
+            <g transform="translate(180, 75)">
+              <rect x="0" y="12" width="38" height="48" fill="#475569" stroke="#0f172a" strokeWidth="2.5" />
+              <polygon points="-5,12 19,-2 43,12" fill="#1e293b" stroke="#0f172a" strokeWidth="2" />
+              <rect x="12" y="30" width="14" height="30" fill="#0f172a" />
+            </g>
           </g>
 
-          {/* House 2: Center Town Hall */}
-          <g
-            transform="translate(120, 205)"
-            className="village-house"
-            style={{ filter: tier === "normal" ? "saturate(0.7)" : "none" }}
-          >
-            <rect x="54" y="10" width="9" height="25" fill="var(--scene-boss-slate)" />
-            <rect x="0" y="65" width="68" height="25" fill="#38434f" stroke="var(--scene-boss-slate)" strokeWidth="3" />
-            <rect x="0" y="25" width="68" height="42" fill="var(--scene-house-wall)" stroke="var(--scene-boss-slate)" strokeWidth="3" />
-            <polygon
-              points="-5,27 34,-5 73,27"
-              fill={isDamaged ? "var(--scene-ember-danger)" : "var(--scene-house-roof)"}
-              stroke="var(--scene-boss-slate)"
-              strokeWidth="3"
-              strokeLinejoin="round"
+          {/* Front Palisade Wall Gate */}
+          <g className="village-front-gate" transform="translate(0, 115)">
+            <path
+              d="M 5 20 L 235 20"
+              stroke="#5c3a21"
+              strokeWidth="5"
             />
-            <path d="M 26 90 V 64 A 8 8 0 0 1 42 64 V 90 Z" fill="var(--scene-boss-slate)" />
-            <rect
-              x="12"
-              y="36"
-              width="13"
-              height="13"
-              rx="1"
-              fill={isHealthy ? "var(--scene-ember-gold)" : "#475569"}
-              stroke="var(--scene-boss-slate)"
-              strokeWidth="2"
-            />
-            <rect
-              x="43"
-              y="36"
-              width="13"
-              height="13"
-              rx="1"
-              fill={isHealthy ? "var(--scene-ember-gold)" : "#475569"}
-              stroke="var(--scene-boss-slate)"
-              strokeWidth="2"
+            <path
+              d="M 15 20 L 15 0 M 35 20 L 35 -5 M 55 20 L 55 0 M 185 20 L 185 0 M 205 20 L 205 -5 M 225 20 L 225 0"
+              stroke="#3d2314"
+              strokeWidth="4.5"
+              strokeLinecap="round"
             />
           </g>
-
-          {/* House 3: Stone Forge */}
-          <g
-            transform="translate(195, 235)"
-            className="village-house"
-            style={{ filter: tier === "normal" ? "saturate(0.7)" : "none" }}
-          >
-            <rect x="0" y="15" width="44" height="45" fill="#424f5d" stroke="var(--scene-boss-slate)" strokeWidth="3" rx="1" />
-            <polygon
-              points="-3,17 22,0 47,17"
-              fill={isCritical ? "var(--scene-ember-danger)" : "var(--scene-house-roof)"}
-              stroke="var(--scene-boss-slate)"
-              strokeWidth="3"
-              strokeLinejoin="round"
-            />
-            <rect x="15" y="38" width="14" height="22" fill="var(--scene-boss-slate)" />
-            <rect
-              x="26"
-              y="22"
-              width="10"
-              height="10"
-              rx="1"
-              fill={isHealthy ? "var(--scene-ember-gold)" : "#475569"}
-              stroke="var(--scene-boss-slate)"
-              strokeWidth="1.5"
-            />
-          </g>
-
-          {/* Section 5: Front Palisade Wall (Bottom/Front of Perimeter Box) */}
-          <use href="#palisade-wall-shape" x="0" y="240" />
-          <use href="#palisade-wall-shape" x="24" y="240" />
-          <use href="#palisade-wall-shape" x="236" y="240" />
-          <use href="#palisade-wall-shape" x="260" y="240" />
         </g>
       </svg>
+
+      {/* Anchored Village HP Badge Overlay (Under/Over village structure on bottom-left) */}
+      <div
+        className="village-hp-anchored-badge"
+        style={{
+          position: "absolute",
+          left: "20px",
+          bottom: "15px",
+          zIndex: 25,
+          background: "rgba(15, 23, 42, 0.9)",
+          color: "#fff",
+          padding: "6px 12px",
+          borderRadius: "10px",
+          border: "2px solid rgba(255, 255, 255, 0.2)",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+          fontFamily: "sans-serif",
+        }}
+      >
+        <span style={{ fontSize: "13px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+          🏰 Village HP
+        </span>
+        <span style={{ fontSize: "14px", fontWeight: 900, color: hpColor }}>
+          {villageHpPercent}%
+        </span>
+        <div style={{ width: "60px", height: "8px", background: "rgba(255,255,255,0.2)", borderRadius: "4px", overflow: "hidden" }}>
+          <div style={{ width: `${villageHpPercent}%`, height: "100%", background: hpColor, transition: "width 0.3s ease" }} />
+        </div>
+      </div>
     </div>
   );
 }
