@@ -41,150 +41,159 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
         <div className="dragon-idle-bob">
           <svg viewBox="0 0 320 250" width="100%" height="100%">
             <g transform="translate(10, 10)" className="medieval-dragon">
-              {/* --- 1. Tail with Barbed Arrowhead --- */}
-              <path
-                d="M 230 150 Q 285 175 270 215 Q 240 235 205 195"
-                fill="none"
-                stroke="var(--scene-boss-slate)"
-                strokeWidth="14"
-                strokeLinecap="round"
-              />
-              {/* Tail Spine Ridges */}
-              <polygon points="275,200 288,208 270,218" fill="var(--scene-ember-danger)" />
-              <polygon points="255,225 262,238 245,232" fill="var(--scene-ember-danger)" />
-              {/* Barbed Arrowhead Tip */}
-              <polygon points="195,190 210,185 205,210" fill="var(--scene-ember-danger)" stroke="var(--scene-boss-slate)" strokeWidth="2" />
 
-              {/* --- 2. Back Hind Leg (Limb 1/4) --- */}
-              <g className="dragon-back-leg">
-                <path d="M 190 150 Q 220 180 205 210 L 180 215" fill="none" stroke="#1b232a" strokeWidth="16" strokeLinecap="round" />
-                {/* Claws */}
-                <polygon points="175,215 168,222 178,212" fill="#d9c3b0" />
-                <polygon points="182,216 177,225 186,213" fill="#d9c3b0" />
-              </g>
-
-              {/* --- 3. Back Front Arm (Limb 2/4) --- */}
-              <g className="dragon-back-arm">
-                <path d="M 115 135 L 90 165 L 75 160" fill="none" stroke="#1b232a" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
-                <polygon points="72,158 64,163 74,162" fill="#d9c3b0" />
-                <polygon points="73,162 67,169 77,165" fill="#d9c3b0" />
-              </g>
-
-              {/* --- 4. Back Wing --- */}
-              <g className="dragon-wing-left">
+              {/* --- Layer 1: Background Left Wing (Scary Jagged Membrane & Tip Spur) --- */}
+              <g className="dragon-wing-left" transform="translate(0, 0)">
+                {/* Main Membrane with Jagged Torn Cutouts */}
                 <path
-                  d="M 155 90 L 250 10 L 205 100 L 140 105 Z"
-                  fill="#172026"
-                  stroke="var(--scene-boss-slate)"
-                  strokeWidth="4"
+                  d="M 145 95 L 260 0 L 235 45 Q 215 50 195 80 Q 170 85 145 95 Z"
+                  fill="#111827"
+                  stroke="#0f172a"
+                  strokeWidth="3.5"
                   strokeLinejoin="round"
                 />
-                <path d="M 250 10 Q 200 45 205 100" fill="none" stroke="var(--scene-boss-slate)" strokeWidth="2" />
-                <polygon points="250,10 258,4 252,14" fill="var(--scene-ember-danger)" />
+                {/* Strut Bones */}
+                <line x1="145" y1="95" x2="260" y2="0" stroke="var(--scene-boss-slate)" strokeWidth="3" />
+                <path d="M 260 0 Q 210 50 195 80" fill="none" stroke="var(--scene-boss-slate)" strokeWidth="2.5" />
+                <path d="M 260 0 Q 185 65 145 95" fill="none" stroke="var(--scene-boss-slate)" strokeWidth="2" />
+                {/* Sharp Wing-Tip Spur */}
+                <polygon points="260,0 272,-8 262,10" fill="var(--scene-ember-danger)" stroke="#0f172a" strokeWidth="1.5" />
               </g>
 
-              {/* --- 5. Main Body Torso --- */}
+              {/* --- Layer 2: Seamless Connected Tail --- */}
+              <g className="dragon-tail">
+                <path
+                  d="M 190 150 C 235 155 270 170 260 210 C 250 235 210 230 195 200"
+                  fill="none"
+                  stroke="var(--scene-boss-slate)"
+                  strokeWidth="16"
+                  strokeLinecap="round"
+                />
+                {/* Tail Spine Ridges */}
+                <path d="M 235 160 Q 255 170 262 195" fill="none" stroke="var(--scene-ember-danger)" strokeWidth="4" strokeLinecap="round" />
+                {/* Barbed Arrowhead Tip */}
+                <path d="M 195 200 Q 185 190 178 198 Q 188 208 195 200 Z" fill="var(--scene-ember-danger)" stroke="#0f172a" strokeWidth="2" />
+              </g>
+
+              {/* --- Layer 3: Back Spikes along Spine (Following Neck & Spine Curve) --- */}
+              <g className="dragon-spine-spikes">
+                <path
+                  d="M 42 22 Q 52 35 75 75 Q 110 100 165 112 Q 210 135 240 165"
+                  fill="none"
+                  stroke="var(--scene-ember-danger)"
+                  strokeWidth="6"
+                  strokeDasharray="6 4"
+                  strokeLinecap="round"
+                />
+              </g>
+
+              {/* --- Layer 4: Back Hind Leg (Limb 1/4) --- */}
+              <g className="dragon-back-leg">
+                <path d="M 185 155 Q 215 185 200 215 L 175 220" fill="none" stroke="#111827" strokeWidth="15" strokeLinecap="round" />
+                {/* Curved Claws */}
+                <path d="M 175 220 Q 165 228 158 232" fill="none" stroke="#d9c3b0" strokeWidth="3" strokeLinecap="round" />
+                <path d="M 178 222 Q 170 231 165 236" fill="none" stroke="#d9c3b0" strokeWidth="3" strokeLinecap="round" />
+              </g>
+
+              {/* --- Layer 5: Back Front Arm (Limb 2/4) --- */}
+              <g className="dragon-back-arm">
+                <path d="M 115 135 L 90 165 L 75 160" fill="none" stroke="#111827" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M 75 160 Q 64 163 58 167" fill="none" stroke="#d9c3b0" strokeWidth="2.5" strokeLinecap="round" />
+              </g>
+
+              {/* --- Layer 6: Main Torso Body --- */}
               <path
-                d="M 75 125 Q 130 90 210 125 Q 220 175 160 190 Q 95 195 75 125 Z"
+                d="M 75 125 Q 130 90 200 125 Q 215 175 160 190 Q 95 195 75 125 Z"
                 fill="var(--scene-boss-slate)"
                 stroke="#0f172a"
-                strokeWidth="5"
+                strokeWidth="4.5"
               />
 
-              {/* Chest Scales / Armor Plates */}
-              <path
-                d="M 85 140 Q 115 170 155 165"
-                fill="none"
-                stroke="var(--scene-ember-danger)"
-                strokeWidth="5"
-                strokeLinecap="round"
-              />
-              <path
-                d="M 95 155 Q 120 180 150 176"
-                fill="none"
-                stroke="var(--scene-ember-gold)"
-                strokeWidth="4"
-                strokeLinecap="round"
-              />
+              {/* Chest Armor Scales */}
+              <path d="M 85 140 Q 115 170 155 165" fill="none" stroke="var(--scene-ember-danger)" strokeWidth="4.5" strokeLinecap="round" />
+              <path d="M 95 155 Q 120 180 150 176" fill="none" stroke="var(--scene-ember-gold)" strokeWidth="3.5" strokeLinecap="round" />
 
-              {/* Spine Plates along Neck and Back */}
-              <polygon points="110,85 116,68 124,84" fill="var(--scene-ember-danger)" />
-              <polygon points="135,88 143,70 150,89" fill="var(--scene-ember-danger)" />
-              <polygon points="160,96 170,78 176,99" fill="var(--scene-ember-danger)" />
-              <polygon points="185,108 196,92 200,112" fill="var(--scene-ember-danger)" />
-
-              {/* --- 6. Front Hind Leg (Limb 3/4) --- */}
-              <g className="dragon-front-leg">
-                <path d="M 175 155 Q 210 185 195 220 L 165 225" fill="none" stroke="var(--scene-boss-slate)" strokeWidth="18" strokeLinecap="round" />
-                {/* Claws */}
-                <polygon points="160,225 148,232 162,221" fill="#fff" stroke="var(--scene-boss-slate)" strokeWidth="1" />
-                <polygon points="166,227 158,236 171,223" fill="#fff" stroke="var(--scene-boss-slate)" strokeWidth="1" />
-                <polygon points="172,228 168,238 178,225" fill="#fff" stroke="var(--scene-boss-slate)" strokeWidth="1" />
+              {/* --- Layer 7: Right Wing (Moved Behind Head/Chest) --- */}
+              <g className="dragon-wing-right" transform="translate(-10, -5)">
+                <path
+                  d="M 125 95 L 30 10 L 65 55 Q 85 85 105 105 Z"
+                  fill="var(--scene-boss-slate)"
+                  stroke="#0f172a"
+                  strokeWidth="3.5"
+                  strokeLinejoin="round"
+                />
+                <line x1="125" y1="95" x2="30" y2="10" stroke="#0f172a" strokeWidth="2.5" />
+                <polygon points="30,10 20,4 28,16" fill="var(--scene-ember-danger)" stroke="#0f172a" strokeWidth="1.5" />
               </g>
 
-              {/* --- 7. Neck & Medieval Dragon Head with Snout & Open Mouth --- */}
+              {/* --- Layer 8: Front Hind Leg (Limb 3/4) --- */}
+              <g className="dragon-front-leg">
+                <path d="M 170 155 Q 205 185 190 220 L 160 225" fill="none" stroke="var(--scene-boss-slate)" strokeWidth="16" strokeLinecap="round" />
+                {/* Tapered Curved Claws */}
+                <path d="M 160 225 Q 148 234 140 238" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" />
+                <path d="M 164 227 Q 155 237 148 242" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" />
+              </g>
+
+              {/* --- Layer 9: Head, Snout, Mouth & Horns --- */}
               <g className="dragon-head-neck">
                 {/* Neck */}
                 <path
                   d="M 90 140 Q 48 110 40 68 Q 20 45 60 38 Q 92 60 102 120 Z"
                   fill="var(--scene-boss-slate)"
                   stroke="#0f172a"
-                  strokeWidth="5"
+                  strokeWidth="4.5"
                 />
 
-                {/* Upper Head & Snout */}
-                <polygon points="45,45 5,30 25,18 60,35" fill="var(--scene-boss-slate)" stroke="#0f172a" strokeWidth="4" strokeLinejoin="round" />
-
-                {/* Open Lower Jaw */}
-                <polygon points="40,54 -2,42 22,62" fill="var(--scene-boss-slate)" stroke="#0f172a" strokeWidth="3" strokeLinejoin="round" />
-
-                {/* Inside Mouth & Tongue */}
-                <polygon points="35,47 6,36 18,48" fill="#800f1c" />
-                <path d="M 25 46 Q 8 42 12 47" fill="none" stroke="var(--scene-ember-danger)" strokeWidth="2.5" />
-
-                {/* Sharp Teeth (Upper & Lower) */}
-                <polygon points="8,31 5,37 12,33" fill="#fff" />
-                <polygon points="16,33 13,40 20,35" fill="#fff" />
-                <polygon points="24,35 22,42 28,37" fill="#fff" />
-                <polygon points="4,41 2,36 8,43" fill="#fff" />
-                <polygon points="12,44 10,39 16,46" fill="#fff" />
-
-                {/* Dual Curved Head Horns */}
-                <path d="M 45 32 C 30 15 15 -5 5 -12 C 18 -5 32 10 42 26 Z" fill="var(--scene-ember-danger)" stroke="var(--scene-boss-slate)" strokeWidth="2" />
-                <path d="M 55 30 C 45 10 32 -10 20 -20 C 35 -10 48 5 54 22 Z" fill="var(--scene-ember-danger)" stroke="var(--scene-boss-slate)" strokeWidth="2" />
-
-                {/* Nostril Dot */}
-                <circle cx="10" cy="27" r="1.5" fill="#0f172a" />
-
-                {/* Fiery Dragon Eye */}
-                <polygon points="34,26 44,24 38,32" fill="var(--scene-ember-gold)" stroke="var(--scene-boss-slate)" strokeWidth="1" />
-                <line x1="39" y1="24" x2="38" y2="32" stroke="#0f172a" strokeWidth="2" />
-              </g>
-
-              {/* --- 8. Front Claw Arm (Limb 4/4) --- */}
-              <g className="dragon-front-arm">
-                <path d="M 105 140 L 72 175 L 50 168" fill="none" stroke="var(--scene-boss-slate)" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
-                {/* 3 Sharp Front Claws */}
-                <polygon points="48,165 38,170 49,170" fill="#fff" stroke="var(--scene-boss-slate)" strokeWidth="1" />
-                <polygon points="49,170 41,178 52,174" fill="#fff" stroke="var(--scene-boss-slate)" strokeWidth="1" />
-                <polygon points="53,173 47,183 56,175" fill="#fff" stroke="var(--scene-boss-slate)" strokeWidth="1" />
-              </g>
-
-              {/* --- 9. Front Wing --- */}
-              <g className="dragon-wing-right">
+                {/* Protruding Outward Snout & Upper Jaw */}
                 <path
-                  d="M 120 100 L 15 15 L 75 115 L 125 125 Z"
+                  d="M 50 42 L -2 26 L 22 14 L 62 32 Z"
                   fill="var(--scene-boss-slate)"
                   stroke="#0f172a"
-                  strokeWidth="5"
+                  strokeWidth="4"
                   strokeLinejoin="round"
                 />
-                {/* Wing Membrane Finger Struts */}
-                <path d="M 15 15 Q 65 60 75 115" fill="none" stroke="#0f172a" strokeWidth="3" />
-                <path d="M 15 15 Q 90 75 125 125" fill="none" stroke="#0f172a" strokeWidth="2.5" />
-                {/* Wing Thumb Claw */}
-                <polygon points="15,15 8,7 18,10" fill="var(--scene-ember-danger)" stroke="#0f172a" strokeWidth="1.5" />
+
+                {/* Open Lower Jaw */}
+                <path
+                  d="M 42 54 L -6 40 L 20 62 Z"
+                  fill="var(--scene-boss-slate)"
+                  stroke="#0f172a"
+                  strokeWidth="3.5"
+                  strokeLinejoin="round"
+                />
+
+                {/* Dark Inner Mouth Cavity */}
+                <polygon points="36,46 2,34 16,48" fill="#7f1d1d" />
+                <path d="M 24 45 Q 6 40 10 46" fill="none" stroke="var(--scene-ember-danger)" strokeWidth="2.5" />
+
+                {/* Curved Tapered Fangs (INSIDE Mouth Jaws) */}
+                <path d="M 8 30 Q 6 36 10 35" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
+                <path d="M 16 32 Q 14 39 18 37" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
+                <path d="M 24 34 Q 22 41 26 39" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
+                <path d="M 6 39 Q 4 34 8 41" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
+                <path d="M 14 42 Q 12 37 16 44" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
+
+                {/* Dual Curved Head Horns */}
+                <path d="M 45 28 C 30 10 12 -8 2 -18 C 16 -8 30 5 42 22 Z" fill="var(--scene-ember-danger)" stroke="#0f172a" strokeWidth="2" />
+                <path d="M 54 26 C 44 6 28 -14 16 -24 C 30 -14 44 2 52 20 Z" fill="var(--scene-ember-danger)" stroke="#0f172a" strokeWidth="2" />
+
+                {/* Nostril Ridge */}
+                <ellipse cx="6" cy="22" rx="2" ry="1" fill="#0f172a" />
+
+                {/* Expressive Enlarged Dragon Eye */}
+                <ellipse cx="38" cy="24" rx="7" ry="5" fill="var(--scene-ember-gold)" stroke="#0f172a" strokeWidth="1.5" />
+                <ellipse cx="38" cy="24" rx="2" ry="4" fill="#0f172a" />
+                <circle cx="36" cy="22" r="1.5" fill="#fff" />
               </g>
+
+              {/* --- Layer 10: Front Claw Arm (Limb 4/4) --- */}
+              <g className="dragon-front-arm">
+                <path d="M 105 140 L 72 175 L 50 168" fill="none" stroke="var(--scene-boss-slate)" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
+                {/* Tapered Front Claws */}
+                <path d="M 50 168 Q 38 174 34 180" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
+                <path d="M 53 171 Q 42 179 38 186" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
+              </g>
+
             </g>
           </svg>
         </div>

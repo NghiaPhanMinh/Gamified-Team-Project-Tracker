@@ -510,3 +510,41 @@ export const deletePermanently = mutation({
     return project._id;
   },
 });
+
+export const lockTasks = mutation({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+    if (project === null) throw new Error("This project no longer exists.");
+    const { membership, profile } = await requireTeamMember(ctx, project.teamId);
+
+    if (membership.role !== "owner" && project.creatorProfileId !== profile._id) {
+      throw new Error("Only the project leader or team owner can lock tasks.");
+    }
+
+    if (project.tasksLocked) {
+      return project._id;
+    }
+
+    const tasks = await ctx.db
+      .query("tasks")
+      .withIndex("by_project", (q) => q.eq("projectId", project._id))
+      .collect();
+
+    const requiredTasks = tasks.filter((task) => task.required);
+    const tasksTotal = requiredTasks.length;
+
+    if (tasksTotal === 0) {
+      throw new Error("Add at least 1 required task before locking tasks to reveal Boss Health.");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(project._id, {
+      tasksLocked: true,
+      tasksTotal,
+      updatedAt: now,
+    });
+
+    return project._id;
+  },
+});

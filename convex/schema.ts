@@ -198,6 +198,8 @@ export default defineSchema({
     ),
     launchedAt: v.optional(v.number()),
     targetMemberCount: v.optional(v.number()),
+    tasksLocked: v.optional(v.boolean()),
+    tasksTotal: v.optional(v.number()),
   })
     .index("by_team_and_status", ["teamId", "status"])
     .index("by_team_and_updated", ["teamId", "updatedAt"]),
@@ -453,4 +455,16 @@ export default defineSchema({
   })
     .index("by_project_and_source", ["projectId", "source"])
     .index("by_profile_and_time", ["profileId", "createdAt"]),
+  dailyFeed: defineTable({
+    projectId: v.id("projects"),
+    authorProfileId: v.id("userProfiles"),
+    text: v.string(),
+    imageUrls: v.array(v.string()),
+    wordCount: v.number(),
+    imageCount: v.number(),
+    isValid: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_project_and_time", ["projectId", "createdAt"])
+    .index("by_project_author_and_time", ["projectId", "authorProfileId", "createdAt"]),
 });

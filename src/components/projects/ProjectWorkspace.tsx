@@ -12,6 +12,7 @@ import { AllocationWorkbench } from "./AllocationWorkbench";
 import { ProjectTeamMembers } from "./ProjectTeamMembers";
 import { TaskEvidencePanel } from "./TaskEvidencePanel";
 import { TaskTradePanel } from "./TaskTradePanel";
+import { DailyEvidenceFeed } from "./DailyEvidenceFeed";
 
 type ProjectWorkspaceProps = {
   projectId: Id<"projects">;
@@ -30,12 +31,14 @@ type TaskStatus =
   | "verified"
   | "awaiting_creator";
 
-export type ProjectTab = "overview" | "tasks" | "members";
+export type ProjectTab = "overview" | "tasks" | "daily" | "members" | "battle";
 
 const PROJECT_TABS: { value: ProjectTab; label: string }[] = [
   { value: "overview", label: "Overview" },
   { value: "tasks", label: "Tasks" },
+  { value: "daily", label: "Daily Feed" },
   { value: "members", label: "Team Members" },
+  { value: "battle", label: "Battle Scene" },
 ];
 
 const STATUS_LABELS: Record<TaskStatus, string> = {
@@ -417,7 +420,11 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
         </section>
       ) : null}
 
+      {activeTab === "daily" ? <DailyEvidenceFeed projectId={workspace.project._id} /> : null}
+
       {activeTab === "members" ? <ProjectTeamMembers projectId={workspace.project._id} /> : null}
+
+      {activeTab === "battle" ? <BattleScene projectId={workspace.project._id} /> : null}
 
       {briefOpen ? <div className="brief-drawer-backdrop" role="presentation" onClick={() => setBriefOpen(false)}><aside className="brief-drawer" role="dialog" aria-modal="true" aria-labelledby="project-brief-title" onClick={(event) => event.stopPropagation()}><button className="guided-back-link" type="button" onClick={() => setBriefOpen(false)}>Close</button><p className="kicker">Project brief</p>{workspace.canManageProject ? <form onSubmit={saveBrief}><label><span>Project name</span><input required maxLength={100} value={briefTitle} onChange={(event) => setBriefTitle(event.target.value)} /></label><label><span>Deadline</span><input required type="date" value={briefDeadline} onChange={(event) => setBriefDeadline(event.target.value)} /></label><label><span>Brief</span><textarea required maxLength={8000} value={briefDescription} onChange={(event) => setBriefDescription(event.target.value)} /></label><button className="primary-button" type="submit" disabled={isSaving}>Save brief</button></form> : <><h3 className="display-heading" id="project-brief-title">{workspace.project.title}</h3><p>{workspace.project.description}</p><strong>Deadline {workspace.project.deadline}</strong></>}<ol className="brief-phase-list">{workspace.phases.map((phase) => <li key={phase._id}><strong>{phase.title}</strong><span>{phase.description}</span></li>)}</ol></aside></div> : null}
     </section>

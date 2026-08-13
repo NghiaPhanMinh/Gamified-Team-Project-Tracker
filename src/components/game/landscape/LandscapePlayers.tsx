@@ -12,14 +12,20 @@ type LandscapePlayersProps = {
 };
 
 export function LandscapePlayers({ members }: LandscapePlayersProps) {
+  // Section 6: Deterministic Layout Grid - auto-arranges with clean even spacing as player count changes
+  const count = Math.max(1, members.length);
+  const startX = 170;
+  const availableWidth = 260;
+  const spacing = Math.min(50, availableWidth / count);
+
   return (
-    <div className="landscape-layer layer-7-players" aria-label="Party members presence">
+    <div className="landscape-layer layer-7-players" aria-label="Party members roster">
       <svg viewBox="0 0 1000 400" width="100%" height="100%">
-        {/* Positioned near the village ground plane (left ~180px - 260px) */}
-        <g transform="translate(160, 240)">
+        <g>
           {members.map((member, index) => {
-            const offsetX = index * 26;
-            const offsetY = (index % 2) * 6;
+            // Deterministic row positioning
+            const offsetX = startX + index * spacing;
+            const offsetY = 220 + (index % 2) * 16;
             const fill = member.characterFill || "#4ca0fe";
             const outline = member.characterOutline || "var(--scene-boss-slate)";
             const active = member.isActiveToday;
@@ -32,6 +38,31 @@ export function LandscapePlayers({ members }: LandscapePlayersProps) {
                 role="img"
                 aria-label={`${member.displayName} (${active ? "Active today" : "Idle"})`}
               >
+                {/* Section 6: Game ID Tag Pill rendered directly above avatar */}
+                <g transform="translate(15, -12)">
+                  <rect
+                    x="-24"
+                    y="-12"
+                    width="48"
+                    height="15"
+                    rx="7.5"
+                    fill="var(--scene-boss-slate)"
+                    stroke="rgba(255, 255, 255, 0.3)"
+                    strokeWidth="1"
+                  />
+                  <text
+                    x="0"
+                    y="-1.5"
+                    textAnchor="middle"
+                    fill="#fff"
+                    fontSize="9"
+                    fontWeight="600"
+                    fontFamily="sans-serif"
+                  >
+                    {member.displayName.slice(0, 7)}
+                  </text>
+                </g>
+
                 {/* Active glow ring */}
                 {active ? (
                   <circle
