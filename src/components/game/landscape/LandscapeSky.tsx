@@ -1,41 +1,57 @@
+import { useMemo } from "react";
+
 export function LandscapeSky() {
+  // Deterministic seeds for cloud horizontal & vertical offsets per session
+  const farClouds = useMemo(() => [
+    { id: 1, x: 20, y: 15, scale: 1.1 },
+    { id: 2, x: 220, y: 35, scale: 0.85 },
+    { id: 3, x: 440, y: 10, scale: 1.0 },
+    { id: 4, x: 680, y: 40, scale: 0.9 },
+    { id: 5, x: 920, y: 25, scale: 1.15 },
+  ], []);
+
+  const nearClouds = useMemo(() => [
+    { id: 1, x: 80, y: 20, scale: 1.2 },
+    { id: 2, x: 400, y: 45, scale: 0.95 },
+    { id: 3, x: 750, y: 15, scale: 1.3 },
+  ], []);
+
   return (
     <>
-      {/* Layer 0: Energetic Fantasy Sky Gradient */}
-      <div className="landscape-layer layer-0-sky" aria-hidden="true">
-        <svg viewBox="0 0 1000 400" preserveAspectRatio="none" width="100%" height="100%">
-          <defs>
-            <linearGradient id="energetic-sky-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1b355a" />
-              <stop offset="60%" stopColor="#2e5482" />
-              <stop offset="100%" stopColor="#4375aa" />
-            </linearGradient>
-          </defs>
-          <rect x="0" y="0" width="1000" height="120" fill="url(#energetic-sky-grad)" />
-        </svg>
+      {/* Layer 1: Far Clouds */}
+      <div className="landscape-layer layer-1-far-clouds" aria-hidden="true">
+        <div className="cloud-far-wrapper">
+          <svg viewBox="0 0 1200 120" width="100%" height="100%">
+            {farClouds.map((cloud) => (
+              <use
+                key={cloud.id}
+                href="#cloud-cluster-1"
+                x={cloud.x}
+                y={cloud.y}
+                transform={`scale(${cloud.scale})`}
+                opacity="0.65"
+              />
+            ))}
+          </svg>
+        </div>
       </div>
 
-      {/* Layer 1: Distant Parallax Clouds */}
-      <div className="landscape-layer layer-1-clouds-far" aria-hidden="true">
-        <svg viewBox="0 0 1000 400" width="100%" height="100%">
-          <g opacity="0.45" fill="#e2e8f0">
-            <ellipse cx="140" cy="42" rx="48" ry="18" />
-            <ellipse cx="170" cy="38" rx="32" ry="15" />
-            <ellipse cx="520" cy="35" rx="65" ry="22" />
-            <ellipse cx="860" cy="46" rx="55" ry="19" />
-          </g>
-        </svg>
-      </div>
-
-      {/* Layer 2: Near Parallax Clouds */}
-      <div className="landscape-layer layer-2-clouds-near" aria-hidden="true">
-        <svg viewBox="0 0 1000 400" width="100%" height="100%">
-          <g opacity="0.75" fill="#f8fafc">
-            <ellipse cx="320" cy="32" rx="70" ry="24" />
-            <ellipse cx="360" cy="28" rx="45" ry="20" />
-            <ellipse cx="720" cy="36" rx="60" ry="22" />
-          </g>
-        </svg>
+      {/* Layer 2: Near Clouds */}
+      <div className="landscape-layer layer-2-near-clouds" aria-hidden="true">
+        <div className="cloud-near-wrapper">
+          <svg viewBox="0 0 1200 140" width="100%" height="100%">
+            {nearClouds.map((cloud) => (
+              <use
+                key={cloud.id}
+                href="#cloud-cluster-2"
+                x={cloud.x}
+                y={cloud.y}
+                transform={`scale(${cloud.scale})`}
+                opacity="0.9"
+              />
+            ))}
+          </svg>
+        </div>
       </div>
     </>
   );

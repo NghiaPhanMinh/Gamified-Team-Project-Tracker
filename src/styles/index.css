@@ -51,12 +51,12 @@
     "Glacial Indifference", Inter, "Avenir Next", Avenir, "Helvetica Neue",
     Arial, sans-serif;
   --font-heading: var(--font-body);
-  --color-sky-top: #6b8cae;
-  --color-sky-bottom: #cbe3f0;
+  --color-sky-top: #526374;
+  --color-sky-bottom: #b0c4d4;
   --color-cloud: #f4efe6;
   --color-cloud-near: #e5dec9;
-  --color-land: #4a6b53;
-  --color-land-dark: #354e3c;
+  --color-land: #3f523d;
+  --color-land-dark: #314230;
   --color-roof: #b8654b;
   --color-roof-dark: #8c4632;
   --color-dragon: #2c353f;
