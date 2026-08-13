@@ -51,12 +51,12 @@
     "Glacial Indifference", Inter, "Avenir Next", Avenir, "Helvetica Neue",
     Arial, sans-serif;
   --font-heading: var(--font-body);
-  --color-sky-top: #6b8cae;
-  --color-sky-bottom: #cbe3f0;
-  --color-cloud: #f4efe6;
-  --color-cloud-near: #e5dec9;
-  --color-land: #4a6b53;
-  --color-land-dark: #354e3c;
+  --color-sky-top: #f97316;
+  --color-sky-bottom: #fde047;
+  --color-cloud: #ffffff;
+  --color-cloud-near: #ffedd5;
+  --color-land: #4a7c2a;
+  --color-land-dark: #3b6e22;
   --color-roof: #b8654b;
   --color-roof-dark: #8c4632;
   --color-dragon: #2c353f;
@@ -79,12 +79,12 @@
   --color-error: #ff9bb0;
   --border-strong: 3px solid var(--color-cream);
   --shadow-card: 6px 6px 0 var(--color-blue);
-  --color-sky-top: #1a2a38;
-  --color-sky-bottom: #354d63;
-  --color-cloud: #2d3c4a;
-  --color-cloud-near: #3b4c5c;
-  --color-land: #263e2e;
-  --color-land-dark: #1b2d21;
+  --color-sky-top: #ea580c;
+  --color-sky-bottom: #fbbf24;
+  --color-cloud: #fef08a;
+  --color-cloud-near: #fde047;
+  --color-land: #3b6e22;
+  --color-land-dark: #2a5217;
   --color-roof: #7a3e2c;
   --color-roof-dark: #572a1d;
   --color-dragon: #141a21;
