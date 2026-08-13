@@ -6,9 +6,9 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { getErrorMessage } from "../../lib/errors";
 import { BattleScene } from "../game/BattleScene";
-import { ProjectGameProgress } from "../game/ProjectGameProgress";
 import { AIPlanningAssistant, type AiTaskSuggestion } from "./AIPlanningAssistant";
 import { AllocationWorkbench } from "./AllocationWorkbench";
+import { BattleTaskBoard, type BattleTaskSummary } from "./BattleTaskBoard";
 import { ProjectTeamMembers } from "./ProjectTeamMembers";
 import { TaskEvidencePanel } from "./TaskEvidencePanel";
 import { TaskTradePanel } from "./TaskTradePanel";
@@ -31,14 +31,13 @@ type TaskStatus =
   | "verified"
   | "awaiting_creator";
 
-export type ProjectTab = "overview" | "tasks" | "daily" | "members" | "battle";
+export type ProjectTab = "overview" | "tasks" | "daily" | "members";
 
 const PROJECT_TABS: { value: ProjectTab; label: string }[] = [
   { value: "overview", label: "Overview" },
   { value: "tasks", label: "Tasks" },
   { value: "daily", label: "Daily Feed" },
   { value: "members", label: "Team Members" },
-  { value: "battle", label: "Battle Scene" },
 ];
 
 const STATUS_LABELS: Record<TaskStatus, string> = {
@@ -90,11 +89,13 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
   const decideCompletion = useMutation(api.evidence.decideCompletion);
   const updateBrief = useMutation(api.projects.updateBrief);
   const setProjectArchived = useMutation(api.projects.setArchived);
+  const lockTasks = useMutation(api.projects.lockTasks);
 
   const [activeTab, setActiveTab] = useState<ProjectTab>(initialTab);
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<Id<"tasks"> | null>(null);
   const [openEvidenceTaskId, setOpenEvidenceTaskId] = useState<Id<"tasks"> | null>(null);
+  const [openBattleTaskId, setOpenBattleTaskId] = useState<Id<"tasks"> | null>(null);
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [taskPhaseId, setTaskPhaseId] = useState("");
@@ -201,6 +202,32 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
   const requestTasks = workspace.tasks.filter((task) =>
     task.primaryOwnerProfileId === workspace.currentProfileId && task.acceptanceStatus === "pending",
   );
+  const needsMyReviewCount = workspace.tasks.filter((task) =>
+    task.reviewerProfileId === workspace.currentProfileId && ["submitted", "review"].includes(task.status),
+  ).length;
+  const currentPhase = workspace.phases.find((phase) =>
+    workspace.tasks.some((task) => task.phaseId === phase._id && !["completed", "verified"].includes(task.status)),
+  )?.title ?? workspace.phases.at(-1)?.title;
+  const openBattleTask = workspace.tasks.find((task) => task._id === openBattleTaskId);
+  const battleTasks: BattleTaskSummary[] = workspace.tasks.map((task) => ({
+    id: task._id,
+    title: task.title,
+    phase: phaseNameById.get(task.phaseId) ?? "Project work",
+    owner: task.assignmentState === "unassigned"
+      ? "Unassigned"
+      : task.isOpenForClaiming
+        ? "Open for claiming"
+        : memberNameById.get(task.primaryOwnerProfileId) ?? "Team member",
+    reviewer: task.reviewerProfileId ? memberNameById.get(task.reviewerProfileId) ?? "Reviewer" : "Choose later",
+    dueDate: task.dueDate,
+    status: task.status as TaskStatus,
+    weight: task.weight,
+    damage: task.damage ?? ((task.difficulty ?? 1) <= 1 ? 10 : task.difficulty === 2 ? 20 : 30),
+    isMine: task.primaryOwnerProfileId === workspace.currentProfileId,
+    isReviewer: task.reviewerProfileId === workspace.currentProfileId,
+    isOpenForClaiming: Boolean(task.isOpenForClaiming),
+    acceptanceStatus: task.acceptanceStatus,
+  }));
 
   function resetTaskForm() {
     setTaskTitle("");
@@ -325,30 +352,47 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
       {isSaving ? <p className="workspace-saving" role="status">Saving changes…</p> : null}
 
       {activeTab === "overview" ? (
-        <div className="project-overview-flow">
-          <div className="overview-compact-actions">
-            <button className="quiet-button" type="button" onClick={() => setBriefOpen(true)}>Project Brief</button>
-            <button className="quiet-button" type="button" onClick={() => window.print()}>Project Report</button>
-          </div>
+        <div className="project-overview-flow battle-workspace-overview">
+          <section className="shared-battle-stage" aria-label="Shared project Battle scene">
+            <BattleScene projectId={workspace.project._id} currentPhase={currentPhase} tasksLocked={Boolean(workspace.project.tasksLocked)} />
+          </section>
 
-          {workspace.canManageProject && completionRequests.length > 0 ? (
-            <section className="completion-request-panel" aria-labelledby="completion-request-title">
-              <p className="card-eyebrow">Creator action needed</p><h3 id="completion-request-title">Completion requests</h3>
-              {completionRequests.map((task) => (
-                <article key={task._id}>
-                  <div><strong>{task.title}</strong><span>Recommended complete by {task.reviewerProfileId ? memberNameById.get(task.reviewerProfileId) : "reviewer"}</span></div>
-                  <div><button className="primary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => decideCompletion({ taskId: task._id, decision: "approve" }), "The task could not be completed.")}>Approve Complete</button><button className="secondary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => decideCompletion({ taskId: task._id, decision: "reject" }), "The task could not be returned.")}>Return to In Progress</button></div>
-                </article>
-              ))}
-            </section>
-          ) : null}
+          <BattleTaskBoard
+            tasks={battleTasks}
+            canManageProject={workspace.canManageProject}
+            tasksLocked={Boolean(workspace.project.tasksLocked)}
+            disabled={isSaving}
+            onOpenDetails={(taskId) => setOpenBattleTaskId(taskId as Id<"tasks">)}
+            onClaim={(taskId) => void runAction(() => claimTask({ taskId: taskId as Id<"tasks"> }), "The task could not be claimed.")}
+            onAccept={(taskId) => void runAction(() => acceptTask({ taskId: taskId as Id<"tasks"> }), "The request could not be accepted.")}
+            onDecline={(taskId) => void runAction(() => declineTask({ taskId: taskId as Id<"tasks"> }), "The request could not be declined.")}
+          />
 
-          <ProjectGameProgress projectTitle={workspace.project.title} status={workspace.project.status} tasks={workspace.tasks.map((task) => ({ ...task, status: (task.status === "awaiting_creator" ? "review" : task.status) as Exclude<TaskStatus, "awaiting_creator"> }))} milestones={[]} />
-
-          <details className="overview-game-section" open>
-            <summary>Battle</summary>
-            <p>Completed, creator-approved tasks trigger the existing combat system exactly once.</p>
-            <BattleScene projectId={workspace.project._id} />
+          <details className="battle-more-tools">
+            <summary>
+              <span>More Tools</span>
+              <span className="battle-tools-alerts">
+                {needsMyReviewCount > 0 ? `${needsMyReviewCount} to review` : null}
+                {requestTasks.length > 0 ? `${requestTasks.length} task request${requestTasks.length === 1 ? "" : "s"}` : null}
+                {workspace.canManageProject && completionRequests.length > 0 ? `${completionRequests.length} approval${completionRequests.length === 1 ? "" : "s"}` : null}
+              </span>
+            </summary>
+            <div className="battle-tool-links">
+              <button className="quiet-button" type="button" onClick={() => {
+                const task = workspace.tasks.find((item) => item.reviewerProfileId === workspace.currentProfileId && ["submitted", "review"].includes(item.status));
+                if (task) setOpenBattleTaskId(task._id); else { setActiveTab("tasks"); setNeedsMyReview(true); }
+              }}>Review Queue{needsMyReviewCount > 0 ? ` (${needsMyReviewCount})` : ""}</button>
+              <button className="quiet-button" type="button" onClick={() => {
+                if (requestTasks[0]) setOpenBattleTaskId(requestTasks[0]._id); else setActiveTab("tasks");
+              }}>Task Requests{requestTasks.length > 0 ? ` (${requestTasks.length})` : ""}</button>
+              {workspace.canManageProject && completionRequests.length > 0 ? <button className="quiet-button" type="button" onClick={() => setOpenBattleTaskId(completionRequests[0]._id)}>Completion Requests ({completionRequests.length})</button> : null}
+              <button className="quiet-button" type="button" onClick={() => setActiveTab("members")}>Team Members</button>
+              {workspace.canManageProject ? <button className="quiet-button" type="button" onClick={() => { setActiveTab("tasks"); setShowTaskForm(true); }}>Adjust Plan</button> : null}
+              <button className="quiet-button" type="button" onClick={() => setBriefOpen(true)}>Project Brief</button>
+              <button className="quiet-button" type="button" onClick={() => window.print()}>Project Report</button>
+            </div>
+            <TaskTradePanel projectId={workspace.project._id} />
+            <details className="planning-workload-details"><summary>Workload</summary><AllocationWorkbench workspace={workspace} /></details>
           </details>
 
           <details className="project-context-settings">
@@ -397,9 +441,6 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
             <label className="inline-check-field"><input type="checkbox" checked={needsMyReview} onChange={(event) => setNeedsMyReview(event.target.checked)} /><span>Needs My Review</span></label>
           </div>
 
-          <TaskTradePanel projectId={workspace.project._id} />
-          <details className="planning-workload-details"><summary>Review workload balance</summary><AllocationWorkbench workspace={workspace} /></details>
-
           {filteredTasks.length === 0 ? <div className="project-empty"><strong>No tasks match.</strong><p>Change the filters or ask the creator to add the first task.</p></div> : <div className="task-card-list">{filteredTasks.map((task) => {
             const ownerLabel = task.assignmentState === "unassigned" ? "Unassigned" : task.isOpenForClaiming ? "Open for claiming" : memberNameById.get(task.primaryOwnerProfileId) ?? "Team member";
             const reviewerLabel = task.reviewerProfileId ? memberNameById.get(task.reviewerProfileId) ?? "Reviewer" : "Owner chooses later";
@@ -424,9 +465,32 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
 
       {activeTab === "members" ? <ProjectTeamMembers projectId={workspace.project._id} /> : null}
 
-      {activeTab === "battle" ? <BattleScene projectId={workspace.project._id} /> : null}
-
       {briefOpen ? <div className="brief-drawer-backdrop" role="presentation" onClick={() => setBriefOpen(false)}><aside className="brief-drawer" role="dialog" aria-modal="true" aria-labelledby="project-brief-title" onClick={(event) => event.stopPropagation()}><button className="guided-back-link" type="button" onClick={() => setBriefOpen(false)}>Close</button><p className="kicker">Project brief</p>{workspace.canManageProject ? <form onSubmit={saveBrief}><label><span>Project name</span><input required maxLength={100} value={briefTitle} onChange={(event) => setBriefTitle(event.target.value)} /></label><label><span>Deadline</span><input required type="date" value={briefDeadline} onChange={(event) => setBriefDeadline(event.target.value)} /></label><label><span>Brief</span><textarea required maxLength={8000} value={briefDescription} onChange={(event) => setBriefDescription(event.target.value)} /></label><button className="primary-button" type="submit" disabled={isSaving}>Save brief</button></form> : <><h3 className="display-heading" id="project-brief-title">{workspace.project.title}</h3><p>{workspace.project.description}</p><strong>Deadline {workspace.project.deadline}</strong></>}<ol className="brief-phase-list">{workspace.phases.map((phase) => <li key={phase._id}><strong>{phase.title}</strong><span>{phase.description}</span></li>)}</ol></aside></div> : null}
+
+      {openBattleTask ? <div className="battle-task-drawer-backdrop" role="presentation" onClick={() => setOpenBattleTaskId(null)}><aside className="battle-task-drawer" role="dialog" aria-modal="true" aria-labelledby="battle-task-detail-title" onClick={(event) => event.stopPropagation()}>
+        <header className="battle-task-drawer-heading"><div><p className="card-eyebrow">Task details</p><h3 id="battle-task-detail-title">{openBattleTask.title}</h3></div><button className="quiet-button" type="button" onClick={() => setOpenBattleTaskId(null)}>Close</button></header>
+        <p>{openBattleTask.description}</p>
+        <dl className="battle-task-detail-meta">
+          <div><dt>Owner</dt><dd>{openBattleTask.isOpenForClaiming ? "Open for claiming" : memberNameById.get(openBattleTask.primaryOwnerProfileId) ?? "Team member"}{workspace.project.tasksLocked && !openBattleTask.isOpenForClaiming ? " 🔒" : ""}</dd></div>
+          <div><dt>Phase</dt><dd>{phaseNameById.get(openBattleTask.phaseId) ?? "Project work"}</dd></div>
+          <div><dt>Due</dt><dd>{openBattleTask.dueDate}</dd></div>
+          <div><dt>Impact</dt><dd>Weight {openBattleTask.weight} · {openBattleTask.damage ?? 20} DMG</dd></div>
+          <div><dt>Reviewer</dt><dd>{openBattleTask.reviewerProfileId ? memberNameById.get(openBattleTask.reviewerProfileId) ?? "Reviewer" : "Choose later"}</dd></div>
+          <div><dt>Status</dt><dd>{STATUS_LABELS[openBattleTask.status as TaskStatus]}</dd></div>
+        </dl>
+
+        {openBattleTask.isOpenForClaiming ? <button className="primary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => claimTask({ taskId: openBattleTask._id }), "The task could not be claimed.")}>Claim Task</button> : null}
+        {openBattleTask.primaryOwnerProfileId === workspace.currentProfileId && openBattleTask.acceptanceStatus === "pending" ? <div className="battle-drawer-action-row"><button className="primary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => acceptTask({ taskId: openBattleTask._id }), "The request could not be accepted.")}>Accept</button><button className="quiet-button" type="button" disabled={isSaving} onClick={() => void runAction(() => declineTask({ taskId: openBattleTask._id }), "The request could not be declined.")}>Decline</button></div> : null}
+
+        {(workspace.canManageProject || workspace.isTeamOwner) && !workspace.project.tasksLocked ? <section className="task-allocation-lock"><div><strong>Allocation</strong><span>Freeze the required task count and reveal the shared Boss HP baseline.</span></div><button className="secondary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => lockTasks({ projectId: workspace.project._id }), "The task list could not be locked.")}>Lock project task list</button></section> : null}
+        {workspace.project.tasksLocked ? <p className="task-lock-state">🔒 Task allocation baseline is locked for this Battle.</p> : null}
+
+        {workspace.canManageProject && openBattleTask.status === "awaiting_creator" ? <section className="battle-completion-actions"><strong>Reviewer recommends completion</strong><div><button className="primary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => decideCompletion({ taskId: openBattleTask._id, decision: "approve" }), "The task could not be completed.")}>Approve Complete</button><button className="secondary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => decideCompletion({ taskId: openBattleTask._id, decision: "reject" }), "The task could not be returned.")}>Return to In Progress</button></div></section> : null}
+
+        <TaskEvidencePanel taskId={openBattleTask._id} taskTitle={openBattleTask.title} taskStatus={openBattleTask.status as TaskStatus} requiresReview={openBattleTask.requiresReview} reviewerName={openBattleTask.reviewerProfileId ? memberNameById.get(openBattleTask.reviewerProfileId) : undefined} />
+        <TaskTradePanel key={openBattleTask._id} projectId={workspace.project._id} initialTaskId={openBattleTask.primaryOwnerProfileId === workspace.currentProfileId ? openBattleTask._id : undefined} />
+        {workspace.canManageProject ? <button className="quiet-button" type="button" onClick={() => { editTask(openBattleTask); setOpenBattleTaskId(null); setActiveTab("tasks"); }}>Edit task in plan</button> : null}
+      </aside></div> : null}
     </section>
   );
 }

@@ -4312,7 +4312,7 @@ footer {
 }
 
 .boss-hp-panel { display: grid; gap: .65rem; }.boss-hp-panel > div:first-child { display: flex; justify-content: space-between; }.boss-hp-track { height: 25px; overflow: hidden; border: 3px solid var(--color-text); border-radius: 999px; background: color-mix(in srgb, var(--color-text) 12%, transparent); }.boss-hp-track span { display: block; height: 100%; background: var(--color-magenta); transition: width .45s ease; }
-.combat-log > div { display: flex; justify-content: space-between; align-items: center; }.combat-log ol { display: grid; gap: .55rem; margin: 1rem 0 0; padding: 0; list-style: none; }.combat-log li { display: grid; gap: .15rem; padding: .65rem 0; border-top: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent); }.combat-log li span { color: var(--color-muted); font-size: .86rem; }
+.combat-log > summary { display: flex; justify-content: space-between; align-items: center; gap: 1rem; cursor: pointer; }.combat-log ol { display: grid; gap: .55rem; margin: 1rem 0 0; padding: 0; list-style: none; }.combat-log li { display: grid; gap: .15rem; padding: .65rem 0; border-top: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent); }.combat-log li span { color: var(--color-muted); font-size: .86rem; }
 .victory-panel { background: var(--color-yellow); color: var(--color-navy); }
 
 /* Reduced Motion Overrides */
@@ -4913,3 +4913,83 @@ footer {
 .village-hp-bar-fill.fill-normal { background: #eab308; }
 .village-hp-bar-fill.fill-damaged { background: #f97316; }
 .village-hp-bar-fill.fill-critical { background: #ef4444; }
+
+/* Consolidated Battle workspace: encounter first, contextual tasks second, tools third. */
+.battle-workspace-overview { gap: 1.25rem; }
+.shared-battle-stage { min-width: 0; padding: clamp(.65rem, 1.5vw, 1rem); border: 3px solid var(--color-text); border-radius: 24px; background: var(--color-surface); color: var(--color-text); box-shadow: 7px 7px 0 var(--color-blue); }
+.shared-battle-stage .battle-page { gap: .8rem; }
+.shared-battle-stage .battle-summary { border: 0; padding: .35rem .5rem .55rem; background: transparent; }
+.shared-battle-stage .landscape-scene-container { min-height: 420px; }
+.shared-battle-stage .boss-hp-panel { border-width: 2px; }
+.shared-battle-stage .member-hp-shares > div:last-child > div { background: var(--color-page) !important; color: var(--color-text); border-color: color-mix(in srgb, var(--color-text) 20%, transparent) !important; }
+.shared-battle-stage .combat-log { border-width: 2px; padding: .75rem 1rem; }
+
+.battle-task-board { display: grid; gap: 1rem; min-width: 0; padding: clamp(1rem, 2vw, 1.35rem); border: 3px solid var(--color-text); border-radius: 22px; background: var(--color-surface); color: var(--color-text); }
+.battle-task-board-heading, .battle-task-group-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.battle-task-board-heading h3 { margin: .1rem 0 0; font-size: clamp(1.8rem, 4vw, 3rem); }
+.battle-task-board-heading > span, .battle-task-group-heading > span { display: grid; place-items: center; min-width: 34px; height: 34px; padding: 0 .45rem; border: 2px solid var(--color-text); border-radius: 999px; background: var(--color-yellow); color: var(--color-navy); font-weight: 900; }
+.battle-task-group { display: grid; gap: .65rem; min-width: 0; }
+.battle-task-group-heading h4 { margin: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: .06em; }
+.battle-task-strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: .85rem; min-width: 0; }
+.battle-task-note { display: grid; grid-template-rows: 1fr auto; min-height: 270px; overflow: hidden; border: 3px solid var(--color-navy); border-radius: 5px 18px 7px 13px; background: var(--color-yellow); color: var(--color-navy); box-shadow: 5px 6px 0 color-mix(in srgb, var(--color-navy) 88%, transparent); transform: rotate(-.35deg); }
+.battle-task-note:nth-child(even) { transform: rotate(.45deg); }
+.battle-task-note.is-mine { outline: 4px solid var(--color-blue); outline-offset: 3px; }
+.battle-task-note.task-in_progress { background: var(--color-blue); color: var(--text-on-blue); }
+.battle-task-note.task-blocked, .battle-task-note.task-changes_requested { background: var(--color-orange); color: var(--text-on-orange); }
+.battle-task-note.task-submitted, .battle-task-note.task-review { background: var(--color-pink); color: var(--text-on-pink); }
+.battle-task-note.task-awaiting_creator { background: var(--color-orange); color: var(--text-on-orange); }
+.battle-task-note.task-completed, .battle-task-note.task-verified { background: var(--color-green); color: var(--text-on-green); }
+.battle-task-note-main { display: grid; grid-template-columns: 1fr auto; align-content: start; gap: .45rem .6rem; width: 100%; padding: 1rem; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.battle-task-note-main > strong { grid-column: 1 / -1; min-height: 2.7em; font-family: var(--font-heading); font-size: clamp(1.35rem, 2.2vw, 2rem); line-height: .98; }
+.battle-task-phase, .battle-task-status { width: fit-content; padding: .25rem .45rem; border: 2px solid currentColor; border-radius: 999px; font-size: .67rem; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; }
+.battle-task-status { justify-self: end; }
+.battle-task-owner, .battle-task-date, .battle-task-reviewer, .battle-task-impact { font-size: .8rem; font-weight: 800; }
+.battle-task-date, .battle-task-impact { text-align: right; }
+.battle-task-reviewer { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.battle-task-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .45rem; min-height: 58px; padding: .65rem; border-top: 2px dashed currentColor; }
+.battle-task-actions button { min-height: 40px; }
+.battle-task-waiting, .battle-task-complete { padding: .42rem .6rem; border: 2px solid currentColor; border-radius: 999px; font-size: .76rem; font-weight: 900; }
+.battle-task-empty { margin: 0; padding: .85rem; border: 2px dashed color-mix(in srgb, var(--color-text) 38%, transparent); border-radius: 13px; color: var(--color-muted); }
+
+.battle-more-tools { min-width: 0; padding: 1rem; border: 2px solid var(--color-text); border-radius: 18px; background: var(--color-surface); color: var(--color-text); }
+.battle-more-tools > summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; cursor: pointer; font-weight: 900; }
+.battle-tools-alerts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .35rem; color: var(--color-muted); font-size: .78rem; }
+.battle-tools-alerts:not(:empty)::before { content: "●"; color: var(--color-pink); }
+.battle-tool-links { display: flex; flex-wrap: wrap; gap: .55rem; margin: 1rem 0; }
+.battle-more-tools .planning-workload-details { margin-top: .8rem; }
+
+.battle-task-drawer-backdrop { position: fixed; z-index: 95; inset: 0; display: flex; justify-content: flex-end; background: rgb(18 31 37 / .66); }
+.battle-task-drawer { width: min(95vw, 760px); height: 100%; overflow: auto; padding: clamp(1rem, 3vw, 1.6rem); border-left: 3px solid var(--color-text); background: var(--color-surface); color: var(--color-text); box-shadow: -8px 0 0 var(--color-blue); }
+.battle-task-drawer-heading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
+.battle-task-drawer-heading h3 { margin: .15rem 0; font-size: clamp(2rem, 5vw, 3.8rem); }
+.battle-task-detail-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
+.battle-task-detail-meta > div { display: grid; gap: .15rem; padding: .7rem; border: 1px solid color-mix(in srgb, var(--color-text) 28%, transparent); border-radius: 11px; }
+.battle-task-detail-meta dt { color: var(--color-muted); font-size: .7rem; font-weight: 900; text-transform: uppercase; }
+.battle-task-detail-meta dd { margin: 0; font-weight: 800; overflow-wrap: anywhere; }
+.battle-drawer-action-row, .battle-completion-actions > div { display: flex; flex-wrap: wrap; gap: .55rem; }
+.task-allocation-lock, .battle-completion-actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1rem; padding: .9rem; border: 2px dashed var(--color-text); border-radius: 13px; }
+.task-allocation-lock > div { display: grid; gap: .2rem; }
+.task-lock-state { padding: .7rem .85rem; border: 2px solid var(--color-text); border-radius: 12px; background: color-mix(in srgb, var(--color-blue) 30%, var(--color-surface)); font-weight: 800; }
+
+@media (max-width: 760px) {
+  .shared-battle-stage { padding: .45rem; box-shadow: 4px 4px 0 var(--color-blue); }
+  .shared-battle-stage .battle-summary { align-items: stretch; }
+  .shared-battle-stage .battle-summary h3 { font-size: clamp(1.8rem, 10vw, 2.8rem); }
+  .shared-battle-stage .battle-summary dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
+  .shared-battle-stage .landscape-scene-container { min-height: 235px; border-radius: 15px; }
+  .shared-battle-stage .member-hp-shares { display: none; }
+  .battle-task-board { padding: .85rem; }
+  .battle-task-strip { display: flex; gap: .8rem; overflow-x: auto; padding: .3rem .25rem .85rem; scroll-snap-type: x mandatory; overscroll-behavior-inline: contain; }
+  .battle-task-note { flex: 0 0 min(82vw, 285px); min-height: 250px; scroll-snap-align: start; transform: none; }
+  .battle-task-note:nth-child(even) { transform: none; }
+  .battle-task-detail-meta { grid-template-columns: 1fr; }
+  .task-allocation-lock, .battle-completion-actions { align-items: stretch; flex-direction: column; }
+  .battle-task-drawer { width: 100%; }
+  .battle-more-tools > summary { align-items: flex-start; flex-direction: column; }
+  .battle-tools-alerts { justify-content: flex-start; }
+}
+
+@media (max-width: 420px) {
+  .shared-battle-stage .battle-summary dl { grid-template-columns: 1fr; }
+  .battle-task-note { flex-basis: 86vw; }
+}

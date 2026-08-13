@@ -5,12 +5,12 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { getErrorMessage } from "../../lib/errors";
 
-export function TaskTradePanel({ projectId }: { projectId: Id<"projects"> }) {
+export function TaskTradePanel({ projectId, initialTaskId }: { projectId: Id<"projects">; initialTaskId?: Id<"tasks"> }) {
   const workspace = useQuery(api.tasks.getWorkspace, { projectId });
   const data = useQuery(api.taskTrades.listForProject, { projectId });
   const requestTrade = useMutation(api.taskTrades.request);
   const resolveTrade = useMutation(api.taskTrades.resolve);
-  const [taskId, setTaskId] = useState("");
+  const [taskId, setTaskId] = useState(initialTaskId ?? "");
   const [recipientId, setRecipientId] = useState("");
   const [message, setMessage] = useState("");
   const [isSaving, setIsSaving] = useState(false);

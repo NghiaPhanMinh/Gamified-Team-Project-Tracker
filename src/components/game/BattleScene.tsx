@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import { getErrorMessage } from "../../lib/errors";
 
 import { SVGDefs } from "./landscape/SVGDefs";
 import { LandscapeSky } from "./landscape/LandscapeSky";
@@ -14,17 +13,20 @@ import { LandscapePlayers } from "./landscape/LandscapePlayers";
 import { LandscapeDragon } from "./landscape/LandscapeDragon";
 import { LandscapeFX } from "./landscape/LandscapeFX";
 
-type BattleSceneProps = { projectId: Id<"projects"> };
+type BattleSceneProps = { projectId: Id<"projects">; currentPhase?: string; tasksLocked?: boolean };
 
-export function BattleScene({ projectId }: BattleSceneProps) {
+type OptionalBattleMetrics = {
+  goblinsRemaining?: number;
+  totalGoblinsForProject?: number;
+  isVillageDestroyed?: boolean;
+};
+
+export function BattleScene({ projectId, currentPhase, tasksLocked = true }: BattleSceneProps) {
   const state = useQuery(api.battle.getState, { projectId });
-  const lockTasksMutation = useMutation(api.projects.lockTasks);
 
   const initialised = useRef(false);
   const latestSeenEventId = useRef<string | null>(null);
   const [activeEventId, setActiveEventId] = useState<string | null>(null);
-  const [isLocking, setIsLocking] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!state) return;
@@ -49,11 +51,11 @@ export function BattleScene({ projectId }: BattleSceneProps) {
 
   const goblins = useMemo(() => {
     if (!state) return [];
-    return state.members.map((member: any) => ({
+    return state.members.map((member) => ({
       id: member.profileId,
       memberId: member.profileId,
       memberName: member.displayName,
-      goblinState: member.goblinState ?? (member.hasSubmittedToday ? "ghost" : "active"),
+      goblinState: member.hasSubmittedToday ? "ghost" as const : "active" as const,
       isDefeated: member.hasSubmittedToday,
     }));
   }, [state]);
@@ -70,25 +72,13 @@ export function BattleScene({ projectId }: BattleSceneProps) {
     }));
   }, [state, activeEvent]);
 
-  async function handleLockTasks() {
-    if (!state) return;
-    setError(null);
-    setIsLocking(true);
-    try {
-      await lockTasksMutation({ projectId: state.project._id });
-    } catch (caughtError) {
-      setError(getErrorMessage(caughtError, "Failed to lock tasks."));
-    } finally {
-      setIsLocking(false);
-    }
-  }
-
   if (state === undefined) {
     return <section className="battle-loading" aria-busy="true">Preparing the battle scene…</section>;
   }
 
   const hpPercent = state.maximumHp === 0 ? 100 : Math.round((state.remainingHp / state.maximumHp) * 100);
   const defeated = state.maximumHp > 0 && state.remainingHp === 0;
+  const optionalMetrics = state as typeof state & OptionalBattleMetrics;
 
   return (
     <section className={`battle-page ${activeEvent ? "has-new-attack" : ""} ${defeated ? "is-defeated" : ""}`} aria-labelledby="battle-title">
@@ -101,12 +91,11 @@ export function BattleScene({ projectId }: BattleSceneProps) {
         </div>
         <dl>
           <div><dt>Deadline</dt><dd>{state.project.deadline}</dd></div>
-          <div><dt>Goblins Left</dt><dd>{(state as any).goblinsRemaining ?? 0} / {(state as any).totalGoblinsForProject ?? 0}</dd></div>
+          {currentPhase ? <div><dt>Current Phase</dt><dd>{currentPhase}</dd></div> : null}
+          <div><dt>Goblins Left</dt><dd>{optionalMetrics.goblinsRemaining ?? 0} / {optionalMetrics.totalGoblinsForProject ?? 0}</dd></div>
           <div><dt>Tasks Left</dt><dd>{state.remainingRequiredTasks}</dd></div>
         </dl>
       </header>
-
-      {error ? <p className="form-error" role="alert" style={{ margin: "0.5rem 1rem" }}>{error}</p> : null}
 
       {/* Main 10-Layer Geometric SVG Landscape Scene */}
       <div className="landscape-scene-container" aria-label="Interactive project encounter scene">
@@ -140,25 +129,17 @@ export function BattleScene({ projectId }: BattleSceneProps) {
         />
       </div>
 
-      {/* Section 7: Boss HP & Task Locking Panel */}
+      {/* Boss HP remains visible in the shared encounter. Task locking is contextual in task details. */}
       <div className="boss-hp-panel">
-        {!(state as any).tasksLocked ? (
-          <div className="task-lock-banner">
-            <div className="lock-banner-text">
-              <strong>Boss Health: Undetermined</strong>
-              <span>Lock the task list to freeze project tasks and reveal the Boss Health pool.</span>
-            </div>
-            <button className="primary-button lock-tasks-button" type="button" disabled={isLocking} onClick={handleLockTasks}>
-              {isLocking ? "Locking tasks..." : "Lock tasks to reveal Boss Health"}
-            </button>
-          </div>
-        ) : (
+        {tasksLocked ? (
           <>
             <div><strong>Boss HP</strong><span>{state.remainingHp} / {state.maximumHp} ({hpPercent}%)</span></div>
             <div className="boss-hp-track" role="progressbar" aria-valuemin={0} aria-valuemax={state.maximumHp} aria-valuenow={state.remainingHp}>
               <span style={{ width: `${hpPercent}%` }} />
             </div>
           </>
+        ) : (
+          <div><strong>Boss HP</strong><span>Undetermined · lock from a task’s allocation details</span></div>
         )}
 
         {state.members && state.members.length > 0 ? (
@@ -189,7 +170,7 @@ export function BattleScene({ projectId }: BattleSceneProps) {
         ) : null}
       </div>
 
-      {(state as any).isVillageDestroyed ? (
+      {optionalMetrics.isVillageDestroyed ? (
         <section className="failure-panel" style={{ background: "#fef2f2", border: "2px solid #ef4444", padding: "1.5rem", borderRadius: "12px", margin: "1rem 0" }}>
           <p className="card-eyebrow" style={{ color: "#dc2626" }}>Project Failed</p>
           <h3 style={{ color: "#991b1b", margin: "0.2rem 0 0.5rem" }}>The Village Has Been Destroyed!</h3>
@@ -205,8 +186,8 @@ export function BattleScene({ projectId }: BattleSceneProps) {
         </section>
       ) : null}
 
-      <section className="combat-log" aria-labelledby="combat-log-title">
-        <div><h4 id="combat-log-title">Combat log</h4><span>{state.events.length} verified attacks</span></div>
+      <details className="combat-log">
+        <summary><strong id="combat-log-title">Combat log</strong><span>{state.events.length} verified attacks</span></summary>
         {state.events.length === 0 ? (
           <p>No attacks yet. A submitted task deals damage only after its assigned reviewer verifies it.</p>
         ) : (
@@ -219,7 +200,7 @@ export function BattleScene({ projectId }: BattleSceneProps) {
             ))}
           </ol>
         )}
-      </section>
+      </details>
     </section>
   );
 }
