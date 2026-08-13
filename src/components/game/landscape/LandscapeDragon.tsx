@@ -25,7 +25,6 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
               values="0,0; 0,-14; 0,0"
               dur="3.2s"
               repeatCount="indefinite"
-              timingFunction="ease-in-out"
             />
 
             {/* --- TERRIFYING WESTERN DRAGON (PURE VECTOR SHAPES WITHOUT OUTLINES) --- */}
