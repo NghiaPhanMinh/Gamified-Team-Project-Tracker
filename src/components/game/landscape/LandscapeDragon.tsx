@@ -4,145 +4,178 @@ type LandscapeDragonProps = {
 };
 
 export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonProps) {
-  // Anchor dragon on far-right end of the 1000x400 viewBox canvas (x = 740 to 940, y = 160 to 300)
-  // HP clears: shifts slightly right on repel (from x=740 at 100% HP to x=820 at 0% HP)
+  // Anchor dragon on far-right end of the 1000x400 viewBox canvas (x = 740 to 940)
   const damageClearedFraction = (100 - bossHpPercent) / 100;
-  const dragonX = 740 + damageClearedFraction * 70;
+  const dragonX = 740 + damageClearedFraction * 60;
 
   return (
-    <div className="landscape-layer layer-8-dragon" aria-label={`Medieval dragon raiding village (${bossHpPercent}% HP left)`}>
+    <div className="landscape-layer layer-8-dragon" aria-label={`Terrifying medieval western dragon (${bossHpPercent}% HP left)`}>
       <svg viewBox="0 0 1000 400" width="100%" height="100%">
+        {/* Dragon Group anchored on Far-Right End */}
         <g
-          transform={`translate(${dragonX}, 160)`}
+          transform={`translate(${dragonX}, 150)`}
           className={`dragon-group ${isDefeated ? "dragon-defeated" : ""}`}
           style={{ opacity: isDefeated ? 0.35 : 1 }}
         >
-          {/* Dragon Scaled to Balanced Medieval Size (Width ~190, Height ~150) */}
-          <g transform="scale(0.65)" className="medieval-dragon-svg">
-
-            {/* --- BACKGROUND WING 1: Left Bat Wing (BEHIND Body & Head Z-layer) --- */}
-            <g className="dragon-wing-left" transform="translate(10, -10)">
-              <path
-                d="M 130 100 L 260 -25 L 230 25 Q 205 35 180 70 Q 150 80 130 100 Z"
-                fill="#0b0f17"
-                stroke="#020617"
-                strokeWidth="3.5"
-                strokeLinejoin="round"
-              />
-              <line x1="130" y1="100" x2="260" y2="-25" stroke="#334155" strokeWidth="3" />
-              <polygon points="260,-25 274,-35 262,-15" fill="#ef4444" stroke="#020617" strokeWidth="1.5" />
-            </g>
-
-            {/* --- BACKGROUND WING 2: Right Bat Wing (BEHIND Head Z-layer) --- */}
-            <g className="dragon-wing-right" transform="translate(-25, -15)">
-              <path
-                d="M 140 105 L 10 -20 L 50 30 Q 80 65 110 95 Z"
-                fill="#1e293b"
-                stroke="#020617"
-                strokeWidth="3.5"
-                strokeLinejoin="round"
-              />
-              <line x1="140" y1="105" x2="10" y2="-20" stroke="#020617" strokeWidth="3" />
-              <polygon points="10,-20 0,-28 8,-12" fill="#ef4444" stroke="#020617" strokeWidth="1.5" />
-            </g>
-
-            {/* --- Seamless Reattached Barbed Tail --- */}
-            <g className="dragon-tail">
-              <path
-                d="M 190 150 C 240 155 275 175 265 215 C 255 240 215 235 200 205"
-                fill="none"
-                stroke="#1e293b"
-                strokeWidth="16"
-                strokeLinecap="round"
-              />
-              <path d="M 235 160 Q 260 175 268 200" fill="none" stroke="#ef4444" strokeWidth="4" strokeLinecap="round" />
-              <path d="M 200 205 Q 190 195 182 203 Q 192 213 200 205 Z" fill="#ef4444" stroke="#020617" strokeWidth="2" />
-            </g>
-
-            {/* --- Back Spine Spikes --- */}
-            <path
-              d="M 42 22 Q 52 35 75 75 Q 110 100 165 112 Q 210 135 240 165"
-              fill="none"
-              stroke="#ef4444"
-              strokeWidth="7"
-              strokeDasharray="7 5"
-              strokeLinecap="round"
+          {/* Gentle Flying Hovering Animation (up and down translate) */}
+          <g>
+            <animateTransform
+              attributeName="transform"
+              type="translate"
+              values="0,0; 0,-14; 0,0"
+              dur="3.2s"
+              repeatCount="indefinite"
+              timingFunction="ease-in-out"
             />
 
-            {/* --- Back Leg --- */}
-            <path d="M 185 155 Q 215 185 200 215 L 175 220" fill="none" stroke="#0f172a" strokeWidth="15" strokeLinecap="round" />
+            {/* --- TERRIFYING WESTERN DRAGON (PURE VECTOR SHAPES WITHOUT OUTLINES) --- */}
+            <g transform="scale(0.7)">
 
-            {/* --- Main Torso Body --- */}
-            <path
-              d="M 75 125 Q 130 90 200 125 Q 215 175 160 190 Q 95 195 75 125 Z"
-              fill="#1e293b"
-              stroke="#020617"
-              strokeWidth="4.5"
-            />
-            {/* Chest Scales */}
-            <path d="M 85 140 Q 115 170 155 165" fill="none" stroke="#ef4444" strokeWidth="5" strokeLinecap="round" />
-            <path d="M 95 155 Q 120 180 150 176" fill="none" stroke="#f59e0b" strokeWidth="4" strokeLinecap="round" />
+              {/* --- HUGE WESTERN BAT WING 1 (LEFT/BACK WING) --- */}
+              <g className="dragon-wing-left" transform="translate(10, -20)">
+                {/* Sprawling Wing Membrane */}
+                <path
+                  d="M 130 110 L 290 -45 C 240 -15 210 25 190 60 C 160 30 140 75 130 110 Z"
+                  fill="#1e1b4b"
+                />
+                <path
+                  d="M 290 -45 C 240 10 190 70 130 110"
+                  fill="#2e1065"
+                />
+                {/* Wing Bone Finger Struts */}
+                <path d="M 130 110 L 290 -45 L 230 35 L 180 80 Z" fill="#312e81" opacity="0.6" />
+                {/* Sharp Wing Claw Tip */}
+                <polygon points="290,-45 306,-58 292,-32" fill="#dc2626" />
+              </g>
 
-            {/* --- Front Hind Leg --- */}
-            <g className="dragon-front-leg">
-              <path d="M 170 155 Q 205 185 190 220 L 160 225" fill="none" stroke="#1e293b" strokeWidth="16" strokeLinecap="round" />
-              <path d="M 160 225 Q 148 234 140 238" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" />
-              <path d="M 164 227 Q 155 237 148 242" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" />
-            </g>
+              {/* --- HUGE WESTERN BAT WING 2 (RIGHT/BACK WING) --- */}
+              <g className="dragon-wing-right" transform="translate(-30, -25)">
+                <path
+                  d="M 140 115 L -20 -35 C 30 0 70 45 110 100 Z"
+                  fill="#0f172a"
+                />
+                <path d="M -20 -35 L 45 25 L 90 80 Z" fill="#1e293b" opacity="0.7" />
+                <polygon points="-20,-35 -34,-48 -22,-22" fill="#dc2626" />
+              </g>
 
-            {/* --- Menacing Dragon Head, Snout, Mouth & Horns (FOREGROUND 100% VISIBLE) --- */}
-            <g className="dragon-head-group">
-              {/* Thick Neck */}
+              {/* --- BARBED TAIL (Seamless Vector Base) --- */}
+              <g className="dragon-tail">
+                <path
+                  d="M 180 155 C 235 160 280 185 270 225 C 255 255 210 245 195 210 Q 185 195 180 155 Z"
+                  fill="#1e1b4b"
+                />
+                <polygon points="270,225 295,245 275,255 255,235" fill="#dc2626" />
+              </g>
+
+              {/* --- BACK DORSAL SPINES (No Outlines) --- */}
+              <g className="dragon-dorsal-spines">
+                <polygon points="50,30 40,10 60,25" fill="#dc2626" />
+                <polygon points="75,55 68,35 85,50" fill="#dc2626" />
+                <polygon points="105,80 100,60 118,75" fill="#dc2626" />
+                <polygon points="140,105 138,85 152,100" fill="#dc2626" />
+                <polygon points="175,130 178,110 188,125" fill="#dc2626" />
+              </g>
+
+              {/* --- BACK HIND LEG & SHARP CLAWS --- */}
+              <g className="dragon-back-leg">
+                <path d="M 175 150 Q 215 185 195 225 L 165 230 Q 145 210 175 150 Z" fill="#0f172a" />
+                <polygon points="165,230 148,242 160,225" fill="#f8fafc" />
+                <polygon points="170,232 156,246 167,227" fill="#f8fafc" />
+              </g>
+
+              {/* --- MAIN MUSCULAR TORSO BODY --- */}
               <path
-                d="M 90 140 Q 48 110 40 68 Q 20 45 60 38 Q 92 60 102 120 Z"
-                fill="#1e293b"
-                stroke="#020617"
-                strokeWidth="4.5"
+                d="M 70 120 C 130 80 205 115 195 185 C 150 205 90 200 70 120 Z"
+                fill="#312e81"
               />
 
-              {/* Protruding Snout & Upper Jaw */}
-              <path
-                d="M 50 42 L -6 24 L 20 12 L 64 30 Z"
-                fill="#1e293b"
-                stroke="#020617"
-                strokeWidth="4"
-                strokeLinejoin="round"
-              />
+              {/* Chest Scales (No Outlines) */}
+              <path d="M 80 135 C 110 165 150 160 165 150 Q 140 185 85 170 Z" fill="#dc2626" />
+              <path d="M 90 148 C 115 172 145 168 155 160 Q 135 188 95 178 Z" fill="#f59e0b" />
 
-              {/* Open Lower Jaw */}
-              <path
-                d="M 42 54 L -10 38 L 18 62 Z"
-                fill="#1e293b"
-                stroke="#020617"
-                strokeWidth="3.5"
-                strokeLinejoin="round"
-              />
+              {/* --- FRONT HIND LEG & TALON CLAWS --- */}
+              <g className="dragon-front-leg">
+                <path d="M 160 150 Q 200 185 180 230 L 150 235 Q 135 210 160 150 Z" fill="#1e1b4b" />
+                <polygon points="150,235 130,248 145,230" fill="#ffffff" />
+                <polygon points="155,237 138,252 152,232" fill="#ffffff" />
+                <polygon points="160,239 146,254 158,234" fill="#ffffff" />
+              </g>
 
-              {/* Flame Cavity */}
-              <polygon points="36,46 0,32 14,48" fill="#7f1d1d" />
+              {/* --- TERRIFYING PREDATOR HEAD & DEER-LIKE ANTLER HORNS --- */}
+              <g className="dragon-head">
+                {/* Muscular Neck */}
+                <path
+                  d="M 85 135 C 45 105 35 65 55 35 C 85 55 98 115 85 135 Z"
+                  fill="#312e81"
+                />
 
-              {/* Curved Fangs Inside Mouth */}
-              <path d="M 6 28 Q 4 35 8 34" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
-              <path d="M 14 30 Q 12 38 16 36" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
-              <path d="M 22 32 Q 20 40 24 38" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
+                {/* Upper Skull & Protruding Snout */}
+                <path
+                  d="M 55 38 L -15 18 L 15 5 L 68 24 Z"
+                  fill="#1e1b4b"
+                />
 
-              {/* Head Horns */}
-              <path d="M 45 28 C 30 10 10 -10 -2 -22 C 14 -10 28 3 42 20 Z" fill="#ef4444" stroke="#020617" strokeWidth="2.5" />
-              <path d="M 54 26 C 44 6 26 -16 12 -28 C 28 -16 44 2 52 18 Z" fill="#ef4444" stroke="#020617" strokeWidth="2.5" />
+                {/* Protruding Nostril Ridge */}
+                <ellipse cx="-4" cy="14" rx="4" ry="2.5" fill="#090d16" />
 
-              {/* Slitted Glowing Eye */}
-              <ellipse cx="36" cy="22" rx="8" ry="6" fill="#f59e0b" stroke="#020617" strokeWidth="2" />
-              <ellipse cx="36" cy="22" rx="2" ry="5" fill="#020617" />
-              <circle cx="34" cy="20" r="1.8" fill="#fff" />
+                {/* Open Aggressive Lower Jaw */}
+                <path
+                  d="M 45 52 L -18 34 L 12 60 Z"
+                  fill="#1e1b4b"
+                />
+
+                {/* Fiery Inner Mouth Cavity */}
+                <polygon points="38,44 -10,32 10,46" fill="#991b1b" />
+
+                {/* SHARP FULL SET OF WHITE TEETH (Inside Mouth Jaw Line) */}
+                {/* Upper Jaw Teeth */}
+                <polygon points="-8,20 -14,28 -3,22" fill="#ffffff" />
+                <polygon points="-2,21 -6,30 3,23" fill="#ffffff" />
+                <polygon points="4,22 1,31 9,24" fill="#ffffff" />
+                <polygon points="10,23 8,32 15,25" fill="#ffffff" />
+                <polygon points="16,24 14,33 21,26" fill="#ffffff" />
+                <polygon points="22,25 20,34 27,27" fill="#ffffff" />
+
+                {/* Lower Jaw Teeth */}
+                <polygon points="-12,33 -6,25 -7,35" fill="#ffffff" />
+                <polygon points="-4,35 1,27 1,37" fill="#ffffff" />
+                <polygon points="3,37 8,29 8,39" fill="#ffffff" />
+                <polygon points="10,39 15,31 15,41" fill="#ffffff" />
+
+                {/* DEER-LIKE BRANCHING ANTLER HORNS (Top of Head) */}
+                <g className="deer-antler-horns">
+                  {/* Horn 1 (Main Beam & Tines) */}
+                  <path d="M 48 24 C 32 4 12 -18 -8 -34 L -2 -38 C 18 -22 36 2 48 24 Z" fill="#7f1d1d" />
+                  {/* Tine 1 */}
+                  <polygon points="25,-8 10,-24 18,-12" fill="#dc2626" />
+                  {/* Tine 2 */}
+                  <polygon points="5,-22 -10,-38 -2,-28" fill="#dc2626" />
+
+                  {/* Horn 2 (Secondary Beam & Tines) */}
+                  <path d="M 58 22 C 46 2 28 -20 8 -36 L 14 -40 C 32 -24 48 0 58 22 Z" fill="#991b1b" />
+                  {/* Tine 1 */}
+                  <polygon points="36,-8 22,-24 30,-12" fill="#ef4444" />
+                  {/* Tine 2 */}
+                  <polygon points="18,-22 2,-38 10,-28" fill="#ef4444" />
+                </g>
+
+                {/* ANGRY GLOWING CRIMSON/YELLOW EYE WITH SLITTED PUPIL */}
+                <ellipse cx="38" cy="18" rx="9" ry="6" fill="#f59e0b" />
+                <polygon points="38,11 40,18 38,25 36,18" fill="#000000" />
+                <circle cx="35" cy="16" r="2" fill="#ffffff" />
+                {/* Angry Eyebrow Ridge */}
+                <polygon points="26,11 48,13 46,16 28,14" fill="#0f172a" />
+              </g>
+
+              {/* --- FRONT ARM & TALONS --- */}
+              <g className="dragon-front-arm">
+                <path d="M 100 135 L 65 170 L 42 162 Q 75 130 100 135 Z" fill="#1e1b4b" />
+                <polygon points="42,162 26,172 38,158" fill="#ffffff" />
+                <polygon points="45,165 30,177 42,161" fill="#ffffff" />
+                <polygon points="48,168 34,180 45,164" fill="#ffffff" />
+              </g>
+
             </g>
-
-            {/* --- Front Claw Arm --- */}
-            <g className="dragon-front-arm">
-              <path d="M 105 140 L 72 175 L 50 168" fill="none" stroke="#1e293b" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M 50 168 Q 38 174 34 180" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" />
-              <path d="M 53 171 Q 42 179 38 186" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" />
-            </g>
-
           </g>
         </g>
       </svg>

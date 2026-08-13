@@ -51,12 +51,12 @@
     "Glacial Indifference", Inter, "Avenir Next", Avenir, "Helvetica Neue",
     Arial, sans-serif;
   --font-heading: var(--font-body);
-  --color-sky-top: #f97316;
-  --color-sky-bottom: #fde047;
+  --color-sky-top: #0284c7;
+  --color-sky-bottom: #bae6fd;
   --color-cloud: #ffffff;
-  --color-cloud-near: #ffedd5;
-  --color-land: #4a7c2a;
-  --color-land-dark: #3b6e22;
+  --color-cloud-near: #f1f5f9;
+  --color-land: #15803d;
+  --color-land-dark: #166534;
   --color-roof: #b8654b;
   --color-roof-dark: #8c4632;
   --color-dragon: #2c353f;
@@ -79,12 +79,12 @@
   --color-error: #ff9bb0;
   --border-strong: 3px solid var(--color-cream);
   --shadow-card: 6px 6px 0 var(--color-blue);
-  --color-sky-top: #ea580c;
-  --color-sky-bottom: #fbbf24;
-  --color-cloud: #fef08a;
-  --color-cloud-near: #fde047;
-  --color-land: #3b6e22;
-  --color-land-dark: #2a5217;
+  --color-sky-top: #0369a1;
+  --color-sky-bottom: #7dd3fc;
+  --color-cloud: #ffffff;
+  --color-cloud-near: #e2e8f0;
+  --color-land: #166534;
+  --color-land-dark: #14532d;
   --color-roof: #7a3e2c;
   --color-roof-dark: #572a1d;
   --color-dragon: #141a21;
