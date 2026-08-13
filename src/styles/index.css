@@ -4237,18 +4237,8 @@ footer {
 }
 
 /* Dragon Animations */
-.dragon-container {
-  position: absolute;
-  bottom: 15%;
-  width: min(34%, 280px);
-  height: min(48%, 210px);
-  transition: left 1.2s cubic-bezier(0.25, 1, 0.5, 1), transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
-  will-change: left, transform;
-}
-
-.dragon-idle-bob {
-  animation: dragon-hover 3s ease-in-out infinite;
-  transform-origin: center center;
+.dragon-group {
+  transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1), opacity 1.2s ease;
 }
 
 .dragon-wing-left {
