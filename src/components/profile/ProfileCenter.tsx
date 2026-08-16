@@ -92,18 +92,11 @@ function SkillPicker({
       : [];
 
   const tabLabels = {
-    recommended: "⭐ Recommended",
-    search: "🔍 Search",
-    all: "📚 View All",
-    other: "✏️ Custom Skill",
+    recommended: "Recommended",
+    search: "Search",
+    all: "View All",
+    other: "Custom Skill",
   } as const;
-
-  const categoryIcons: Record<string, string> = {
-    Creative: "🎨 Creative",
-    "Research / Strategy": "📊 Research & Strategy",
-    General: "💬 General & Soft Skills",
-    Software: "💻 Software & Tools",
-  };
 
   return (
     <div className="profile-skill-picker">
@@ -117,19 +110,19 @@ function SkillPicker({
 
       {mode === "search" ? (
         <label className="profile-skill-search">
-          <span>Type to search skills & tools</span>
-          <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="e.g. Figma, React, Copywriting, Market Research…" />
+          <span>Search skills & tools</span>
+          <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Type Figma, writing, research…" />
         </label>
       ) : null}
 
       {mode === "other" ? (
         <div className="profile-other-skill">
           <label>
-            <span>Add custom skill</span>
+            <span>Custom skill</span>
             <input
               value={other}
               maxLength={60}
-              placeholder="e.g. Motion Graphics, Motion Capture…"
+              placeholder="Type custom skill name…"
               onChange={(event) => setOther(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -139,7 +132,7 @@ function SkillPicker({
               }}
             />
           </label>
-          <button className="primary-button add-custom-skill-btn" type="button" onClick={addOther}>+ Add Custom Skill</button>
+          <button className="primary-button" type="button" onClick={addOther}>Add Skill</button>
         </div>
       ) : null}
 
@@ -147,22 +140,22 @@ function SkillPicker({
         <div className="profile-skill-categories">
           {Object.entries(SKILL_CATEGORIES).map(([category, categorySkills]) => (
             <section key={category} className="skill-category-block">
-              <h4 className="skill-category-title">{categoryIcons[category] ?? category}</h4>
+              <h4 className="skill-category-title">{category}</h4>
               <div className="profile-skill-options">
                 {categorySkills.map((skill) => (
                   <button key={skill} type="button" className={skills.includes(skill) ? "is-selected" : ""} aria-pressed={skills.includes(skill)} onClick={() => toggle(skill)}>
-                    {skills.includes(skill) ? "✓ " : ""}{skill}
+                    {skill}
                   </button>
                 ))}
               </div>
             </section>
           ))}
           <section className="skill-category-block">
-            <h4 className="skill-category-title">{categoryIcons["Software"]}</h4>
+            <h4 className="skill-category-title">Software</h4>
             <div className="profile-skill-options">
               {SOFTWARE_SKILLS.map((skill) => (
                 <button key={skill} type="button" className={softwareSkills.includes(skill) ? "is-selected" : ""} aria-pressed={softwareSkills.includes(skill)} onClick={() => toggle(skill)}>
-                  {softwareSkills.includes(skill) ? "✓ " : ""}{skill}
+                  {skill}
                 </button>
               ))}
             </div>
@@ -176,22 +169,22 @@ function SkillPicker({
             const selected = skills.includes(skill) || softwareSkills.includes(skill);
             return (
               <button key={skill} type="button" className={selected ? "is-selected" : ""} aria-pressed={selected} onClick={() => toggle(skill)}>
-                {selected ? "✓ " : ""}{skill}
+                {skill}
               </button>
             );
-          }) : <p className="no-skills-found">{mode === "search" ? "Type a skill or tool name to search." : "No recommendations available."}</p>}
+          }) : <p className="no-skills-found">{mode === "search" ? "Type a skill to search." : "No recommendations available."}</p>}
         </div>
       ) : null}
 
       {skills.length > 0 || softwareSkills.length > 0 ? (
         <div className="selected-skills-container">
           <div className="selected-skills-header">
-            <span className="selected-skills-title">🎯 Your Selected Skills ({skills.length + softwareSkills.length})</span>
-            <span className="selected-skills-hint">Click any skill chip below to remove</span>
+            <span className="selected-skills-title">Selected skills ({skills.length + softwareSkills.length})</span>
+            <span className="selected-skills-hint">Click any skill to remove</span>
           </div>
           <div className="selected-profile-skills" aria-live="polite">
             {[...skills, ...softwareSkills].map((skill) => (
-              <button key={skill} type="button" onClick={() => toggle(skill)} title="Click to remove">
+              <button key={skill} type="button" onClick={() => toggle(skill)}>
                 {skill}<span aria-hidden="true"> ×</span>
               </button>
             ))}
@@ -255,71 +248,23 @@ export function ProfileCenter({
     }
   }
 
-  const totalSteps = 3;
-  const isSkillsReady = skills.length + softwareSkills.length > 0;
-  const completedSteps = 1 + (isSkillsReady ? 1 : 0) + (weeklyCapacity ? 1 : 0);
-  const progressPercent = Math.round((completedSteps / totalSteps) * 100);
-
   return (
     <section className="profile-page profile-center" aria-labelledby="profile-page-title">
-      <header className="focused-page-heading profile-stepper-heading">
-        <div className="profile-header-main">
-          <p className="kicker">{setupRequired ? "🔒 Onboarding Required" : "⚙️ Profile Settings"}</p>
+      <header className="focused-page-heading">
+        <div>
+          <p className="kicker">{setupRequired ? "Required setup" : "Profile"}</p>
           <h1 className="display-heading" id="profile-page-title">
-            {setupRequired ? "Complete Your Profile to Unlock Rooms" : "How You Work"}
+            {setupRequired ? "Complete your profile" : "How you work"}
           </h1>
-          <p className="profile-header-subtext">
-            Complete 3 simple steps so MayLamDi can allocate fair workloads and prevent team burnout.
-          </p>
+          <p>Save these preferences once. MayLamDi reuses them when planning fair project work.</p>
         </div>
-
-        {/* Visual Progress Bar & Step Summary Overview */}
-        <div className="profile-progress-container" aria-label="Profile completion progress">
-          <div className="profile-progress-meta">
-            <span className="profile-progress-label">PROFILE COMPLETION PROGRESS</span>
-            <span className="profile-progress-percent">{completedSteps}/{totalSteps} STEPS COMPLETED ({progressPercent}%)</span>
-          </div>
-          <div className="profile-progress-track">
-            <div className="profile-progress-fill" style={{ width: `${progressPercent}%` }} />
-          </div>
-
-          {/* 3-Step Quick Summary Cards */}
-          <div className="profile-step-summary-grid">
-            <div className="step-summary-item is-complete">
-              <span className="step-num">1</span>
-              <div className="step-info">
-                <strong>Google Account</strong>
-                <small>✓ Verified</small>
-              </div>
-            </div>
-            <div className={`step-summary-item ${isSkillsReady ? "is-complete" : "is-pending"}`}>
-              <span className="step-num">2</span>
-              <div className="step-info">
-                <strong>Skills & Tools</strong>
-                <small>{isSkillsReady ? `✓ ${skills.length + softwareSkills.length} selected` : "⚠️ Pick 1 or more"}</small>
-              </div>
-            </div>
-            <div className="step-summary-item is-complete">
-              <span className="step-num">3</span>
-              <div className="step-info">
-                <strong>Weekly Capacity</strong>
-                <small>✓ {CAPACITY_OPTIONS.find((o) => o.value === weeklyCapacity)?.label ?? "Set"}</small>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {roomControl}
       </header>
 
       <form className="profile-setup-form" onSubmit={submit}>
-        {/* Step 1: Account Identity */}
-        <section className="profile-basic-card profile-step-card" aria-labelledby="basic-profile-title">
-          <div className="profile-card-header-row">
-            <span className="profile-step-badge is-completed">✓ STEP 1</span>
-            <span className="card-eyebrow">Google Account</span>
-            <span className="profile-status-pill is-verified">Verified</span>
-          </div>
+        {/* Basic Google Profile */}
+        <section className="profile-basic-card" aria-labelledby="basic-profile-title">
+          <p className="card-eyebrow">Google profile</p>
           <div className="profile-identity">
             {profile?.imageUrl ? <img src={profile.imageUrl} alt="" /> : <span className="member-avatar">{profile?.displayName.slice(0, 1).toUpperCase()}</span>}
             <div>
@@ -330,39 +275,23 @@ export function ProfileCenter({
           {character ? (
             <details className="compact-character-settings"><summary>Customise my character</summary>{character}</details>
           ) : (
-            <p className="profile-character-note"><span>ℹ️</span> Character customisation unlocks after joining a room.</p>
+            <p className="profile-character-note">Character customisation becomes available after you enter a room.</p>
           )}
         </section>
 
-        {/* Step 2: Skills & Tools */}
-        <section className={`profile-settings-card profile-step-card ${!isSkillsReady ? "is-attention" : ""}`} aria-labelledby="work-profile-title">
-          <div className="profile-card-header-row">
-            <span className={`profile-step-badge ${isSkillsReady ? "is-completed" : "is-active"}`}>
-              {isSkillsReady ? "✓ STEP 2" : "STEP 2"}
-            </span>
-            <span className="card-eyebrow">Core Competencies</span>
-          </div>
-
-          <div className="profile-title-with-badge">
-            <h2 id="work-profile-title">What skills do you bring to your team?</h2>
-            {!isSkillsReady ? (
-              <span className="skill-req-badge is-missing">⚠️ Required: Pick at least 1 skill</span>
-            ) : (
-              <span className="skill-req-badge is-ready">✓ {skills.length + softwareSkills.length} skill(s) selected</span>
-            )}
-          </div>
-          <p className="card-description">Select your main skills and tools so MayLamDi's allocation engine can assign suitable tasks.</p>
+        {/* Reusable Preferences (Skills & Tools) */}
+        <section className="profile-settings-card" aria-labelledby="work-profile-title">
+          <p className="card-eyebrow">Reusable preferences</p>
+          <h2 id="work-profile-title">Tell your team how you work</h2>
+          <p className="card-description">Select the core skills and tools you excel at so your team can assign tasks fairly and transparently.</p>
           <SkillPicker skills={skills} softwareSkills={softwareSkills} onSkillsChange={setSkills} onSoftwareSkillsChange={setSoftwareSkills} />
         </section>
 
-        {/* Step 3: Weekly Capacity */}
-        <section className="profile-settings-card profile-step-card" aria-labelledby="capacity-title">
-          <div className="profile-card-header-row">
-            <span className="profile-step-badge is-completed">✓ STEP 3</span>
-            <span className="card-eyebrow">Weekly Availability</span>
-          </div>
-          <h2 id="capacity-title">How much time can you commit each week?</h2>
-          <p className="card-description">Used to balance project workloads across your team and prevent teammate burnout.</p>
+        {/* Weekly Capacity */}
+        <section className="profile-settings-card" aria-labelledby="capacity-title">
+          <p className="card-eyebrow">Weekly capacity</p>
+          <h2 id="capacity-title">How much time can you contribute each week?</h2>
+          <p className="card-description">Used by MayLamDi's allocation engine to balance workload and prevent burnout.</p>
           <div className="capacity-options">
             {CAPACITY_OPTIONS.map((option) => (
               <button
@@ -378,33 +307,42 @@ export function ProfileCenter({
           </div>
         </section>
 
-        {/* Step 4: Final Action Card */}
-        <section className="profile-submit-card">
-          <div className="profile-submit-info">
-            <span className="profile-step-badge is-final">FINAL STEP</span>
-            <h3>Save & Unlock Team Rooms</h3>
-            <p>{isSkillsReady ? "All steps ready! Click below to save your profile." : "Please select at least 1 skill in Step 2 before saving."}</p>
-          </div>
-          {error ? <p className="form-error" role="alert">{error}</p> : null}
-          {message ? <p className="form-success" role="status">{message}</p> : null}
-          <button className="primary-button profile-save-button" type="submit" disabled={isSaving}>
-            {isSaving ? "Saving profile…" : "✓ Save Profile & Unlock App"}
-          </button>
-        </section>
+        {error ? <p className="form-error" role="alert">{error}</p> : null}
+        {message ? <p className="form-success" role="status">{message}</p> : null}
+
+        <button className="primary-button profile-save-button" type="submit" disabled={isSaving}>
+          {isSaving ? "Saving…" : "Save My Profile"}
+        </button>
       </form>
 
       {!setupRequired ? (
         <div className="profile-context-settings">
           <details className="profile-secondary-settings">
             <summary>Subscription</summary>
-            <section className="profile-settings-card"><p className="card-eyebrow">Current plan</p><h2>Free assignment demo</h2><p>Manual planning remains unlimited. AI assistance stays optional and uses free routes only.</p></section>
+            <section className="profile-settings-card">
+              <p className="card-eyebrow">Current plan</p>
+              <h2>Free assignment demo</h2>
+              <p>Manual planning remains unlimited. AI assistance stays optional and uses free routes only.</p>
+            </section>
           </details>
           <details className="profile-secondary-settings">
             <summary>AI settings</summary>
             <section className="profile-settings-card ai-settings-card">
-            <label className="toggle-field"><input type="checkbox" checked={useOwnKey} onChange={(event) => setUseOwnKey(event.target.checked)} /><span>Use my own AI key for this session</span></label>
-            <div className="guided-field-grid"><label><span>OpenRouter API key</span><input disabled={!useOwnKey} type="password" autoComplete="off" value={apiKey} onChange={(event) => setApiKey(event.target.value)} /></label><label><span>Model ID</span><input disabled={!useOwnKey} value={model} onChange={(event) => setModel(event.target.value)} /></label></div>
-            <p className="ai-security-note">This key stays in this browser session and is never stored with your profile.</p>
+              <label className="toggle-field">
+                <input type="checkbox" checked={useOwnKey} onChange={(event) => setUseOwnKey(event.target.checked)} />
+                <span>Use my own AI key for this session</span>
+              </label>
+              <div className="guided-field-grid">
+                <label>
+                  <span>OpenRouter API key</span>
+                  <input disabled={!useOwnKey} type="password" autoComplete="off" value={apiKey} onChange={(event) => setApiKey(event.target.value)} />
+                </label>
+                <label>
+                  <span>Model ID</span>
+                  <input disabled={!useOwnKey} value={model} onChange={(event) => setModel(event.target.value)} />
+                </label>
+              </div>
+              <p className="ai-security-note">This key stays in this browser session and is never stored with your profile.</p>
             </section>
           </details>
         </div>
@@ -412,3 +350,4 @@ export function ProfileCenter({
     </section>
   );
 }
+
