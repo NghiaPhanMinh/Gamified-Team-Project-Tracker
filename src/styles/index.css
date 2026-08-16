@@ -5344,3 +5344,95 @@ footer {
   letter-spacing: -0.01em;
 }
 
+/* Step Header & Badges */
+.profile-card-header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.profile-step-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  background: var(--color-yellow);
+  color: var(--color-navy);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  border: 1.5px solid var(--color-text);
+  box-shadow: 1.5px 1.5px 0 var(--color-text);
+}
+
+.profile-title-with-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.skill-req-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  border: 1.5px solid var(--color-text);
+}
+
+.skill-req-badge.is-missing {
+  background: color-mix(in srgb, var(--color-orange) 30%, var(--color-surface));
+  color: var(--color-text);
+}
+
+.skill-req-badge.is-ready {
+  background: var(--color-green);
+  color: var(--color-navy);
+  font-weight: 900;
+}
+
+/* Submit Action Card */
+.profile-submit-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.6rem 1.85rem;
+  border: 3px solid var(--color-text);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--color-yellow) 25%, var(--color-surface));
+  box-shadow: 6px 6px 0 var(--color-blue);
+  margin-top: 0.5rem;
+}
+
+.profile-submit-info h3 {
+  font-size: 1.4rem;
+  font-weight: 900;
+  margin: 0 0 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.profile-submit-info p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.92rem;
+}
+
+.profile-submit-card .profile-save-button {
+  margin-top: 0;
+  background: var(--color-green);
+  color: var(--color-navy);
+  box-shadow: 4px 4px 0 var(--color-text);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.profile-submit-card .profile-save-button:hover {
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+}
+
+

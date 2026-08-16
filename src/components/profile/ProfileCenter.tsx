@@ -190,36 +190,88 @@ export function ProfileCenter({
   return (
     <section className="profile-page profile-center" aria-labelledby="profile-page-title">
       <header className="focused-page-heading">
-        <div><p className="kicker">{setupRequired ? "Required first step" : "Profile"}</p><h1 className="display-heading" id="profile-page-title">{setupRequired ? "Complete your profile" : "How you work"}</h1><p>Save these preferences once. MayLamDi reuses them when planning fair project work.</p></div>
+        <div>
+          <p className="kicker">{setupRequired ? "Required Onboarding Step" : "Profile Settings"}</p>
+          <h1 className="display-heading" id="profile-page-title">{setupRequired ? "Complete your profile" : "How you work"}</h1>
+          <p>Complete these 3 simple steps so MayLamDi can structure fair workloads for your team.</p>
+        </div>
         {roomControl}
       </header>
 
       <form className="profile-setup-form" onSubmit={submit}>
+        {/* Step 1: Identity */}
         <section className="profile-basic-card" aria-labelledby="basic-profile-title">
+          <div className="profile-card-header-row">
+            <span className="profile-step-badge">STEP 1</span>
+            <span className="card-eyebrow">Google Account</span>
+          </div>
           <div className="profile-identity">
             {profile?.imageUrl ? <img src={profile.imageUrl} alt="" /> : <span className="member-avatar">{profile?.displayName.slice(0, 1).toUpperCase()}</span>}
-            <div><p className="card-eyebrow">Google profile</p><h2 id="basic-profile-title">{profile?.displayName}</h2><span>{profile?.email}</span></div>
+            <div>
+              <h2 id="basic-profile-title">{profile?.displayName}</h2>
+              <span>{profile?.email}</span>
+            </div>
           </div>
-          {character ? <details className="compact-character-settings"><summary>Customise my character</summary>{character}</details> : <p className="profile-character-note"><span>ℹ️</span> Character customisation becomes available after you enter a room.</p>}
+          {character ? (
+            <details className="compact-character-settings"><summary>Customise my character</summary>{character}</details>
+          ) : (
+            <p className="profile-character-note"><span>ℹ️</span> Character customisation unlocks after joining a room.</p>
+          )}
         </section>
 
+        {/* Step 2: Skills */}
         <section className="profile-settings-card" aria-labelledby="work-profile-title">
-          <p className="card-eyebrow">Reusable preferences</p>
-          <h2 id="work-profile-title">Tell your team how you work</h2>
-          <p className="card-description">Select the core skills and tools you excel at so your team can assign tasks fairly and transparently.</p>
+          <div className="profile-card-header-row">
+            <span className="profile-step-badge">STEP 2</span>
+            <span className="card-eyebrow">Reusable Preferences</span>
+          </div>
+          <div className="profile-title-with-badge">
+            <h2 id="work-profile-title">Tell your team how you work</h2>
+            {skills.length + softwareSkills.length === 0 ? (
+              <span className="skill-req-badge is-missing">⚠️ Select at least 1 skill</span>
+            ) : (
+              <span className="skill-req-badge is-ready">✓ {skills.length + softwareSkills.length} selected</span>
+            )}
+          </div>
+          <p className="card-description">Select the core skills and tools you excel at so tasks can be allocated fairly and transparently.</p>
           <SkillPicker skills={skills} softwareSkills={softwareSkills} onSkillsChange={setSkills} onSoftwareSkillsChange={setSoftwareSkills} />
         </section>
 
+        {/* Step 3: Weekly Capacity */}
         <section className="profile-settings-card" aria-labelledby="capacity-title">
-          <p className="card-eyebrow">Weekly capacity</p>
+          <div className="profile-card-header-row">
+            <span className="profile-step-badge">STEP 3</span>
+            <span className="card-eyebrow">Weekly Availability</span>
+          </div>
           <h2 id="capacity-title">How much time can you contribute each week?</h2>
-          <p className="card-description">Used by MayLamDi's allocation engine to balance workload and prevent burnout.</p>
-          <div className="capacity-options">{CAPACITY_OPTIONS.map((option) => <button key={option.value} type="button" className={weeklyCapacity === option.value ? "is-selected" : ""} aria-pressed={weeklyCapacity === option.value} onClick={() => setWeeklyCapacity(option.value)}>{option.label}</button>)}</div>
+          <p className="card-description">Used by MayLamDi's allocation engine to balance workload and prevent teammate burnout.</p>
+          <div className="capacity-options">
+            {CAPACITY_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={weeklyCapacity === option.value ? "is-selected" : ""}
+                aria-pressed={weeklyCapacity === option.value}
+                onClick={() => setWeeklyCapacity(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
         </section>
 
-        {error ? <p className="form-error" role="alert">{error}</p> : null}
-        {message ? <p className="form-success" role="status">{message}</p> : null}
-        <button className="primary-button profile-save-button" type="submit" disabled={isSaving}>{isSaving ? "Saving…" : "Save My Profile"}</button>
+        {/* Action Card: Save Profile */}
+        <section className="profile-submit-card">
+          <div className="profile-submit-info">
+            <h3>Ready to save your profile?</h3>
+            <p>Your preferences will be saved for all project rooms.</p>
+          </div>
+          {error ? <p className="form-error" role="alert">{error}</p> : null}
+          {message ? <p className="form-success" role="status">{message}</p> : null}
+          <button className="primary-button profile-save-button" type="submit" disabled={isSaving}>
+            {isSaving ? "Saving profile…" : "✓ Save Profile & Unlock App"}
+          </button>
+        </section>
       </form>
 
       {!setupRequired ? (
