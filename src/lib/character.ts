@@ -1,12 +1,12 @@
 export const CHARACTER_PALETTE = [
-  { name: "Sunbeam", value: "#FFF73F" },
-  { name: "Tangerine", value: "#FEAA01" },
-  { name: "Bubblegum", value: "#FF8AE7" },
+  { name: "Yellow", value: "#FFF73F" },
+  { name: "Orange", value: "#FEAA01" },
+  { name: "Pink", value: "#FF8AE7" },
   { name: "Magenta", value: "#FD39E4" },
-  { name: "Sprout", value: "#1DD851" },
-  { name: "Sky", value: "#4CA0FE" },
-  { name: "Cream", value: "#FFFDED" },
-  { name: "Navy", value: "#121F25" },
+  { name: "Green", value: "#1DD851" },
+  { name: "Blue", value: "#4CA0FE" },
+  { name: "White", value: "#FFFDED" },
+  { name: "Black", value: "#121F25" },
 ] as const;
 
 export const SPELL_OPTIONS = [
