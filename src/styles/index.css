@@ -4993,3 +4993,450 @@ footer {
   .shared-battle-stage .battle-summary dl { grid-template-columns: 1fr; }
   .battle-task-note { flex-basis: 86vw; }
 }
+
+/* =========================================================================
+   MEDIEVAL RPG BOARD UI STYLES
+   ========================================================================= */
+
+/* RPG Overlay Controls inside the Landscape container */
+.rpg-btn-leaderboard {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-family: var(--font-heading), serif;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #fdf5e6;
+  background: linear-gradient(135deg, #7a4f28 0%, #4e2c16 100%);
+  border: 3px solid #b8860b;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 2px 2px rgba(255,255,255,0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rpg-btn-leaderboard:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.15);
+  box-shadow: 0 6px 10px rgba(0,0,0,0.4), inset 0 2px 2px rgba(255,255,255,0.3);
+}
+
+.rpg-btn-leaderboard:active {
+  transform: translateY(1px);
+}
+
+.rpg-btn-attack-circle {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 20;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading), serif;
+  font-weight: 900;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+  background: radial-gradient(circle, #dc2626 0%, #7f1d1d 100%);
+  border: 4px solid #b8860b;
+  border-radius: 50%;
+  box-shadow: 0 6px 8px rgba(0,0,0,0.4), inset 0 3px 5px rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.rpg-btn-attack-circle:hover {
+  transform: scale(1.1);
+  filter: brightness(1.1);
+  box-shadow: 0 8px 12px rgba(0,0,0,0.5), inset 0 3px 5px rgba(255,255,255,0.4);
+}
+
+.rpg-btn-attack-circle:active {
+  transform: scale(0.95);
+}
+
+/* Modals & Popups Backdrops */
+.rpg-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 10, 8, 0.75);
+  backdrop-filter: blur(4px);
+  padding: 1rem;
+}
+
+/* Carved Wooden Quest Board Frame */
+.rpg-wood-board {
+  position: relative;
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #3e2213 linear-gradient(to bottom, #502f1a 0%, #351a0d 100%);
+  border: 8px solid #b8860b;
+  border-radius: 16px;
+  box-shadow: 
+    0 12px 28px rgba(0,0,0,0.6), 
+    inset 0 0 20px rgba(0,0,0,0.8),
+    inset 0 4px 6px rgba(255,255,255,0.1);
+  padding: 24px;
+  color: #faf0dd;
+}
+
+/* Iron Corner Plates */
+.rpg-wood-board::before,
+.rpg-wood-board::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: #2b2b2b;
+  border: 2px solid #555;
+  box-shadow: inset 1px 1px 2px #fff, 0 1px 3px rgba(0,0,0,0.5);
+  z-index: 10;
+}
+
+.rpg-wood-board::before { top: 4px; left: 4px; border-radius: 0 0 6px 0; }
+.rpg-wood-board::after { top: 4px; right: 4px; border-radius: 0 0 0 6px; }
+
+.rpg-wood-board-bottom-caps {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  height: 18px;
+  pointer-events: none;
+}
+
+.rpg-wood-board-bottom-caps::before,
+.rpg-wood-board-bottom-caps::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: #2b2b2b;
+  border: 2px solid #555;
+  box-shadow: inset 1px 1px 2px #fff, 0 1px 3px rgba(0,0,0,0.5);
+  z-index: 10;
+}
+
+.rpg-wood-board-bottom-caps::before { bottom: 0; left: 0; border-radius: 0 6px 0 0; }
+.rpg-wood-board-bottom-caps::after { bottom: 0; right: 0; border-radius: 6px 0 0 0; }
+
+/* Tavern Board Title Banner */
+.rpg-board-title {
+  text-align: center;
+  font-family: var(--font-heading), serif;
+  font-size: 1.6rem;
+  color: #ffd700;
+  text-shadow: 2px 2px 0px #000, 0 0 10px rgba(184, 134, 11, 0.6);
+  margin: 0 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 3px double #b8860b;
+}
+
+/* Parchment Quest Sheets */
+.rpg-parchment-sheet {
+  background: #fdf5e6 radial-gradient(circle, #fdf5e6 60%, #eeddbb 100%);
+  color: #2c1a0e;
+  border: 2px solid #8b5a2b;
+  border-radius: 8px;
+  box-shadow: 
+    3px 3px 6px rgba(0,0,0,0.4), 
+    inset 0 0 12px rgba(139,90,43,0.3);
+  padding: 16px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+/* Little Metal Pin/Nail Detail at the top center of Parchment */
+.rpg-parchment-sheet::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle at 4px 4px, #7f7f7f 0%, #3a3a3a 100%);
+  border-radius: 50%;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.4);
+  z-index: 5;
+}
+
+/* RPG Medieval Grid/Plaque buttons */
+.rpg-grid-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.rpg-plaque-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 120px;
+  background: linear-gradient(to bottom, #7a4f28 0%, #4e2c16 100%);
+  border: 4px solid #b8860b;
+  border-radius: 12px;
+  color: #faf0dd;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.4), inset 0 2px 3px rgba(255,255,255,0.2);
+}
+
+.rpg-plaque-btn:hover {
+  transform: translateY(-4px);
+  filter: brightness(1.15);
+  box-shadow: 0 10px 18px rgba(0,0,0,0.5), inset 0 2px 3px rgba(255,255,255,0.3);
+}
+
+.rpg-plaque-btn:active {
+  transform: translateY(1px);
+}
+
+.rpg-plaque-btn span.emoji {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.4));
+}
+
+.rpg-plaque-btn span.label {
+  font-family: var(--font-heading), serif;
+  font-weight: bold;
+  font-size: 1.15rem;
+  letter-spacing: 0.05em;
+  text-shadow: 1px 1px 2px #000;
+}
+
+/* Medieval Close Button */
+.rpg-btn-close {
+  width: 100%;
+  padding: 10px;
+  font-family: var(--font-heading), serif;
+  font-weight: bold;
+  font-size: 0.95rem;
+  color: #fff;
+  background: linear-gradient(to bottom, #b91c1c 0%, #7f1d1d 100%);
+  border: 2px solid #b8860b;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.15s ease;
+}
+
+.rpg-btn-close:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 10px rgba(0,0,0,0.4);
+}
+
+.rpg-btn-close:active {
+  transform: translateY(1px);
+}
+
+/* Leaderboard Boarding Table */
+.rpg-leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.rpg-leaderboard-table th, 
+.rpg-leaderboard-table td {
+  padding: 10px 8px;
+  text-align: left;
+}
+
+.rpg-leaderboard-table th {
+  border-bottom: 2px solid #8b5a2b;
+  color: #8b5a2b;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.rpg-leaderboard-table tr:not(:last-child) td {
+  border-bottom: 1px solid rgba(139,90,43,0.15);
+}
+
+.rpg-leaderboard-table td.rank {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+/* Slay Goblin Form Content */
+.rpg-goblin-form {
+  display: grid;
+  gap: 14px;
+}
+
+.rpg-field-label {
+  display: grid;
+  gap: 4px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #5c3d24;
+}
+
+.rpg-input-textarea,
+.rpg-input-text,
+.rpg-select {
+  padding: 10px;
+  border: 2px solid #8b5a2b;
+  border-radius: 6px;
+  background: #fffdf9;
+  color: #2c1a0e;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.rpg-input-textarea:focus,
+.rpg-input-text:focus,
+.rpg-select:focus {
+  outline: none;
+  border-color: #b8860b;
+  box-shadow: 0 0 0 3px rgba(184,134,11,0.25);
+}
+
+/* RPG Validation Tags */
+.rpg-val-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  border: 1px solid currentColor;
+}
+
+.rpg-val-tag.is-valid {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.rpg-val-tag.is-invalid {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+/* Boss Board Pinned Notes */
+.rpg-boss-board {
+  max-height: 480px;
+  overflow-y: auto;
+  padding: 4px;
+  display: grid;
+  gap: 18px;
+}
+
+.rpg-note-pin-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rpg-note-title {
+  margin: 0;
+  font-family: var(--font-heading), serif;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #1a0f07;
+  line-height: 1.15;
+}
+
+.rpg-note-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.75rem;
+  color: #6b4c35;
+  margin: 6px 0 12px 0;
+  font-weight: 700;
+}
+
+.rpg-note-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.rpg-evidence-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #eeddbb;
+  padding-bottom: 4px;
+}
+
+.rpg-evidence-tab {
+  padding: 6px 10px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: transparent;
+  border: none;
+  color: #8b5a2b;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.rpg-evidence-tab.is-active {
+  background: #8b5a2b;
+  color: #fdf5e6;
+}
+
+.rpg-evidence-form-container {
+  display: grid;
+  gap: 8px;
+}
+
+.rpg-btn-submit-action {
+  width: 100%;
+  padding: 10px;
+  font-family: var(--font-heading), serif;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #fff;
+  background: linear-gradient(to bottom, #15803d 0%, #166534 100%);
+  border: 2px solid #b8860b;
+  border-radius: 6px;
+  box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rpg-btn-submit-action:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+
+.rpg-btn-submit-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rpg-no-tasks-alert {
+  text-align: center;
+  padding: 30px;
+  color: #8b5a2b;
+  font-weight: bold;
+}
+

@@ -136,3 +136,55 @@ export const getState = query({
     };
   },
 });
+
+export const getLeaderboard = query({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+    if (project === null) throw new Error("This project no longer exists.");
+    await requireTeamMember(ctx, project.teamId);
+
+    // Get all team memberships
+    const memberships = await ctx.db
+      .query("teamMembers")
+      .withIndex("by_team", (q) => q.eq("teamId", project.teamId))
+      .collect();
+
+    const leaderboard = await Promise.all(
+      memberships.map(async (m) => {
+        const userProfile = await ctx.db.get(m.profileId);
+        if (!userProfile) return null;
+
+        // Count dailyFeed valid posts
+        const posts = await ctx.db
+          .query("dailyFeed")
+          .withIndex("by_project_author_and_time", (q) =>
+            q.eq("projectId", project._id).eq("authorProfileId", m.profileId)
+          )
+          .collect();
+        const goblinsKilled = posts.filter((p) => p.isValid).length;
+
+        // Count completed / verified tasks
+        const tasks = await ctx.db
+          .query("tasks")
+          .withIndex("by_project_and_owner", (q) =>
+            q.eq("projectId", project._id).eq("primaryOwnerProfileId", m.profileId)
+          )
+          .collect();
+        const tasksCompleted = tasks.filter((t) => t.status === "completed" || t.status === "verified").length;
+
+        return {
+          profileId: m.profileId,
+          displayName: userProfile.displayName,
+          goblinsKilled,
+          tasksCompleted,
+        };
+      })
+    );
+
+    return leaderboard
+      .filter((item): item is NonNullable<typeof item> => item !== null)
+      .sort((a, b) => b.goblinsKilled - a.goblinsKilled);
+  },
+});
+
