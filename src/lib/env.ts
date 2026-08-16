@@ -1,4 +1,5 @@
-const CONVEX_URL_PATTERN = /^https:\/\/[a-z0-9-]+\.convex\.cloud$/;
+const CONVEX_URL_PATTERN =
+  /^(https:\/\/[a-z0-9-]+\.convex\.cloud|http:\/\/(127\.0\.0\.1|localhost):[0-9]+)$/;
 
 export function requireConvexUrl(value: string | undefined): string {
   if (!value) {
@@ -9,7 +10,7 @@ export function requireConvexUrl(value: string | undefined): string {
 
   if (!CONVEX_URL_PATTERN.test(value)) {
     throw new Error(
-      "MayLamDi received an invalid VITE_CONVEX_URL. Expected an https://*.convex.cloud deployment URL.",
+      "MayLamDi received an invalid VITE_CONVEX_URL. Expected a Convex deployment URL.",
     );
   }
 

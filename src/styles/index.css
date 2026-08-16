@@ -1,4 +1,5 @@
-@import "tailwindcss";
+@import "tailwindcss/theme.css";
+@import "tailwindcss/utilities.css";
 
 @font-face {
   font-family: "Blode Starkly";
@@ -4993,3 +4994,353 @@ footer {
   .shared-battle-stage .battle-summary dl { grid-template-columns: 1fr; }
   .battle-task-note { flex-basis: 86vw; }
 }
+
+/* ==========================================================================
+   Profile Center — Hierarchical Layout & Visual Hierarchy Enhancement
+   ========================================================================== */
+
+.profile-page.profile-center {
+  display: grid;
+  gap: 1.75rem;
+  width: min(100%, 960px);
+  margin: 0 auto;
+  padding-bottom: 3rem;
+}
+
+.profile-center .focused-page-heading {
+  margin-bottom: 0.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid color-mix(in srgb, var(--color-text) 18%, transparent);
+}
+
+.profile-center .focused-page-heading h1 {
+  font-size: clamp(2rem, 4.5vw, 3.25rem);
+  letter-spacing: -0.035em;
+  margin: 0.25rem 0 0.4rem;
+}
+
+.profile-center .focused-page-heading p {
+  color: var(--color-muted);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.profile-setup-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.profile-basic-card,
+.profile-settings-card {
+  border: 2px solid color-mix(in srgb, var(--color-text) 80%, transparent);
+  border-radius: 22px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 1.6rem 1.85rem;
+  box-shadow: 5px 5px 0 color-mix(in srgb, var(--color-text) 18%, transparent);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-basic-card:focus-within,
+.profile-settings-card:focus-within {
+  border-color: var(--color-blue);
+}
+
+.card-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-blue);
+  margin-bottom: 0.35rem;
+}
+
+:root[data-theme="dark"] .card-eyebrow {
+  color: var(--color-yellow);
+}
+
+.profile-basic-card h2,
+.profile-settings-card h2 {
+  font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.35rem;
+  line-height: 1.25;
+}
+
+.card-description {
+  color: var(--color-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin: 0 0 1.25rem;
+}
+
+/* Profile Basic Card Layout */
+.profile-basic-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+}
+
+.profile-identity img,
+.profile-identity .member-avatar {
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 50%;
+  border: 3px solid var(--color-text);
+  box-shadow: 2px 2px 0 var(--color-text);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.profile-identity div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.profile-identity h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
+.profile-identity span {
+  font-size: 0.88rem;
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.profile-character-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem 1.1rem;
+  border-radius: 14px;
+  border: 1px dashed color-mix(in srgb, var(--color-text) 30%, transparent);
+  background: color-mix(in srgb, var(--color-page) 75%, var(--color-surface));
+  color: var(--color-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.4;
+  max-width: 360px;
+  margin: 0;
+}
+
+/* Skill Picker Tabs & Options */
+.profile-skill-picker {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.profile-skill-toolbar {
+  display: flex;
+  gap: 0.45rem;
+  padding: 0.35rem;
+  background: color-mix(in srgb, var(--color-page) 85%, var(--color-surface));
+  border: 2px solid color-mix(in srgb, var(--color-text) 35%, transparent);
+  border-radius: 14px;
+  width: fit-content;
+  flex-wrap: wrap;
+}
+
+.profile-skill-toolbar button {
+  padding: 0.5rem 1.1rem;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.profile-skill-toolbar button:hover {
+  background: color-mix(in srgb, var(--color-blue) 18%, transparent);
+}
+
+.profile-skill-toolbar button.is-active {
+  background: var(--color-yellow);
+  color: var(--color-navy);
+  border-color: var(--color-text);
+  box-shadow: 2px 2px 0 var(--color-text);
+}
+
+.profile-skill-search,
+.profile-other-skill {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.profile-skill-search span,
+.profile-other-skill label span {
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.profile-skill-search input,
+.profile-other-skill input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.7rem 1rem;
+  border: 2px solid var(--color-text);
+  border-radius: 12px;
+  background: var(--color-page);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.profile-skill-search input:focus,
+.profile-other-skill input:focus {
+  outline: none;
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-blue) 25%, transparent);
+}
+
+.profile-skill-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.profile-skill-options button {
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--color-text) 50%, transparent);
+  background: var(--color-page);
+  color: var(--color-text);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.profile-skill-options button:hover {
+  border-color: var(--color-text);
+  transform: translateY(-1px);
+}
+
+.profile-skill-options button.is-selected {
+  background: var(--color-blue);
+  color: var(--text-on-blue);
+  border-color: var(--color-text);
+  box-shadow: 2px 2px 0 var(--color-text);
+  font-weight: 900;
+}
+
+/* Selected Skills Container */
+.selected-skills-container {
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 1.1rem;
+  border-top: 2px dashed color-mix(in srgb, var(--color-text) 25%, transparent);
+  margin-top: 0.5rem;
+}
+
+.selected-skills-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.selected-skills-title {
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.selected-skills-hint {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+
+.selected-profile-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.selected-profile-skills button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  border: 2px solid var(--color-text);
+  background: var(--color-pink);
+  color: var(--color-navy);
+  font-size: 0.84rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--color-text);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.selected-profile-skills button:hover {
+  filter: brightness(0.95);
+  transform: scale(1.03);
+}
+
+/* Capacity Options Grid */
+.capacity-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.capacity-options button {
+  min-height: 52px;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  border: 2px solid color-mix(in srgb, var(--color-text) 45%, transparent);
+  background: var(--color-page);
+  color: var(--color-text);
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.capacity-options button:hover {
+  border-color: var(--color-text);
+  transform: translateY(-2px);
+}
+
+.capacity-options button.is-selected {
+  background: var(--color-green);
+  color: var(--color-navy);
+  border-color: var(--color-text);
+  box-shadow: 3px 3px 0 var(--color-text);
+  font-weight: 900;
+}
+
+/* Primary Profile Save Button */
+.profile-save-button {
+  margin-top: 0.75rem;
+  min-height: 54px;
+  font-size: 1.08rem;
+  font-weight: 900;
+  width: 100%;
+  border-radius: 16px;
+  letter-spacing: -0.01em;
+}
+

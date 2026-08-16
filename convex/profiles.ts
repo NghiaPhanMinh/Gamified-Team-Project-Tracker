@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 
 import { mutation, query } from "./_generated/server";
-import { requireAuthUser, requireUserProfile } from "./lib/auth";
+import { requireAuthUser } from "./lib/auth";
 
 function cleanSkills(values: string[], label: string) {
   const skills = [...new Set(values.map((value) => value.trim()))]
@@ -87,7 +87,14 @@ export const saveCurrent = mutation({
     weeklyCapacity: v.number(),
   },
   handler: async (ctx, args) => {
-    const profile = await requireUserProfile(ctx);
+    const authUser = await requireAuthUser(ctx);
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_auth_user_id", (indexQuery) =>
+        indexQuery.eq("authUserId", authUser._id),
+      )
+      .unique();
+
     const skills = cleanSkills(args.skills, "Skills");
     const softwareSkills = cleanSkills(args.softwareSkills, "Software skills");
 
@@ -103,6 +110,24 @@ export const saveCurrent = mutation({
     }
 
     const now = Date.now();
+    if (profile === null) {
+      const displayName = authUser.name?.trim() ?? "Teammate";
+      const email = authUser.email?.trim().toLowerCase() ?? "";
+
+      return await ctx.db.insert("userProfiles", {
+        authUserId: authUser._id,
+        displayName,
+        email,
+        imageUrl: authUser.image ?? undefined,
+        skills,
+        softwareSkills,
+        weeklyCapacity: args.weeklyCapacity,
+        profileCompletedAt: now,
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+
     await ctx.db.patch(profile._id, {
       skills,
       softwareSkills,

@@ -118,9 +118,18 @@ function SkillPicker({
       {mode === "recommended" || mode === "search" ? (
         <div className="profile-skill-options">{choices.length ? choices.map((skill) => { const selected = skills.includes(skill) || softwareSkills.includes(skill); return <button key={skill} type="button" className={selected ? "is-selected" : ""} aria-pressed={selected} onClick={() => toggle(skill)}>{skill}</button>; }) : <p>{mode === "search" ? "Type a skill to search." : "No recommendations available."}</p>}</div>
       ) : null}
-      <div className="selected-profile-skills" aria-live="polite">
-        {[...skills, ...softwareSkills].map((skill) => <button key={skill} type="button" onClick={() => toggle(skill)}>{skill}<span aria-hidden="true"> ×</span></button>)}
-      </div>
+      
+      {skills.length > 0 || softwareSkills.length > 0 ? (
+        <div className="selected-skills-container">
+          <div className="selected-skills-header">
+            <span className="selected-skills-title">Selected skills ({skills.length + softwareSkills.length})</span>
+            <span className="selected-skills-hint">Click any skill to remove</span>
+          </div>
+          <div className="selected-profile-skills" aria-live="polite">
+            {[...skills, ...softwareSkills].map((skill) => <button key={skill} type="button" onClick={() => toggle(skill)}>{skill}<span aria-hidden="true"> ×</span></button>)}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -191,17 +200,20 @@ export function ProfileCenter({
             {profile?.imageUrl ? <img src={profile.imageUrl} alt="" /> : <span className="member-avatar">{profile?.displayName.slice(0, 1).toUpperCase()}</span>}
             <div><p className="card-eyebrow">Google profile</p><h2 id="basic-profile-title">{profile?.displayName}</h2><span>{profile?.email}</span></div>
           </div>
-          {character ? <details className="compact-character-settings"><summary>Customise my character</summary>{character}</details> : <p className="profile-character-note">Character customisation becomes available after you enter a room.</p>}
+          {character ? <details className="compact-character-settings"><summary>Customise my character</summary>{character}</details> : <p className="profile-character-note"><span>ℹ️</span> Character customisation becomes available after you enter a room.</p>}
         </section>
 
         <section className="profile-settings-card" aria-labelledby="work-profile-title">
-          <p className="card-eyebrow">Reusable preferences</p><h2 id="work-profile-title">Tell your team how you work</h2>
+          <p className="card-eyebrow">Reusable preferences</p>
+          <h2 id="work-profile-title">Tell your team how you work</h2>
+          <p className="card-description">Select the core skills and tools you excel at so your team can assign tasks fairly and transparently.</p>
           <SkillPicker skills={skills} softwareSkills={softwareSkills} onSkillsChange={setSkills} onSoftwareSkillsChange={setSoftwareSkills} />
         </section>
 
         <section className="profile-settings-card" aria-labelledby="capacity-title">
-          <p className="card-eyebrow">Weekly capacity</p><h2 id="capacity-title">How much time can you contribute each week?</h2>
-          <p>Used to avoid giving one teammate significantly more work than they can manage.</p>
+          <p className="card-eyebrow">Weekly capacity</p>
+          <h2 id="capacity-title">How much time can you contribute each week?</h2>
+          <p className="card-description">Used by MayLamDi's allocation engine to balance workload and prevent burnout.</p>
           <div className="capacity-options">{CAPACITY_OPTIONS.map((option) => <button key={option.value} type="button" className={weeklyCapacity === option.value ? "is-selected" : ""} aria-pressed={weeklyCapacity === option.value} onClick={() => setWeeklyCapacity(option.value)}>{option.label}</button>)}</div>
         </section>
 

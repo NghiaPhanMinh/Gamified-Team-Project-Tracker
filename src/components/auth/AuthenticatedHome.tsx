@@ -13,7 +13,14 @@ import { MAIN_NAV_ITEMS, type MainSection, type ProjectsView } from "../../lib/n
 export function AuthenticatedHome() {
   const { signOut } = useAuthActions();
   const profile = useQuery(api.profiles.getOrNull);
-  const rooms = useQuery(api.teams.listMine);
+  const profileComplete =
+    profile !== undefined &&
+    profile !== null &&
+    profile.profileCompletedAt !== undefined &&
+    profile.weeklyCapacity !== undefined &&
+    (profile.skills?.length ?? 0) + (profile.softwareSkills?.length ?? 0) > 0;
+
+  const rooms = useQuery(api.teams.listMine, profileComplete ? {} : "skip");
   const ensureProfile = useMutation(api.profiles.ensureCurrent);
   const hasRequestedProfile = useRef(false);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -63,11 +70,6 @@ export function AuthenticatedHome() {
       </main>
     );
   }
-
-  const profileComplete =
-    profile.profileCompletedAt !== undefined &&
-    profile.weeklyCapacity !== undefined &&
-    (profile.skills?.length ?? 0) + (profile.softwareSkills?.length ?? 0) > 0;
 
   if (!profileComplete) {
     return (

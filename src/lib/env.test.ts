@@ -13,8 +13,14 @@ describe("Convex environment validation", () => {
     expect(() => requireConvexUrl(undefined)).toThrow(/VITE_CONVEX_URL/);
   });
 
-  it("rejects non-Convex and non-HTTPS URLs", () => {
-    expect(() => requireConvexUrl("http://localhost:3000")).toThrow(
+  it("accepts local development deployment URLs", () => {
+    expect(requireConvexUrl("http://127.0.0.1:3210")).toBe(
+      "http://127.0.0.1:3210",
+    );
+  });
+
+  it("rejects non-Convex URLs", () => {
+    expect(() => requireConvexUrl("https://example.com")).toThrow(
       /invalid VITE_CONVEX_URL/,
     );
   });

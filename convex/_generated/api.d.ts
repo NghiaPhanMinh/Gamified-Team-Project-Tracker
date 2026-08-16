@@ -18,6 +18,7 @@ import type * as auth from "../auth.js";
 import type * as availability from "../availability.js";
 import type * as battle from "../battle.js";
 import type * as customFrameworks from "../customFrameworks.js";
+import type * as daily from "../daily.js";
 import type * as evidence from "../evidence.js";
 import type * as health from "../health.js";
 import type * as http from "../http.js";
@@ -56,6 +57,7 @@ declare const fullApi: ApiFromModules<{
   availability: typeof availability;
   battle: typeof battle;
   customFrameworks: typeof customFrameworks;
+  daily: typeof daily;
   evidence: typeof evidence;
   health: typeof health;
   http: typeof http;
