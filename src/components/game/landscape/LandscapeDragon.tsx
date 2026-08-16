@@ -1,12 +1,59 @@
+export type CustomShape = {
+  id: string;
+  name: string;
+  type: "circle" | "ellipse" | "rect" | "polygon" | "path";
+  fill: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rx: number;
+  ry: number;
+  points: string;
+  d: string;
+  rotate: number;
+};
+
 type LandscapeDragonProps = {
   bossHpPercent: number; // 0 to 100
   isDefeated: boolean;
+  offsets?: Record<string, { x: number; y: number; rotate: number }>;
+  onSelectPart?: (partId: string) => void;
+  selectedPart?: string | null;
+  animationsEnabled?: boolean;
+  customShapes?: CustomShape[];
 };
 
-export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonProps) {
+export function LandscapeDragon({
+  bossHpPercent,
+  isDefeated,
+  offsets,
+  onSelectPart,
+  selectedPart,
+  animationsEnabled = true,
+  customShapes = [],
+}: LandscapeDragonProps) {
   // Anchor dragon on far-right end of the 1000x400 viewBox canvas (x = 730 to 930)
   const damageClearedFraction = (100 - bossHpPercent) / 100;
   const dragonX = 730 + damageClearedFraction * 60;
+
+  // Helper function to build SVG attributes (translate, rotate, hover, highlight, selection)
+  function getShapeProps(shapeId: string, defaultStroke?: string, defaultStrokeWidth?: number) {
+    const isSelected = selectedPart === shapeId;
+    const offset = offsets?.[shapeId] || { x: 0, y: 0, rotate: 0 };
+    return {
+      onClick: (e: React.MouseEvent) => {
+        if (onSelectPart) {
+          e.stopPropagation();
+          onSelectPart(shapeId);
+        }
+      },
+      style: { cursor: onSelectPart ? "pointer" : "inherit" },
+      stroke: isSelected ? "#ffd700" : defaultStroke,
+      strokeWidth: isSelected ? 3 : defaultStrokeWidth,
+      transform: `translate(${offset.x}, ${offset.y}) rotate(${offset.rotate ?? 0})`,
+    };
+  }
 
   return (
     <div className="landscape-layer layer-8-dragon" aria-label={`Epic Rigged Western Red Dragon (${bossHpPercent}% HP left)`}>
@@ -17,176 +64,182 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
           className={`dragon-group ${isDefeated ? "dragon-defeated" : ""}`}
           style={{ opacity: isDefeated ? 0.35 : 1 }}
         >
-          {/* Gentle Flying Hovering Animation */}
+          {/* Hovering animation tag */}
           <g>
-            <animateTransform
-              attributeName="transform"
-              type="translate"
-              values="0,0; 0,-14; 0,0"
-              dur="3.2s"
-              repeatCount="indefinite"
-            />
+            {animationsEnabled && (
+              <animateTransform
+                attributeName="transform"
+                type="translate"
+                values="0,0; 0,-14; 0,0"
+                dur="3.2s"
+                repeatCount="indefinite"
+              />
+            )}
 
-            {/* --- MASTER-LEVEL ANATOMICAL DRAGON (CONNECTED RIGHT-FACING HORNS, SOLID SOLID MOUTH, ALIGNED SCALES) --- */}
+            {/* --- MASTER-LEVEL ANATOMICAL DRAGON --- */}
             <g transform="scale(0.68)">
 
               {/* =========================================================================
-                  1. LEFT / BACK SWEEPING FLAPPING BAT WING (Same Red Color as Body)
+                  1. LEFT / BACK SWEEPING BAT WING
                  ========================================================================= */}
               <g className="dragon-back-wing" transform-origin="120 110">
-                <animateTransform
-                  attributeName="transform"
-                  type="rotate"
-                  values="0; -15; 0"
-                  dur="1.8s"
-                  repeatCount="indefinite"
-                  additive="sum"
-                />
+                {animationsEnabled && (
+                  <animateTransform
+                    attributeName="transform"
+                    type="rotate"
+                    values="0; -15; 0"
+                    dur="1.8s"
+                    repeatCount="indefinite"
+                    additive="sum"
+                  />
+                )}
                 {/* Wing Membrane Panels */}
-                <path d="M 120 110 Q 180 -40 320 -70 Q 250 10 210 70 Q 160 50 120 110 Z" fill="#7f1d1d" />
-                <path d="M 320 -70 Q 270 20 230 85 Q 180 80 120 110 Q 200 10 320 -70 Z" fill="#991b1b" />
-                <path d="M 230 85 Q 180 40 120 110 Q 170 80 230 85 Z" fill="#450a0a" />
+                <path d="M 120 110 Q 180 -40 320 -70 Q 250 10 210 70 Q 160 50 120 110 Z" fill="#7f1d1d" {...getShapeProps("backWing_membrane1")} />
+                <path d="M 320 -70 Q 270 20 230 85 Q 180 80 120 110 Q 200 10 320 -70 Z" fill="#991b1b" {...getShapeProps("backWing_membrane2")} />
+                <path d="M 230 85 Q 180 40 120 110 Q 170 80 230 85 Z" fill="#450a0a" {...getShapeProps("backWing_membrane3")} />
 
                 {/* Wing Finger Bone Struts */}
-                <path d="M 120 110 Q 220 -20 320 -70" stroke="#b91c1c" strokeWidth="5" strokeLinecap="round" fill="none" />
-                <path d="M 120 110 Q 185 10 230 85" stroke="#b91c1c" strokeWidth="4" strokeLinecap="round" fill="none" />
+                <path d="M 120 110 Q 220 -20 320 -70" strokeLinecap="round" fill="none" {...getShapeProps("backWing_strut1", "#b91c1c", 5)} />
+                <path d="M 120 110 Q 185 10 230 85" strokeLinecap="round" fill="none" {...getShapeProps("backWing_strut2", "#b91c1c", 4)} />
 
                 {/* Wing Joint & Claw */}
-                <circle cx="320" cy="-70" r="5" fill="#f97316" />
-                <polygon points="320,-70 334,-84 324,-58" fill="#ea580c" />
+                <circle cx="320" cy="-70" r="5" fill="#f97316" {...getShapeProps("backWing_joint")} />
+                <polygon points="320,-70 334,-84 324,-58" fill="#ea580c" {...getShapeProps("backWing_claw")} />
               </g>
 
               {/* =========================================================================
-                  2. RIGHT / FRONT SWEEPING FLAPPING BAT WING (Same Red Color as Body)
+                  2. RIGHT / FRONT SWEEPING BAT WING
                  ========================================================================= */}
               <g className="dragon-front-wing" transform-origin="110 115">
-                <animateTransform
-                  attributeName="transform"
-                  type="rotate"
-                  values="0; 15; 0"
-                  dur="1.8s"
-                  repeatCount="indefinite"
-                  additive="sum"
-                />
+                {animationsEnabled && (
+                  <animateTransform
+                    attributeName="transform"
+                    type="rotate"
+                    values="0; 15; 0"
+                    dur="1.8s"
+                    repeatCount="indefinite"
+                    additive="sum"
+                  />
+                )}
                 {/* Front Membrane Panels */}
-                <path d="M 110 115 Q 10 -40 -80 -60 Q 0 15 50 80 Q 80 60 110 115 Z" fill="#991b1b" />
-                <path d="M -80 -60 Q -10 35 30 100 Q 70 85 130 125 Z" fill="#7f1d1d" />
-                <path d="M 30 100 Q 65 60 130 125 Q 75 95 30 100 Z" fill="#450a0a" />
+                <path d="M 110 115 Q 10 -40 -80 -60 Q 0 15 50 80 Q 80 60 110 115 Z" fill="#991b1b" {...getShapeProps("frontWing_membrane1")} />
+                <path d="M -80 -60 Q -10 35 30 100 Q 70 85 130 125 Z" fill="#7f1d1d" {...getShapeProps("frontWing_membrane2")} />
+                <path d="M 30 100 Q 65 60 130 125 Q 75 95 30 100 Z" fill="#450a0a" {...getShapeProps("frontWing_membrane3")} />
 
                 {/* Front Bone Struts */}
-                <path d="M 110 115 Q 20 10 -80 -60" stroke="#b91c1c" strokeWidth="5" strokeLinecap="round" fill="none" />
-                <path d="M 110 115 Q 50 30 30 100" stroke="#991b1b" strokeWidth="4" strokeLinecap="round" fill="none" />
+                <path d="M 110 115 Q 20 10 -80 -60" strokeLinecap="round" fill="none" {...getShapeProps("frontWing_strut1", "#b91c1c", 5)} />
+                <path d="M 110 115 Q 50 30 30 100" strokeLinecap="round" fill="none" {...getShapeProps("frontWing_strut2", "#991b1b", 4)} />
 
                 {/* Wrist Joint & Claw */}
-                <circle cx="-70" cy="-50" r="5" fill="#f97316" />
-                <polygon points="-70,-50 -85,-65 -74,-38" fill="#ea580c" />
+                <circle cx="-70" cy="-50" r="5" fill="#f97316" {...getShapeProps("frontWing_joint")} />
+                <polygon points="-70,-50 -85,-65 -74,-38" fill="#ea580c" {...getShapeProps("frontWing_claw")} />
               </g>
 
               {/* =========================================================================
-                  3. SLIM POINTY TAPERED TAIL WITH TRIPLE BARBED BLADE TIP
+                  3. SLIM POINTY TAPERED TAIL
                  ========================================================================= */}
               <g className="dragon-tail">
                 {/* Slim Segment 1 */}
-                <path d="M 160 150 Q 220 160 255 190 L 240 215 Q 215 190 165 175 Z" fill="#7f1d1d" />
+                <path d="M 160 150 Q 220 160 255 190 L 240 215 Q 215 190 165 175 Z" fill="#7f1d1d" {...getShapeProps("tail_seg1")} />
                 {/* Slim Segment 2 */}
-                <path d="M 255 190 Q 285 225 265 260 L 245 255 Q 260 235 240 215 Z" fill="#991b1b" />
+                <path d="M 255 190 Q 285 225 265 260 L 245 255 Q 260 235 240 215 Z" fill="#991b1b" {...getShapeProps("tail_seg2")} />
                 {/* Slim Segment 3 */}
-                <path d="M 265 260 Q 240 280 205 270 L 210 255 Q 235 262 245 255 Z" fill="#b91c1c" />
+                <path d="M 265 260 Q 240 280 205 270 L 210 255 Q 235 262 245 255 Z" fill="#b91c1c" {...getShapeProps("tail_seg3")} />
 
                 {/* Underbelly tail shadow */}
-                <path d="M 245 255 Q 235 262 205 270 Q 220 285 245 255 Z" fill="#450a0a" />
+                <path d="M 245 255 Q 235 262 205 270 Q 220 285 245 255 Z" fill="#450a0a" {...getShapeProps("tail_shadow")} />
 
                 {/* Barbed tip */}
-                <polygon points="205,270 170,290 192,260" fill="#dc2626" />
-                <polygon points="205,270 182,252 196,263" fill="#ea580c" />
-                <polygon points="205,270 188,285 198,272" fill="#f97316" />
+                <polygon points="205,270 170,290 192,260" fill="#dc2626" {...getShapeProps("tail_barb1")} />
+                <polygon points="205,270 182,252 196,263" fill="#ea580c" {...getShapeProps("tail_barb2")} />
+                <polygon points="205,270 188,285 198,272" fill="#f97316" {...getShapeProps("tail_barb3")} />
 
                 {/* Tail Spines */}
-                <polygon points="230,170 242,158 238,175" fill="#dc2626" />
-                <polygon points="275,215 290,208 280,225" fill="#dc2626" />
-                <polygon points="255,262 268,272 250,268" fill="#dc2626" />
+                <polygon points="230,170 242,158 238,175" fill="#dc2626" {...getShapeProps("tail_spine1")} />
+                <polygon points="275,215 290,208 280,225" fill="#dc2626" {...getShapeProps("tail_spine2")} />
+                <polygon points="255,262 268,272 250,268" fill="#dc2626" {...getShapeProps("tail_spine3")} />
               </g>
 
               {/* =========================================================================
-                  4. DORSAL SPINE CREST PLATES (Perfect Alignment on Torso/Spine Contour)
+                  4. DORSAL SPINE CREST PLATES
                  ========================================================================= */}
               <g className="dragon-dorsal-spines">
-                <polygon points="35,42 22,22 42,35" fill="#dc2626" />
-                <polygon points="55,58 45,38 62,52" fill="#dc2626" />
-                <polygon points="80,78 72,58 88,72" fill="#dc2626" />
-                <polygon points="105,98 94,82 110,95" fill="#dc2626" />
-                <polygon points="135,118 122,100 138,114" fill="#dc2626" />
-                <polygon points="165,138 152,120 168,134" fill="#dc2626" />
-                <polygon points="195,152 182,135 198,148" fill="#dc2626" />
+                <polygon points="35,42 22,22 42,35" fill="#dc2626" {...getShapeProps("spine1")} />
+                <polygon points="55,58 45,38 62,52" fill="#dc2626" {...getShapeProps("spine2")} />
+                <polygon points="80,78 72,58 88,72" fill="#dc2626" {...getShapeProps("spine3")} />
+                <polygon points="105,98 94,82 110,95" fill="#dc2626" {...getShapeProps("spine4")} />
+                <polygon points="135,118 122,100 138,114" fill="#dc2626" {...getShapeProps("spine5")} />
+                <polygon points="165,138 152,120 168,134" fill="#dc2626" {...getShapeProps("spine6")} />
+                <polygon points="195,152 182,135 198,148" fill="#dc2626" {...getShapeProps("spine7")} />
               </g>
 
               {/* =========================================================================
-                  5. BACK HIND LEG (ANATOMICAL RIGGED JOINTS - BIGGER & THICKER)
+                  5. BACK HIND LEG
                  ========================================================================= */}
               <g className="dragon-back-leg">
                 {/* Quad/Thigh */}
-                <path d="M 150 145 C 205 160 210 205 185 215 C 145 205 140 180 150 145 Z" fill="#450a0a" />
+                <path d="M 150 145 C 205 160 210 205 185 215 C 145 205 140 180 150 145 Z" fill="#450a0a" {...getShapeProps("backLeg_thigh")} />
                 {/* Knee */}
-                <circle cx="185" cy="215" r="14" fill="#310606" />
+                <circle cx="185" cy="215" r="14" fill="#310606" {...getShapeProps("backLeg_knee")} />
                 {/* Calf */}
-                <path d="M 185 215 L 165 255 L 140 248 L 170 208 Z" fill="#450a0a" />
+                <path d="M 185 215 L 165 255 L 140 248 L 170 208 Z" fill="#450a0a" {...getShapeProps("backLeg_calf")} />
                 {/* Ankle */}
-                <circle cx="165" cy="255" r="9" fill="#1c0303" />
+                <circle cx="165" cy="255" r="9" fill="#1c0303" {...getShapeProps("backLeg_ankle")} />
                 {/* Foot */}
-                <path d="M 165 255 L 125 264 L 128 252 L 158 246 Z" fill="#450a0a" />
+                <path d="M 165 255 L 125 264 L 128 252 L 158 246 Z" fill="#450a0a" {...getShapeProps("backLeg_foot")} />
                 {/* 3 White Claws */}
-                <polygon points="125,264 102,276 120,256" fill="#ffffff" />
-                <polygon points="128,266 108,280 125,258" fill="#ffffff" />
-                <polygon points="132,268 114,284 130,260" fill="#ffffff" />
+                <polygon points="125,264 102,276 120,256" fill="#ffffff" {...getShapeProps("backLeg_claw1")} />
+                <polygon points="128,266 108,280 125,258" fill="#ffffff" {...getShapeProps("backLeg_claw2")} />
+                <polygon points="132,268 114,284 130,260" fill="#ffffff" {...getShapeProps("backLeg_claw3")} />
               </g>
 
               {/* =========================================================================
                   6. PROPORTIONATE MUSCULAR TORSO & MULTI-LAYERED CHEST ARMOR
                  ========================================================================= */}
               <g className="dragon-torso">
-                <path d="M 50 110 C 115 65 200 100 185 180 C 145 210 70 195 50 110 Z" fill="#7f1d1d" />
-                <path d="M 150 135 C 195 150 185 195 140 185 Z" fill="#580e0e" />
-                <path d="M 105 75 C 175 110 175 185 125 195 C 155 155 138 100 105 75 Z" fill="#450a0a" />
+                <path d="M 50 110 C 115 65 200 100 185 180 C 145 210 70 195 50 110 Z" fill="#7f1d1d" {...getShapeProps("torso_base")} />
+                <path d="M 150 135 C 195 150 185 195 140 185 Z" fill="#580e0e" {...getShapeProps("torso_plate1")} />
+                <path d="M 105 75 C 175 110 175 185 125 195 C 155 155 138 100 105 75 Z" fill="#450a0a" {...getShapeProps("torso_plate2")} />
 
                 {/* Chest Plates */}
-                <path d="M 58 122 C 92 150 135 145 150 135 Q 130 170 66 152 Z" fill="#b91c1c" />
-                <path d="M 64 132 C 94 158 130 152 142 142 Q 122 174 72 160 Z" fill="#dc2626" />
-                <path d="M 70 142 C 98 165 125 158 135 148 Q 115 178 78 166 Z" fill="#ea580c" />
-                <path d="M 76 152 C 100 170 120 164 128 154 Q 110 182 84 172 Z" fill="#f97316" />
-                <path d="M 82 162 C 102 176 116 170 122 160 Q 106 186 90 178 Z" fill="#fef08a" />
+                <path d="M 58 122 C 92 150 135 145 150 135 Q 130 170 66 152 Z" fill="#b91c1c" {...getShapeProps("torso_chest1")} />
+                <path d="M 64 132 C 94 158 130 152 142 142 Q 122 174 72 160 Z" fill="#dc2626" {...getShapeProps("torso_chest2")} />
+                <path d="M 70 142 C 98 165 125 158 135 148 Q 115 178 78 166 Z" fill="#ea580c" {...getShapeProps("torso_chest3")} />
+                <path d="M 76 152 C 100 170 120 164 128 154 Q 110 182 84 172 Z" fill="#f97316" {...getShapeProps("torso_chest4")} />
+                <path d="M 82 162 C 102 176 116 170 122 160 Q 106 186 90 178 Z" fill="#fef08a" {...getShapeProps("torso_chest5")} />
               </g>
 
               {/* =========================================================================
-                  7. FRONT HIND LEG (ANATOMICAL RIGGED JOINTS - BIGGER & THICKER)
+                  7. FRONT HIND LEG
                  ========================================================================= */}
               <g className="dragon-front-leg">
                 {/* Thigh */}
-                <path d="M 145 150 C 195 165 198 210 175 220 C 135 210 132 185 145 150 Z" fill="#991b1b" />
+                <path d="M 145 150 C 195 165 198 210 175 220 C 135 210 132 185 145 150 Z" fill="#991b1b" {...getShapeProps("frontLeg_thigh")} />
                 {/* Knee */}
-                <circle cx="175" cy="220" r="14" fill="#7f1d1d" />
+                <circle cx="175" cy="220" r="14" fill="#7f1d1d" {...getShapeProps("frontLeg_knee")} />
                 {/* Calf */}
-                <path d="M 175 220 L 155 260 L 130 252 L 160 212 Z" fill="#991b1b" />
+                <path d="M 175 220 L 155 260 L 130 252 L 160 212 Z" fill="#991b1b" {...getShapeProps("frontLeg_calf")} />
                 {/* Ankle */}
-                <circle cx="155" cy="260" r="9" fill="#580e0e" />
+                <circle cx="155" cy="260" r="9" fill="#580e0e" {...getShapeProps("frontLeg_ankle")} />
                 {/* Foot */}
-                <path d="M 155 260 L 115 270 L 118 258 L 148 252 Z" fill="#991b1b" />
+                <path d="M 155 260 L 115 270 L 118 258 L 148 252 Z" fill="#991b1b" {...getShapeProps("frontLeg_foot")} />
                 {/* Claws */}
-                <polygon points="115,270 92,284 110,262" fill="#ffffff" />
-                <polygon points="118,272 98,288 114,264" fill="#ffffff" />
-                <polygon points="122,274 104,292 118,266" fill="#ffffff" />
+                <polygon points="115,270 92,284 110,262" fill="#ffffff" {...getShapeProps("frontLeg_claw1")} />
+                <polygon points="118,272 98,288 114,264" fill="#ffffff" {...getShapeProps("frontLeg_claw2")} />
+                <polygon points="122,274 104,292 118,266" fill="#ffffff" {...getShapeProps("frontLeg_claw3")} />
               </g>
 
               {/* =========================================================================
-                  8. RIGGED FRONT ARM (SHOULDER, BICEP, FOREARM, HAND - BIGGER)
+                  8. RIGGED FRONT ARM
                  ========================================================================= */}
               <g className="dragon-front-arm">
-                <circle cx="95" cy="120" r="15" fill="#991b1b" />
-                <path d="M 95 120 L 60 155 L 45 145 L 82 112 Z" fill="#991b1b" />
-                <circle cx="60" cy="155" r="9" fill="#7f1d1d" />
-                <path d="M 60 155 L 30 148 L 28 135 L 52 142 Z" fill="#991b1b" />
-                <circle cx="30" cy="148" r="7" fill="#7f1d1d" />
-                <polygon points="30,148 10,160 24,142" fill="#ffffff" />
-                <polygon points="32,150 14,164 26,144" fill="#ffffff" />
+                <circle cx="95" cy="120" r="15" fill="#991b1b" {...getShapeProps("frontArm_shoulder")} />
+                <path d="M 95 120 L 60 155 L 45 145 L 82 112 Z" fill="#991b1b" {...getShapeProps("frontArm_bicep")} />
+                <circle cx="60" cy="155" r="9" fill="#7f1d1d" {...getShapeProps("frontArm_elbow")} />
+                <path d="M 60 155 L 30 148 L 28 135 L 52 142 Z" fill="#991b1b" {...getShapeProps("frontArm_forearm")} />
+                <circle cx="30" cy="148" r="7" fill="#7f1d1d" {...getShapeProps("frontArm_wrist")} />
+                <polygon points="30,148 10,160 24,142" fill="#ffffff" {...getShapeProps("frontArm_claw1")} />
+                <polygon points="32,150 14,164 26,144" fill="#ffffff" {...getShapeProps("frontArm_claw2")} />
               </g>
 
               {/* =========================================================================
@@ -194,76 +247,110 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
                  ========================================================================= */}
               <g className="dragon-head-neck">
                 {/* S-Neck */}
-                <path d="M 70 125 Q 35 90 30 55 Q 15 30 52 18 Q 80 38 86 102 Z" fill="#7f1d1d" />
-                <path d="M 35 90 Q 30 55 15 30 Q 30 35 48 60 Z" fill="#991b1b" />
+                <path d="M 70 125 Q 35 90 30 55 Q 15 30 52 18 Q 80 38 86 102 Z" fill="#7f1d1d" {...getShapeProps("neck_base1")} />
+                <path d="M 35 90 Q 30 55 15 30 Q 30 35 48 60 Z" fill="#991b1b" {...getShapeProps("neck_base2")} />
 
-                {/* Neck Plates (Aligned to flow inside the neck contour) */}
-                <path d="M 28 50 C 44 42 60 48 68 56 C 54 62 38 58 28 50 Z" fill="#580e0e" />
-                <path d="M 32 64 C 48 56 64 62 72 70 C 58 76 42 72 32 64 Z" fill="#450a0a" />
-                <path d="M 36 78 C 52 70 68 76 76 84 C 62 90 46 86 36 78 Z" fill="#310606" />
+                {/* Neck Plates */}
+                <path d="M 28 50 C 44 42 60 48 68 56 C 54 62 38 58 28 50 Z" fill="#580e0e" {...getShapeProps("neck_plate1")} />
+                <path d="M 32 64 C 48 56 64 62 72 70 C 58 76 42 72 32 64 Z" fill="#450a0a" {...getShapeProps("neck_plate2")} />
+                <path d="M 36 78 C 52 70 68 76 76 84 C 62 90 46 86 36 78 Z" fill="#310606" {...getShapeProps("neck_plate3")} />
 
                 {/* =========================================================================
-                    10. PREDATOR SKULL (CONNECTED RIGHT-FACING JAGGED HORNS, SOLID SOLID MOUTH)
+                    10. PREDATOR SKULL
                    ========================================================================= */}
-                {/* Solid Back-Mouth Cavity (NO GREEN GAPS SHINE THROUGH!) */}
-                <path d="M 32 20 L -10 15 L -16 28 L 8 40 L 32 30 Z" fill="#220303" />
+                {/* Solid Back-Mouth Cavity */}
+                <path d="M 32 20 L -10 15 L -16 28 L 8 40 L 32 30 Z" fill="#220303" {...getShapeProps("mouth_cavity")} />
 
                 {/* Skull Base */}
-                <path d="M 48 20 L -24 5 L 8 -10 L 62 8 Z" fill="#991b1b" />
+                <path d="M 48 20 L -24 5 L 8 -10 L 62 8 Z" fill="#991b1b" {...getShapeProps("skull_base")} />
 
                 {/* Webbed Mouth Tissue */}
-                <path d="M 28 20 Q 20 28 8 36 Q 22 38 28 20 Z" fill="#b91c1c" opacity="0.85" />
+                <path d="M 28 20 Q 20 28 8 36 Q 22 38 28 20 Z" fill="#b91c1c" opacity="0.85" {...getShapeProps("mouth_webbing")} />
 
                 {/* Snout */}
-                <polygon points="-24,5 -8,-1 5,-7 -17,0" fill="#7f1d1d" />
-                <ellipse cx="-12" cy="2" rx="4" ry="2.2" fill="#260404" />
+                <polygon points="-24,5 -8,-1 5,-7 -17,0" fill="#7f1d1d" {...getShapeProps("snout_base")} />
+                <ellipse cx="-12" cy="2" rx="4" ry="2.2" fill="#260404" {...getShapeProps("snout_nostril")} />
 
                 {/* Lower Jaw */}
-                <path d="M 38 34 L -26 18 L 8 42 Z" fill="#7f1d1d" />
+                <path d="M 38 34 L -26 18 L 8 42 Z" fill="#7f1d1d" {...getShapeProps("lower_jaw")} />
 
                 {/* Upper Jaw Fangs */}
-                <polygon points="-16,7 -22,14 -11,9" fill="#ffffff" />
-                <polygon points="-10,8 -14,16 -5,10" fill="#ffffff" />
-                <polygon points="-4,9 -8,17 1,11" fill="#ffffff" />
-                <polygon points="2,10 0,18 7,12" fill="#ffffff" />
-                <polygon points="8,11 6,19 13,13" fill="#ffffff" />
-                <polygon points="14,12 12,20 19,14" fill="#ffffff" />
+                <polygon points="-16,7 -22,14 -11,9" fill="#ffffff" {...getShapeProps("upper_fang1")} />
+                <polygon points="-10,8 -14,16 -5,10" fill="#ffffff" {...getShapeProps("upper_fang2")} />
+                <polygon points="-4,9 -8,17 1,11" fill="#ffffff" {...getShapeProps("upper_fang3")} />
+                <polygon points="2,10 0,18 7,12" fill="#ffffff" {...getShapeProps("upper_fang4")} />
+                <polygon points="8,11 6,19 13,13" fill="#ffffff" {...getShapeProps("upper_fang5")} />
+                <polygon points="14,12 12,20 19,14" fill="#ffffff" {...getShapeProps("upper_fang6")} />
 
                 {/* Lower Jaw Fangs */}
-                <polygon points="-20,20 -14,12 -15,22" fill="#ffffff" />
-                <polygon points="-12,22 -7,14 -7,24" fill="#ffffff" />
-                <polygon points="-4,24 1,16 1,26" fill="#ffffff" />
-                <polygon points="3,26 8,18 8,28" fill="#ffffff" />
+                <polygon points="-20,20 -14,12 -15,22" fill="#ffffff" {...getShapeProps("lower_fang1")} />
+                <polygon points="-12,22 -7,14 -7,24" fill="#ffffff" {...getShapeProps("lower_fang2")} />
+                <polygon points="-4,24 1,16 1,26" fill="#ffffff" {...getShapeProps("lower_fang3")} />
+                <polygon points="3,26 8,18 8,28" fill="#ffffff" {...getShapeProps("lower_fang4")} />
 
-                {/* CONNECTED JAGGED LIGHTNING HORNS (Connected to Skull, Facing Right) */}
-                <g className="lightning-horns-connected" transform="translate(42, 6)">
-                  {/* Lightning Horn 1: Starts at (0, 0), sweeps jaggedly to the right */}
-                  <path d="M 0 0 L 22 -18 L 12 -20 L 40 -38 L 16 -24 L 24 -22 Z" fill="#260404" />
-                  {/* Lightning Horn 2 */}
-                  <path d="M -5 -4 L 17 -22 L 7 -24 L 35 -42 L 11 -28 L 19 -26 Z" fill="#7f1d1d" />
-                </g>
+                {/* CONNECTED JAGGED LIGHTNING HORNS */}
+                <path d="M 42 6 L 64 -12 L 54 -14 L 82 -32 L 58 -18 L 66 -16 Z" fill="#260404" {...getShapeProps("horn1")} />
+                <path d="M 37 2 L 59 -16 L 49 -18 L 77 -36 L 53 -22 L 61 -20 Z" fill="#7f1d1d" {...getShapeProps("horn2")} />
 
                 {/* Spines */}
-                <polygon points="42,8 55,-4 58,10" fill="#7f1d1d" />
-                <polygon points="30,18 12,14 26,26" fill="#991b1b" />
-                <polygon points="38,16 22,8 34,22" fill="#450a0a" />
+                <polygon points="42,8 55,-4 58,10" fill="#7f1d1d" {...getShapeProps("spine_head1")} />
+                <polygon points="30,18 12,14 26,26" fill="#991b1b" {...getShapeProps("spine_head2")} />
+                <polygon points="38,16 22,8 34,22" fill="#450a0a" {...getShapeProps("spine_head3")} />
 
                 {/* Eye */}
-                <ellipse cx="28" cy="4" rx="8" ry="5" fill="#f59e0b" />
-                <polygon points="28,-1 30,4 28,9 26,4" fill="#000000" />
-                <circle cx="25" cy="2" r="1.8" fill="#ffffff" />
-                <polygon points="18,-2 38,0 36,3 20,1" fill="#260404" />
+                <ellipse cx="28" cy="4" rx="8" ry="5" fill="#f59e0b" {...getShapeProps("eye_base")} />
+                <polygon points="28,-1 30,4 28,9 26,4" fill="#000000" {...getShapeProps("eye_pupil")} />
+                <circle cx="25" cy="2" r="1.8" fill="#ffffff" {...getShapeProps("eye_specular")} />
+                <polygon points="18,-2 38,0 36,3 20,1" fill="#260404" {...getShapeProps("eye_brow")} />
               </g>
 
               {/* =========================================================================
-                  12. FRONT CLAW ARM & TALONS (BIGGER)
+                  11. FRONT CLAW ARM & TALONS
                  ========================================================================= */}
-              <g className="dragon-front-arm">
-                <path d="M 85 115 L 50 148 L 30 140 Q 60 110 85 115 Z" fill="#991b1b" />
-                <polygon points="30,140 15,150 27,136" fill="#ffffff" />
-                <polygon points="33,143 19,154 30,139" fill="#ffffff" />
-                <polygon points="36,146 23,157 33,142" fill="#ffffff" />
+              <g className="dragon-front-claw">
+                <path d="M 85 115 L 50 148 L 30 140 Q 60 110 85 115 Z" fill="#991b1b" {...getShapeProps("frontClaw_arm")} />
+                <polygon points="30,140 15,150 27,136" fill="#ffffff" {...getShapeProps("frontClaw_claw1")} />
+                <polygon points="33,143 19,154 30,139" fill="#ffffff" {...getShapeProps("frontClaw_claw2")} />
+                <polygon points="36,146 23,157 33,142" fill="#ffffff" {...getShapeProps("frontClaw_claw3")} />
               </g>
+
+              {/* =========================================================================
+                  12. CUSTOM SPAWNED SHAPES (Spawned via admin tools to patch holes/gaps)
+                 ========================================================================= */}
+              {customShapes.map((shape) => {
+                const shpOffset = offsets?.[shape.id] || { x: 0, y: 0, rotate: 0 };
+                const isSelected = selectedPart === shape.id;
+                
+                const commonProps = {
+                  key: shape.id,
+                  fill: shape.fill,
+                  stroke: isSelected ? "#ffd700" : undefined,
+                  strokeWidth: isSelected ? 3 : undefined,
+                  style: { cursor: onSelectPart ? "pointer" : "inherit" },
+                  onClick: (e: React.MouseEvent) => {
+                    if (onSelectPart) {
+                      e.stopPropagation();
+                      onSelectPart(shape.id);
+                    }
+                  },
+                  transform: `translate(${shape.x + shpOffset.x}, ${shape.y + shpOffset.y}) rotate(${shape.rotate + shpOffset.rotate})`,
+                };
+
+                switch (shape.type) {
+                  case "circle":
+                    return <circle cx="0" cy="0" r={shape.rx} {...commonProps} />;
+                  case "ellipse":
+                    return <ellipse cx="0" cy="0" rx={shape.rx} ry={shape.ry} {...commonProps} />;
+                  case "rect":
+                    return <rect x={-(shape.width / 2)} y={-(shape.height / 2)} width={shape.width} height={shape.height} rx={shape.rx} ry={shape.ry} {...commonProps} />;
+                  case "polygon":
+                    return <polygon points={shape.points} {...commonProps} />;
+                  case "path":
+                    return <path d={shape.d} {...commonProps} />;
+                  default:
+                    return null;
+                }
+              })}
 
             </g>
           </g>
