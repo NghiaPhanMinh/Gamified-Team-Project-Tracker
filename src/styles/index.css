@@ -5355,15 +5355,114 @@ footer {
 .profile-step-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.6rem;
+  padding: 0.25rem 0.65rem;
   border-radius: 8px;
   background: var(--color-yellow);
   color: var(--color-navy);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.08em;
   border: 1.5px solid var(--color-text);
   box-shadow: 1.5px 1.5px 0 var(--color-text);
+}
+
+.profile-step-badge.is-completed {
+  background: var(--color-green);
+  color: var(--color-navy);
+}
+
+.profile-step-badge.is-active {
+  background: var(--color-blue);
+  color: var(--text-on-blue);
+}
+
+.profile-step-badge.is-final {
+  background: var(--color-pink);
+  color: var(--color-navy);
+}
+
+.profile-status-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  margin-left: auto;
+}
+
+.profile-status-pill.is-verified {
+  background: color-mix(in srgb, var(--color-green) 25%, transparent);
+  color: var(--color-text);
+  border: 1px solid color-mix(in srgb, var(--color-green) 60%, transparent);
+}
+
+/* Stepper Progress Bar */
+.profile-stepper-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.profile-header-subtext {
+  color: var(--color-muted);
+  font-size: 0.98rem;
+  line-height: 1.5;
+  margin-top: 0.35rem;
+}
+
+.profile-progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--color-page) 90%, var(--color-surface));
+  border: 2px solid color-mix(in srgb, var(--color-text) 30%, transparent);
+}
+
+.profile-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-progress-label {
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--color-text);
+}
+
+.profile-progress-percent {
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: var(--color-blue);
+}
+
+:root[data-theme="dark"] .profile-progress-percent {
+  color: var(--color-yellow);
+}
+
+.profile-progress-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-text) 15%, transparent);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-text) 25%, transparent);
+}
+
+.profile-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-yellow), var(--color-green));
+  border-radius: 999px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Card Visual Priority States */
+.profile-step-card.is-attention {
+  border-color: var(--color-orange);
+  box-shadow: 6px 6px 0 color-mix(in srgb, var(--color-orange) 30%, transparent);
 }
 
 .profile-title-with-badge {
@@ -5378,48 +5477,51 @@ footer {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.3rem 0.7rem;
+  padding: 0.35rem 0.8rem;
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 800;
   border: 1.5px solid var(--color-text);
 }
 
 .skill-req-badge.is-missing {
-  background: color-mix(in srgb, var(--color-orange) 30%, var(--color-surface));
+  background: color-mix(in srgb, var(--color-orange) 35%, var(--color-surface));
   color: var(--color-text);
+  box-shadow: 2px 2px 0 var(--color-text);
 }
 
 .skill-req-badge.is-ready {
   background: var(--color-green);
   color: var(--color-navy);
   font-weight: 900;
+  box-shadow: 2px 2px 0 var(--color-text);
 }
 
 /* Submit Action Card */
 .profile-submit-card {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.6rem 1.85rem;
+  gap: 1.1rem;
+  padding: 1.75rem 2rem;
   border: 3px solid var(--color-text);
   border-radius: 22px;
-  background: color-mix(in srgb, var(--color-yellow) 25%, var(--color-surface));
+  background: color-mix(in srgb, var(--color-yellow) 22%, var(--color-surface));
   box-shadow: 6px 6px 0 var(--color-blue);
   margin-top: 0.5rem;
 }
 
 .profile-submit-info h3 {
-  font-size: 1.4rem;
+  font-size: 1.45rem;
   font-weight: 900;
-  margin: 0 0 0.25rem;
+  margin: 0.35rem 0 0.25rem;
   letter-spacing: -0.02em;
 }
 
 .profile-submit-info p {
   margin: 0;
   color: var(--color-muted);
-  font-size: 0.92rem;
+  font-size: 0.94rem;
+  line-height: 1.45;
 }
 
 .profile-submit-card .profile-save-button {
@@ -5434,5 +5536,6 @@ footer {
   filter: brightness(1.05);
   transform: translateY(-2px);
 }
+
 
 

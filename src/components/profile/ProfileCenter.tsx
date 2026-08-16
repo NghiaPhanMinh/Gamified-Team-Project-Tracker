@@ -187,23 +187,45 @@ export function ProfileCenter({
     }
   }
 
+  const totalSteps = 3;
+  const isSkillsReady = skills.length + softwareSkills.length > 0;
+  const completedSteps = 1 + (isSkillsReady ? 1 : 0) + (weeklyCapacity ? 1 : 0);
+  const progressPercent = Math.round((completedSteps / totalSteps) * 100);
+
   return (
     <section className="profile-page profile-center" aria-labelledby="profile-page-title">
-      <header className="focused-page-heading">
-        <div>
-          <p className="kicker">{setupRequired ? "Required Onboarding Step" : "Profile Settings"}</p>
-          <h1 className="display-heading" id="profile-page-title">{setupRequired ? "Complete your profile" : "How you work"}</h1>
-          <p>Complete these 3 simple steps so MayLamDi can structure fair workloads for your team.</p>
+      <header className="focused-page-heading profile-stepper-heading">
+        <div className="profile-header-main">
+          <p className="kicker">{setupRequired ? "🔒 Onboarding Required" : "⚙️ Profile Settings"}</p>
+          <h1 className="display-heading" id="profile-page-title">
+            {setupRequired ? "Complete Your Profile to Unlock Rooms" : "How You Work"}
+          </h1>
+          <p className="profile-header-subtext">
+            Complete 3 simple steps so MayLamDi can allocate fair workloads and prevent team burnout.
+          </p>
         </div>
+
+        {/* Visual Progress Bar */}
+        <div className="profile-progress-container" aria-label="Profile completion progress">
+          <div className="profile-progress-meta">
+            <span className="profile-progress-label">PROFILE PROGRESS</span>
+            <span className="profile-progress-percent">{completedSteps}/{totalSteps} STEPS READY ({progressPercent}%)</span>
+          </div>
+          <div className="profile-progress-track">
+            <div className="profile-progress-fill" style={{ width: `${progressPercent}%` }} />
+          </div>
+        </div>
+
         {roomControl}
       </header>
 
       <form className="profile-setup-form" onSubmit={submit}>
-        {/* Step 1: Identity */}
-        <section className="profile-basic-card" aria-labelledby="basic-profile-title">
+        {/* Step 1: Account Identity */}
+        <section className="profile-basic-card profile-step-card" aria-labelledby="basic-profile-title">
           <div className="profile-card-header-row">
-            <span className="profile-step-badge">STEP 1</span>
+            <span className="profile-step-badge is-completed">✓ STEP 1</span>
             <span className="card-eyebrow">Google Account</span>
+            <span className="profile-status-pill is-verified">Verified</span>
           </div>
           <div className="profile-identity">
             {profile?.imageUrl ? <img src={profile.imageUrl} alt="" /> : <span className="member-avatar">{profile?.displayName.slice(0, 1).toUpperCase()}</span>}
@@ -219,32 +241,35 @@ export function ProfileCenter({
           )}
         </section>
 
-        {/* Step 2: Skills */}
-        <section className="profile-settings-card" aria-labelledby="work-profile-title">
+        {/* Step 2: Skills & Tools */}
+        <section className={`profile-settings-card profile-step-card ${!isSkillsReady ? "is-attention" : ""}`} aria-labelledby="work-profile-title">
           <div className="profile-card-header-row">
-            <span className="profile-step-badge">STEP 2</span>
-            <span className="card-eyebrow">Reusable Preferences</span>
+            <span className={`profile-step-badge ${isSkillsReady ? "is-completed" : "is-active"}`}>
+              {isSkillsReady ? "✓ STEP 2" : "STEP 2"}
+            </span>
+            <span className="card-eyebrow">Core Competencies</span>
           </div>
+
           <div className="profile-title-with-badge">
-            <h2 id="work-profile-title">Tell your team how you work</h2>
-            {skills.length + softwareSkills.length === 0 ? (
-              <span className="skill-req-badge is-missing">⚠️ Select at least 1 skill</span>
+            <h2 id="work-profile-title">What skills do you bring to your team?</h2>
+            {!isSkillsReady ? (
+              <span className="skill-req-badge is-missing">⚠️ Required: Pick at least 1 skill</span>
             ) : (
-              <span className="skill-req-badge is-ready">✓ {skills.length + softwareSkills.length} selected</span>
+              <span className="skill-req-badge is-ready">✓ {skills.length + softwareSkills.length} skill(s) selected</span>
             )}
           </div>
-          <p className="card-description">Select the core skills and tools you excel at so tasks can be allocated fairly and transparently.</p>
+          <p className="card-description">Select your main skills and tools so MayLamDi's allocation engine can assign suitable tasks.</p>
           <SkillPicker skills={skills} softwareSkills={softwareSkills} onSkillsChange={setSkills} onSoftwareSkillsChange={setSoftwareSkills} />
         </section>
 
         {/* Step 3: Weekly Capacity */}
-        <section className="profile-settings-card" aria-labelledby="capacity-title">
+        <section className="profile-settings-card profile-step-card" aria-labelledby="capacity-title">
           <div className="profile-card-header-row">
-            <span className="profile-step-badge">STEP 3</span>
+            <span className="profile-step-badge is-completed">✓ STEP 3</span>
             <span className="card-eyebrow">Weekly Availability</span>
           </div>
-          <h2 id="capacity-title">How much time can you contribute each week?</h2>
-          <p className="card-description">Used by MayLamDi's allocation engine to balance workload and prevent teammate burnout.</p>
+          <h2 id="capacity-title">How much time can you commit each week?</h2>
+          <p className="card-description">Used to balance project workloads across your team and prevent teammate burnout.</p>
           <div className="capacity-options">
             {CAPACITY_OPTIONS.map((option) => (
               <button
@@ -260,11 +285,12 @@ export function ProfileCenter({
           </div>
         </section>
 
-        {/* Action Card: Save Profile */}
+        {/* Step 4: Final Action Card */}
         <section className="profile-submit-card">
           <div className="profile-submit-info">
-            <h3>Ready to save your profile?</h3>
-            <p>Your preferences will be saved for all project rooms.</p>
+            <span className="profile-step-badge is-final">FINAL STEP</span>
+            <h3>Save & Unlock Team Rooms</h3>
+            <p>{isSkillsReady ? "All steps ready! Click below to save your profile." : "Please select at least 1 skill in Step 2 before saving."}</p>
           </div>
           {error ? <p className="form-error" role="alert">{error}</p> : null}
           {message ? <p className="form-success" role="status">{message}</p> : null}
