@@ -57,6 +57,105 @@ function uploadFile(
   });
 }
 
+const SHAPE_LABELS: Record<string, string> = {
+  backWing_membrane1: "🦅 Back Wing Membrane 1",
+  backWing_membrane2: "🦅 Back Wing Membrane 2",
+  backWing_membrane3: "🦅 Back Wing Membrane 3",
+  backWing_strut1: "🦴 Back Wing Bone Strut 1",
+  backWing_strut2: "🦴 Back Wing Bone Strut 2",
+  backWing_joint: "🟢 Back Wing Joint",
+  backWing_claw: "💅 Back Wing Claw",
+  frontWing_membrane1: "🦅 Front Wing Membrane 1",
+  frontWing_membrane2: "🦅 Front Wing Membrane 2",
+  frontWing_membrane3: "🦅 Front Wing Membrane 3",
+  frontWing_strut1: "🦴 Front Wing Bone Strut 1",
+  frontWing_strut2: "🦴 Front Wing Bone Strut 2",
+  frontWing_joint: "🟢 Front Wing Joint",
+  frontWing_claw: "💅 Front Wing Claw",
+  tail_seg1: "🐍 Tail Segment 1",
+  tail_seg2: "🐍 Tail Segment 2",
+  tail_seg3: "🐍 Tail Segment 3",
+  tail_shadow: "🐍 Tail Shadow Overlay",
+  tail_barb1: "⚔️ Tail Barb Tip 1",
+  tail_barb2: "⚔️ Tail Barb Tip 2",
+  tail_barb3: "⚔️ Tail Barb Tip 3",
+  tail_spine1: "🔺 Tail Spine 1",
+  tail_spine2: "🔺 Tail Spine 2",
+  tail_spine3: "🔺 Tail Spine 3",
+  spine1: "🔺 Dorsal Spine 1",
+  spine2: "🔺 Dorsal Spine 2",
+  spine3: "🔺 Dorsal Spine 3",
+  spine4: "🔺 Dorsal Spine 4",
+  spine5: "🔺 Dorsal Spine 5",
+  spine6: "🔺 Dorsal Spine 6",
+  spine7: "🔺 Dorsal Spine 7",
+  backLeg_thigh: "🦵 Back Leg Thigh",
+  backLeg_knee: "🟢 Back Leg Knee Joint",
+  backLeg_calf: "🦵 Back Leg Calf",
+  backLeg_ankle: "🟢 Back Leg Ankle Joint",
+  backLeg_foot: "🦶 Back Leg Foot",
+  backLeg_claw1: "💅 Back Leg Talon 1",
+  backLeg_claw2: "💅 Back Leg Talon 2",
+  backLeg_claw3: "💅 Back Leg Talon 3",
+  torso_base: "🛡️ Torso Main Frame",
+  torso_plate1: "🛡️ Torso Muscle Overlay 1",
+  torso_plate2: "🛡️ Torso Muscle Overlay 2",
+  torso_chest1: "🛡️ Chest Segment Plate 1",
+  torso_chest2: "🛡️ Chest Segment Plate 2",
+  torso_chest3: "🛡️ Chest Segment Plate 3",
+  torso_chest4: "🛡️ Chest Segment Plate 4",
+  torso_chest5: "🛡️ Chest Segment Plate 5",
+  frontLeg_thigh: "🦵 Front Leg Thigh",
+  frontLeg_knee: "🟢 Front Leg Knee Joint",
+  frontLeg_calf: "🦵 Front Leg Calf",
+  frontLeg_ankle: "🟢 Front Leg Ankle Joint",
+  frontLeg_foot: "🦶 Front Leg Foot",
+  frontLeg_claw1: "💅 Front Leg Talon 1",
+  frontLeg_claw2: "💅 Front Leg Talon 2",
+  frontLeg_claw3: "💅 Front Leg Talon 3",
+  frontArm_shoulder: "🟢 Shoulder Joint",
+  frontArm_bicep: "💪 Muscular Bicep",
+  frontArm_elbow: "🟢 Elbow Joint",
+  frontArm_forearm: "💪 Forearm Frame",
+  frontArm_wrist: "🟢 Wrist Joint",
+  frontArm_claw1: "💅 Arm Talon 1",
+  frontArm_claw2: "💅 Arm Talon 2",
+  neck_base1: "🦒 Neck Segment 1",
+  neck_base2: "🦒 Neck Segment 2",
+  neck_plate1: "🦒 Neck Plate 1",
+  neck_plate2: "🦒 Neck Plate 2",
+  neck_plate3: "🦒 Neck Plate 3",
+  mouth_cavity: "🕳️ Throat Cavity Backfill",
+  skull_base: "💀 Skull Core base",
+  mouth_webbing: "🕸️ Mouth Flap Webbing",
+  snout_base: "👃 Snout structure",
+  snout_nostril: "🕳️ Nostril Cavity",
+  lower_jaw: "💀 Lower Jawbone",
+  upper_fang1: "🦷 Upper Fang 1",
+  upper_fang2: "🦷 Upper Fang 2",
+  upper_fang3: "🦷 Upper Fang 3",
+  upper_fang4: "🦷 Upper Fang 4",
+  upper_fang5: "🦷 Upper Fang 5",
+  upper_fang6: "🦷 Upper Fang 6",
+  lower_fang1: "🦷 Lower Fang 1",
+  lower_fang2: "🦷 Lower Fang 2",
+  lower_fang3: "🦷 Lower Fang 3",
+  lower_fang4: "🦷 Lower Fang 4",
+  horn1: "⚡ Main Lightning Horn (Left)",
+  horn2: "⚡ Under Lightning Horn (Right)",
+  spine_head1: "🔺 Crest Horn Plate 1",
+  spine_head2: "🔺 Crest Horn Plate 2",
+  spine_head3: "🔺 Crest Horn Plate 3",
+  eye_base: "🟡 Eye Iris",
+  eye_pupil: "⚫ Eye Slit Pupil",
+  eye_specular: "⚪ Eye Light Specular",
+  eye_brow: "😠 Angry Eyebrow Plate",
+  frontClaw_arm: "💪 Rigged Claw Arm",
+  frontClaw_claw1: "💅 Claw Talon 1",
+  frontClaw_claw2: "💅 Claw Talon 2",
+  frontClaw_claw3: "💅 Claw Talon 3",
+};
+
 export function BattleScene({ projectId, currentPhase, tasksLocked = true }: BattleSceneProps) {
   const state = useQuery(api.battle.getState, { projectId });
 
@@ -96,20 +195,172 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [uploadProgress, setUploadProgress] = useState(0);
   const [bossError, setBossError] = useState<string | null>(null);
 
-  // Dragon Layout Vector Editor Admin States
-  const [dragonOffsets, setDragonOffsets] = useState<Record<string, { x: number; y: number }>>({
-    backWing: { x: 0, y: 0 },
-    frontWing: { x: 0, y: 0 },
-    tail: { x: 0, y: 0 },
-    dorsalSpines: { x: 0, y: 0 },
-    backLeg: { x: 0, y: 0 },
-    torso: { x: 0, y: 0 },
-    frontLeg: { x: 0, y: 0 },
-    frontArm: { x: 0, y: 0 },
-    headNeck: { x: 0, y: 0 },
+  // Dragon Layout Vector Editor Admin States (All individual shapes, moveable panels, pausable animation)
+  const [dragonOffsets, setDragonOffsets] = useState<Record<string, { x: number; y: number; rotate: number }>>({
+    backWing_membrane1: { x: 0, y: 0, rotate: 0 },
+    backWing_membrane2: { x: 0, y: 0, rotate: 0 },
+    backWing_membrane3: { x: 0, y: 0, rotate: 0 },
+    backWing_strut1: { x: 0, y: 0, rotate: 0 },
+    backWing_strut2: { x: 0, y: 0, rotate: 0 },
+    backWing_joint: { x: 0, y: 0, rotate: 0 },
+    backWing_claw: { x: 0, y: 0, rotate: 0 },
+    frontWing_membrane1: { x: 0, y: 0, rotate: 0 },
+    frontWing_membrane2: { x: 0, y: 0, rotate: 0 },
+    frontWing_membrane3: { x: 0, y: 0, rotate: 0 },
+    frontWing_strut1: { x: 0, y: 0, rotate: 0 },
+    frontWing_strut2: { x: 0, y: 0, rotate: 0 },
+    frontWing_joint: { x: 0, y: 0, rotate: 0 },
+    frontWing_claw: { x: 0, y: 0, rotate: 0 },
+    tail_seg1: { x: 0, y: 0, rotate: 0 },
+    tail_seg2: { x: 0, y: 0, rotate: 0 },
+    tail_seg3: { x: 0, y: 0, rotate: 0 },
+    tail_shadow: { x: 0, y: 0, rotate: 0 },
+    tail_barb1: { x: 0, y: 0, rotate: 0 },
+    tail_barb2: { x: 0, y: 0, rotate: 0 },
+    tail_barb3: { x: 0, y: 0, rotate: 0 },
+    tail_spine1: { x: 0, y: 0, rotate: 0 },
+    tail_spine2: { x: 0, y: 0, rotate: 0 },
+    tail_spine3: { x: 0, y: 0, rotate: 0 },
+    spine1: { x: 0, y: 0, rotate: 0 },
+    spine2: { x: 0, y: 0, rotate: 0 },
+    spine3: { x: 0, y: 0, rotate: 0 },
+    spine4: { x: 0, y: 0, rotate: 0 },
+    spine5: { x: 0, y: 0, rotate: 0 },
+    spine6: { x: 0, y: 0, rotate: 0 },
+    spine7: { x: 0, y: 0, rotate: 0 },
+    backLeg_thigh: { x: 0, y: 0, rotate: 0 },
+    backLeg_knee: { x: 0, y: 0, rotate: 0 },
+    backLeg_calf: { x: 0, y: 0, rotate: 0 },
+    backLeg_ankle: { x: 0, y: 0, rotate: 0 },
+    backLeg_foot: { x: 0, y: 0, rotate: 0 },
+    backLeg_claw1: { x: 0, y: 0, rotate: 0 },
+    backLeg_claw2: { x: 0, y: 0, rotate: 0 },
+    backLeg_claw3: { x: 0, y: 0, rotate: 0 },
+    torso_base: { x: 0, y: 0, rotate: 0 },
+    torso_plate1: { x: 0, y: 0, rotate: 0 },
+    torso_plate2: { x: 0, y: 0, rotate: 0 },
+    torso_chest1: { x: 0, y: 0, rotate: 0 },
+    torso_chest2: { x: 0, y: 0, rotate: 0 },
+    torso_chest3: { x: 0, y: 0, rotate: 0 },
+    torso_chest4: { x: 0, y: 0, rotate: 0 },
+    torso_chest5: { x: 0, y: 0, rotate: 0 },
+    frontLeg_thigh: { x: 0, y: 0, rotate: 0 },
+    frontLeg_knee: { x: 0, y: 0, rotate: 0 },
+    frontLeg_calf: { x: 0, y: 0, rotate: 0 },
+    frontLeg_ankle: { x: 0, y: 0, rotate: 0 },
+    frontLeg_foot: { x: 0, y: 0, rotate: 0 },
+    frontLeg_claw1: { x: 0, y: 0, rotate: 0 },
+    frontLeg_claw2: { x: 0, y: 0, rotate: 0 },
+    frontLeg_claw3: { x: 0, y: 0, rotate: 0 },
+    frontArm_shoulder: { x: 0, y: 0, rotate: 0 },
+    frontArm_bicep: { x: 0, y: 0, rotate: 0 },
+    frontArm_elbow: { x: 0, y: 0, rotate: 0 },
+    frontArm_forearm: { x: 0, y: 0, rotate: 0 },
+    frontArm_wrist: { x: 0, y: 0, rotate: 0 },
+    frontArm_claw1: { x: 0, y: 0, rotate: 0 },
+    frontArm_claw2: { x: 0, y: 0, rotate: 0 },
+    neck_base1: { x: 0, y: 0, rotate: 0 },
+    neck_base2: { x: 0, y: 0, rotate: 0 },
+    neck_plate1: { x: 0, y: 0, rotate: 0 },
+    neck_plate2: { x: 0, y: 0, rotate: 0 },
+    neck_plate3: { x: 0, y: 0, rotate: 0 },
+    mouth_cavity: { x: 0, y: 0, rotate: 0 },
+    skull_base: { x: 0, y: 0, rotate: 0 },
+    mouth_webbing: { x: 0, y: 0, rotate: 0 },
+    snout_base: { x: 0, y: 0, rotate: 0 },
+    snout_nostril: { x: 0, y: 0, rotate: 0 },
+    lower_jaw: { x: 0, y: 0, rotate: 0 },
+    upper_fang1: { x: 0, y: 0, rotate: 0 },
+    upper_fang2: { x: 0, y: 0, rotate: 0 },
+    upper_fang3: { x: 0, y: 0, rotate: 0 },
+    upper_fang4: { x: 0, y: 0, rotate: 0 },
+    upper_fang5: { x: 0, y: 0, rotate: 0 },
+    upper_fang6: { x: 0, y: 0, rotate: 0 },
+    lower_fang1: { x: 0, y: 0, rotate: 0 },
+    lower_fang2: { x: 0, y: 0, rotate: 0 },
+    lower_fang3: { x: 0, y: 0, rotate: 0 },
+    lower_fang4: { x: 0, y: 0, rotate: 0 },
+    horn1: { x: 0, y: 0, rotate: 0 },
+    horn2: { x: 0, y: 0, rotate: 0 },
+    spine_head1: { x: 0, y: 0, rotate: 0 },
+    spine_head2: { x: 0, y: 0, rotate: 0 },
+    spine_head3: { x: 0, y: 0, rotate: 0 },
+    eye_base: { x: 0, y: 0, rotate: 0 },
+    eye_pupil: { x: 0, y: 0, rotate: 0 },
+    eye_specular: { x: 0, y: 0, rotate: 0 },
+    eye_brow: { x: 0, y: 0, rotate: 0 },
+    frontClaw_arm: { x: 0, y: 0, rotate: 0 },
+    frontClaw_claw1: { x: 0, y: 0, rotate: 0 },
+    frontClaw_claw2: { x: 0, y: 0, rotate: 0 },
+    frontClaw_claw3: { x: 0, y: 0, rotate: 0 },
   });
   const [selectedDragonPart, setSelectedDragonPart] = useState<string | null>(null);
   const [showDragonEditor, setShowDragonEditor] = useState(false);
+  const [animationsEnabled, setAnimationsEnabled] = useState(true);
+
+  // Spawner states
+  const [customShapes, setCustomShapes] = useState<any[]>([]);
+  const [spawnerType, setSpawnerType] = useState<"circle" | "ellipse" | "rect" | "polygon" | "path">("circle");
+  const [spawnerColor, setSpawnerColor] = useState("#b91c1c");
+
+  // Moveable Panel coords
+  const [panelPos, setPanelPos] = useState({ x: 80, y: 80 });
+  const [isDraggingPanel, setIsDraggingPanel] = useState(false);
+  const dragStartOffset = useRef({ x: 0, y: 0 });
+
+  function handlePanelDragStart(e: React.MouseEvent) {
+    setIsDraggingPanel(true);
+    dragStartOffset.current = {
+      x: e.clientX - panelPos.x,
+      y: e.clientY - panelPos.y,
+    };
+  }
+
+  useEffect(() => {
+    function handleMouseMove(e: MouseEvent) {
+      if (!isDraggingPanel) return;
+      setPanelPos({
+        x: e.clientX - dragStartOffset.current.x,
+        y: e.clientY - dragStartOffset.current.y,
+      });
+    }
+    function handleMouseUp() {
+      setIsDraggingPanel(false);
+    }
+    if (isDraggingPanel) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDraggingPanel]);
+
+  function handleAddCustomShape() {
+    const id = `custom_${Date.now()}`;
+    const newShape = {
+      id,
+      name: `✨ Custom ${spawnerType.toUpperCase()} (${customShapes.length + 1})`,
+      type: spawnerType,
+      fill: spawnerColor,
+      x: 150,
+      y: 150,
+      width: 40,
+      height: 30,
+      rx: spawnerType === "circle" || spawnerType === "ellipse" || spawnerType === "rect" ? 15 : 0,
+      ry: spawnerType === "ellipse" ? 10 : 0,
+      points: "0,-15 15,15 -15,15",
+      d: "M -15 -15 L 15 15",
+      rotate: 0,
+    };
+    setDragonOffsets((prev) => ({
+      ...prev,
+      [id]: { x: 0, y: 0, rotate: 0 },
+    }));
+    setCustomShapes((prev) => [...prev, newShape]);
+    setSelectedDragonPart(id);
+  }
 
   // Derive eligible reviewers (teammates who are not the current user)
   const eligibleReviewers = useMemo(() => {
@@ -401,6 +652,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           offsets={dragonOffsets as any}
           onSelectPart={setSelectedDragonPart as any}
           selectedPart={selectedDragonPart as any}
+          animationsEnabled={animationsEnabled}
+          customShapes={customShapes}
         />
 
         {/* Layer 9: Section 2 - Cosmetic Combat Exchange (50% Opacity Background Burst) */}
@@ -873,148 +1126,375 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       ) : null}
 
       {/* =========================================================================
-          DRAGON LAYOUT ADMIN VECTOR EDITOR PANEL (PHOTOSHOP-STYLE LAYERS)
+          DRAGON LAYOUT ADMIN VECTOR EDITOR PANEL (DRAGGABLE & PHOTOSHOP LAYERS)
          ========================================================================= */}
       {showDragonEditor && (
-        <div className="rpg-admin-panel" onClick={(e) => e.stopPropagation()}>
-          <div className="rpg-admin-header">
+        <div
+          className="rpg-admin-panel"
+          style={{
+            left: `${panelPos.x}px`,
+            top: `${panelPos.y}px`,
+            position: "fixed",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            className="rpg-admin-header"
+            onMouseDown={handlePanelDragStart}
+            style={{ cursor: "move", userSelect: "none" }}
+          >
             <h4>🛠️ Dragon Vector Editor</h4>
             <button className="rpg-admin-close-btn" type="button" onClick={() => setShowDragonEditor(false)}>×</button>
           </div>
           
           <div className="rpg-admin-body">
-            <p style={{ fontSize: "0.75rem", margin: "0 0 10px 0", color: "#94a3b8" }}>
-              Click any dragon segment directly on screen or select a layer below to shift its position.
+            {/* Toggle Animation control */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", background: "#0f172a", padding: "8px", borderRadius: "4px" }}>
+              <input
+                id="toggle-anim"
+                type="checkbox"
+                checked={animationsEnabled}
+                onChange={(e) => setAnimationsEnabled(e.target.checked)}
+              />
+              <label htmlFor="toggle-anim" style={{ fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer", color: "#38bdf8" }}>
+                Enable Flapping/Hover
+              </label>
+            </div>
+
+            {/* Custom Shape Spawner */}
+            <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", marginBottom: "10px", border: "1px solid #334155" }}>
+              <h5 style={{ margin: "0 0 6px 0", fontSize: "0.72rem", textTransform: "uppercase", color: "#94a3b8" }}>➕ Spawn Vector Shape</h5>
+              <div style={{ display: "flex", gap: "6px", marginBottom: "6px" }}>
+                <select
+                  value={spawnerType}
+                  onChange={(e: any) => setSpawnerType(e.target.value)}
+                  style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "4px", fontSize: "0.7rem", flex: 1 }}
+                >
+                  <option value="circle">Circle</option>
+                  <option value="ellipse">Ellipse</option>
+                  <option value="rect">Rectangle</option>
+                  <option value="polygon">Polygon</option>
+                  <option value="path">Path</option>
+                </select>
+                <input
+                  type="color"
+                  value={spawnerColor}
+                  onChange={(e) => setSpawnerColor(e.target.value)}
+                  style={{ width: "32px", height: "24px", border: "none", background: "transparent", cursor: "pointer" }}
+                />
+              </div>
+              <button
+                type="button"
+                className="rpg-admin-action-btn"
+                style={{ background: "#16a34a", padding: "6px", fontSize: "0.7rem" }}
+                onClick={handleAddCustomShape}
+              >
+                Spawn Shape
+              </button>
+            </div>
+
+            <p style={{ fontSize: "0.72rem", margin: "0 0 8px 0", color: "#94a3b8" }}>
+              Click any shape on screen or select a layer stack row below to shift and rotate.
             </p>
 
             {/* Photoshop-style Layer Stack */}
-            <div className="rpg-layers-stack">
-              {([
-                { key: "headNeck", name: "🐉 Head & Neck" },
-                { key: "frontWing", name: "🦅 Front Wing" },
-                { key: "backWing", name: "🦅 Back Wing" },
-                { key: "torso", name: "🛡️ Torso & Chest" },
-                { key: "frontArm", name: "💪 Front Arm" },
-                { key: "frontLeg", name: "🦵 Front Leg" },
-                { key: "backLeg", name: "🦵 Back Leg" },
-                { key: "tail", name: "🐍 Tapered Tail" },
-                { key: "dorsalSpines", name: "🔺 Dorsal Spines" },
-              ] as const).map((layer) => {
-                const isSelected = selectedDragonPart === layer.key;
-                const offset = dragonOffsets[layer.key] || { x: 0, y: 0 };
-                
-                return (
-                  <div
-                    key={layer.key}
-                    className={`rpg-layer-row ${isSelected ? "is-selected" : ""}`}
-                    onClick={() => setSelectedDragonPart(layer.key)}
-                  >
-                    <div className="rpg-layer-info">
-                      <span className="rpg-layer-name">{layer.name}</span>
-                      <span className="rpg-layer-coords">X: {offset.x}, Y: {offset.y}</span>
-                    </div>
+            <div className="rpg-layers-stack" style={{ maxHeight: "220px" }}>
+              {(() => {
+                const originals = Object.entries(SHAPE_LABELS).map(([key, name]) => ({ key, name }));
+                const customs = customShapes.map((s) => ({ key: s.id, name: s.name }));
+                const layers = [...customs, ...originals];
 
-                    {isSelected && (
-                      <div className="rpg-layer-controls" onClick={(e) => e.stopPropagation()}>
-                        {/* Num inputs */}
-                        <div className="rpg-coords-inputs">
-                          <label>
-                            X:
-                            <input
-                              type="number"
-                              value={offset.x}
-                              onChange={(e) => {
-                                const val = parseInt(e.target.value) || 0;
-                                setDragonOffsets((prev) => ({
-                                  ...prev,
-                                  [layer.key]: { ...prev[layer.key], x: val }
-                                }));
-                              }}
-                            />
-                          </label>
-                          <label>
-                            Y:
-                            <input
-                              type="number"
-                              value={offset.y}
-                              onChange={(e) => {
-                                const val = parseInt(e.target.value) || 0;
-                                setDragonOffsets((prev) => ({
-                                  ...prev,
-                                  [layer.key]: { ...prev[layer.key], y: val }
-                                }));
-                              }}
-                            />
-                          </label>
-                        </div>
-
-                        {/* Arrow D-Pad */}
-                        <div className="rpg-dpad">
-                          <div />
-                          <button
-                            type="button"
-                            className="rpg-dpad-btn up"
-                            title="Move Up"
-                            onClick={() => {
-                              setDragonOffsets((prev) => ({
-                                ...prev,
-                                [layer.key]: { ...prev[layer.key], y: prev[layer.key].y - 1 }
-                              }));
-                            }}
-                          >
-                            ▲
-                          </button>
-                          <div />
-
-                          <button
-                            type="button"
-                            className="rpg-dpad-btn left"
-                            title="Move Left"
-                            onClick={() => {
-                              setDragonOffsets((prev) => ({
-                                ...prev,
-                                [layer.key]: { ...prev[layer.key], x: prev[layer.key].x - 1 }
-                              }));
-                            }}
-                          >
-                            ◀
-                          </button>
-                          <div className="rpg-dpad-center">Shift</div>
-                          <button
-                            type="button"
-                            className="rpg-dpad-btn right"
-                            title="Move Right"
-                            onClick={() => {
-                              setDragonOffsets((prev) => ({
-                                ...prev,
-                                [layer.key]: { ...prev[layer.key], x: prev[layer.key].x + 1 }
-                              }));
-                            }}
-                          >
-                            ▶
-                          </button>
-
-                          <div />
-                          <button
-                            type="button"
-                            className="rpg-dpad-btn down"
-                            title="Move Down"
-                            onClick={() => {
-                              setDragonOffsets((prev) => ({
-                                ...prev,
-                                [layer.key]: { ...prev[layer.key], y: prev[layer.key].y + 1 }
-                              }));
-                            }}
-                          >
-                            ▼
-                          </button>
-                          <div />
-                        </div>
+                return layers.map((layer) => {
+                  const isSelected = selectedDragonPart === layer.key;
+                  const offset = dragonOffsets[layer.key] || { x: 0, y: 0, rotate: 0 };
+                  
+                  return (
+                    <div
+                      key={layer.key}
+                      className={`rpg-layer-row ${isSelected ? "is-selected" : ""}`}
+                      onClick={() => setSelectedDragonPart(layer.key)}
+                    >
+                      <div className="rpg-layer-info">
+                        <span className="rpg-layer-name">{layer.name}</span>
+                        <span className="rpg-layer-coords">X:{offset.x} Y:{offset.y} R:{offset.rotate}°</span>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
+
+                      {isSelected && (
+                        <div className="rpg-layer-controls" onClick={(e) => e.stopPropagation()}>
+                          {/* Position Coordinates */}
+                          <div className="rpg-coords-inputs">
+                            <label>
+                              X:
+                              <input
+                                type="number"
+                                value={offset.x}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value) || 0;
+                                  setDragonOffsets((prev) => ({
+                                    ...prev,
+                                    [layer.key]: { ...prev[layer.key], x: val }
+                                  }));
+                                }}
+                              />
+                            </label>
+                            <label>
+                              Y:
+                              <input
+                                type="number"
+                                value={offset.y}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value) || 0;
+                                  setDragonOffsets((prev) => ({
+                                    ...prev,
+                                    [layer.key]: { ...prev[layer.key], y: val }
+                                  }));
+                                }}
+                              />
+                            </label>
+                          </div>
+
+                          {/* Rotation Input Row */}
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
+                            <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "flex", alignItems: "center", gap: "3px", flex: 1 }}>
+                              Rot:
+                              <input
+                                type="number"
+                                style={{ width: "100%", padding: "2px 4px", background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", fontSize: "0.7rem" }}
+                                value={offset.rotate ?? 0}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value) || 0;
+                                  setDragonOffsets((prev) => ({
+                                    ...prev,
+                                    [layer.key]: { ...prev[layer.key], rotate: val }
+                                  }));
+                                }}
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              className="rpg-dpad-btn"
+                              style={{ width: "24px", padding: "2px 0" }}
+                              onClick={() => {
+                                setDragonOffsets((prev) => ({
+                                  ...prev,
+                                  [layer.key]: { ...prev[layer.key], rotate: ((prev[layer.key]?.rotate ?? 0) - 5) % 360 }
+                                }));
+                              }}
+                              title="Rotate CCW 5°"
+                            >
+                              ↺
+                            </button>
+                            <button
+                              type="button"
+                              className="rpg-dpad-btn"
+                              style={{ width: "24px", padding: "2px 0" }}
+                              onClick={() => {
+                                setDragonOffsets((prev) => ({
+                                  ...prev,
+                                  [layer.key]: { ...prev[layer.key], rotate: ((prev[layer.key]?.rotate ?? 0) + 5) % 360 }
+                                }));
+                              }}
+                              title="Rotate CW 5°"
+                            >
+                              ↻
+                            </button>
+                          </div>
+
+                          {/* Arrow D-Pad */}
+                          <div className="rpg-dpad" style={{ marginTop: "6px" }}>
+                            <div />
+                            <button
+                              type="button"
+                              className="rpg-dpad-btn up"
+                              title="Move Up"
+                              onClick={() => {
+                                setDragonOffsets((prev) => ({
+                                  ...prev,
+                                  [layer.key]: { ...prev[layer.key], y: prev[layer.key].y - 1 }
+                                }));
+                              }}
+                            >
+                              ▲
+                            </button>
+                            <div />
+
+                            <button
+                              type="button"
+                              className="rpg-dpad-btn left"
+                              title="Move Left"
+                              onClick={() => {
+                                setDragonOffsets((prev) => ({
+                                  ...prev,
+                                  [layer.key]: { ...prev[layer.key], x: prev[layer.key].x - 1 }
+                                }));
+                              }}
+                            >
+                              ◀
+                            </button>
+                            <div className="rpg-dpad-center" style={{ fontSize: "0.55rem" }}>Shift</div>
+                            <button
+                              type="button"
+                              className="rpg-dpad-btn right"
+                              title="Move Right"
+                              onClick={() => {
+                                setDragonOffsets((prev) => ({
+                                  ...prev,
+                                  [layer.key]: { ...prev[layer.key], x: prev[layer.key].x + 1 }
+                                }));
+                              }}
+                            >
+                              ▶
+                            </button>
+
+                            <div />
+                            <button
+                              type="button"
+                              className="rpg-dpad-btn down"
+                              title="Move Down"
+                              onClick={() => {
+                                setDragonOffsets((prev) => ({
+                                  ...prev,
+                                  [layer.key]: { ...prev[layer.key], y: prev[layer.key].y + 1 }
+                                }));
+                              }}
+                            >
+                              ▼
+                            </button>
+                            <div />
+                          </div>
+
+                          {/* Custom Shape Parameter Modification (Width, height, radius, path, delete shape) */}
+                          {layer.key.startsWith("custom_") && (() => {
+                            const cs = customShapes.find((s) => s.id === layer.key);
+                            if (!cs) return null;
+                            return (
+                              <div style={{ display: "grid", gap: "6px", marginTop: "8px", borderTop: "1px solid #334155", paddingTop: "8px" }}>
+                                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                                  Fill Color:
+                                  <input
+                                    type="color"
+                                    value={cs.fill}
+                                    onChange={(e) => {
+                                      setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, fill: e.target.value } : s));
+                                    }}
+                                  />
+                                </label>
+                                {cs.type === "circle" && (
+                                  <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                                    Radius:
+                                    <input
+                                      type="number"
+                                      style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                                      value={cs.rx}
+                                      onChange={(e) => {
+                                        const val = parseInt(e.target.value) || 0;
+                                        setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, rx: val } : s));
+                                      }}
+                                    />
+                                  </label>
+                                )}
+                                {cs.type === "ellipse" && (
+                                  <>
+                                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                                      Radius X:
+                                      <input
+                                        type="number"
+                                        style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                                        value={cs.rx}
+                                        onChange={(e) => {
+                                          const val = parseInt(e.target.value) || 0;
+                                          setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, rx: val } : s));
+                                        }}
+                                      />
+                                    </label>
+                                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                                      Radius Y:
+                                      <input
+                                        type="number"
+                                        style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                                        value={cs.ry}
+                                        onChange={(e) => {
+                                          const val = parseInt(e.target.value) || 0;
+                                          setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, ry: val } : s));
+                                        }}
+                                      />
+                                    </label>
+                                  </>
+                                )}
+                                {cs.type === "rect" && (
+                                  <>
+                                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                                      Width:
+                                      <input
+                                        type="number"
+                                        style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                                        value={cs.width}
+                                        onChange={(e) => {
+                                          const val = parseInt(e.target.value) || 0;
+                                          setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, width: val } : s));
+                                        }}
+                                      />
+                                    </label>
+                                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                                      Height:
+                                      <input
+                                        type="number"
+                                        style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                                        value={cs.height}
+                                        onChange={(e) => {
+                                          const val = parseInt(e.target.value) || 0;
+                                          setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, height: val } : s));
+                                        }}
+                                      />
+                                    </label>
+                                  </>
+                                )}
+                                {cs.type === "polygon" && (
+                                  <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                                    Points:
+                                    <input
+                                      type="text"
+                                      style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                                      value={cs.points}
+                                      onChange={(e) => {
+                                        setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, points: e.target.value } : s));
+                                      }}
+                                    />
+                                  </label>
+                                )}
+                                {cs.type === "path" && (
+                                  <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                                    Path (d):
+                                    <input
+                                      type="text"
+                                      style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                                      value={cs.d}
+                                      onChange={(e) => {
+                                        setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, d: e.target.value } : s));
+                                      }}
+                                    />
+                                  </label>
+                                )}
+                                <button
+                                  type="button"
+                                  className="rpg-admin-action-btn reset"
+                                  style={{ background: "#b91c1c", padding: "4px", fontSize: "0.65rem" }}
+                                  onClick={() => {
+                                    setCustomShapes((prev) => prev.filter((s) => s.id !== cs.id));
+                                    setSelectedDragonPart(null);
+                                  }}
+                                >
+                                  Delete Shape
+                                </button>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
             </div>
 
             {/* Code exporter and helper actions */}
@@ -1023,33 +1503,29 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 type="button"
                 className="rpg-admin-action-btn"
                 onClick={() => {
-                  const codeStr = JSON.stringify(dragonOffsets, null, 2);
+                  const exportData = {
+                    dragonOffsets,
+                    customShapes,
+                  };
+                  const codeStr = JSON.stringify(exportData, null, 2);
                   navigator.clipboard.writeText(codeStr);
-                  alert("Copied layout code settings to clipboard!");
+                  alert("Copied full layout & custom shape config JSON to clipboard!");
                 }}
               >
-                📋 Copy Offset Config JSON
+                📋 Copy Layout & Shapes Config
               </button>
               <button
                 type="button"
                 className="rpg-admin-action-btn reset"
                 onClick={() => {
-                  if (confirm("Reset all offsets to 0?")) {
-                    setDragonOffsets({
-                      backWing: { x: 0, y: 0 },
-                      frontWing: { x: 0, y: 0 },
-                      tail: { x: 0, y: 0 },
-                      dorsalSpines: { x: 0, y: 0 },
-                      backLeg: { x: 0, y: 0 },
-                      torso: { x: 0, y: 0 },
-                      frontLeg: { x: 0, y: 0 },
-                      frontArm: { x: 0, y: 0 },
-                      headNeck: { x: 0, y: 0 },
-                    });
+                  if (confirm("Reset all custom shapes and coordinates to 0?")) {
+                    setDragonOffsets({});
+                    setCustomShapes([]);
+                    setSelectedDragonPart(null);
                   }
                 }}
               >
-                🔄 Reset All Coordinates
+                🔄 Reset Config
               </button>
             </div>
           </div>
