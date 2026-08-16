@@ -298,6 +298,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [showDragonEditor, setShowDragonEditor] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
 
+  // Custom Fills & Deletions
+  const [dragonFills, setDragonFills] = useState<Record<string, string>>({});
+  const [deletedShapes, setDeletedShapes] = useState<Record<string, boolean>>({});
+
   // Spawner states
   const [customShapes, setCustomShapes] = useState<any[]>([]);
   const [spawnerType, setSpawnerType] = useState<"circle" | "ellipse" | "rect" | "polygon" | "path">("circle");
@@ -308,6 +312,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [isDraggingPanel, setIsDraggingPanel] = useState(false);
   const dragStartOffset = useRef({ x: 0, y: 0 });
 
+  // Direct Shape Drag and Drop
+  const [draggingShapeId, setDraggingShapeId] = useState<string | null>(null);
+  const dragShapeStart = useRef({ mouseX: 0, mouseY: 0, shapeX: 0, shapeY: 0 });
+
   function handlePanelDragStart(e: React.MouseEvent) {
     setIsDraggingPanel(true);
     dragStartOffset.current = {
@@ -316,18 +324,59 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     };
   }
 
+  function handleStartDragShape(shapeId: string, clientX: number, clientY: number) {
+    const currentOffset = dragonOffsets[shapeId] || { x: 0, y: 0, rotate: 0 };
+    setDraggingShapeId(shapeId);
+    dragShapeStart.current = {
+      mouseX: clientX,
+      mouseY: clientY,
+      shapeX: currentOffset.x,
+      shapeY: currentOffset.y,
+    };
+  }
+
+  // Effect to drag Panel & drag individual SVG shapes directly
   useEffect(() => {
     function handleMouseMove(e: MouseEvent) {
-      if (!isDraggingPanel) return;
-      setPanelPos({
-        x: e.clientX - dragStartOffset.current.x,
-        y: e.clientY - dragStartOffset.current.y,
-      });
+      if (isDraggingPanel) {
+        setPanelPos({
+          x: e.clientX - dragStartOffset.current.x,
+          y: e.clientY - dragStartOffset.current.y,
+        });
+      }
+
+      if (draggingShapeId) {
+        const dx = e.clientX - dragShapeStart.current.mouseX;
+        const dy = e.clientY - dragShapeStart.current.mouseY;
+        
+        // Calculate viewBox scale relative to actual SVG screen width
+        const svgEl = document.querySelector(".layer-8-dragon svg");
+        let scaleFactor = 1.5;
+        if (svgEl) {
+          const rect = svgEl.getBoundingClientRect();
+          scaleFactor = (1000 / rect.width) / 0.68;
+        }
+
+        setDragonOffsets((prev) => {
+          const prevVal = prev[draggingShapeId] || { x: 0, y: 0, rotate: 0 };
+          return {
+            ...prev,
+            [draggingShapeId]: {
+              ...prevVal,
+              x: Math.round(dragShapeStart.current.shapeX + dx * scaleFactor),
+              y: Math.round(dragShapeStart.current.shapeY + dy * scaleFactor),
+            },
+          };
+        });
+      }
     }
+
     function handleMouseUp() {
       setIsDraggingPanel(false);
+      setDraggingShapeId(null);
     }
-    if (isDraggingPanel) {
+
+    if (isDraggingPanel || draggingShapeId) {
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
     }
@@ -335,7 +384,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDraggingPanel]);
+  }, [isDraggingPanel, draggingShapeId]);
 
   function handleAddCustomShape() {
     const id = `custom_${Date.now()}`;
@@ -654,6 +703,9 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           selectedPart={selectedDragonPart as any}
           animationsEnabled={animationsEnabled}
           customShapes={customShapes}
+          fills={dragonFills}
+          deletedShapes={deletedShapes}
+          onStartDragShape={handleStartDragShape}
         />
 
         {/* Layer 9: Section 2 - Cosmetic Combat Exchange (50% Opacity Background Burst) */}
@@ -1198,11 +1250,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             </p>
 
             {/* Photoshop-style Layer Stack */}
-            <div className="rpg-layers-stack" style={{ maxHeight: "220px" }}>
+            <div className="rpg-layers-stack" style={{ maxHeight: "250px" }}>
               {(() => {
                 const originals = Object.entries(SHAPE_LABELS).map(([key, name]) => ({ key, name }));
                 const customs = customShapes.map((s) => ({ key: s.id, name: s.name }));
-                const layers = [...customs, ...originals];
+                const layers = [...customs, ...originals].filter(l => !deletedShapes[l.key]);
 
                 return layers.map((layer) => {
                   const isSelected = selectedDragonPart === layer.key;
@@ -1221,6 +1273,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
                       {isSelected && (
                         <div className="rpg-layer-controls" onClick={(e) => e.stopPropagation()}>
+                          <p style={{ fontSize: "0.62rem", color: "#64748b", margin: "0 0 6px 0" }}>
+                            💡 Hold <strong>Shift + Drag</strong> the shape on screen to position instantly.
+                          </p>
+
                           {/* Position Coordinates */}
                           <div className="rpg-coords-inputs">
                             <label>
@@ -1300,85 +1356,35 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                             </button>
                           </div>
 
-                          {/* Arrow D-Pad */}
-                          <div className="rpg-dpad" style={{ marginTop: "6px" }}>
-                            <div />
-                            <button
-                              type="button"
-                              className="rpg-dpad-btn up"
-                              title="Move Up"
-                              onClick={() => {
-                                setDragonOffsets((prev) => ({
-                                  ...prev,
-                                  [layer.key]: { ...prev[layer.key], y: prev[layer.key].y - 1 }
-                                }));
-                              }}
-                            >
-                              ▲
-                            </button>
-                            <div />
-
-                            <button
-                              type="button"
-                              className="rpg-dpad-btn left"
-                              title="Move Left"
-                              onClick={() => {
-                                setDragonOffsets((prev) => ({
-                                  ...prev,
-                                  [layer.key]: { ...prev[layer.key], x: prev[layer.key].x - 1 }
-                                }));
-                              }}
-                            >
-                              ◀
-                            </button>
-                            <div className="rpg-dpad-center" style={{ fontSize: "0.55rem" }}>Shift</div>
-                            <button
-                              type="button"
-                              className="rpg-dpad-btn right"
-                              title="Move Right"
-                              onClick={() => {
-                                setDragonOffsets((prev) => ({
-                                  ...prev,
-                                  [layer.key]: { ...prev[layer.key], x: prev[layer.key].x + 1 }
-                                }));
-                              }}
-                            >
-                              ▶
-                            </button>
-
-                            <div />
-                            <button
-                              type="button"
-                              className="rpg-dpad-btn down"
-                              title="Move Down"
-                              onClick={() => {
-                                setDragonOffsets((prev) => ({
-                                  ...prev,
-                                  [layer.key]: { ...prev[layer.key], y: prev[layer.key].y + 1 }
-                                }));
-                              }}
-                            >
-                              ▼
-                            </button>
-                            <div />
+                          {/* Color Fill Selector */}
+                          <div style={{ marginTop: "8px" }}>
+                            <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                              Shape Fill Color:
+                              <input
+                                type="color"
+                                style={{ width: "100%", height: "24px", padding: "0", border: "none", background: "transparent", cursor: "pointer" }}
+                                value={dragonFills[layer.key] || (layer.key.startsWith("custom_") ? (customShapes.find(s => s.id === layer.key)?.fill || "#b91c1c") : "#7f1d1d")}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  if (layer.key.startsWith("custom_")) {
+                                    setCustomShapes((prev) => prev.map((s) => s.id === layer.key ? { ...s, fill: val } : s));
+                                  } else {
+                                    setDragonFills((prev) => ({
+                                      ...prev,
+                                      [layer.key]: val,
+                                    }));
+                                  }
+                                }}
+                              />
+                            </label>
                           </div>
 
-                          {/* Custom Shape Parameter Modification (Width, height, radius, path, delete shape) */}
+                          {/* Custom Shape Parameter Modification (Width, height, radius, path) */}
                           {layer.key.startsWith("custom_") && (() => {
                             const cs = customShapes.find((s) => s.id === layer.key);
                             if (!cs) return null;
                             return (
                               <div style={{ display: "grid", gap: "6px", marginTop: "8px", borderTop: "1px solid #334155", paddingTop: "8px" }}>
-                                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                                  Fill Color:
-                                  <input
-                                    type="color"
-                                    value={cs.fill}
-                                    onChange={(e) => {
-                                      setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, fill: e.target.value } : s));
-                                    }}
-                                  />
-                                </label>
                                 {cs.type === "circle" && (
                                   <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
                                     Radius:
@@ -1475,20 +1481,29 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                                     />
                                   </label>
                                 )}
-                                <button
-                                  type="button"
-                                  className="rpg-admin-action-btn reset"
-                                  style={{ background: "#b91c1c", padding: "4px", fontSize: "0.65rem" }}
-                                  onClick={() => {
-                                    setCustomShapes((prev) => prev.filter((s) => s.id !== cs.id));
-                                    setSelectedDragonPart(null);
-                                  }}
-                                >
-                                  Delete Shape
-                                </button>
                               </div>
                             );
                           })()}
+
+                          {/* Delete Element Action */}
+                          <button
+                            type="button"
+                            className="rpg-admin-action-btn reset"
+                            style={{ background: "#b91c1c", padding: "4px", fontSize: "0.65rem", marginTop: "8px", width: "100%" }}
+                            onClick={() => {
+                              if (layer.key.startsWith("custom_")) {
+                                setCustomShapes((prev) => prev.filter((s) => s.id !== layer.key));
+                              } else {
+                                setDeletedShapes((prev) => ({
+                                  ...prev,
+                                  [layer.key]: true,
+                                }));
+                              }
+                              setSelectedDragonPart(null);
+                            }}
+                          >
+                            🗑️ Delete Object
+                          </button>
                         </div>
                       )}
                     </div>
@@ -1505,11 +1520,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 onClick={() => {
                   const exportData = {
                     dragonOffsets,
+                    dragonFills,
+                    deletedShapes,
                     customShapes,
                   };
                   const codeStr = JSON.stringify(exportData, null, 2);
                   navigator.clipboard.writeText(codeStr);
-                  alert("Copied full layout & custom shape config JSON to clipboard!");
+                  alert("Copied full layout, color overrides & custom shapes config to clipboard!");
                 }}
               >
                 📋 Copy Layout & Shapes Config
@@ -1518,8 +1535,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 type="button"
                 className="rpg-admin-action-btn reset"
                 onClick={() => {
-                  if (confirm("Reset all custom shapes and coordinates to 0?")) {
+                  if (confirm("Reset all customizations, colors, and coordinates to 0?")) {
                     setDragonOffsets({});
+                    setDragonFills({});
+                    setDeletedShapes({});
                     setCustomShapes([]);
                     setSelectedDragonPart(null);
                   }
