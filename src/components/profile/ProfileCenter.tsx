@@ -91,42 +91,110 @@ function SkillPicker({
       ? searchResults
       : [];
 
+  const tabLabels = {
+    recommended: "⭐ Recommended",
+    search: "🔍 Search",
+    all: "📚 View All",
+    other: "✏️ Custom Skill",
+  } as const;
+
+  const categoryIcons: Record<string, string> = {
+    Creative: "🎨 Creative",
+    "Research / Strategy": "📊 Research & Strategy",
+    General: "💬 General & Soft Skills",
+    Software: "💻 Software & Tools",
+  };
+
   return (
     <div className="profile-skill-picker">
       <div className="profile-skill-toolbar" role="tablist" aria-label="Skill picker views">
         {(["recommended", "search", "all", "other"] as const).map((item) => (
           <button key={item} type="button" role="tab" aria-selected={mode === item} className={mode === item ? "is-active" : ""} onClick={() => setMode(item)}>
-            {item === "all" ? "View All" : item[0].toUpperCase() + item.slice(1)}
+            {tabLabels[item]}
           </button>
         ))}
       </div>
 
       {mode === "search" ? (
-        <label className="profile-skill-search"><span>Search skills</span><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Try Figma, writing, research…" /></label>
+        <label className="profile-skill-search">
+          <span>Type to search skills & tools</span>
+          <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="e.g. Figma, React, Copywriting, Market Research…" />
+        </label>
       ) : null}
+
       {mode === "other" ? (
-        <div className="profile-other-skill"><label><span>Other skill</span><input value={other} maxLength={60} onChange={(event) => setOther(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addOther(); } }} /></label><button className="quiet-button" type="button" onClick={addOther}>Add skill</button></div>
+        <div className="profile-other-skill">
+          <label>
+            <span>Add custom skill</span>
+            <input
+              value={other}
+              maxLength={60}
+              placeholder="e.g. Motion Graphics, Motion Capture…"
+              onChange={(event) => setOther(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  addOther();
+                }
+              }}
+            />
+          </label>
+          <button className="primary-button add-custom-skill-btn" type="button" onClick={addOther}>+ Add Custom Skill</button>
+        </div>
       ) : null}
+
       {mode === "all" ? (
         <div className="profile-skill-categories">
           {Object.entries(SKILL_CATEGORIES).map(([category, categorySkills]) => (
-            <section key={category}><h4>{category}</h4><div className="profile-skill-options">{categorySkills.map((skill) => <button key={skill} type="button" className={skills.includes(skill) ? "is-selected" : ""} aria-pressed={skills.includes(skill)} onClick={() => toggle(skill)}>{skill}</button>)}</div></section>
+            <section key={category} className="skill-category-block">
+              <h4 className="skill-category-title">{categoryIcons[category] ?? category}</h4>
+              <div className="profile-skill-options">
+                {categorySkills.map((skill) => (
+                  <button key={skill} type="button" className={skills.includes(skill) ? "is-selected" : ""} aria-pressed={skills.includes(skill)} onClick={() => toggle(skill)}>
+                    {skills.includes(skill) ? "✓ " : ""}{skill}
+                  </button>
+                ))}
+              </div>
+            </section>
           ))}
-          <section><h4>Software</h4><div className="profile-skill-options">{SOFTWARE_SKILLS.map((skill) => <button key={skill} type="button" className={softwareSkills.includes(skill) ? "is-selected" : ""} aria-pressed={softwareSkills.includes(skill)} onClick={() => toggle(skill)}>{skill}</button>)}</div></section>
+          <section className="skill-category-block">
+            <h4 className="skill-category-title">{categoryIcons["Software"]}</h4>
+            <div className="profile-skill-options">
+              {SOFTWARE_SKILLS.map((skill) => (
+                <button key={skill} type="button" className={softwareSkills.includes(skill) ? "is-selected" : ""} aria-pressed={softwareSkills.includes(skill)} onClick={() => toggle(skill)}>
+                  {softwareSkills.includes(skill) ? "✓ " : ""}{skill}
+                </button>
+              ))}
+            </div>
+          </section>
         </div>
       ) : null}
+
       {mode === "recommended" || mode === "search" ? (
-        <div className="profile-skill-options">{choices.length ? choices.map((skill) => { const selected = skills.includes(skill) || softwareSkills.includes(skill); return <button key={skill} type="button" className={selected ? "is-selected" : ""} aria-pressed={selected} onClick={() => toggle(skill)}>{skill}</button>; }) : <p>{mode === "search" ? "Type a skill to search." : "No recommendations available."}</p>}</div>
+        <div className="profile-skill-options">
+          {choices.length ? choices.map((skill) => {
+            const selected = skills.includes(skill) || softwareSkills.includes(skill);
+            return (
+              <button key={skill} type="button" className={selected ? "is-selected" : ""} aria-pressed={selected} onClick={() => toggle(skill)}>
+                {selected ? "✓ " : ""}{skill}
+              </button>
+            );
+          }) : <p className="no-skills-found">{mode === "search" ? "Type a skill or tool name to search." : "No recommendations available."}</p>}
+        </div>
       ) : null}
-      
+
       {skills.length > 0 || softwareSkills.length > 0 ? (
         <div className="selected-skills-container">
           <div className="selected-skills-header">
-            <span className="selected-skills-title">Selected skills ({skills.length + softwareSkills.length})</span>
-            <span className="selected-skills-hint">Click any skill to remove</span>
+            <span className="selected-skills-title">🎯 Your Selected Skills ({skills.length + softwareSkills.length})</span>
+            <span className="selected-skills-hint">Click any skill chip below to remove</span>
           </div>
           <div className="selected-profile-skills" aria-live="polite">
-            {[...skills, ...softwareSkills].map((skill) => <button key={skill} type="button" onClick={() => toggle(skill)}>{skill}<span aria-hidden="true"> ×</span></button>)}
+            {[...skills, ...softwareSkills].map((skill) => (
+              <button key={skill} type="button" onClick={() => toggle(skill)} title="Click to remove">
+                {skill}<span aria-hidden="true"> ×</span>
+              </button>
+            ))}
           </div>
         </div>
       ) : null}

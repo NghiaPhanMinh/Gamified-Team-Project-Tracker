@@ -5537,5 +5537,41 @@ footer {
   transform: translateY(-2px);
 }
 
+/* Category Blocks & Custom Skill Button */
+.skill-category-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--color-page) 75%, var(--color-surface));
+  border: 1.5px solid color-mix(in srgb, var(--color-text) 25%, transparent);
+  margin-bottom: 0.85rem;
+}
+
+.skill-category-title {
+  font-size: 0.92rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.15rem;
+  color: var(--color-text);
+}
+
+.add-custom-skill-btn {
+  white-space: nowrap;
+  padding: 0.65rem 1.15rem;
+  font-size: 0.88rem;
+  font-weight: 900;
+  border-radius: 12px;
+}
+
+.no-skills-found {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
+
 
 
