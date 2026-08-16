@@ -96,6 +96,21 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [uploadProgress, setUploadProgress] = useState(0);
   const [bossError, setBossError] = useState<string | null>(null);
 
+  // Dragon Layout Vector Editor Admin States
+  const [dragonOffsets, setDragonOffsets] = useState<Record<string, { x: number; y: number }>>({
+    backWing: { x: 0, y: 0 },
+    frontWing: { x: 0, y: 0 },
+    tail: { x: 0, y: 0 },
+    dorsalSpines: { x: 0, y: 0 },
+    backLeg: { x: 0, y: 0 },
+    torso: { x: 0, y: 0 },
+    frontLeg: { x: 0, y: 0 },
+    frontArm: { x: 0, y: 0 },
+    headNeck: { x: 0, y: 0 },
+  });
+  const [selectedDragonPart, setSelectedDragonPart] = useState<string | null>(null);
+  const [showDragonEditor, setShowDragonEditor] = useState(false);
+
   // Derive eligible reviewers (teammates who are not the current user)
   const eligibleReviewers = useMemo(() => {
     if (!workspace || !workspace.currentProfileId) return [];
@@ -293,6 +308,9 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const defeated = state.maximumHp > 0 && state.remainingHp === 0;
   const optionalMetrics = state as typeof state & OptionalBattleMetrics;
 
+  const damageClearedFraction = (100 - hpPercent) / 100;
+  const dragonX = 730 + damageClearedFraction * 60;
+
   return (
     <section className={`battle-page ${activeEvent ? "has-new-attack" : ""} ${defeated ? "is-defeated" : ""}`} aria-labelledby="battle-title">
       <SVGDefs />
@@ -321,6 +339,21 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           🏆 Leaderboard
         </button>
 
+        {/* Admin Edit Dragon Layout Overlay Button */}
+        <button
+          className="rpg-btn-leaderboard"
+          style={{ right: "185px", background: "#475569", borderColor: "#94a3b8" }}
+          onClick={() => {
+            setShowDragonEditor((prev) => !prev);
+            if (!selectedDragonPart) {
+              setSelectedDragonPart("headNeck");
+            }
+          }}
+          type="button"
+        >
+          🛠️ Layout Admin
+        </button>
+
         {/* Attack Circular Action Button */}
         <button
           className="rpg-btn-attack-circle"
@@ -329,6 +362,22 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         >
           ⚔️<br />Attack
         </button>
+
+        {/* Floating Mob-Style Boss HP Bar */}
+        <div
+          className="boss-hp-mob-style"
+          style={{
+            left: `${Math.min(92, Math.max(8, (dragonX / 10) - 2.5))}%`
+          }}
+        >
+          <span className="boss-hp-percent-label">DRAGON {hpPercent}% HP</span>
+          <div className="boss-hp-mob-track">
+            <div
+              className="boss-hp-mob-fill"
+              style={{ width: `${hpPercent}%` }}
+            />
+          </div>
+        </div>
 
         {/* Layer 0, 1, 2: Sky & Parallax Clouds */}
         <LandscapeSky />
@@ -346,7 +395,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         <LandscapePlayers members={players} />
 
         {/* Layer 8: Section 1 - Medieval Dragon Visuals & Wings */}
-        <LandscapeDragon bossHpPercent={hpPercent} isDefeated={defeated} />
+        <LandscapeDragon
+          bossHpPercent={hpPercent}
+          isDefeated={defeated}
+          offsets={dragonOffsets as any}
+          onSelectPart={setSelectedDragonPart as any}
+          selectedPart={selectedDragonPart as any}
+        />
 
         {/* Layer 9: Section 2 - Cosmetic Combat Exchange (50% Opacity Background Burst) */}
         <LandscapeFX
@@ -816,6 +871,190 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           <p>Every required task has been verified. The village is safe. Export the report or archive the project from project settings.</p>
         </section>
       ) : null}
+
+      {/* =========================================================================
+          DRAGON LAYOUT ADMIN VECTOR EDITOR PANEL (PHOTOSHOP-STYLE LAYERS)
+         ========================================================================= */}
+      {showDragonEditor && (
+        <div className="rpg-admin-panel" onClick={(e) => e.stopPropagation()}>
+          <div className="rpg-admin-header">
+            <h4>🛠️ Dragon Vector Editor</h4>
+            <button className="rpg-admin-close-btn" type="button" onClick={() => setShowDragonEditor(false)}>×</button>
+          </div>
+          
+          <div className="rpg-admin-body">
+            <p style={{ fontSize: "0.75rem", margin: "0 0 10px 0", color: "#94a3b8" }}>
+              Click any dragon segment directly on screen or select a layer below to shift its position.
+            </p>
+
+            {/* Photoshop-style Layer Stack */}
+            <div className="rpg-layers-stack">
+              {([
+                { key: "headNeck", name: "🐉 Head & Neck" },
+                { key: "frontWing", name: "🦅 Front Wing" },
+                { key: "backWing", name: "🦅 Back Wing" },
+                { key: "torso", name: "🛡️ Torso & Chest" },
+                { key: "frontArm", name: "💪 Front Arm" },
+                { key: "frontLeg", name: "🦵 Front Leg" },
+                { key: "backLeg", name: "🦵 Back Leg" },
+                { key: "tail", name: "🐍 Tapered Tail" },
+                { key: "dorsalSpines", name: "🔺 Dorsal Spines" },
+              ] as const).map((layer) => {
+                const isSelected = selectedDragonPart === layer.key;
+                const offset = dragonOffsets[layer.key] || { x: 0, y: 0 };
+                
+                return (
+                  <div
+                    key={layer.key}
+                    className={`rpg-layer-row ${isSelected ? "is-selected" : ""}`}
+                    onClick={() => setSelectedDragonPart(layer.key)}
+                  >
+                    <div className="rpg-layer-info">
+                      <span className="rpg-layer-name">{layer.name}</span>
+                      <span className="rpg-layer-coords">X: {offset.x}, Y: {offset.y}</span>
+                    </div>
+
+                    {isSelected && (
+                      <div className="rpg-layer-controls" onClick={(e) => e.stopPropagation()}>
+                        {/* Num inputs */}
+                        <div className="rpg-coords-inputs">
+                          <label>
+                            X:
+                            <input
+                              type="number"
+                              value={offset.x}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value) || 0;
+                                setDragonOffsets((prev) => ({
+                                  ...prev,
+                                  [layer.key]: { ...prev[layer.key], x: val }
+                                }));
+                              }}
+                            />
+                          </label>
+                          <label>
+                            Y:
+                            <input
+                              type="number"
+                              value={offset.y}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value) || 0;
+                                setDragonOffsets((prev) => ({
+                                  ...prev,
+                                  [layer.key]: { ...prev[layer.key], y: val }
+                                }));
+                              }}
+                            />
+                          </label>
+                        </div>
+
+                        {/* Arrow D-Pad */}
+                        <div className="rpg-dpad">
+                          <div />
+                          <button
+                            type="button"
+                            className="rpg-dpad-btn up"
+                            title="Move Up"
+                            onClick={() => {
+                              setDragonOffsets((prev) => ({
+                                ...prev,
+                                [layer.key]: { ...prev[layer.key], y: prev[layer.key].y - 1 }
+                              }));
+                            }}
+                          >
+                            ▲
+                          </button>
+                          <div />
+
+                          <button
+                            type="button"
+                            className="rpg-dpad-btn left"
+                            title="Move Left"
+                            onClick={() => {
+                              setDragonOffsets((prev) => ({
+                                ...prev,
+                                [layer.key]: { ...prev[layer.key], x: prev[layer.key].x - 1 }
+                              }));
+                            }}
+                          >
+                            ◀
+                          </button>
+                          <div className="rpg-dpad-center">Shift</div>
+                          <button
+                            type="button"
+                            className="rpg-dpad-btn right"
+                            title="Move Right"
+                            onClick={() => {
+                              setDragonOffsets((prev) => ({
+                                ...prev,
+                                [layer.key]: { ...prev[layer.key], x: prev[layer.key].x + 1 }
+                              }));
+                            }}
+                          >
+                            ▶
+                          </button>
+
+                          <div />
+                          <button
+                            type="button"
+                            className="rpg-dpad-btn down"
+                            title="Move Down"
+                            onClick={() => {
+                              setDragonOffsets((prev) => ({
+                                ...prev,
+                                [layer.key]: { ...prev[layer.key], y: prev[layer.key].y + 1 }
+                              }));
+                            }}
+                          >
+                            ▼
+                          </button>
+                          <div />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Code exporter and helper actions */}
+            <div className="rpg-admin-actions">
+              <button
+                type="button"
+                className="rpg-admin-action-btn"
+                onClick={() => {
+                  const codeStr = JSON.stringify(dragonOffsets, null, 2);
+                  navigator.clipboard.writeText(codeStr);
+                  alert("Copied layout code settings to clipboard!");
+                }}
+              >
+                📋 Copy Offset Config JSON
+              </button>
+              <button
+                type="button"
+                className="rpg-admin-action-btn reset"
+                onClick={() => {
+                  if (confirm("Reset all offsets to 0?")) {
+                    setDragonOffsets({
+                      backWing: { x: 0, y: 0 },
+                      frontWing: { x: 0, y: 0 },
+                      tail: { x: 0, y: 0 },
+                      dorsalSpines: { x: 0, y: 0 },
+                      backLeg: { x: 0, y: 0 },
+                      torso: { x: 0, y: 0 },
+                      frontLeg: { x: 0, y: 0 },
+                      frontArm: { x: 0, y: 0 },
+                      headNeck: { x: 0, y: 0 },
+                    });
+                  }
+                }}
+              >
+                🔄 Reset All Coordinates
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <details className="combat-log">
         <summary><strong id="combat-log-title">Combat log</strong><span>{state.events.length} verified attacks</span></summary>

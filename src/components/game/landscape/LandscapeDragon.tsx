@@ -1,9 +1,20 @@
+type DragPart = "backWing" | "frontWing" | "tail" | "dorsalSpines" | "backLeg" | "torso" | "frontLeg" | "frontArm" | "headNeck";
+
 type LandscapeDragonProps = {
   bossHpPercent: number; // 0 to 100
   isDefeated: boolean;
+  offsets?: Record<DragPart, { x: number; y: number }>;
+  onSelectPart?: (part: DragPart) => void;
+  selectedPart?: DragPart | null;
 };
 
-export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonProps) {
+export function LandscapeDragon({
+  bossHpPercent,
+  isDefeated,
+  offsets,
+  onSelectPart,
+  selectedPart,
+}: LandscapeDragonProps) {
   // Anchor dragon on far-right end of the 1000x400 viewBox canvas (x = 730 to 930)
   const damageClearedFraction = (100 - bossHpPercent) / 100;
   const dragonX = 730 + damageClearedFraction * 60;
@@ -33,7 +44,20 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
               {/* =========================================================================
                   1. LEFT / BACK SWEEPING FLAPPING BAT WING (Same Red Color as Body)
                  ========================================================================= */}
-              <g className="dragon-back-wing" transform-origin="120 110">
+              <g
+                className="dragon-back-wing"
+                transform-origin="120 110"
+                transform={`translate(${offsets?.backWing?.x ?? 0}, ${offsets?.backWing?.y ?? 0})`}
+                onClick={(e) => {
+                  if (onSelectPart) {
+                    e.stopPropagation();
+                    onSelectPart("backWing");
+                  }
+                }}
+                style={{ cursor: onSelectPart ? "pointer" : "inherit" }}
+                stroke={selectedPart === "backWing" ? "#ffd700" : undefined}
+                strokeWidth={selectedPart === "backWing" ? 3 : undefined}
+              >
                 <animateTransform
                   attributeName="transform"
                   type="rotate"
@@ -59,7 +83,20 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
               {/* =========================================================================
                   2. RIGHT / FRONT SWEEPING FLAPPING BAT WING (Same Red Color as Body)
                  ========================================================================= */}
-              <g className="dragon-front-wing" transform-origin="110 115">
+              <g
+                className="dragon-front-wing"
+                transform-origin="110 115"
+                transform={`translate(${offsets?.frontWing?.x ?? 0}, ${offsets?.frontWing?.y ?? 0})`}
+                onClick={(e) => {
+                  if (onSelectPart) {
+                    e.stopPropagation();
+                    onSelectPart("frontWing");
+                  }
+                }}
+                style={{ cursor: onSelectPart ? "pointer" : "inherit" }}
+                stroke={selectedPart === "frontWing" ? "#ffd700" : undefined}
+                strokeWidth={selectedPart === "frontWing" ? 3 : undefined}
+              >
                 <animateTransform
                   attributeName="transform"
                   type="rotate"
@@ -85,7 +122,19 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
               {/* =========================================================================
                   3. SLIM POINTY TAPERED TAIL WITH TRIPLE BARBED BLADE TIP
                  ========================================================================= */}
-              <g className="dragon-tail">
+              <g
+                className="dragon-tail"
+                transform={`translate(${offsets?.tail?.x ?? 0}, ${offsets?.tail?.y ?? 0})`}
+                onClick={(e) => {
+                  if (onSelectPart) {
+                    e.stopPropagation();
+                    onSelectPart("tail");
+                  }
+                }}
+                style={{ cursor: onSelectPart ? "pointer" : "inherit" }}
+                stroke={selectedPart === "tail" ? "#ffd700" : undefined}
+                strokeWidth={selectedPart === "tail" ? 3 : undefined}
+              >
                 {/* Slim Segment 1 */}
                 <path d="M 160 150 Q 220 160 255 190 L 240 215 Q 215 190 165 175 Z" fill="#7f1d1d" />
                 {/* Slim Segment 2 */}
@@ -110,7 +159,19 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
               {/* =========================================================================
                   4. DORSAL SPINE CREST PLATES (Perfect Alignment on Torso/Spine Contour)
                  ========================================================================= */}
-              <g className="dragon-dorsal-spines">
+              <g
+                className="dragon-dorsal-spines"
+                transform={`translate(${offsets?.dorsalSpines?.x ?? 0}, ${offsets?.dorsalSpines?.y ?? 0})`}
+                onClick={(e) => {
+                  if (onSelectPart) {
+                    e.stopPropagation();
+                    onSelectPart("dorsalSpines");
+                  }
+                }}
+                style={{ cursor: onSelectPart ? "pointer" : "inherit" }}
+                stroke={selectedPart === "dorsalSpines" ? "#ffd700" : undefined}
+                strokeWidth={selectedPart === "dorsalSpines" ? 3 : undefined}
+              >
                 <polygon points="35,42 22,22 42,35" fill="#dc2626" />
                 <polygon points="55,58 45,38 62,52" fill="#dc2626" />
                 <polygon points="80,78 72,58 88,72" fill="#dc2626" />
@@ -123,7 +184,19 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
               {/* =========================================================================
                   5. BACK HIND LEG (ANATOMICAL RIGGED JOINTS - BIGGER & THICKER)
                  ========================================================================= */}
-              <g className="dragon-back-leg">
+              <g
+                className="dragon-back-leg"
+                transform={`translate(${offsets?.backLeg?.x ?? 0}, ${offsets?.backLeg?.y ?? 0})`}
+                onClick={(e) => {
+                  if (onSelectPart) {
+                    e.stopPropagation();
+                    onSelectPart("backLeg");
+                  }
+                }}
+                style={{ cursor: onSelectPart ? "pointer" : "inherit" }}
+                stroke={selectedPart === "backLeg" ? "#ffd700" : undefined}
+                strokeWidth={selectedPart === "backLeg" ? 3 : undefined}
+              >
                 {/* Quad/Thigh */}
                 <path d="M 150 145 C 205 160 210 205 185 215 C 145 205 140 180 150 145 Z" fill="#450a0a" />
                 {/* Knee */}
@@ -143,7 +216,19 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
               {/* =========================================================================
                   6. PROPORTIONATE MUSCULAR TORSO & MULTI-LAYERED CHEST ARMOR
                  ========================================================================= */}
-              <g className="dragon-torso">
+              <g
+                className="dragon-torso"
+                transform={`translate(${offsets?.torso?.x ?? 0}, ${offsets?.torso?.y ?? 0})`}
+                onClick={(e) => {
+                  if (onSelectPart) {
+                    e.stopPropagation();
+                    onSelectPart("torso");
+                  }
+                }}
+                style={{ cursor: onSelectPart ? "pointer" : "inherit" }}
+                stroke={selectedPart === "torso" ? "#ffd700" : undefined}
+                strokeWidth={selectedPart === "torso" ? 3 : undefined}
+              >
                 <path d="M 50 110 C 115 65 200 100 185 180 C 145 210 70 195 50 110 Z" fill="#7f1d1d" />
                 <path d="M 150 135 C 195 150 185 195 140 185 Z" fill="#580e0e" />
                 <path d="M 105 75 C 175 110 175 185 125 195 C 155 155 138 100 105 75 Z" fill="#450a0a" />
@@ -159,7 +244,19 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
               {/* =========================================================================
                   7. FRONT HIND LEG (ANATOMICAL RIGGED JOINTS - BIGGER & THICKER)
                  ========================================================================= */}
-              <g className="dragon-front-leg">
+              <g
+                className="dragon-front-leg"
+                transform={`translate(${offsets?.frontLeg?.x ?? 0}, ${offsets?.frontLeg?.y ?? 0})`}
+                onClick={(e) => {
+                  if (onSelectPart) {
+                    e.stopPropagation();
+                    onSelectPart("frontLeg");
+                  }
+                }}
+                style={{ cursor: onSelectPart ? "pointer" : "inherit" }}
+                stroke={selectedPart === "frontLeg" ? "#ffd700" : undefined}
+                strokeWidth={selectedPart === "frontLeg" ? 3 : undefined}
+              >
                 {/* Thigh */}
                 <path d="M 145 150 C 195 165 198 210 175 220 C 135 210 132 185 145 150 Z" fill="#991b1b" />
                 {/* Knee */}
@@ -179,7 +276,19 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
               {/* =========================================================================
                   8. RIGGED FRONT ARM (SHOULDER, BICEP, FOREARM, HAND - BIGGER)
                  ========================================================================= */}
-              <g className="dragon-front-arm">
+              <g
+                className="dragon-front-arm"
+                transform={`translate(${offsets?.frontArm?.x ?? 0}, ${offsets?.frontArm?.y ?? 0})`}
+                onClick={(e) => {
+                  if (onSelectPart) {
+                    e.stopPropagation();
+                    onSelectPart("frontArm");
+                  }
+                }}
+                style={{ cursor: onSelectPart ? "pointer" : "inherit" }}
+                stroke={selectedPart === "frontArm" ? "#ffd700" : undefined}
+                strokeWidth={selectedPart === "frontArm" ? 3 : undefined}
+              >
                 <circle cx="95" cy="120" r="15" fill="#991b1b" />
                 <path d="M 95 120 L 60 155 L 45 145 L 82 112 Z" fill="#991b1b" />
                 <circle cx="60" cy="155" r="9" fill="#7f1d1d" />
@@ -192,7 +301,19 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
               {/* =========================================================================
                   9. MUSCULAR S-CURVED NECK & ALIGNED THROAT COLLAR
                  ========================================================================= */}
-              <g className="dragon-head-neck">
+              <g
+                className="dragon-head-neck"
+                transform={`translate(${offsets?.headNeck?.x ?? 0}, ${offsets?.headNeck?.y ?? 0})`}
+                onClick={(e) => {
+                  if (onSelectPart) {
+                    e.stopPropagation();
+                    onSelectPart("headNeck");
+                  }
+                }}
+                style={{ cursor: onSelectPart ? "pointer" : "inherit" }}
+                stroke={selectedPart === "headNeck" ? "#ffd700" : undefined}
+                strokeWidth={selectedPart === "headNeck" ? 3 : undefined}
+              >
                 {/* S-Neck */}
                 <path d="M 70 125 Q 35 90 30 55 Q 15 30 52 18 Q 80 38 86 102 Z" fill="#7f1d1d" />
                 <path d="M 35 90 Q 30 55 15 30 Q 30 35 48 60 Z" fill="#991b1b" />
@@ -253,16 +374,6 @@ export function LandscapeDragon({ bossHpPercent, isDefeated }: LandscapeDragonPr
                 <polygon points="28,-1 30,4 28,9 26,4" fill="#000000" />
                 <circle cx="25" cy="2" r="1.8" fill="#ffffff" />
                 <polygon points="18,-2 38,0 36,3 20,1" fill="#260404" />
-              </g>
-
-              {/* =========================================================================
-                  12. FRONT CLAW ARM & TALONS (BIGGER)
-                 ========================================================================= */}
-              <g className="dragon-front-arm">
-                <path d="M 85 115 L 50 148 L 30 140 Q 60 110 85 115 Z" fill="#991b1b" />
-                <polygon points="30,140 15,150 27,136" fill="#ffffff" />
-                <polygon points="33,143 19,154 30,139" fill="#ffffff" />
-                <polygon points="36,146 23,157 33,142" fill="#ffffff" />
               </g>
 
             </g>
