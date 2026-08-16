@@ -55,7 +55,7 @@ export function LandscapeDragon({
           onSelectPart(shapeId);
         }
       },
-      onPointerDown: (e: React.PointerEvent) => {
+      onMouseDown: (e: React.MouseEvent) => {
         if (e.shiftKey && onStartDragShape) {
           e.preventDefault();
           e.stopPropagation();
@@ -63,7 +63,10 @@ export function LandscapeDragon({
           onStartDragShape(shapeId, e.clientX, e.clientY);
         }
       },
-      style: { cursor: onSelectPart ? "pointer" : "inherit" },
+      style: {
+        cursor: onSelectPart ? "pointer" : "inherit",
+        pointerEvents: (onSelectPart ? "auto" : "none") as any,
+      },
       stroke: isSelected ? "#ffd700" : defaultStroke,
       strokeWidth: isSelected ? 3 : defaultStrokeWidth,
       transform: `translate(${offset.x}, ${offset.y}) rotate(${offset.rotate ?? 0})`,
@@ -71,8 +74,17 @@ export function LandscapeDragon({
   }
 
   return (
-    <div className="landscape-layer layer-8-dragon" aria-label={`Epic Rigged Western Red Dragon (${bossHpPercent}% HP left)`}>
-      <svg viewBox="0 0 1000 400" width="100%" height="100%">
+    <div
+      className="landscape-layer layer-8-dragon"
+      style={{ pointerEvents: (onSelectPart ? "auto" : "none") as any }}
+      aria-label={`Epic Rigged Western Red Dragon (${bossHpPercent}% HP left)`}
+    >
+      <svg
+        viewBox="0 0 1000 400"
+        width="100%"
+        height="100%"
+        style={{ pointerEvents: (onSelectPart ? "auto" : "none") as any }}
+      >
         {/* Dragon Group anchored on Far-Right End */}
         <g
           transform={`translate(${dragonX}, 130)`}
@@ -342,14 +354,17 @@ export function LandscapeDragon({
                   fill: fills[shape.id] ?? shape.fill,
                   stroke: isSelected ? "#ffd700" : undefined,
                   strokeWidth: isSelected ? 3 : undefined,
-                  style: { cursor: onSelectPart ? "pointer" : "inherit" },
+                  style: {
+                    cursor: onSelectPart ? "pointer" : "inherit",
+                    pointerEvents: (onSelectPart ? "auto" : "none") as any,
+                  },
                   onClick: (e: React.MouseEvent) => {
                     if (onSelectPart) {
                       e.stopPropagation();
                       onSelectPart(shape.id);
                     }
                   },
-                  onPointerDown: (e: React.PointerEvent) => {
+                  onMouseDown: (e: React.MouseEvent) => {
                     if (e.shiftKey && onStartDragShape) {
                       e.preventDefault();
                       e.stopPropagation();
