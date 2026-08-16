@@ -181,47 +181,106 @@ export function ProfileCenter({
   return (
     <section className="profile-page profile-center" aria-labelledby="profile-page-title">
       <header className="focused-page-heading">
-        <div><p className="kicker">{setupRequired ? "Required first step" : "Profile"}</p><h1 className="display-heading" id="profile-page-title">{setupRequired ? "Complete your profile" : "How you work"}</h1><p>Save these preferences once. MayLamDi reuses them when planning fair project work.</p></div>
+        <div>
+          <p className="kicker">{setupRequired ? "Required first step" : "Profile"}</p>
+          <h1 className="display-heading" id="profile-page-title">
+            {setupRequired ? "Complete your profile" : "How you work"}
+          </h1>
+          <p>Save these preferences once. MayLamDi reuses them when planning fair project work.</p>
+        </div>
         {roomControl}
       </header>
 
       <form className="profile-setup-form" onSubmit={submit}>
         <section className="profile-basic-card" aria-labelledby="basic-profile-title">
           <div className="profile-identity">
-            {profile?.imageUrl ? <img src={profile.imageUrl} alt="" /> : <span className="member-avatar">{profile?.displayName.slice(0, 1).toUpperCase()}</span>}
-            <div><p className="card-eyebrow">Google profile</p><h2 id="basic-profile-title">{profile?.displayName}</h2><span>{profile?.email}</span></div>
+            {profile?.imageUrl ? (
+              <img src={profile.imageUrl} alt="" />
+            ) : (
+              <span className="member-avatar">{profile?.displayName.slice(0, 1).toUpperCase()}</span>
+            )}
+            <div>
+              <p className="card-eyebrow">Google profile</p>
+              <h2 id="basic-profile-title">{profile?.displayName}</h2>
+              <span>{profile?.email}</span>
+            </div>
           </div>
-          {character ? <details className="compact-character-settings"><summary>Customise my character</summary>{character}</details> : <p className="profile-character-note">Character customisation becomes available after you enter a room.</p>}
+          {character ? (
+            <details className="compact-character-settings">
+              <summary>Customise my character</summary>
+              {character}
+            </details>
+          ) : (
+            <p className="profile-character-note">Character customisation becomes available after you enter a room.</p>
+          )}
         </section>
 
         <section className="profile-settings-card" aria-labelledby="work-profile-title">
-          <p className="card-eyebrow">Reusable preferences</p><h2 id="work-profile-title">Tell your team how you work</h2>
-          <SkillPicker skills={skills} softwareSkills={softwareSkills} onSkillsChange={setSkills} onSoftwareSkillsChange={setSoftwareSkills} />
+          <p className="card-eyebrow">Reusable preferences</p>
+          <h2 id="work-profile-title">Tell your team how you work</h2>
+          <SkillPicker
+            skills={skills}
+            softwareSkills={softwareSkills}
+            onSkillsChange={setSkills}
+            onSoftwareSkillsChange={setSoftwareSkills}
+          />
         </section>
 
         <section className="profile-settings-card" aria-labelledby="capacity-title">
-          <p className="card-eyebrow">Weekly capacity</p><h2 id="capacity-title">How much time can you contribute each week?</h2>
+          <p className="card-eyebrow">Weekly capacity</p>
+          <h2 id="capacity-title">How much time can you contribute each week?</h2>
           <p>Used to avoid giving one teammate significantly more work than they can manage.</p>
-          <div className="capacity-options">{CAPACITY_OPTIONS.map((option) => <button key={option.value} type="button" className={weeklyCapacity === option.value ? "is-selected" : ""} aria-pressed={weeklyCapacity === option.value} onClick={() => setWeeklyCapacity(option.value)}>{option.label}</button>)}</div>
+          <div className="capacity-options">
+            {CAPACITY_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={weeklyCapacity === option.value ? "is-selected" : ""}
+                aria-pressed={weeklyCapacity === option.value}
+                onClick={() => setWeeklyCapacity(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
         </section>
 
         {error ? <p className="form-error" role="alert">{error}</p> : null}
         {message ? <p className="form-success" role="status">{message}</p> : null}
-        <button className="primary-button profile-save-button" type="submit" disabled={isSaving}>{isSaving ? "Saving…" : "Save My Profile"}</button>
+
+        <button className="primary-button profile-save-button" type="submit" disabled={isSaving}>
+          {isSaving ? "Saving…" : "Save My Profile"}
+        </button>
       </form>
 
       {!setupRequired ? (
         <div className="profile-context-settings">
           <details className="profile-secondary-settings">
             <summary>Subscription</summary>
-            <section className="profile-settings-card"><p className="card-eyebrow">Current plan</p><h2>Free assignment demo</h2><p>Manual planning remains unlimited. AI assistance stays optional and uses free routes only.</p></section>
+            <section className="profile-settings-card">
+              <p className="card-eyebrow">Current plan</p>
+              <h2>Free assignment demo</h2>
+              <p>Manual planning remains unlimited. AI assistance stays optional and uses free routes only.</p>
+            </section>
           </details>
           <details className="profile-secondary-settings">
             <summary>AI settings</summary>
             <section className="profile-settings-card ai-settings-card">
-            <label className="toggle-field"><input type="checkbox" checked={useOwnKey} onChange={(event) => setUseOwnKey(event.target.checked)} /><span>Use my own AI key for this session</span></label>
-            <div className="guided-field-grid"><label><span>OpenRouter API key</span><input disabled={!useOwnKey} type="password" autoComplete="off" value={apiKey} onChange={(event) => setApiKey(event.target.value)} /></label><label><span>Model ID</span><input disabled={!useOwnKey} value={model} onChange={(event) => setModel(event.target.value)} /></label></div>
-            <p className="ai-security-note">This key stays in this browser session and is never stored with your profile.</p>
+              <label className="toggle-field">
+                <input type="checkbox" checked={useOwnKey} onChange={(event) => setUseOwnKey(event.target.checked)} />
+                <span>Use my own AI key for this session</span>
+              </label>
+              <div className="guided-field-grid">
+                <label>
+                  <span>OpenRouter API key</span>
+                  <input disabled={!useOwnKey} type="password" autoComplete="off" value={apiKey} onChange={(event) => setApiKey(event.target.value)} />
+                </label>
+                <label>
+                  <span>Model ID</span>
+                  <input disabled={!useOwnKey} value={model} onChange={(event) => setModel(event.target.value)} />
+                </label>
+              </div>
+              <p className="ai-security-note">This key stays in this browser session and is never stored with your profile.</p>
             </section>
           </details>
         </div>
@@ -229,3 +288,4 @@ export function ProfileCenter({
     </section>
   );
 }
+

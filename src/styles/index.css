@@ -4996,6 +4996,138 @@ footer {
 }
 
 /* =========================================================================
+   Profile Layout Alignment & Proportional Spacing
+   ========================================================================= */
+
+.profile-page.profile-center {
+  display: grid;
+  gap: 2rem;
+  width: min(100%, 960px);
+  margin: 0 auto;
+  padding-bottom: 3.5rem;
+}
+
+.profile-center .focused-page-heading {
+  margin-bottom: 0.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid color-mix(in srgb, var(--color-text) 18%, transparent);
+}
+
+.profile-setup-form {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.profile-basic-card,
+.profile-settings-card {
+  border: 2px solid color-mix(in srgb, var(--color-text) 80%, transparent);
+  border-radius: 22px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 1.75rem 2rem;
+  box-shadow: 5px 5px 0 color-mix(in srgb, var(--color-text) 18%, transparent);
+}
+
+.card-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-blue);
+  margin-bottom: 0.4rem;
+}
+
+:root[data-theme="dark"] .card-eyebrow {
+  color: var(--color-yellow);
+}
+
+.profile-basic-card h2,
+.profile-settings-card h2 {
+  font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.4rem;
+  line-height: 1.25;
+}
+
+.profile-basic-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.profile-identity img,
+.profile-identity .member-avatar {
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 50%;
+  border: 3px solid var(--color-text);
+  box-shadow: 2px 2px 0 var(--color-text);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.profile-identity div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.profile-skill-picker {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 0.75rem;
+}
+
+.profile-skill-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.35rem;
+  background: color-mix(in srgb, var(--color-page) 85%, var(--color-surface));
+  border: 2px solid color-mix(in srgb, var(--color-text) 35%, transparent);
+  border-radius: 14px;
+  width: fit-content;
+  flex-wrap: wrap;
+}
+
+.profile-skill-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.selected-profile-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.capacity-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+.profile-save-button {
+  margin-top: 0.5rem;
+  min-height: 54px;
+  font-size: 1.08rem;
+  font-weight: 900;
+  width: 100%;
+  border-radius: 16px;
+}
+
+
+/* =========================================================================
    MEDIEVAL RPG BOARD UI STYLES (Pure flat vector - no gradients, no shadows)
    ========================================================================= */
 
