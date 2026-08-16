@@ -1350,8 +1350,14 @@ select:focus-visible {
   padding: 1.25rem;
   border: 3px solid var(--color-navy);
   border-radius: 1.5rem;
-  background: var(--color-pink);
+  background: #ffffff !important;
+  color: #1e293b !important;
   text-align: center;
+}
+
+:root[data-theme="dark"] .character-preview {
+  background: #ffffff !important;
+  color: #1e293b !important;
 }
 
 .character-preview > span {
@@ -1359,6 +1365,7 @@ select:focus-visible {
   font-weight: 900;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  color: #64748b !important;
 }
 
 .character-orb {
@@ -1397,8 +1404,11 @@ select:focus-visible {
 }
 
 .character-preview > p {
-  margin: 0;
-  font-weight: 900;
+  margin: 0.5rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1e293b !important;
+  line-height: 1.35;
 }
 
 .framework-library {
