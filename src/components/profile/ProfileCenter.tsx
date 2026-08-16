@@ -91,106 +91,36 @@ function SkillPicker({
       ? searchResults
       : [];
 
-  const tabLabels = {
-    recommended: "Recommended",
-    search: "Search",
-    all: "View All",
-    other: "Custom Skill",
-  } as const;
-
   return (
     <div className="profile-skill-picker">
       <div className="profile-skill-toolbar" role="tablist" aria-label="Skill picker views">
         {(["recommended", "search", "all", "other"] as const).map((item) => (
           <button key={item} type="button" role="tab" aria-selected={mode === item} className={mode === item ? "is-active" : ""} onClick={() => setMode(item)}>
-            {tabLabels[item]}
+            {item === "all" ? "View All" : item[0].toUpperCase() + item.slice(1)}
           </button>
         ))}
       </div>
 
       {mode === "search" ? (
-        <label className="profile-skill-search">
-          <span>Search skills & tools</span>
-          <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Type Figma, writing, research…" />
-        </label>
+        <label className="profile-skill-search"><span>Search skills</span><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Try Figma, writing, research…" /></label>
       ) : null}
-
       {mode === "other" ? (
-        <div className="profile-other-skill">
-          <label>
-            <span>Custom skill</span>
-            <input
-              value={other}
-              maxLength={60}
-              placeholder="Type custom skill name…"
-              onChange={(event) => setOther(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  addOther();
-                }
-              }}
-            />
-          </label>
-          <button className="primary-button" type="button" onClick={addOther}>Add Skill</button>
-        </div>
+        <div className="profile-other-skill"><label><span>Other skill</span><input value={other} maxLength={60} onChange={(event) => setOther(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addOther(); } }} /></label><button className="quiet-button" type="button" onClick={addOther}>Add skill</button></div>
       ) : null}
-
       {mode === "all" ? (
         <div className="profile-skill-categories">
           {Object.entries(SKILL_CATEGORIES).map(([category, categorySkills]) => (
-            <section key={category} className="skill-category-block">
-              <h4 className="skill-category-title">{category}</h4>
-              <div className="profile-skill-options">
-                {categorySkills.map((skill) => (
-                  <button key={skill} type="button" className={skills.includes(skill) ? "is-selected" : ""} aria-pressed={skills.includes(skill)} onClick={() => toggle(skill)}>
-                    {skill}
-                  </button>
-                ))}
-              </div>
-            </section>
+            <section key={category}><h4>{category}</h4><div className="profile-skill-options">{categorySkills.map((skill) => <button key={skill} type="button" className={skills.includes(skill) ? "is-selected" : ""} aria-pressed={skills.includes(skill)} onClick={() => toggle(skill)}>{skill}</button>)}</div></section>
           ))}
-          <section className="skill-category-block">
-            <h4 className="skill-category-title">Software</h4>
-            <div className="profile-skill-options">
-              {SOFTWARE_SKILLS.map((skill) => (
-                <button key={skill} type="button" className={softwareSkills.includes(skill) ? "is-selected" : ""} aria-pressed={softwareSkills.includes(skill)} onClick={() => toggle(skill)}>
-                  {skill}
-                </button>
-              ))}
-            </div>
-          </section>
+          <section><h4>Software</h4><div className="profile-skill-options">{SOFTWARE_SKILLS.map((skill) => <button key={skill} type="button" className={softwareSkills.includes(skill) ? "is-selected" : ""} aria-pressed={softwareSkills.includes(skill)} onClick={() => toggle(skill)}>{skill}</button>)}</div></section>
         </div>
       ) : null}
-
       {mode === "recommended" || mode === "search" ? (
-        <div className="profile-skill-options">
-          {choices.length ? choices.map((skill) => {
-            const selected = skills.includes(skill) || softwareSkills.includes(skill);
-            return (
-              <button key={skill} type="button" className={selected ? "is-selected" : ""} aria-pressed={selected} onClick={() => toggle(skill)}>
-                {skill}
-              </button>
-            );
-          }) : <p className="no-skills-found">{mode === "search" ? "Type a skill to search." : "No recommendations available."}</p>}
-        </div>
+        <div className="profile-skill-options">{choices.length ? choices.map((skill) => { const selected = skills.includes(skill) || softwareSkills.includes(skill); return <button key={skill} type="button" className={selected ? "is-selected" : ""} aria-pressed={selected} onClick={() => toggle(skill)}>{skill}</button>; }) : <p>{mode === "search" ? "Type a skill to search." : "No recommendations available."}</p>}</div>
       ) : null}
-
-      {skills.length > 0 || softwareSkills.length > 0 ? (
-        <div className="selected-skills-container">
-          <div className="selected-skills-header">
-            <span className="selected-skills-title">Selected skills ({skills.length + softwareSkills.length})</span>
-            <span className="selected-skills-hint">Click any skill to remove</span>
-          </div>
-          <div className="selected-profile-skills" aria-live="polite">
-            {[...skills, ...softwareSkills].map((skill) => (
-              <button key={skill} type="button" onClick={() => toggle(skill)}>
-                {skill}<span aria-hidden="true"> ×</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      <div className="selected-profile-skills" aria-live="polite">
+        {[...skills, ...softwareSkills].map((skill) => <button key={skill} type="button" onClick={() => toggle(skill)}>{skill}<span aria-hidden="true"> ×</span></button>)}
+      </div>
     </div>
   );
 }
@@ -251,98 +181,47 @@ export function ProfileCenter({
   return (
     <section className="profile-page profile-center" aria-labelledby="profile-page-title">
       <header className="focused-page-heading">
-        <div>
-          <p className="kicker">{setupRequired ? "Required setup" : "Profile"}</p>
-          <h1 className="display-heading" id="profile-page-title">
-            {setupRequired ? "Complete your profile" : "How you work"}
-          </h1>
-          <p>Save these preferences once. MayLamDi reuses them when planning fair project work.</p>
-        </div>
+        <div><p className="kicker">{setupRequired ? "Required first step" : "Profile"}</p><h1 className="display-heading" id="profile-page-title">{setupRequired ? "Complete your profile" : "How you work"}</h1><p>Save these preferences once. MayLamDi reuses them when planning fair project work.</p></div>
         {roomControl}
       </header>
 
       <form className="profile-setup-form" onSubmit={submit}>
-        {/* Basic Google Profile */}
         <section className="profile-basic-card" aria-labelledby="basic-profile-title">
-          <p className="card-eyebrow">Google profile</p>
           <div className="profile-identity">
             {profile?.imageUrl ? <img src={profile.imageUrl} alt="" /> : <span className="member-avatar">{profile?.displayName.slice(0, 1).toUpperCase()}</span>}
-            <div>
-              <h2 id="basic-profile-title">{profile?.displayName}</h2>
-              <span>{profile?.email}</span>
-            </div>
+            <div><p className="card-eyebrow">Google profile</p><h2 id="basic-profile-title">{profile?.displayName}</h2><span>{profile?.email}</span></div>
           </div>
-          {character ? (
-            <details className="compact-character-settings"><summary>Customise my character</summary>{character}</details>
-          ) : (
-            <p className="profile-character-note">Character customisation becomes available after you enter a room.</p>
-          )}
+          {character ? <details className="compact-character-settings"><summary>Customise my character</summary>{character}</details> : <p className="profile-character-note">Character customisation becomes available after you enter a room.</p>}
         </section>
 
-        {/* Reusable Preferences (Skills & Tools) */}
         <section className="profile-settings-card" aria-labelledby="work-profile-title">
-          <p className="card-eyebrow">Reusable preferences</p>
-          <h2 id="work-profile-title">Tell your team how you work</h2>
-          <p className="card-description">Select the core skills and tools you excel at so your team can assign tasks fairly and transparently.</p>
+          <p className="card-eyebrow">Reusable preferences</p><h2 id="work-profile-title">Tell your team how you work</h2>
           <SkillPicker skills={skills} softwareSkills={softwareSkills} onSkillsChange={setSkills} onSoftwareSkillsChange={setSoftwareSkills} />
         </section>
 
-        {/* Weekly Capacity */}
         <section className="profile-settings-card" aria-labelledby="capacity-title">
-          <p className="card-eyebrow">Weekly capacity</p>
-          <h2 id="capacity-title">How much time can you contribute each week?</h2>
-          <p className="card-description">Used by MayLamDi's allocation engine to balance workload and prevent burnout.</p>
-          <div className="capacity-options">
-            {CAPACITY_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={weeklyCapacity === option.value ? "is-selected" : ""}
-                aria-pressed={weeklyCapacity === option.value}
-                onClick={() => setWeeklyCapacity(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
+          <p className="card-eyebrow">Weekly capacity</p><h2 id="capacity-title">How much time can you contribute each week?</h2>
+          <p>Used to avoid giving one teammate significantly more work than they can manage.</p>
+          <div className="capacity-options">{CAPACITY_OPTIONS.map((option) => <button key={option.value} type="button" className={weeklyCapacity === option.value ? "is-selected" : ""} aria-pressed={weeklyCapacity === option.value} onClick={() => setWeeklyCapacity(option.value)}>{option.label}</button>)}</div>
         </section>
 
         {error ? <p className="form-error" role="alert">{error}</p> : null}
         {message ? <p className="form-success" role="status">{message}</p> : null}
-
-        <button className="primary-button profile-save-button" type="submit" disabled={isSaving}>
-          {isSaving ? "Saving…" : "Save My Profile"}
-        </button>
+        <button className="primary-button profile-save-button" type="submit" disabled={isSaving}>{isSaving ? "Saving…" : "Save My Profile"}</button>
       </form>
 
       {!setupRequired ? (
         <div className="profile-context-settings">
           <details className="profile-secondary-settings">
             <summary>Subscription</summary>
-            <section className="profile-settings-card">
-              <p className="card-eyebrow">Current plan</p>
-              <h2>Free assignment demo</h2>
-              <p>Manual planning remains unlimited. AI assistance stays optional and uses free routes only.</p>
-            </section>
+            <section className="profile-settings-card"><p className="card-eyebrow">Current plan</p><h2>Free assignment demo</h2><p>Manual planning remains unlimited. AI assistance stays optional and uses free routes only.</p></section>
           </details>
           <details className="profile-secondary-settings">
             <summary>AI settings</summary>
             <section className="profile-settings-card ai-settings-card">
-              <label className="toggle-field">
-                <input type="checkbox" checked={useOwnKey} onChange={(event) => setUseOwnKey(event.target.checked)} />
-                <span>Use my own AI key for this session</span>
-              </label>
-              <div className="guided-field-grid">
-                <label>
-                  <span>OpenRouter API key</span>
-                  <input disabled={!useOwnKey} type="password" autoComplete="off" value={apiKey} onChange={(event) => setApiKey(event.target.value)} />
-                </label>
-                <label>
-                  <span>Model ID</span>
-                  <input disabled={!useOwnKey} value={model} onChange={(event) => setModel(event.target.value)} />
-                </label>
-              </div>
-              <p className="ai-security-note">This key stays in this browser session and is never stored with your profile.</p>
+            <label className="toggle-field"><input type="checkbox" checked={useOwnKey} onChange={(event) => setUseOwnKey(event.target.checked)} /><span>Use my own AI key for this session</span></label>
+            <div className="guided-field-grid"><label><span>OpenRouter API key</span><input disabled={!useOwnKey} type="password" autoComplete="off" value={apiKey} onChange={(event) => setApiKey(event.target.value)} /></label><label><span>Model ID</span><input disabled={!useOwnKey} value={model} onChange={(event) => setModel(event.target.value)} /></label></div>
+            <p className="ai-security-note">This key stays in this browser session and is never stored with your profile.</p>
             </section>
           </details>
         </div>
@@ -350,4 +229,3 @@ export function ProfileCenter({
     </section>
   );
 }
-
