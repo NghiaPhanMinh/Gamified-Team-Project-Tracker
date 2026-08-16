@@ -181,12 +181,12 @@ export function ProfileCenter({
   return (
     <section className="profile-page profile-center" aria-labelledby="profile-page-title">
       <header className="focused-page-heading">
-        <div>
+        <div className="focused-heading-stack">
           <p className="kicker">{setupRequired ? "Required first step" : "Profile"}</p>
           <h1 className="display-heading" id="profile-page-title">
             {setupRequired ? "Complete your profile" : "How you work"}
           </h1>
-          <p>Save these preferences once. MayLamDi reuses them when planning fair project work.</p>
+          <p className="profile-subtext">Save these preferences once. MayLamDi reuses them when planning fair project work.</p>
         </div>
         {roomControl}
       </header>
@@ -199,10 +199,10 @@ export function ProfileCenter({
             ) : (
               <span className="member-avatar">{profile?.displayName.slice(0, 1).toUpperCase()}</span>
             )}
-            <div>
+            <div className="profile-identity-text">
               <p className="card-eyebrow">Google profile</p>
-              <h2 id="basic-profile-title">{profile?.displayName}</h2>
-              <span>{profile?.email}</span>
+              <h2 id="basic-profile-title" className="profile-user-name">{profile?.displayName}</h2>
+              <span className="profile-user-email">{profile?.email}</span>
             </div>
           </div>
           {character ? (
@@ -229,7 +229,7 @@ export function ProfileCenter({
         <section className="profile-settings-card" aria-labelledby="capacity-title">
           <p className="card-eyebrow">Weekly capacity</p>
           <h2 id="capacity-title">How much time can you contribute each week?</h2>
-          <p>Used to avoid giving one teammate significantly more work than they can manage.</p>
+          <p className="card-description">Used to avoid giving one teammate significantly more work than they can manage.</p>
           <div className="capacity-options">
             {CAPACITY_OPTIONS.map((option) => (
               <button
@@ -245,12 +245,13 @@ export function ProfileCenter({
           </div>
         </section>
 
-        {error ? <p className="form-error" role="alert">{error}</p> : null}
-        {message ? <p className="form-success" role="status">{message}</p> : null}
-
-        <button className="primary-button profile-save-button" type="submit" disabled={isSaving}>
-          {isSaving ? "Saving…" : "Save My Profile"}
-        </button>
+        <div className="profile-form-actions">
+          {error ? <p className="form-error" role="alert">{error}</p> : null}
+          {message ? <p className="form-success" role="status">{message}</p> : null}
+          <button className="primary-button profile-save-button" type="submit" disabled={isSaving}>
+            {isSaving ? "Saving…" : "Save My Profile"}
+          </button>
+        </div>
       </form>
 
       {!setupRequired ? (
