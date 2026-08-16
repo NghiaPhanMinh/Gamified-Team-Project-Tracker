@@ -273,14 +273,39 @@ export function ProfileCenter({
           </p>
         </div>
 
-        {/* Visual Progress Bar */}
+        {/* Visual Progress Bar & Step Summary Overview */}
         <div className="profile-progress-container" aria-label="Profile completion progress">
           <div className="profile-progress-meta">
-            <span className="profile-progress-label">PROFILE PROGRESS</span>
-            <span className="profile-progress-percent">{completedSteps}/{totalSteps} STEPS READY ({progressPercent}%)</span>
+            <span className="profile-progress-label">PROFILE COMPLETION PROGRESS</span>
+            <span className="profile-progress-percent">{completedSteps}/{totalSteps} STEPS COMPLETED ({progressPercent}%)</span>
           </div>
           <div className="profile-progress-track">
             <div className="profile-progress-fill" style={{ width: `${progressPercent}%` }} />
+          </div>
+
+          {/* 3-Step Quick Summary Cards */}
+          <div className="profile-step-summary-grid">
+            <div className="step-summary-item is-complete">
+              <span className="step-num">1</span>
+              <div className="step-info">
+                <strong>Google Account</strong>
+                <small>✓ Verified</small>
+              </div>
+            </div>
+            <div className={`step-summary-item ${isSkillsReady ? "is-complete" : "is-pending"}`}>
+              <span className="step-num">2</span>
+              <div className="step-info">
+                <strong>Skills & Tools</strong>
+                <small>{isSkillsReady ? `✓ ${skills.length + softwareSkills.length} selected` : "⚠️ Pick 1 or more"}</small>
+              </div>
+            </div>
+            <div className="step-summary-item is-complete">
+              <span className="step-num">3</span>
+              <div className="step-info">
+                <strong>Weekly Capacity</strong>
+                <small>✓ {CAPACITY_OPTIONS.find((o) => o.value === weeklyCapacity)?.label ?? "Set"}</small>
+              </div>
+            </div>
           </div>
         </div>
 
