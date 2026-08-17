@@ -10,10 +10,11 @@ export const getState = query({
     if (project === null) throw new Error("This project no longer exists.");
     const { profile } = await requireTeamMember(ctx, project.teamId);
 
-    const [tasks, events, memberships] = await Promise.all([
+    const [tasks, events, memberships, dailyPosts] = await Promise.all([
       ctx.db.query("tasks").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("combatEvents").withIndex("by_project_and_time", (q) => q.eq("projectId", project._id)).order("asc").collect(),
       ctx.db.query("teamMembers").withIndex("by_team", (q) => q.eq("teamId", project.teamId)).collect(),
+      ctx.db.query("dailyFeed").withIndex("by_project_and_time", (q) => q.eq("projectId", project._id)).collect(),
     ]);
 
     const requiredTasks = tasks.filter((task) => task.required);
@@ -106,7 +107,10 @@ export const getState = query({
         (task) => task.status !== "verified" && task.status !== "completed",
       ).length,
       members: memberships.map((member) => {
-        const hasSubmittedToday = uniqueEvents.some(
+        const hasValidDailyToday = dailyPosts.some(
+          (p) => p.authorProfileId === member.profileId && p.isValid && p.createdAt >= startOfToday,
+        );
+        const hasSubmittedToday = hasValidDailyToday || uniqueEvents.some(
           (event) => event.attackerProfileId === member.profileId && event.createdAt >= startOfToday,
         ) || tasks.some(
           (task) => (task.primaryOwnerProfileId === member.profileId || task.collaboratorProfileIds.includes(member.profileId)) &&
@@ -155,14 +159,20 @@ export const getLeaderboard = query({
         const userProfile = await ctx.db.get(m.profileId);
         if (!userProfile) return null;
 
-        // Count dailyFeed valid posts
+        // Count dailyFeed unique valid days (1 goblin kill per day maximum)
         const posts = await ctx.db
           .query("dailyFeed")
           .withIndex("by_project_author_and_time", (q) =>
             q.eq("projectId", project._id).eq("authorProfileId", m.profileId)
           )
           .collect();
-        const goblinsKilled = posts.filter((p) => p.isValid).length;
+
+        const uniqueKillDays = new Set(
+          posts
+            .filter((p) => p.isValid)
+            .map((p) => new Date(p.createdAt).toISOString().split("T")[0])
+        );
+        const goblinsKilled = uniqueKillDays.size;
 
         // Count completed / verified tasks
         const tasks = await ctx.db

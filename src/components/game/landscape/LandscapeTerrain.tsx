@@ -18,7 +18,7 @@ export function LandscapeTerrain() {
 
       {/* Layer 4: Multi-Layered Meadow & Curvy Winding Path */}
       <div className="landscape-layer layer-4-ground" aria-hidden="true">
-        <svg viewBox="0 0 1000 400" width="100%" height="100%">
+        <svg viewBox="0 0 1000 400" preserveAspectRatio="none" width="100%" height="100%">
           <defs>
             {/* Subtle 3-blade Grass Tuft Template */}
             <g id="grass-tuft-dark">
@@ -27,9 +27,9 @@ export function LandscapeTerrain() {
               <polygon points="0,0 4,-7 5,-3" fill="#14532d" />
             </g>
             <g id="grass-tuft-light">
-              <polygon points="0,0 -2,-9 0,-6" fill="#22c55e" />
-              <polygon points="0,0 1,-12 3,-8" fill="#4ade80" />
-              <polygon points="0,0 4,-7 5,-3" fill="#22c55e" />
+              <polygon points="0,0 -2,-9 0,-6" fill="#4ade80" />
+              <polygon points="0,0 1,-12 3,-8" fill="#86efac" />
+              <polygon points="0,0 4,-7 5,-3" fill="#4ade80" />
             </g>
             {/* Slate Pebble Template */}
             <g id="slate-pebble">
@@ -38,14 +38,15 @@ export function LandscapeTerrain() {
             </g>
           </defs>
 
-          {/* Background Dark Forest Meadow */}
+          {/* 10% Horizon Dark Forest Green Band (y = 100 to 130) */}
           <rect x="0" y="100" width="1000" height="300" fill="#166534" />
 
-          {/* Midground Rolling Meadow Band */}
-          <path d="M0,170 Q260,145 520,175 T1000,165 L1000,400 L0,400 Z" fill="#15803d" />
+          {/* 10% Horizon Mid Meadow Green Band (y = 128 to 160) */}
+          <path d="M0,130 Q260,120 520,135 T1000,128 L1000,400 L0,400 Z" fill="#15803d" />
 
-          {/* Foreground Rich Vibrant Meadow Band */}
-          <path d="M0,230 Q280,210 580,240 T1000,225 L1000,400 L0,400 Z" fill="#16a34a" opacity="0.95" />
+          {/* 80% Main Bright Lush Meadow (y = 155 to 400) */}
+          <path d="M0,158 Q280,148 580,165 T1000,155 L1000,400 L0,400 Z" fill="#22c55e" />
+          <rect x="0" y="165" width="1000" height="235" fill="#22c55e" />
 
           {/* --- Curvy Winding Dirt / Cobblestone Pathway --- */}
           {/* Pathway Outer Dirt Foundation */}

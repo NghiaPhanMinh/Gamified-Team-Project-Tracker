@@ -14,14 +14,19 @@ type LandscapePlayersProps = {
 
 type MageType = "lightning" | "fire" | "ice";
 
-function getMageTheme(spellType?: string, index: number = 0) {
+function getMageTheme(spellType?: string, profileId: string = "", index: number = 0) {
   let type: MageType = "lightning";
-  if (spellType === "lightning" || spellType === "spark") type = "lightning";
-  else if (spellType === "fire") type = "fire";
-  else if (spellType === "water" || spellType === "ice" || spellType === "nature" || spellType === "shield") type = "ice";
+  if (spellType === "fire") type = "fire";
+  else if (spellType === "ice" || spellType === "water") type = "ice";
+  else if (spellType === "lightning") type = "lightning";
   else {
+    // Deterministic random elemental assignment based on player ID & index
+    let hash = 0;
+    for (let i = 0; i < profileId.length; i++) {
+      hash = profileId.charCodeAt(i) + ((hash << 5) - hash);
+    }
     const types: MageType[] = ["lightning", "fire", "ice"];
-    type = types[index % 3];
+    type = types[Math.abs(hash + index) % types.length];
   }
 
   if (type === "lightning") {
@@ -83,7 +88,7 @@ export function LandscapePlayers({ members }: LandscapePlayersProps) {
             const offsetX = startX + index * spacing;
             const offsetY = 265 + (index % 2) * 12;
             const active = member.isActiveToday;
-            const mage = getMageTheme(member.spellType, index);
+            const mage = getMageTheme(member.spellType, member.profileId, index);
 
             return (
               <g

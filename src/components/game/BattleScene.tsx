@@ -1225,12 +1225,23 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         text: goblinText,
         imageUrls: goblinImageUrls,
       });
+
       const currentMember = state?.members.find((m) => m.profileId === state.currentProfileId);
+      let hash = 0;
+      const pid = currentMember?.profileId || "";
+      for (let i = 0; i < pid.length; i++) {
+        hash = pid.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const types = ["lightning", "fire", "ice"];
+      const resolvedSpell = (currentMember?.spellType && currentMember.spellType !== "spark")
+        ? currentMember.spellType
+        : types[Math.abs(hash) % types.length];
+
       setLocalAttack({
         id: `goblin_atk_${Date.now()}`,
         attackerName: currentMember?.displayName || "Adventurer",
         damage: 100,
-        spellType: currentMember?.spellType || "lightning",
+        spellType: resolvedSpell,
         target: "goblin",
       });
       setGoblinText("");
@@ -1327,11 +1338,21 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       await submitForReview({ taskId: selectedTaskId });
 
       const currentMember = state?.members.find((m) => m.profileId === state.currentProfileId);
+      let hash = 0;
+      const pid = currentMember?.profileId || "";
+      for (let i = 0; i < pid.length; i++) {
+        hash = pid.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const types = ["lightning", "fire", "ice"];
+      const resolvedSpell = (currentMember?.spellType && currentMember.spellType !== "spark")
+        ? currentMember.spellType
+        : types[Math.abs(hash) % types.length];
+
       setLocalAttack({
         id: `boss_atk_${Date.now()}`,
         attackerName: currentMember?.displayName || "Adventurer",
         damage: currentTask.damage || 50,
-        spellType: currentMember?.spellType || "fire",
+        spellType: resolvedSpell,
         target: "dragon",
       });
 
@@ -1888,6 +1909,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             <form onSubmit={handleGoblinSubmit} className="rpg-goblin-form">
               <div className="rpg-parchment-sheet" style={{ marginBottom: 0 }}>
                 {goblinError && <p className="form-error" role="alert" style={{ color: "#b91c1c", fontWeight: 800 }}>{goblinError}</p>}
+
+                {state?.members.find((m) => m.profileId === state.currentProfileId)?.hasSubmittedToday && (
+                  <div style={{ padding: "8px 10px", background: "#f0fdf4", border: "1.5px solid #86efac", borderRadius: "6px", color: "#166534", fontSize: "0.78rem", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span>✅</span>
+                    <span><strong>Your daily goblin is already slayed for today!</strong> Extra logs can still be recorded, but only 1 goblin kill is awarded per day.</span>
+                  </div>
+                )}
 
                 <p style={{ margin: "0 0 12px 0", fontSize: "0.85rem", lineHeight: "1.4" }}>
                   Provide proof of today's work to defeat your daily goblin threat.
