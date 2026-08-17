@@ -55,23 +55,6 @@ export function SVGDefs() {
           <line x1="0" y1="28" x2="40" y2="28" stroke="#5c422e" strokeWidth="3" strokeLinecap="round" />
         </g>
 
-        {/* Flat Geometric Goblin Shape */}
-        <g id="goblin-shape">
-          {/* Body polygon */}
-          <polygon points="12,35 6,18 24,18 L18,35" fill="#588157" stroke="var(--scene-boss-slate)" strokeWidth="2" />
-          {/* Head circle */}
-          <circle cx="15" cy="12" r="7" fill="#3a5a40" stroke="var(--scene-boss-slate)" strokeWidth="2" />
-          {/* Pointy Ear left */}
-          <polygon points="9,10 2,6 9,14" fill="#3a5a40" />
-          {/* Pointy Ear right */}
-          <polygon points="21,10 28,6 21,14" fill="#3a5a40" />
-          {/* Eyes (ember orange dots) */}
-          <circle cx="13" cy="11" r="1" fill="var(--scene-ember-gold)" />
-          <circle cx="17" cy="11" r="1" fill="var(--scene-ember-gold)" />
-          {/* Spear / Weapon line */}
-          <line x1="22" y1="36" x2="26" y2="4" stroke="var(--scene-boss-slate)" strokeWidth="2" strokeLinecap="round" />
-          <polygon points="26,4 23,-2 29,4" fill="var(--scene-ember-danger)" />
-        </g>
       </defs>
     </svg>
   );

@@ -374,7 +374,7 @@ export function LandscapeDragon({
                         <animateTransform
                           attributeName="transform"
                           type="rotate"
-                          values="0; -15; 0"
+                          values="0; -45; 15; 0"
                           dur="1.8s"
                           repeatCount="indefinite"
                           additive="sum"
@@ -390,7 +390,7 @@ export function LandscapeDragon({
                         <animateTransform
                           attributeName="transform"
                           type="rotate"
-                          values="0; 15; 0"
+                          values="0; 45; -15; 0"
                           dur="1.8s"
                           repeatCount="indefinite"
                           additive="sum"
@@ -464,7 +464,7 @@ export function LandscapeDragon({
                                   <animateTransform
                                     attributeName="transform"
                                     type="rotate"
-                                    values="0; -15; 0"
+                                    values="0; -45; 15; 0"
                                     dur="1.8s"
                                     repeatCount="indefinite"
                                     additive="sum"
@@ -480,7 +480,7 @@ export function LandscapeDragon({
                                   <animateTransform
                                     attributeName="transform"
                                     type="rotate"
-                                    values="0; 15; 0"
+                                    values="0; 45; -15; 0"
                                     dur="1.8s"
                                     repeatCount="indefinite"
                                     additive="sum"

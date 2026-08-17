@@ -1356,6 +1356,44 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     }));
   }, [state, activeEvent]);
 
+  const startStr = workspace?.project?.startDate || (state?.project?.launchedAt ? new Date(state.project.launchedAt).toISOString().split("T")[0] : "");
+  const deadlineStr = workspace?.project?.deadline || state?.project?.deadline || "";
+
+  const { totalDays, daysPassed, daysRemaining, progressPercent } = useMemo(() => {
+    if (!deadlineStr) return { totalDays: 0, daysPassed: 0, daysRemaining: 0, progressPercent: 0 };
+    const end = new Date(`${deadlineStr}T23:59:59Z`).getTime();
+    let start = startStr ? new Date(`${startStr}T00:00:00Z`).getTime() : 0;
+    if (!start || isNaN(start)) {
+      start = end - (14 * 24 * 60 * 60 * 1000);
+    }
+    const now = Date.now();
+    const totalMs = Math.max(1000 * 60 * 60 * 24, end - start);
+    const passedMs = Math.max(0, Math.min(totalMs, now - start));
+    const tDays = Math.max(1, Math.round(totalMs / (1000 * 60 * 60 * 24)));
+    const pDays = Math.max(0, Math.min(tDays, Math.floor(passedMs / (1000 * 60 * 60 * 24))));
+    const rDays = Math.max(0, tDays - pDays);
+    const pct = Math.min(100, Math.max(0, (passedMs / totalMs) * 100));
+    return { totalDays: tDays, daysPassed: pDays, daysRemaining: rDays, progressPercent: pct };
+  }, [startStr, deadlineStr]);
+
+  const milestoneCheckpoints = useMemo(() => {
+    if (!workspace?.milestones || !startStr || !deadlineStr) return [];
+    const start = new Date(`${startStr}T00:00:00Z`).getTime();
+    const end = new Date(`${deadlineStr}T23:59:59Z`).getTime();
+    const totalMs = Math.max(1, end - start);
+    return workspace.milestones.map((m) => {
+      const mTime = new Date(`${m.dueDate}T23:59:59Z`).getTime();
+      const pct = Math.max(0, Math.min(100, ((mTime - start) / totalMs) * 100));
+      return {
+        id: m._id,
+        title: m.title,
+        dueDate: m.dueDate,
+        status: m.status,
+        percent: pct,
+      };
+    });
+  }, [workspace?.milestones, startStr, deadlineStr]);
+
   if (state === undefined) {
     return <section className="battle-loading" aria-busy="true">Preparing the battle scene…</section>;
   }
@@ -1419,20 +1457,17 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           ⚔️<br />Attack
         </button>
 
-        {/* Floating Mob-Style Boss HP Bar */}
+        {/* Floating Mob-Style Boss HP Bar (Pure clean big bar hovering above center of dragon) */}
         <div
           className="boss-hp-mob-style"
           style={{
             left: `${Math.min(92, Math.max(8, (dragonX / 10) - 2.5))}%`
           }}
         >
-          <span className="boss-hp-percent-label">DRAGON {hpPercent}% HP</span>
-          <div className="boss-hp-mob-track">
-            <div
-              className="boss-hp-mob-fill"
-              style={{ width: `${hpPercent}%` }}
-            />
-          </div>
+          <div
+            className="boss-hp-mob-fill"
+            style={{ width: `${hpPercent}%` }}
+          />
         </div>
 
         {/* Layer 0, 1, 2: Sky & Parallax Clouds */}
@@ -1477,6 +1512,152 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           } : null}
           isVictory={defeated}
         />
+
+        {/* Layer 10: Bottom-Middle Plant vs Zombies Style Deadline Progress Bar */}
+        <div
+          className="pvz-deadline-progress-container"
+          style={{
+            position: "absolute",
+            bottom: "12px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 25,
+            width: "min(480px, 52%)",
+            background: "rgba(18, 14, 10, 0.88)",
+            border: "2.5px solid #78350f",
+            borderRadius: "16px",
+            padding: "5px 12px 6px 12px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.6)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "3px",
+            userSelect: "none",
+            pointerEvents: "auto",
+          }}
+          role="progressbar"
+          aria-valuenow={progressPercent}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Project timeline: ${daysRemaining} days remaining`}
+        >
+          {/* Top Info Header */}
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              fontSize: "0.68rem",
+              fontWeight: 800,
+              fontFamily: "var(--font-heading), serif",
+              letterSpacing: "0.04em",
+              color: "#fef08a",
+              textShadow: "0 1px 2px #000",
+            }}
+          >
+            <span>⏳ Day {daysPassed} / {totalDays}</span>
+            <span style={{ color: daysRemaining <= 3 ? "#f87171" : "#86efac" }}>
+              {daysRemaining === 0 ? "⚠️ DEADLINE TODAY!" : `${daysRemaining} DAYS REMAINING`}
+            </span>
+          </div>
+
+          {/* Progress Bar Track */}
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "12px",
+              background: "#1c1917",
+              border: "1.5px solid #92400e",
+              borderRadius: "6px",
+              overflow: "visible",
+            }}
+          >
+            {/* Green Progress Fill */}
+            <div
+              style={{
+                width: `${progressPercent}%`,
+                height: "100%",
+                background: "linear-gradient(to right, #15803d, #22c55e)",
+                borderRadius: "4px",
+                transition: "width 0.4s ease",
+              }}
+            />
+
+            {/* Checkpoint notches for each day */}
+            {totalDays > 1 && totalDays <= 45 && Array.from({ length: totalDays - 1 }).map((_, idx) => {
+              const dayPct = ((idx + 1) / totalDays) * 100;
+              return (
+                <div
+                  key={`day-tick-${idx}`}
+                  style={{
+                    position: "absolute",
+                    left: `${dayPct}%`,
+                    top: "2px",
+                    width: "1.5px",
+                    height: "8px",
+                    background: "rgba(255, 255, 255, 0.25)",
+                    pointerEvents: "none",
+                  }}
+                />
+              );
+            })}
+
+            {/* Milestone Waves Checkpoints (Red Flag Indicators) */}
+            {milestoneCheckpoints.map((mc) => (
+              <div
+                key={mc.id}
+                title={`Wave Milestone: ${mc.title} (Due: ${mc.dueDate})`}
+                style={{
+                  position: "absolute",
+                  left: `${mc.percent}%`,
+                  top: "-15px",
+                  transform: "translateX(-50%)",
+                  fontSize: "12px",
+                  cursor: "help",
+                  filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
+                  zIndex: 2,
+                }}
+              >
+                🚩
+              </div>
+            ))}
+
+            {/* Final Target Destination Crown / Trophy */}
+            <div
+              title={`Final Project Goal: ${deadlineStr}`}
+              style={{
+                position: "absolute",
+                right: "-6px",
+                top: "-15px",
+                fontSize: "12px",
+                cursor: "help",
+                filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
+                zIndex: 2,
+              }}
+            >
+              🏆
+            </div>
+
+            {/* Moving Sword Indicator Head */}
+            <div
+              style={{
+                position: "absolute",
+                left: `${progressPercent}%`,
+                top: "-7px",
+                transform: "translateX(-50%)",
+                fontSize: "14px",
+                pointerEvents: "none",
+                filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.9))",
+                transition: "left 0.4s ease",
+                zIndex: 3,
+              }}
+            >
+              ⚔️
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* =========================================================================

@@ -5665,87 +5665,53 @@ footer {
    MOB-STYLE FLOATING HEALTH BARS WITH OUTLINES
    ========================================================================= */
 
-/* Floating Village HP Bar (placed next to watchtowers) */
+/* Floating Village HP Bar (placed in the center above the village) */
 .village-hp-mob-style {
   position: absolute;
   left: 135px;
   top: 170px;
   transform: translateX(-50%);
   z-index: 15;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 3px 6px;
-  background: #000000;
-  border: 2px solid #ffffff;
+  width: 135px;
+  height: 12px;
+  background: #0f172a;
+  border: 2.5px solid #ffffff;
   border-radius: 4px;
-  width: 95px;
-  pointer-events: none;
-}
-
-.village-hp-percent-label {
-  color: #ffffff;
-  font-size: 0.62rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.village-hp-mob-track {
-  width: 100%;
-  height: 6px;
-  background: #334155;
-  border: 1px solid #ffffff;
-  border-radius: 2px;
   overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
 }
 
 .village-hp-mob-fill {
   height: 100%;
+  transition: width 0.4s ease;
 }
 .village-hp-mob-fill.fill-healthy { background: #22c55e; }
 .village-hp-mob-fill.fill-normal { background: #eab308; }
 .village-hp-mob-fill.fill-damaged { background: #f97316; }
 .village-hp-mob-fill.fill-critical { background: #ef4444; }
 
-/* Floating Dragon HP Bar */
+/* Floating Dragon HP Bar (placed in the center above the dragon) */
 .boss-hp-mob-style {
   position: absolute;
-  top: 90px;
+  top: 85px;
   transform: translateX(-50%);
   z-index: 15;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 3px 6px;
-  background: #000000;
-  border: 2px solid #ffffff;
+  width: 145px;
+  height: 12px;
+  background: #0f172a;
+  border: 2.5px solid #ffffff;
   border-radius: 4px;
-  width: 105px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
   pointer-events: none;
   transition: left 1.2s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.boss-hp-percent-label {
-  color: #ffffff;
-  font-size: 0.62rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.boss-hp-mob-track {
-  width: 100%;
-  height: 6px;
-  background: #334155;
-  border: 1px solid #ffffff;
-  border-radius: 2px;
-  overflow: hidden;
 }
 
 .boss-hp-mob-fill {
   height: 100%;
   background: #ef4444;
+  transition: width 0.4s ease;
 }
 
 /* =========================================================================

@@ -10,9 +10,39 @@ type LandscapeGoblinsProps = {
   goblins: GoblinInfo[];
 };
 
+// Deterministically generate a random clothing color for each goblin that changes every day
+function getGoblinClothingColor(memberId: string) {
+  const today = new Date();
+  const dateSeed = today.getFullYear() * 365 + today.getMonth() * 31 + today.getDate();
+  let hash = dateSeed;
+  for (let i = 0; i < memberId.length; i++) {
+    hash = memberId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const colors = [
+    "#991b1b", // Dark Crimson
+    "#1e3a8a", // Navy Blue
+    "#b45309", // Amber Brown
+    "#4d7c0f", // Forest Olive
+    "#6d28d9", // Regal Purple
+    "#0369a1", // Deep Sky
+    "#be185d", // Magenta Wine
+    "#15803d", // Emerald Green
+    "#c2410c", // Burnt Orange
+    "#475569", // Slate Iron
+  ];
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
+}
+
 export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
   return (
     <div className="landscape-layer layer-6-goblins" aria-label="Daily goblins wave defense">
+      <style>{`
+        @keyframes goblin-breath {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
+        }
+      `}</style>
       <svg viewBox="0 0 1000 400" width="100%" height="100%">
         {/* Right-center middle field face-off zone (x = 490px to 620px) grounded at baseline y = 270px */}
         <g transform="translate(490, 270)">
@@ -20,6 +50,7 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
             const offsetX = index * 45;
             const offsetY = (index % 2) * 12;
             const isGhost = goblin.goblinState === "ghost" || (goblin.isDefeated ?? false);
+            const clothingColor = getGoblinClothingColor(goblin.memberId || goblin.id);
 
             return (
               <g
@@ -27,18 +58,95 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
                 transform={`translate(${offsetX}, ${offsetY})`}
                 className={`goblin-item ${isGhost ? "goblin-ghost-defeated" : "goblin-active-attacking"}`}
                 style={{
-                  opacity: isGhost ? 0.35 : 1,
+                  opacity: isGhost ? 0.38 : 1,
                   filter: isGhost ? "drop-shadow(0 0 6px #60a5fa)" : "none",
                 }}
                 role="img"
                 aria-label={`Goblin wave defense for ${goblin.memberName} (${isGhost ? "Defeated ghost" : "Attacking fence"})`}
               >
-                <use href="#goblin-shape" width="30" height="40" />
+                {/* 1. Ground Shadow (Always visible on floor) */}
+                <ellipse cx="15" cy="38" rx="14" ry="4" fill="rgba(0,0,0,0.22)" stroke="none" />
+
                 {isGhost ? (
-                  <text x="15" y="-6" textAnchor="middle" fill="#93c5fd" fontSize="10" fontWeight="bold">
-                    👻 Slayed
-                  </text>
-                ) : null}
+                  /* =========================================================================
+                     2. DEFEATED / FALLEN APART STATE (Head rolled off, body flat, spear dropped)
+                     ========================================================================= */
+                  <g>
+                    {/* Dropped Spear (Lying horizontally on the ground) */}
+                    <line x1="38" y1="37" x2="8" y2="37" stroke="#78350f" strokeWidth="2" strokeLinecap="round" />
+                    <polygon points="3,37 9,34 9,40" fill="#cbd5e1" stroke="none" />
+
+                    {/* Collapsed Torso / Body lying flat */}
+                    <polygon points="10,32 25,31 23,37 8,36" fill={clothingColor} stroke="none" />
+
+                    {/* Detached Arms */}
+                    <polygon points="4,34 0,38 3,39 7,35" fill="#4f772d" stroke="none" />
+                    <polygon points="26,33 31,36 30,38 25,35" fill="#4f772d" stroke="none" />
+
+                    {/* Rolled Head (Fallen to the side) */}
+                    <circle cx="-2" cy="33" r="6.5" fill="#588157" stroke="none" />
+                    <polygon points="-7,32 -14,28 -6,35" fill="#3a5a40" stroke="none" />
+                    <polygon points="3,32 10,29 4,36" fill="#3a5a40" stroke="none" />
+
+                    {/* Dead X Eyes */}
+                    <line x1="-5" y1="31" x2="-3" y2="33" stroke="#93c5fd" strokeWidth="1.2" strokeLinecap="round" />
+                    <line x1="-3" y1="31" x2="-5" y2="33" stroke="#93c5fd" strokeWidth="1.2" strokeLinecap="round" />
+                    <line x1="-1" y1="31" x2="1" y2="33" stroke="#93c5fd" strokeWidth="1.2" strokeLinecap="round" />
+                    <line x1="1" y1="31" x2="-1" y2="33" stroke="#93c5fd" strokeWidth="1.2" strokeLinecap="round" />
+
+                    {/* Ghost Text */}
+                    <text x="15" y="-4" textAnchor="middle" fill="#93c5fd" fontSize="9" fontWeight="900">
+                      👻 Slayed
+                    </text>
+                  </g>
+                ) : (
+                  /* =========================================================================
+                     3. ACTIVE GOBLIN (Full Body, Pointy Ears, Glowing Eyes, Spear & Breathing)
+                     ========================================================================= */
+                  <g
+                    style={{
+                      animation: "goblin-breath 2s ease-in-out infinite",
+                      animationDelay: `${(index * 0.35) % 2.0}s`,
+                    }}
+                  >
+                    {/* Feet / Boots */}
+                    <rect x="8" y="34" width="4" height="4" rx="1" fill="#1e293b" stroke="none" />
+                    <rect x="18" y="34" width="4" height="4" rx="1" fill="#1e293b" stroke="none" />
+
+                    {/* Body Tunic */}
+                    <polygon points="7,20 23,20 21,34 9,34" fill={clothingColor} stroke="none" />
+                    {/* Belt & Buckle */}
+                    <rect x="8" y="27" width="14" height="2.5" fill="#451a03" stroke="none" />
+                    <rect x="13.5" y="26.5" width="3" height="3.5" fill="#facc15" stroke="none" />
+
+                    {/* Left Arm */}
+                    <polygon points="7,21 2,28 5,30 9,24" fill="#4f772d" stroke="none" />
+
+                    {/* Right Arm (Gripping Weapon) */}
+                    <polygon points="23,21 29,26 27,29 21,24" fill="#4f772d" stroke="none" />
+
+                    {/* Weapon (Spear) */}
+                    <line x1="28" y1="36" x2="28" y2="3" stroke="#78350f" strokeWidth="2" strokeLinecap="round" />
+                    <polygon points="28,-2 24,5 32,5" fill="#e2e8f0" stroke="none" />
+                    <rect x="26.5" y="5" width="3" height="2" fill="#991b1b" stroke="none" />
+
+                    {/* Head & Pointy Ears */}
+                    <circle cx="15" cy="12" r="7" fill="#588157" stroke="none" />
+                    <polygon points="9,10 0,6 8,14" fill="#3a5a40" stroke="none" />
+                    <polygon points="21,10 30,6 22,14" fill="#3a5a40" stroke="none" />
+
+                    {/* Nose */}
+                    <polygon points="15,11 13.5,14 16.5,14" fill="#3a5a40" stroke="none" />
+
+                    {/* Glowing Crimson Eyes */}
+                    <circle cx="12.5" cy="10.5" r="1.3" fill="#ff3333" stroke="none" />
+                    <circle cx="17.5" cy="10.5" r="1.3" fill="#ff3333" stroke="none" />
+
+                    {/* Underbite Fangs */}
+                    <polygon points="13,15 14,15 13.5,17" fill="#ffffff" stroke="none" />
+                    <polygon points="16,15 17,15 16.5,17" fill="#ffffff" stroke="none" />
+                  </g>
+                )}
               </g>
             );
           })}

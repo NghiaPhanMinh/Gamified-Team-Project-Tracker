@@ -18,15 +18,12 @@ export function LandscapeVillage({ villageHpPercent }: LandscapeVillageProps) {
 
   return (
     <div className={`landscape-layer layer-5-village village-tier-${tier}`} aria-label={`Village state: ${villageHpPercent}% HP (${tier})`}>
-      {/* Floating Mob-Style Village HP Bar (No decorative header, just outline border-track and label) */}
+      {/* Floating Mob-Style Village HP Bar (Pure clean big bar hovering above center of village) */}
       <div className="village-hp-mob-style">
-        <span className="village-hp-percent-label">VILLAGE {villageHpPercent}% HP</span>
-        <div className="village-hp-mob-track">
-          <div
-            className={`village-hp-mob-fill fill-${tier}`}
-            style={{ width: `${villageHpPercent}%` }}
-          />
-        </div>
+        <div
+          className={`village-hp-mob-fill fill-${tier}`}
+          style={{ width: `${villageHpPercent}%` }}
+        />
       </div>
 
       <svg viewBox="0 0 1000 400" width="100%" height="100%">
