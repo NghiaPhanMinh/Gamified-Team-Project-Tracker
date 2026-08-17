@@ -156,7 +156,7 @@ const SHAPE_LABELS: Record<string, string> = {
   frontClaw_claw3: "💅 Claw Talon 3",
 };
 
-const LOCAL_STORAGE_KEY = "dragon_editor_config_v2";
+const LOCAL_STORAGE_KEY = "dragon_editor_config_v3";
 
 const DEFAULT_DRAGON_OFFSETS: Record<string, { x: number; y: number; rotate: number; scale?: number }> = {
   "backWing_membrane1": { "x": 0, "y": 0, "rotate": 0 },
