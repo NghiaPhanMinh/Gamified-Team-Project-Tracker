@@ -1,8 +1,9 @@
 type PlayerMember = {
   profileId: string;
   displayName: string;
-  characterFill: string;
-  characterOutline: string;
+  characterFill?: string;
+  characterOutline?: string;
+  spellType?: string;
   isActiveToday: boolean;
   isAttacking?: boolean;
 };
@@ -11,8 +12,58 @@ type LandscapePlayersProps = {
   members: PlayerMember[];
 };
 
+type MageType = "lightning" | "fire" | "ice";
+
+function getMageTheme(spellType?: string, index: number = 0) {
+  let type: MageType = "lightning";
+  if (spellType === "lightning" || spellType === "spark") type = "lightning";
+  else if (spellType === "fire") type = "fire";
+  else if (spellType === "water" || spellType === "ice" || spellType === "nature" || spellType === "shield") type = "ice";
+  else {
+    const types: MageType[] = ["lightning", "fire", "ice"];
+    type = types[index % 3];
+  }
+
+  if (type === "lightning") {
+    return {
+      type,
+      name: "Lightning Mage",
+      robePrimary: "#1e3a8a",
+      trim: "#60a5fa",
+      hat: "#172554",
+      ribbon: "#facc15",
+      orbCore: "#fef08a",
+      orbAccent: "#38bdf8",
+      glowColor: "#fde047",
+    };
+  } else if (type === "fire") {
+    return {
+      type,
+      name: "Fire Mage",
+      robePrimary: "#991b1b",
+      trim: "#ea580c",
+      hat: "#450a0a",
+      ribbon: "#f97316",
+      orbCore: "#ef4444",
+      orbAccent: "#fde047",
+      glowColor: "#f97316",
+    };
+  } else {
+    return {
+      type,
+      name: "Ice Mage",
+      robePrimary: "#0369a1",
+      trim: "#38bdf8",
+      hat: "#0c4a6e",
+      ribbon: "#e0f2fe",
+      orbCore: "#7dd3fc",
+      orbAccent: "#ffffff",
+      glowColor: "#38bdf8",
+    };
+  }
+}
+
 export function LandscapePlayers({ members }: LandscapePlayersProps) {
-  // Left-center middle field zone (x = 320px to 450px), grounded at baseline y = 270px
   const count = Math.max(1, members.length);
   const startX = 320;
   const availableWidth = 130;
@@ -20,14 +71,19 @@ export function LandscapePlayers({ members }: LandscapePlayersProps) {
 
   return (
     <div className="landscape-layer layer-7-players" aria-label="Party members roster">
+      <style>{`
+        @keyframes mage-float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3.5px); }
+        }
+      `}</style>
       <svg viewBox="0 0 1000 400" width="100%" height="100%">
         <g>
           {members.map((member, index) => {
             const offsetX = startX + index * spacing;
-            const offsetY = 270 + (index % 2) * 12;
-            const fill = member.characterFill || "#4ca0fe";
-            const outline = member.characterOutline || "var(--scene-boss-slate)";
+            const offsetY = 265 + (index % 2) * 12;
             const active = member.isActiveToday;
+            const mage = getMageTheme(member.spellType, index);
 
             return (
               <g
@@ -35,19 +91,22 @@ export function LandscapePlayers({ members }: LandscapePlayersProps) {
                 transform={`translate(${offsetX}, ${offsetY})`}
                 className={`player-character ${member.isAttacking ? "is-attacking" : ""}`}
                 role="img"
-                aria-label={`${member.displayName} (${active ? "Active today" : "Idle"})`}
+                aria-label={`${member.displayName} (${mage.name}, ${active ? "Active today" : "Idle"})`}
               >
-                {/* Game ID Tag Pill rendered directly above avatar */}
-                <g transform="translate(15, -14)">
+                {/* 1. Ground Shadow */}
+                <ellipse cx="15" cy="46" rx="14" ry="4.5" fill="rgba(0,0,0,0.22)" stroke="none" />
+
+                {/* 2. Game ID Tag Pill rendered directly above avatar */}
+                <g transform="translate(15, -16)">
                   <rect
                     x="-24"
                     y="-12"
                     width="48"
                     height="15"
                     rx="7.5"
-                    fill="var(--scene-boss-slate)"
-                    stroke="rgba(255, 255, 255, 0.3)"
-                    strokeWidth="1"
+                    fill="#0f172a"
+                    stroke={mage.ribbon}
+                    strokeWidth="1.5"
                   />
                   <text
                     x="0"
@@ -55,48 +114,71 @@ export function LandscapePlayers({ members }: LandscapePlayersProps) {
                     textAnchor="middle"
                     fill="#fff"
                     fontSize="9"
-                    fontWeight="600"
+                    fontWeight="700"
                     fontFamily="sans-serif"
                   >
                     {member.displayName.slice(0, 7)}
                   </text>
                 </g>
 
-                {/* Active glow ring */}
-                {active ? (
-                  <circle
-                    cx="15"
-                    cy="48"
-                    r="12"
-                    fill="none"
-                    stroke="var(--scene-ember-gold)"
-                    strokeWidth="2.5"
-                    opacity="0.85"
-                  />
-                ) : null}
+                {/* 3. Mage Avatar with Idle Floating / Breathing Animation */}
+                <g
+                  style={{
+                    animation: "mage-float 2.2s ease-in-out infinite",
+                    animationDelay: `${(index * 0.4) % 2.0}s`,
+                  }}
+                >
+                  {/* Flowing Wizard Robe */}
+                  <polygon points="6,45 24,45 21,24 9,24" fill={mage.robePrimary} stroke="none" />
+                  {/* Robe Hem Trim */}
+                  <polygon points="5,45 25,45 24,42 6,42" fill={mage.trim} stroke="none" />
+                  {/* Robe Mantle / Cowl */}
+                  <polygon points="7,23 23,23 19,30 11,30" fill={mage.trim} stroke="none" />
+                  {/* Leather Belt & Rune Buckle */}
+                  <rect x="8" y="32" width="14" height="2.5" fill="#1e1b18" stroke="none" />
+                  <rect x="13.5" y="31.5" width="3" height="3.5" fill={mage.ribbon} stroke="none" />
 
-                {/* Head */}
-                <circle cx="15" cy="18" r="9" fill={fill} stroke={outline} strokeWidth="2.5" />
-                {/* Body polygon */}
-                <path
-                  d="M7 45 Q15 32 23 45 Z"
-                  fill={fill}
-                  stroke={outline}
-                  strokeWidth="2.5"
-                />
-                {/* Eyes */}
-                <circle cx="12" cy="17" r="1.2" fill={outline} />
-                <circle cx="18" cy="17" r="1.2" fill={outline} />
+                  {/* Wizard Face */}
+                  <circle cx="15" cy="18" r="6" fill="#fde68a" stroke="none" />
+                  <circle cx="13" cy="18" r="0.9" fill="#0f172a" stroke="none" />
+                  <circle cx="17" cy="18" r="0.9" fill="#0f172a" stroke="none" />
 
-                {/* Active Indicator Crown / Star */}
-                {active ? (
-                  <polygon
-                    points="15,4 17,8 21,8 18,11 19,15 15,13 11,15 12,11 9,8 13,8"
-                    fill="var(--scene-ember-gold)"
-                    stroke="var(--scene-boss-slate)"
-                    strokeWidth="1"
-                  />
-                ) : null}
+                  {/* Conical Wizard Hat */}
+                  {/* Hat Brim */}
+                  <ellipse cx="15" cy="14" rx="13" ry="3.5" fill={mage.hat} stroke="none" />
+                  {/* Hat Cone */}
+                  <polygon points="7,14 15,0 23,14" fill={mage.hat} stroke="none" />
+                  {/* Curved Tip */}
+                  <polygon points="14,2 15,0 18,2 20,4" fill={mage.hat} stroke="none" />
+                  {/* Hat Ribbon */}
+                  <rect x="9" y="11.5" width="12" height="2.5" fill={mage.ribbon} stroke="none" />
+
+                  {/* Wizard Staff */}
+                  {/* Staff Wood Pole */}
+                  <line x1="28" y1="45" x2="28" y2="9" stroke="#78350f" strokeWidth="2" strokeLinecap="round" />
+                  {/* Crystal Claws */}
+                  <polygon points="26,11 28,7 30,11" fill="#b45309" stroke="none" />
+
+                  {/* Elemental Staff Crystal Head */}
+                  {mage.type === "lightning" && (
+                    <g>
+                      <circle cx="28" cy="5" r="4" fill={mage.orbCore} stroke="none" />
+                      <polygon points="28,1 26.5,5 29.5,5 28,9" fill="#eab308" stroke="none" />
+                    </g>
+                  )}
+                  {mage.type === "fire" && (
+                    <g>
+                      <polygon points="28,0 24,7 32,7" fill={mage.orbCore} stroke="none" />
+                      <circle cx="28" cy="5.5" r="2" fill={mage.orbAccent} stroke="none" />
+                    </g>
+                  )}
+                  {mage.type === "ice" && (
+                    <g>
+                      <polygon points="28,0 24,5 28,10 32,5" fill={mage.orbCore} stroke="none" />
+                      <polygon points="28,2 26,5 28,8 30,5" fill="#ffffff" stroke="none" />
+                    </g>
+                  )}
+                </g>
               </g>
             );
           })}

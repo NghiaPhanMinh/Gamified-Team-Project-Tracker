@@ -946,6 +946,18 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [isDraggingPanel, setIsDraggingPanel] = useState(false);
   const dragStartOffset = useRef({ x: 0, y: 0 });
 
+  // Moveable Dragon HP Bar Position
+  const [dragonHpBarPos, setDragonHpBarPos] = useState<{ x: number; y: number }>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.dragonHpBarPos) return parsed.dragonHpBarPos;
+      }
+    } catch {}
+    return { x: 0, y: 0 };
+  });
+
   // Direct Shape Drag and Drop
   const [draggingShapeId, setDraggingShapeId] = useState<string | null>(null);
   const dragShapeStart = useRef({ mouseX: 0, mouseY: 0, shapeX: 0, shapeY: 0 });
@@ -962,10 +974,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       deletedShapes,
       customShapes,
       dragonGeometries,
-      layerOrder
+      layerOrder,
+      dragonHpBarPos,
     };
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(config));
-  }, [dragonOffsets, dragonFills, deletedShapes, customShapes, dragonGeometries, layerOrder]);
+  }, [dragonOffsets, dragonFills, deletedShapes, customShapes, dragonGeometries, layerOrder, dragonHpBarPos]);
 
   // Scroll selected layer stack row into view automatically
   useEffect(() => {
@@ -1212,6 +1225,14 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         text: goblinText,
         imageUrls: goblinImageUrls,
       });
+      const currentMember = state?.members.find((m) => m.profileId === state.currentProfileId);
+      setLocalAttack({
+        id: `goblin_atk_${Date.now()}`,
+        attackerName: currentMember?.displayName || "Adventurer",
+        damage: 100,
+        spellType: currentMember?.spellType || "lightning",
+        target: "goblin",
+      });
       setGoblinText("");
       setGoblinImageInput("");
       setGoblinImageUrls([]);
@@ -1275,23 +1296,44 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         }
 
         const uploadUrl = await generateUploadUrl({ taskId: selectedTaskId });
-        storageId = await uploadFile(uploadUrl, evidenceFile, setUploadProgress);
+        const res = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": evidenceFile.type },
+          body: evidenceFile,
+        });
+
+        if (!res.ok) throw new Error("Failed to upload evidence file.");
+        const json = await res.json();
+        storageId = json.storageId;
       }
 
-      // 3. Add evidence
+      // 3. Submit evidence record
+      const fileName = evidenceFile?.name;
+      const contentType = evidenceFile?.type;
+      const fileSize = evidenceFile?.size;
+
       await addEvidence({
         taskId: selectedTaskId,
         type: evidenceType,
-        note: evidenceNote,
-        url: evidenceType === "link" ? evidenceUrl : undefined,
+        note: evidenceNote.trim() || undefined,
+        url: evidenceUrl.trim() || undefined,
         storageId,
-        fileName: evidenceFile?.name,
-        contentType: evidenceFile?.type,
-        fileSize: evidenceFile?.size,
+        fileName,
+        contentType,
+        fileSize,
       });
 
       // 4. Submit for review
       await submitForReview({ taskId: selectedTaskId });
+
+      const currentMember = state?.members.find((m) => m.profileId === state.currentProfileId);
+      setLocalAttack({
+        id: `boss_atk_${Date.now()}`,
+        attackerName: currentMember?.displayName || "Adventurer",
+        damage: currentTask.damage || 50,
+        spellType: currentMember?.spellType || "fire",
+        target: "dragon",
+      });
 
       // Reset state and close modal
       setSelectedTaskId(null);
@@ -1312,6 +1354,21 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const latestSeenEventId = useRef<string | null>(null);
   const [activeEventId, setActiveEventId] = useState<string | null>(null);
 
+  const [localAttack, setLocalAttack] = useState<{
+    id: string;
+    attackerName: string;
+    damage: number;
+    spellType?: string;
+    target?: "goblin" | "dragon";
+  } | null>(null);
+
+  useEffect(() => {
+    if (localAttack) {
+      const timer = window.setTimeout(() => setLocalAttack(null), 60000);
+      return () => window.clearTimeout(timer);
+    }
+  }, [localAttack]);
+
   useEffect(() => {
     if (!state) return;
     const newest = state.events.at(-1)?._id ?? null;
@@ -1323,7 +1380,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     if (newest && newest !== latestSeenEventId.current) {
       latestSeenEventId.current = newest;
       setActiveEventId(newest);
-      const timer = window.setTimeout(() => setActiveEventId(null), 1800);
+      const timer = window.setTimeout(() => setActiveEventId(null), 60000);
       return () => window.clearTimeout(timer);
     }
   }, [state]);
@@ -1332,6 +1389,20 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     () => state?.events.find((event) => event._id === activeEventId) ?? null,
     [state?.events, activeEventId],
   );
+
+  const combinedActiveEvent = useMemo(() => {
+    if (localAttack) return localAttack;
+    if (activeEvent) {
+      return {
+        id: activeEvent._id,
+        attackerName: activeEvent.attackerName,
+        damage: activeEvent.damage,
+        spellType: activeEvent.spellType,
+        target: "dragon" as const,
+      };
+    }
+    return null;
+  }, [localAttack, activeEvent]);
 
   const goblins = useMemo(() => {
     if (!state) return [];
@@ -1351,10 +1422,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       displayName: member.displayName,
       characterFill: member.characterFill,
       characterOutline: member.characterOutline,
+      spellType: member.spellType,
       isActiveToday: member.hasSubmittedToday,
-      isAttacking: activeEvent?.attackerProfileId === member.profileId,
+      isAttacking: (combinedActiveEvent?.attackerName === member.displayName || activeEvent?.attackerProfileId === member.profileId),
     }));
-  }, [state, activeEvent]);
+  }, [state, activeEvent, combinedActiveEvent]);
 
   const startStr = workspace?.project?.startDate || (state?.project?.launchedAt ? new Date(state.project.launchedAt).toISOString().split("T")[0] : "");
   const deadlineStr = workspace?.project?.deadline || state?.project?.deadline || "";
@@ -1457,11 +1529,12 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           ⚔️<br />Attack
         </button>
 
-        {/* Floating Mob-Style Boss HP Bar (Pure clean big bar hovering above center of dragon) */}
+        {/* Floating Mob-Style Boss HP Bar (Intimidating flame outline + moveable position) */}
         <div
           className="boss-hp-mob-style"
           style={{
-            left: `${Math.min(92, Math.max(8, (dragonX / 10) - 2.5))}%`
+            left: `calc(${Math.min(92, Math.max(8, (dragonX / 10) - 2.5))}% + ${dragonHpBarPos.x}px)`,
+            top: `calc(85px + ${dragonHpBarPos.y}px)`,
           }}
         >
           <div
@@ -1502,14 +1575,9 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           layerOrder={layerOrder}
         />
 
-        {/* Layer 9: Section 2 - Cosmetic Combat Exchange (50% Opacity Background Burst) */}
+        {/* Layer 9: Section 2 - Cosmetic Combat Exchange & Elemental Attacks */}
         <LandscapeFX
-          activeEvent={activeEvent ? {
-            id: activeEvent._id,
-            attackerName: activeEvent.attackerName,
-            damage: activeEvent.damage,
-            spellType: activeEvent.spellType,
-          } : null}
+          activeEvent={combinedActiveEvent}
           isVictory={defeated}
         />
 
@@ -1527,7 +1595,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             border: "2.5px solid #78350f",
             borderRadius: "16px",
             padding: "5px 12px 6px 12px",
-            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.6)",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -1701,6 +1768,67 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   </tbody>
                 </table>
               )}
+
+              {/* Dedicated Scrollable Combat & Kill Log Box */}
+              <div style={{ marginTop: "14px", borderTop: "2px dashed #b45309", paddingTop: "10px" }}>
+                <h4 style={{ margin: "0 0 6px 0", fontSize: "0.85rem", color: "#78350f", fontFamily: "var(--font-heading), serif", display: "flex", alignItems: "center", gap: "6px" }}>
+                  ⚔️ Combat & Kill Activity Log
+                </h4>
+                <div
+                  style={{
+                    maxHeight: "140px",
+                    overflowY: "auto",
+                    background: "rgba(0, 0, 0, 0.05)",
+                    border: "1.5px solid #d97706",
+                    borderRadius: "6px",
+                    padding: "6px 8px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "5px",
+                    fontSize: "0.72rem",
+                  }}
+                >
+                  {!state?.events || state.events.length === 0 ? (
+                    <p style={{ margin: 0, textAlign: "center", color: "#78350f", fontStyle: "italic", padding: "8px 0" }}>
+                      No registered attacks yet. Slay goblins or strike the dragon to log damage!
+                    </p>
+                  ) : (
+                    [...state.events].reverse().map((ev) => {
+                      const isGoblin = (ev.damage ?? 0) >= 100 || ev.taskTitle.toLowerCase().includes("goblin") || ev.taskTitle.toLowerCase().includes("daily");
+                      const spellIcon = ev.spellType === "fire" ? "🔥" : ev.spellType === "lightning" || ev.spellType === "spark" ? "⚡" : "❄️";
+                      return (
+                        <div
+                          key={ev._id}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            padding: "4px 8px",
+                            background: "#fffbeb",
+                            border: "1px solid #fef3c7",
+                            borderRadius: "4px",
+                          }}
+                        >
+                          <div>
+                            <strong style={{ color: "#92400e" }}>{ev.attackerName}</strong>
+                            <span style={{ color: "#475569", marginLeft: "4px" }}>
+                              cast {spellIcon} on <strong>{isGoblin ? "👹 Goblin" : "🐲 Dragon"}</strong> ({ev.taskTitle})
+                            </span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ fontWeight: 800, color: "#dc2626" }}>
+                              -{ev.damage} HP
+                            </span>
+                            <span style={{ fontSize: "0.62rem", color: "#64748b" }}>
+                              {new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "numeric", month: "short", day: "numeric" }).format(ev.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
             </div>
             <button className="rpg-btn-close" type="button" onClick={() => setShowLeaderboardModal(false)}>
               Close Board
@@ -2580,6 +2708,33 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               })()}
             </div>
 
+            {/* Dragon Boss HP Bar Position Controls */}
+            <div style={{ padding: "8px 12px", background: "#0f172a", borderTop: "1px solid #334155", display: "grid", gap: "6px" }}>
+              <div style={{ fontSize: "0.72rem", fontWeight: "bold", color: "#f97316", display: "flex", alignItems: "center", gap: "4px" }}>
+                🔥 Dragon Boss HP Bar Position
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                  Offset X (px):
+                  <input
+                    type="number"
+                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                    value={dragonHpBarPos.x}
+                    onChange={(e) => setDragonHpBarPos((prev) => ({ ...prev, x: parseInt(e.target.value) || 0 }))}
+                  />
+                </label>
+                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                  Offset Y (px):
+                  <input
+                    type="number"
+                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                    value={dragonHpBarPos.y}
+                    onChange={(e) => setDragonHpBarPos((prev) => ({ ...prev, y: parseInt(e.target.value) || 0 }))}
+                  />
+                </label>
+              </div>
+            </div>
+
             {/* Code exporter and helper actions */}
             <div className="rpg-admin-actions">
               <button
@@ -2593,10 +2748,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     customShapes,
                     dragonGeometries,
                     layerOrder,
+                    dragonHpBarPos,
                   };
                   const codeStr = JSON.stringify(exportData, null, 2);
                   navigator.clipboard.writeText(codeStr);
-                  alert("Copied full layout, geometries, fills & custom shapes config to clipboard!");
+                  alert("Copied full layout, geometries, fills, HP bar pos & custom shapes config to clipboard!");
                 }}
               >
                 📋 Copy Layout & Shapes Config
@@ -2612,6 +2768,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     setCustomShapes(DEFAULT_CUSTOM_SHAPES);
                     setDragonGeometries(DEFAULT_DRAGON_GEOMETRIES);
                     setLayerOrder(DEFAULT_LAYER_ORDER);
+                    setDragonHpBarPos({ x: 0, y: 0 });
                     setSelectedDragonPart(null);
                     pushHistoryState(
                       DEFAULT_DRAGON_OFFSETS,

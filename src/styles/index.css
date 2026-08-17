@@ -5678,7 +5678,6 @@ footer {
   border: 2.5px solid #ffffff;
   border-radius: 4px;
   overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
   pointer-events: none;
 }
 
@@ -5691,26 +5690,32 @@ footer {
 .village-hp-mob-fill.fill-damaged { background: #f97316; }
 .village-hp-mob-fill.fill-critical { background: #ef4444; }
 
-/* Floating Dragon HP Bar (placed in the center above the dragon) */
+/* Floating Dragon HP Bar (intimidating flame animated outline) */
+@keyframes dragon-hp-flame-border {
+  0%, 100% { border-color: #ef4444; }
+  33% { border-color: #f97316; }
+  66% { border-color: #fde047; }
+}
+
 .boss-hp-mob-style {
   position: absolute;
   top: 85px;
   transform: translateX(-50%);
   z-index: 15;
-  width: 145px;
-  height: 12px;
-  background: #0f172a;
-  border: 2.5px solid #ffffff;
+  width: 160px;
+  height: 14px;
+  background: #090d16;
+  border: 2.5px solid #ef4444;
   border-radius: 4px;
   overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
   pointer-events: none;
+  animation: dragon-hp-flame-border 1.2s ease-in-out infinite;
   transition: left 1.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .boss-hp-mob-fill {
   height: 100%;
-  background: #ef4444;
+  background: linear-gradient(to right, #991b1b, #dc2626, #f97316);
   transition: width 0.4s ease;
 }
 

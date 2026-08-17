@@ -80,19 +80,24 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
                     <polygon points="10,32 25,31 23,37 8,36" fill={clothingColor} stroke="none" />
 
                     {/* Detached Arms */}
-                    <polygon points="4,34 0,38 3,39 7,35" fill="#4f772d" stroke="none" />
-                    <polygon points="26,33 31,36 30,38 25,35" fill="#4f772d" stroke="none" />
+                    <polygon points="4,34 0,38 3,39 7,35" fill="#a3e635" stroke="none" />
+                    <polygon points="26,33 31,36 30,38 25,35" fill="#a3e635" stroke="none" />
 
                     {/* Rolled Head (Fallen to the side) */}
-                    <circle cx="-2" cy="33" r="6.5" fill="#588157" stroke="none" />
-                    <polygon points="-7,32 -14,28 -6,35" fill="#3a5a40" stroke="none" />
-                    <polygon points="3,32 10,29 4,36" fill="#3a5a40" stroke="none" />
+                    <circle cx="-2" cy="33" r="6.5" fill="#bef264" stroke="none" />
+                    <polygon points="-7,32 -14,28 -6,35" fill="#65a30d" stroke="none" />
+                    <polygon points="3,32 10,29 4,36" fill="#65a30d" stroke="none" />
 
                     {/* Dead X Eyes */}
-                    <line x1="-5" y1="31" x2="-3" y2="33" stroke="#93c5fd" strokeWidth="1.2" strokeLinecap="round" />
-                    <line x1="-3" y1="31" x2="-5" y2="33" stroke="#93c5fd" strokeWidth="1.2" strokeLinecap="round" />
-                    <line x1="-1" y1="31" x2="1" y2="33" stroke="#93c5fd" strokeWidth="1.2" strokeLinecap="round" />
-                    <line x1="1" y1="31" x2="-1" y2="33" stroke="#93c5fd" strokeWidth="1.2" strokeLinecap="round" />
+                    <line x1="-5" y1="31" x2="-3" y2="33" stroke="#38bdf8" strokeWidth="1.2" strokeLinecap="round" />
+                    <line x1="-3" y1="31" x2="-5" y2="33" stroke="#38bdf8" strokeWidth="1.2" strokeLinecap="round" />
+                    <line x1="-1" y1="31" x2="1" y2="33" stroke="#38bdf8" strokeWidth="1.2" strokeLinecap="round" />
+                    <line x1="1" y1="31" x2="-1" y2="33" stroke="#38bdf8" strokeWidth="1.2" strokeLinecap="round" />
+
+                    {/* Persistent Elemental Ice/Burn Shards on defeated goblin */}
+                    <polygon points="-8,25 -2,20 2,26" fill="#7dd3fc" opacity="0.8" stroke="none" />
+                    <polygon points="12,28 18,22 22,30" fill="#bae6fd" opacity="0.85" stroke="none" />
+                    <polygon points="28,30 34,25 36,32" fill="#38bdf8" opacity="0.75" stroke="none" />
 
                     {/* Ghost Text */}
                     <text x="15" y="-4" textAnchor="middle" fill="#93c5fd" fontSize="9" fontWeight="900">
@@ -101,7 +106,7 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
                   </g>
                 ) : (
                   /* =========================================================================
-                     3. ACTIVE GOBLIN (Full Body, Pointy Ears, Glowing Eyes, Spear & Breathing)
+                     3. ACTIVE GOBLIN (High Contrast Lime Skin, Pointy Ears, Glowing Eyes, Spear & Breathing)
                      ========================================================================= */
                   <g
                     style={{
@@ -110,8 +115,8 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
                     }}
                   >
                     {/* Feet / Boots */}
-                    <rect x="8" y="34" width="4" height="4" rx="1" fill="#1e293b" stroke="none" />
-                    <rect x="18" y="34" width="4" height="4" rx="1" fill="#1e293b" stroke="none" />
+                    <rect x="8" y="34" width="4" height="4" rx="1" fill="#0f172a" stroke="none" />
+                    <rect x="18" y="34" width="4" height="4" rx="1" fill="#0f172a" stroke="none" />
 
                     {/* Body Tunic */}
                     <polygon points="7,20 23,20 21,34 9,34" fill={clothingColor} stroke="none" />
@@ -120,27 +125,27 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
                     <rect x="13.5" y="26.5" width="3" height="3.5" fill="#facc15" stroke="none" />
 
                     {/* Left Arm */}
-                    <polygon points="7,21 2,28 5,30 9,24" fill="#4f772d" stroke="none" />
+                    <polygon points="7,21 2,28 5,30 9,24" fill="#a3e635" stroke="none" />
 
                     {/* Right Arm (Gripping Weapon) */}
-                    <polygon points="23,21 29,26 27,29 21,24" fill="#4f772d" stroke="none" />
+                    <polygon points="23,21 29,26 27,29 21,24" fill="#a3e635" stroke="none" />
 
                     {/* Weapon (Spear) */}
                     <line x1="28" y1="36" x2="28" y2="3" stroke="#78350f" strokeWidth="2" strokeLinecap="round" />
-                    <polygon points="28,-2 24,5 32,5" fill="#e2e8f0" stroke="none" />
-                    <rect x="26.5" y="5" width="3" height="2" fill="#991b1b" stroke="none" />
+                    <polygon points="28,-2 24,5 32,5" fill="#f8fafc" stroke="none" />
+                    <rect x="26.5" y="5" width="3" height="2" fill="#dc2626" stroke="none" />
 
-                    {/* Head & Pointy Ears */}
-                    <circle cx="15" cy="12" r="7" fill="#588157" stroke="none" />
-                    <polygon points="9,10 0,6 8,14" fill="#3a5a40" stroke="none" />
-                    <polygon points="21,10 30,6 22,14" fill="#3a5a40" stroke="none" />
+                    {/* Head & Pointy Ears (High Contrast Vibrant Chartreuse) */}
+                    <circle cx="15" cy="12" r="7" fill="#bef264" stroke="none" />
+                    <polygon points="9,10 0,6 8,14" fill="#65a30d" stroke="none" />
+                    <polygon points="21,10 30,6 22,14" fill="#65a30d" stroke="none" />
 
                     {/* Nose */}
-                    <polygon points="15,11 13.5,14 16.5,14" fill="#3a5a40" stroke="none" />
+                    <polygon points="15,11 13.5,14 16.5,14" fill="#65a30d" stroke="none" />
 
                     {/* Glowing Crimson Eyes */}
-                    <circle cx="12.5" cy="10.5" r="1.3" fill="#ff3333" stroke="none" />
-                    <circle cx="17.5" cy="10.5" r="1.3" fill="#ff3333" stroke="none" />
+                    <circle cx="12.5" cy="10.5" r="1.3" fill="#ff0033" stroke="none" />
+                    <circle cx="17.5" cy="10.5" r="1.3" fill="#ff0033" stroke="none" />
 
                     {/* Underbite Fangs */}
                     <polygon points="13,15 14,15 13.5,17" fill="#ffffff" stroke="none" />
