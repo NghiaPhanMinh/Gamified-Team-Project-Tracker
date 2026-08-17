@@ -241,6 +241,8 @@ export function LandscapeDragon({
       ry: s.ry,
       width: s.width,
       height: s.height,
+      x: s.x,
+      y: s.y,
     } as OriginalShape]));
 
     // If layerOrder is empty, fallback to original shapes order
@@ -257,6 +259,19 @@ export function LandscapeDragon({
     const isSelected = selectedPart === shapeId;
     const offset = offsets[shapeId] || { x: 0, y: 0, rotate: 0, scale: 1 };
     const scaleVal = offset.scale ?? 1;
+
+    let tx = offset.x;
+    let ty = offset.y;
+    let baseRot = 0;
+
+    if (shapeId.startsWith("custom_")) {
+      const customShapeObj = customShapes.find(s => s.id === shapeId);
+      if (customShapeObj) {
+        tx += customShapeObj.x;
+        ty += customShapeObj.y;
+        baseRot += customShapeObj.rotate ?? 0;
+      }
+    }
     
     return {
       fill: fills[shapeId] ?? defaultFill,
@@ -280,7 +295,7 @@ export function LandscapeDragon({
       },
       stroke: isSelected ? "#ffd700" : defaultStroke,
       strokeWidth: isSelected ? 3 : defaultStrokeWidth,
-      transform: `translate(${offset.x}, ${offset.y}) rotate(${offset.rotate ?? 0}) scale(${scaleVal})`,
+      transform: `translate(${tx}, ${ty}) rotate(${(offset.rotate ?? 0) + baseRot}) scale(${scaleVal})`,
     };
   }
 
@@ -389,7 +404,18 @@ export function LandscapeDragon({
                 // Render both the shape and its blue drag handles on top
                 const offset = offsets[shape.id] || { x: 0, y: 0, rotate: 0, scale: 1 };
                 const scaleVal = offset.scale ?? 1;
-                const baseTransform = `translate(${offset.x}, ${offset.y}) rotate(${offset.rotate ?? 0}) scale(${scaleVal})`;
+
+                let tx = offset.x;
+                let ty = offset.y;
+                let baseRot = 0;
+
+                if (shape.id.startsWith("custom_")) {
+                  tx += shape.x ?? 0;
+                  ty += shape.y ?? 0;
+                  baseRot += (shape as any).rotate ?? 0;
+                }
+
+                const baseTransform = `translate(${tx}, ${ty}) rotate(${((offset.rotate ?? 0) + baseRot)}) scale(${scaleVal})`;
 
                 return (
                   <g key={shape.id}>

@@ -429,6 +429,139 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     return savedConfig?.layerOrder || DEFAULT_LAYER_ORDER;
   });
 
+  // Undo/Redo history states
+  const [history, setHistory] = useState<any[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+
+  // Initialize history stack on load
+  useEffect(() => {
+    if (history.length === 0) {
+      const initialSnapshot = {
+        dragonOffsets: JSON.parse(JSON.stringify(dragonOffsets)),
+        dragonFills: JSON.parse(JSON.stringify(dragonFills)),
+        deletedShapes: JSON.parse(JSON.stringify(deletedShapes)),
+        customShapes: JSON.parse(JSON.stringify(customShapes)),
+        dragonGeometries: JSON.parse(JSON.stringify(dragonGeometries)),
+        layerOrder: JSON.parse(JSON.stringify(layerOrder)),
+      };
+      setHistory([initialSnapshot]);
+      setHistoryIndex(0);
+    }
+  }, []);
+
+  function pushHistoryState(
+    offsets = dragonOffsets,
+    fills = dragonFills,
+    deleted = deletedShapes,
+    customs = customShapes,
+    geoms = dragonGeometries,
+    order = layerOrder
+  ) {
+    const snapshot = {
+      dragonOffsets: JSON.parse(JSON.stringify(offsets)),
+      dragonFills: JSON.parse(JSON.stringify(fills)),
+      deletedShapes: JSON.parse(JSON.stringify(deleted)),
+      customShapes: JSON.parse(JSON.stringify(customs)),
+      dragonGeometries: JSON.parse(JSON.stringify(geoms)),
+      layerOrder: JSON.parse(JSON.stringify(order)),
+    };
+    
+    setHistory((prev) => {
+      const sliced = prev.slice(0, historyIndex + 1);
+      return [...sliced, snapshot];
+    });
+    setHistoryIndex((prev) => prev + 1);
+  }
+
+  function handleUndo() {
+    if (historyIndex > 0) {
+      const newIdx = historyIndex - 1;
+      const snapshot = history[newIdx];
+      
+      setDragonOffsets(snapshot.dragonOffsets);
+      setDragonFills(snapshot.dragonFills);
+      setDeletedShapes(snapshot.deletedShapes);
+      setCustomShapes(snapshot.customShapes);
+      setDragonGeometries(snapshot.dragonGeometries);
+      setLayerOrder(snapshot.layerOrder);
+      setHistoryIndex(newIdx);
+    }
+  }
+
+  function handleRedo() {
+    if (historyIndex < history.length - 1) {
+      const newIdx = historyIndex + 1;
+      const snapshot = history[newIdx];
+      
+      setDragonOffsets(snapshot.dragonOffsets);
+      setDragonFills(snapshot.dragonFills);
+      setDeletedShapes(snapshot.deletedShapes);
+      setCustomShapes(snapshot.customShapes);
+      setDragonGeometries(snapshot.dragonGeometries);
+      setLayerOrder(snapshot.layerOrder);
+      setHistoryIndex(newIdx);
+    }
+  }
+
+  function handleDuplicateShape(targetId: string) {
+    const id = `custom_${Date.now()}`;
+    const isCustom = targetId.startsWith("custom_");
+    const origShape = DRAGON_ORIGINAL_SHAPES.find(s => s.id === targetId);
+    const custShape = customShapes.find(s => s.id === targetId);
+    
+    if (!origShape && !custShape) return;
+    
+    const baseType = isCustom ? custShape!.type : origShape!.type;
+    const baseFill = dragonFills[targetId] || (isCustom ? custShape!.fill : origShape!.defaultFill);
+    const baseGeom = dragonGeometries[targetId] || (isCustom ? (custShape!.d || custShape!.points) : (origShape!.d || origShape!.points)) || "";
+    const targetOffset = dragonOffsets[targetId] || { x: 0, y: 0, rotate: 0, scale: 1 };
+    
+    const dupShape = {
+      id,
+      name: `✨ Duplicate of ${isCustom ? custShape!.name : origShape!.name}`,
+      type: baseType,
+      fill: baseFill,
+      x: isCustom ? custShape!.x : 150,
+      y: isCustom ? custShape!.y : 150,
+      width: isCustom ? (custShape!.width ?? 40) : (origShape!.width ?? 40),
+      height: isCustom ? (custShape!.height ?? 30) : (origShape!.height ?? 30),
+      rx: isCustom ? (custShape!.rx ?? 0) : (origShape!.rx ?? 0),
+      ry: isCustom ? (custShape!.ry ?? 0) : (origShape!.ry ?? 0),
+      points: baseGeom,
+      d: baseGeom,
+      rotate: targetOffset.rotate,
+    };
+    
+    const nextOffsets = {
+      ...dragonOffsets,
+      [id]: {
+        x: targetOffset.x + 25,
+        y: targetOffset.y + 25,
+        rotate: targetOffset.rotate,
+        scale: targetOffset.scale ?? 1,
+      }
+    };
+    
+    const nextCustoms = [...customShapes, dupShape];
+    const nextGeoms = { ...dragonGeometries, [id]: baseGeom };
+    
+    const nextOrder = [...layerOrder];
+    const targetIdx = nextOrder.indexOf(targetId);
+    if (targetIdx !== -1) {
+      nextOrder.splice(targetIdx + 1, 0, id);
+    } else {
+      nextOrder.unshift(id);
+    }
+    
+    setDragonOffsets(nextOffsets);
+    setCustomShapes(nextCustoms);
+    setDragonGeometries(nextGeoms);
+    setLayerOrder(nextOrder);
+    setSelectedDragonPart(id);
+    
+    pushHistoryState(nextOffsets, dragonFills, deletedShapes, nextCustoms, nextGeoms, nextOrder);
+  }
+
   const [selectedDragonPart, setSelectedDragonPart] = useState<string | null>(null);
   const [showDragonEditor, setShowDragonEditor] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
@@ -510,6 +643,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       newOrder[idx] = newOrder[idx + 1];
       newOrder[idx + 1] = temp;
       setLayerOrder(newOrder);
+      pushHistoryState(dragonOffsets, dragonFills, deletedShapes, customShapes, dragonGeometries, newOrder);
     }
   }
 
@@ -521,6 +655,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       newOrder[idx] = newOrder[idx - 1];
       newOrder[idx - 1] = temp;
       setLayerOrder(newOrder);
+      pushHistoryState(dragonOffsets, dragonFills, deletedShapes, customShapes, dragonGeometries, newOrder);
     }
   }
 
@@ -532,6 +667,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     const [item] = newOrder.splice(currentIdx, 1);
     newOrder.splice(validatedIdx, 0, item);
     setLayerOrder(newOrder);
+    pushHistoryState(dragonOffsets, dragonFills, deletedShapes, customShapes, dragonGeometries, newOrder);
   }
 
   // Effect to drag Panel, drag individual shapes, and drag nodes
@@ -604,6 +740,9 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     }
 
     function handleMouseUp() {
+      if (draggingShapeId || draggingNode) {
+        pushHistoryState();
+      }
       setIsDraggingPanel(false);
       setDraggingShapeId(null);
       setDraggingNode(null);
@@ -636,13 +775,25 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       d: "M -15 -15 L 15 15",
       rotate: 0,
     };
-    setDragonOffsets((prev) => ({
-      ...prev,
-      [id]: { x: 0, y: 0, rotate: 0, scale: 1 },
-    }));
-    setCustomShapes((prev) => [...prev, newShape]);
-    setLayerOrder((prev) => [id, ...prev]);
+    
+    const nextOffsets = {
+      ...dragonOffsets,
+      [id]: { x: 0, y: 0, rotate: 0, scale: 1 }
+    };
+    const nextCustoms = [...customShapes, newShape];
+    const nextGeoms = {
+      ...dragonGeometries,
+      [id]: spawnerType === "polygon" ? "0,-15 15,15 -15,15" : (spawnerType === "path" ? "M -15 -15 L 15 15" : "")
+    };
+    const nextOrder = [id, ...layerOrder];
+
+    setDragonOffsets(nextOffsets);
+    setCustomShapes(nextCustoms);
+    setDragonGeometries(nextGeoms);
+    setLayerOrder(nextOrder);
     setSelectedDragonPart(id);
+
+    pushHistoryState(nextOffsets, dragonFills, deletedShapes, nextCustoms, nextGeoms, nextOrder);
   }
 
   // Derive eligible reviewers (teammates who are not the current user)
@@ -1437,17 +1588,41 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           </div>
           
           <div className="rpg-admin-body">
-            {/* Toggle Animation control */}
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px", background: "#0f172a", padding: "8px", borderRadius: "4px" }}>
-              <input
-                id="toggle-anim"
-                type="checkbox"
-                checked={animationsEnabled}
-                onChange={(e) => setAnimationsEnabled(e.target.checked)}
-              />
-              <label htmlFor="toggle-anim" style={{ fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer", color: "#38bdf8" }}>
-                Enable Flapping/Hover
-              </label>
+            {/* Toggle Animation & History controls */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginBottom: "10px", background: "#0f172a", padding: "8px", borderRadius: "4px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <input
+                  id="toggle-anim"
+                  type="checkbox"
+                  checked={animationsEnabled}
+                  onChange={(e) => setAnimationsEnabled(e.target.checked)}
+                />
+                <label htmlFor="toggle-anim" style={{ fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer", color: "#38bdf8" }}>
+                  Flapping
+                </label>
+              </div>
+              <div style={{ display: "flex", gap: "6px" }}>
+                <button
+                  type="button"
+                  className="rpg-dpad-btn"
+                  style={{ padding: "2px 8px", fontSize: "0.7rem", opacity: historyIndex > 0 ? 1 : 0.4, cursor: historyIndex > 0 ? "pointer" : "not-allowed" }}
+                  onClick={handleUndo}
+                  disabled={historyIndex <= 0}
+                  title="Undo last change"
+                >
+                  ↩️ Undo
+                </button>
+                <button
+                  type="button"
+                  className="rpg-dpad-btn"
+                  style={{ padding: "2px 8px", fontSize: "0.7rem", opacity: historyIndex < history.length - 1 ? 1 : 0.4, cursor: historyIndex < history.length - 1 ? "pointer" : "not-allowed" }}
+                  onClick={handleRedo}
+                  disabled={historyIndex >= history.length - 1}
+                  title="Redo next change"
+                >
+                  ↪️ Redo
+                </button>
+              </div>
             </div>
 
             {/* Custom Shape Spawner */}
@@ -1570,10 +1745,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                               className="rpg-dpad-btn"
                               style={{ width: "24px", padding: "2px 0" }}
                               onClick={() => {
-                                setDragonOffsets((prev) => ({
-                                  ...prev,
-                                  [layerId]: { ...prev[layerId], rotate: ((prev[layerId]?.rotate ?? 0) - 5) % 360 }
-                                }));
+                                const nextVal = ((offset.rotate ?? 0) - 5) % 360;
+                                const nextOffsets = {
+                                  ...dragonOffsets,
+                                  [layerId]: { ...offset, rotate: nextVal }
+                                };
+                                setDragonOffsets(nextOffsets);
+                                pushHistoryState(nextOffsets);
                               }}
                               title="Rotate CCW 5°"
                             >
@@ -1584,10 +1762,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                               className="rpg-dpad-btn"
                               style={{ width: "24px", padding: "2px 0" }}
                               onClick={() => {
-                                setDragonOffsets((prev) => ({
-                                  ...prev,
-                                  [layerId]: { ...prev[layerId], rotate: ((prev[layerId]?.rotate ?? 0) + 5) % 360 }
-                                }));
+                                const nextVal = ((offset.rotate ?? 0) + 5) % 360;
+                                const nextOffsets = {
+                                  ...dragonOffsets,
+                                  [layerId]: { ...offset, rotate: nextVal }
+                                };
+                                setDragonOffsets(nextOffsets);
+                                pushHistoryState(nextOffsets);
                               }}
                               title="Rotate CW 5°"
                             >
@@ -1801,22 +1982,40 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                             );
                           })()}
 
+                          {/* Duplicate Element Action */}
+                          <button
+                            type="button"
+                            className="rpg-admin-action-btn"
+                            style={{ background: "#4f46e5", padding: "4px", fontSize: "0.65rem", marginTop: "8px", width: "100%" }}
+                            onClick={() => handleDuplicateShape(layerId)}
+                          >
+                            👯 Duplicate Object
+                          </button>
+
                           {/* Delete Element Action */}
                           <button
                             type="button"
                             className="rpg-admin-action-btn reset"
                             style={{ background: "#b91c1c", padding: "4px", fontSize: "0.65rem", marginTop: "8px", width: "100%" }}
                             onClick={() => {
+                              let nextCustoms = customShapes;
+                              let nextOrder = layerOrder;
+                              let nextDeleted = deletedShapes;
+
                               if (layerId.startsWith("custom_")) {
-                                setCustomShapes((prev) => prev.filter((s) => s.id !== layerId));
-                                setLayerOrder((prev) => prev.filter((id) => id !== layerId));
+                                nextCustoms = customShapes.filter((s) => s.id !== layerId);
+                                nextOrder = layerOrder.filter((id) => id !== layerId);
+                                setCustomShapes(nextCustoms);
+                                setLayerOrder(nextOrder);
                               } else {
-                                setDeletedShapes((prev) => ({
-                                  ...prev,
+                                nextDeleted = {
+                                  ...deletedShapes,
                                   [layerId]: true,
-                                }));
+                                };
+                                setDeletedShapes(nextDeleted);
                               }
                               setSelectedDragonPart(null);
+                              pushHistoryState(dragonOffsets, dragonFills, nextDeleted, nextCustoms, dragonGeometries, nextOrder);
                             }}
                           >
                             🗑️ Delete Object
@@ -1862,6 +2061,14 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     setDragonGeometries(DEFAULT_DRAGON_GEOMETRIES);
                     setLayerOrder(DEFAULT_LAYER_ORDER);
                     setSelectedDragonPart(null);
+                    pushHistoryState(
+                      DEFAULT_DRAGON_OFFSETS,
+                      DEFAULT_DRAGON_FILLS,
+                      DEFAULT_DELETED_SHAPES,
+                      DEFAULT_CUSTOM_SHAPES,
+                      DEFAULT_DRAGON_GEOMETRIES,
+                      DEFAULT_LAYER_ORDER
+                    );
                   }
                 }}
               >
