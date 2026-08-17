@@ -11,7 +11,7 @@ import { LandscapeTerrain } from "./landscape/LandscapeTerrain";
 import { LandscapeVillage } from "./landscape/LandscapeVillage";
 import { LandscapeGoblins } from "./landscape/LandscapeGoblins";
 import { LandscapePlayers } from "./landscape/LandscapePlayers";
-import { LandscapeDragon } from "./landscape/LandscapeDragon";
+import { LandscapeDragon, DRAGON_ORIGINAL_SHAPES, parseCoordinates } from "./landscape/LandscapeDragon";
 import { LandscapeFX } from "./landscape/LandscapeFX";
 
 type BattleSceneProps = { projectId: Id<"projects">; currentPhase?: string; tasksLocked?: boolean };
@@ -156,6 +156,213 @@ const SHAPE_LABELS: Record<string, string> = {
   frontClaw_claw3: "💅 Claw Talon 3",
 };
 
+const LOCAL_STORAGE_KEY = "dragon_editor_config_v2";
+
+const DEFAULT_DRAGON_OFFSETS: Record<string, { x: number; y: number; rotate: number; scale?: number }> = {
+  "backWing_membrane1": { "x": 0, "y": 0, "rotate": 0 },
+  "backWing_membrane2": { "x": 0, "y": 0, "rotate": 0 },
+  "backWing_membrane3": { "x": 0, "y": 0, "rotate": 0 },
+  "backWing_strut1": { "x": 0, "y": 0, "rotate": 0 },
+  "backWing_strut2": { "x": 0, "y": 0, "rotate": 0 },
+  "backWing_joint": { "x": 0, "y": 0, "rotate": 0 },
+  "backWing_claw": { "x": 0, "y": 0, "rotate": 0 },
+  "frontWing_membrane1": { "x": 0, "y": 0, "rotate": 0 },
+  "frontWing_membrane2": { "x": 0, "y": 0, "rotate": 0 },
+  "frontWing_membrane3": { "x": 0, "y": 0, "rotate": 0 },
+  "frontWing_strut1": { "x": 0, "y": 0, "rotate": 0 },
+  "frontWing_strut2": { "x": 0, "y": 0, "rotate": 0 },
+  "frontWing_joint": { "x": 0, "y": 0, "rotate": 0 },
+  "frontWing_claw": { "x": 0, "y": 0, "rotate": 0 },
+  "tail_seg1": { "x": 0, "y": 0, "rotate": 0 },
+  "tail_seg2": { "x": 0, "y": 0, "rotate": 0 },
+  "tail_seg3": { "x": 0, "y": 0, "rotate": 0 },
+  "tail_shadow": { "x": 64, "y": 32, "rotate": 0 },
+  "tail_barb1": { "x": 16, "y": -6, "rotate": 0 },
+  "tail_barb2": { "x": 0, "y": 0, "rotate": 0 },
+  "tail_barb3": { "x": 13, "y": 22, "rotate": 0 },
+  "tail_spine1": { "x": 0, "y": 8, "rotate": 0 },
+  "tail_spine2": { "x": 0, "y": 0, "rotate": 0 },
+  "tail_spine3": { "x": 0, "y": 0, "rotate": 0 },
+  "spine1": { "x": 0, "y": 0, "rotate": 0 },
+  "spine2": { "x": 0, "y": 0, "rotate": 0 },
+  "spine3": { "x": 0, "y": 0, "rotate": 0 },
+  "spine4": { "x": 0, "y": 0, "rotate": 0 },
+  "spine5": { "x": 0, "y": 0, "rotate": 0 },
+  "spine6": { "x": 0, "y": 0, "rotate": 0 },
+  "spine7": { "x": 7, "y": 15, "rotate": 0 },
+  "backLeg_thigh": { "x": 0, "y": 0, "rotate": 0 },
+  "backLeg_knee": { "x": 0, "y": 0, "rotate": 0 },
+  "backLeg_calf": { "x": 0, "y": 0, "rotate": 0 },
+  "backLeg_ankle": { "x": -12, "y": -15, "rotate": 0 },
+  "backLeg_foot": { "x": -9, "y": -8, "rotate": 0 },
+  "backLeg_claw1": { "x": -2, "y": 2, "rotate": 0 },
+  "backLeg_claw2": { "x": -5, "y": 3, "rotate": 0 },
+  "backLeg_claw3": { "x": -10, "y": 8, "rotate": 0 },
+  "torso_base": { "x": 0, "y": 0, "rotate": 0 },
+  "torso_plate1": { "x": 0, "y": 0, "rotate": 0 },
+  "torso_plate2": { "x": 10, "y": -2, "rotate": 0 },
+  "torso_chest1": { "x": 0, "y": 0, "rotate": 0 },
+  "torso_chest2": { "x": 4, "y": 0, "rotate": 0 },
+  "torso_chest3": { "x": 0, "y": 0, "rotate": 0 },
+  "torso_chest4": { "x": 0, "y": 0, "rotate": 0 },
+  "torso_chest5": { "x": 0, "y": 0, "rotate": 0 },
+  "frontLeg_thigh": { "x": 0, "y": 0, "rotate": 0 },
+  "frontLeg_knee": { "x": 0, "y": 0, "rotate": 0 },
+  "frontLeg_calf": { "x": 9, "y": 7, "rotate": 0 },
+  "frontLeg_ankle": { "x": -3, "y": 2, "rotate": 0 },
+  "frontLeg_foot": { "x": -1, "y": 7, "rotate": 0 },
+  "frontLeg_claw1": { "x": -48, "y": -15, "rotate": 0 },
+  "frontLeg_claw2": { "x": -50, "y": 7, "rotate": 0 },
+  "frontLeg_claw3": { "x": -50, "y": 25, "rotate": 0 },
+  "frontArm_shoulder": { "x": 0, "y": 0, "rotate": 0 },
+  "frontArm_bicep": { "x": -92, "y": 87, "rotate": 0 },
+  "frontArm_elbow": { "x": -11, "y": -6, "rotate": 0 },
+  "frontArm_forearm": { "x": -10, "y": 3, "rotate": 0 },
+  "frontArm_wrist": { "x": -12, "y": -5, "rotate": 0 },
+  "frontArm_claw1": { "x": -59, "y": -17, "rotate": 0 },
+  "frontArm_claw2": { "x": -38, "y": -2, "rotate": 0 },
+  "neck_base1": { "x": 0, "y": 0, "rotate": 0 },
+  "neck_base2": { "x": 45, "y": 112, "rotate": -160 },
+  "neck_plate1": { "x": 0, "y": 0, "rotate": 0 },
+  "neck_plate2": { "x": 0, "y": 0, "rotate": 0 },
+  "neck_plate3": { "x": 0, "y": 0, "rotate": 0 },
+  "mouth_cavity": { "x": 13, "y": -4, "rotate": 0 },
+  "skull_base": { "x": 0, "y": 0, "rotate": 0 },
+  "mouth_webbing": { "x": 0, "y": 0, "rotate": 0 },
+  "snout_base": { "x": 0, "y": 0, "rotate": 0 },
+  "snout_nostril": { "x": 0, "y": 0, "rotate": 0 },
+  "lower_jaw": { "x": 0, "y": 0, "rotate": 0 },
+  "upper_fang1": { "x": 0, "y": 0, "rotate": 0 },
+  "upper_fang2": { "x": 0, "y": 0, "rotate": 0 },
+  "upper_fang3": { "x": 0, "y": 0, "rotate": 0 },
+  "upper_fang4": { "x": 0, "y": 0, "rotate": 0 },
+  "upper_fang5": { "x": 0, "y": 0, "rotate": 0 },
+  "upper_fang6": { "x": 0, "y": 0, "rotate": 0 },
+  "lower_fang1": { "x": 0, "y": 0, "rotate": 0 },
+  "lower_fang2": { "x": 0, "y": 0, "rotate": 0 },
+  "lower_fang3": { "x": 0, "y": 0, "rotate": 0 },
+  "lower_fang4": { "x": 2, "y": 0, "rotate": 0 },
+  "horn1": { "x": 0, "y": 0, "rotate": 0 },
+  "horn2": { "x": 0, "y": 0, "rotate": 0 },
+  "spine_head1": { "x": 0, "y": 0, "rotate": 0 },
+  "spine_head2": { "x": -54, "y": 27, "rotate": 0 },
+  "spine_head3": { "x": -81, "y": 13, "rotate": 0 },
+  "eye_base": { "x": 0, "y": 0, "rotate": 0 },
+  "eye_pupil": { "x": 0, "y": 0, "rotate": 0 },
+  "eye_specular": { "x": 0, "y": 0, "rotate": 0 },
+  "eye_brow": { "x": 0, "y": 0, "rotate": 0 },
+  "frontClaw_arm": { "x": 13, "y": 4, "rotate": 0 },
+  "frontClaw_claw1": { "x": -14, "y": 1, "rotate": 0 },
+  "frontClaw_claw2": { "x": -16, "y": 5, "rotate": 0 },
+  "frontClaw_claw3": { "x": -13, "y": 4, "rotate": 0 },
+  "custom_1786872953815": { "x": -269, "y": -119, "rotate": 0 },
+  "custom_1786873091485": { "x": -122, "y": -124, "rotate": 260 },
+  "custom_1786873263651": { "x": -92, "y": -125, "rotate": 80 },
+  "custom_1786873460613": { "x": -92, "y": -137, "rotate": 70 }
+};
+
+const DEFAULT_DRAGON_FILLS: Record<string, string> = {
+  "frontWing_membrane2": "#471010",
+  "frontWing_membrane1": "#721818"
+};
+
+const DEFAULT_DELETED_SHAPES: Record<string, boolean> = {
+  "horn1": true,
+  "horn2": true,
+  "spine_head2": true,
+  "spine_head3": true,
+  "mouth_webbing": true,
+  "spine_head1": true,
+  "frontArm_bicep": true,
+  "frontArm_claw2": true,
+  "frontArm_claw1": true,
+  "tail_barb3": true,
+  "frontLeg_claw1": true,
+  "frontLeg_claw2": true,
+  "frontLeg_claw3": true,
+  "tail_shadow": true
+};
+
+const DEFAULT_CUSTOM_SHAPES = [
+  {
+    "id": "custom_1786873091485",
+    "name": "✨ Custom POLYGON (2)",
+    "type": "polygon" as const,
+    "fill": "#b91c1c",
+    "x": 150,
+    "y": 150,
+    "width": 40,
+    "height": 30,
+    "rx": 0,
+    "ry": 0,
+    "points": "0,-15 15,15 -15,15",
+    "d": "M -15 -15 L 15 15",
+    "rotate": 0
+  },
+  {
+    "id": "custom_1786873263651",
+    "name": "✨ Custom POLYGON (3)",
+    "type": "polygon" as const,
+    "fill": "#b91c1c",
+    "x": 150,
+    "y": 150,
+    "width": 40,
+    "height": 30,
+    "rx": 0,
+    "ry": 0,
+    "points": "0,-15 10,15 -15,20",
+    "d": "M -15 -15 L 15 15",
+    "rotate": 0
+  },
+  {
+    "id": "custom_1786873460613",
+    "name": "✨ Custom POLYGON (4)",
+    "type": "polygon" as const,
+    "fill": "#e6ac2d",
+    "x": 150,
+    "y": 150,
+    "width": 40,
+    "height": 30,
+    "rx": 0,
+    "ry": 0,
+    "points": "0,-20 2,15 -15,15",
+    "d": "M -15 -15 L 15 15",
+    "rotate": 0
+  }
+];
+
+const DEFAULT_DRAGON_GEOMETRIES: Record<string, string> = {};
+DRAGON_ORIGINAL_SHAPES.forEach((s) => {
+  if (s.d) DEFAULT_DRAGON_GEOMETRIES[s.id] = s.d;
+  if (s.points) DEFAULT_DRAGON_GEOMETRIES[s.id] = s.points;
+});
+DEFAULT_CUSTOM_SHAPES.forEach((s) => {
+  if (s.d) DEFAULT_DRAGON_GEOMETRIES[s.id] = s.d;
+  if (s.points) DEFAULT_DRAGON_GEOMETRIES[s.id] = s.points;
+});
+
+const DEFAULT_LAYER_ORDER = [
+  "custom_1786873091485",
+  "custom_1786873263651",
+  "custom_1786873460613",
+  ...DRAGON_ORIGINAL_SHAPES.map(s => s.id)
+];
+
+function loadSavedConfig() {
+  try {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.dragonOffsets && parsed.customShapes && parsed.dragonGeometries && parsed.layerOrder) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error("Error loading config from localStorage:", e);
+  }
+  return null;
+}
+
 export function BattleScene({ projectId, currentPhase, tasksLocked = true }: BattleSceneProps) {
   const state = useQuery(api.battle.getState, { projectId });
 
@@ -196,114 +403,37 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [bossError, setBossError] = useState<string | null>(null);
 
   // Dragon Layout Vector Editor Admin States (All individual shapes, moveable panels, pausable animation)
-  const [dragonOffsets, setDragonOffsets] = useState<Record<string, { x: number; y: number; rotate: number }>>({
-    backWing_membrane1: { x: 0, y: 0, rotate: 0 },
-    backWing_membrane2: { x: 0, y: 0, rotate: 0 },
-    backWing_membrane3: { x: 0, y: 0, rotate: 0 },
-    backWing_strut1: { x: 0, y: 0, rotate: 0 },
-    backWing_strut2: { x: 0, y: 0, rotate: 0 },
-    backWing_joint: { x: 0, y: 0, rotate: 0 },
-    backWing_claw: { x: 0, y: 0, rotate: 0 },
-    frontWing_membrane1: { x: 0, y: 0, rotate: 0 },
-    frontWing_membrane2: { x: 0, y: 0, rotate: 0 },
-    frontWing_membrane3: { x: 0, y: 0, rotate: 0 },
-    frontWing_strut1: { x: 0, y: 0, rotate: 0 },
-    frontWing_strut2: { x: 0, y: 0, rotate: 0 },
-    frontWing_joint: { x: 0, y: 0, rotate: 0 },
-    frontWing_claw: { x: 0, y: 0, rotate: 0 },
-    tail_seg1: { x: 0, y: 0, rotate: 0 },
-    tail_seg2: { x: 0, y: 0, rotate: 0 },
-    tail_seg3: { x: 0, y: 0, rotate: 0 },
-    tail_shadow: { x: 0, y: 0, rotate: 0 },
-    tail_barb1: { x: 0, y: 0, rotate: 0 },
-    tail_barb2: { x: 0, y: 0, rotate: 0 },
-    tail_barb3: { x: 0, y: 0, rotate: 0 },
-    tail_spine1: { x: 0, y: 0, rotate: 0 },
-    tail_spine2: { x: 0, y: 0, rotate: 0 },
-    tail_spine3: { x: 0, y: 0, rotate: 0 },
-    spine1: { x: 0, y: 0, rotate: 0 },
-    spine2: { x: 0, y: 0, rotate: 0 },
-    spine3: { x: 0, y: 0, rotate: 0 },
-    spine4: { x: 0, y: 0, rotate: 0 },
-    spine5: { x: 0, y: 0, rotate: 0 },
-    spine6: { x: 0, y: 0, rotate: 0 },
-    spine7: { x: 0, y: 0, rotate: 0 },
-    backLeg_thigh: { x: 0, y: 0, rotate: 0 },
-    backLeg_knee: { x: 0, y: 0, rotate: 0 },
-    backLeg_calf: { x: 0, y: 0, rotate: 0 },
-    backLeg_ankle: { x: 0, y: 0, rotate: 0 },
-    backLeg_foot: { x: 0, y: 0, rotate: 0 },
-    backLeg_claw1: { x: 0, y: 0, rotate: 0 },
-    backLeg_claw2: { x: 0, y: 0, rotate: 0 },
-    backLeg_claw3: { x: 0, y: 0, rotate: 0 },
-    torso_base: { x: 0, y: 0, rotate: 0 },
-    torso_plate1: { x: 0, y: 0, rotate: 0 },
-    torso_plate2: { x: 0, y: 0, rotate: 0 },
-    torso_chest1: { x: 0, y: 0, rotate: 0 },
-    torso_chest2: { x: 0, y: 0, rotate: 0 },
-    torso_chest3: { x: 0, y: 0, rotate: 0 },
-    torso_chest4: { x: 0, y: 0, rotate: 0 },
-    torso_chest5: { x: 0, y: 0, rotate: 0 },
-    frontLeg_thigh: { x: 0, y: 0, rotate: 0 },
-    frontLeg_knee: { x: 0, y: 0, rotate: 0 },
-    frontLeg_calf: { x: 0, y: 0, rotate: 0 },
-    frontLeg_ankle: { x: 0, y: 0, rotate: 0 },
-    frontLeg_foot: { x: 0, y: 0, rotate: 0 },
-    frontLeg_claw1: { x: 0, y: 0, rotate: 0 },
-    frontLeg_claw2: { x: 0, y: 0, rotate: 0 },
-    frontLeg_claw3: { x: 0, y: 0, rotate: 0 },
-    frontArm_shoulder: { x: 0, y: 0, rotate: 0 },
-    frontArm_bicep: { x: 0, y: 0, rotate: 0 },
-    frontArm_elbow: { x: 0, y: 0, rotate: 0 },
-    frontArm_forearm: { x: 0, y: 0, rotate: 0 },
-    frontArm_wrist: { x: 0, y: 0, rotate: 0 },
-    frontArm_claw1: { x: 0, y: 0, rotate: 0 },
-    frontArm_claw2: { x: 0, y: 0, rotate: 0 },
-    neck_base1: { x: 0, y: 0, rotate: 0 },
-    neck_base2: { x: 0, y: 0, rotate: 0 },
-    neck_plate1: { x: 0, y: 0, rotate: 0 },
-    neck_plate2: { x: 0, y: 0, rotate: 0 },
-    neck_plate3: { x: 0, y: 0, rotate: 0 },
-    mouth_cavity: { x: 0, y: 0, rotate: 0 },
-    skull_base: { x: 0, y: 0, rotate: 0 },
-    mouth_webbing: { x: 0, y: 0, rotate: 0 },
-    snout_base: { x: 0, y: 0, rotate: 0 },
-    snout_nostril: { x: 0, y: 0, rotate: 0 },
-    lower_jaw: { x: 0, y: 0, rotate: 0 },
-    upper_fang1: { x: 0, y: 0, rotate: 0 },
-    upper_fang2: { x: 0, y: 0, rotate: 0 },
-    upper_fang3: { x: 0, y: 0, rotate: 0 },
-    upper_fang4: { x: 0, y: 0, rotate: 0 },
-    upper_fang5: { x: 0, y: 0, rotate: 0 },
-    upper_fang6: { x: 0, y: 0, rotate: 0 },
-    lower_fang1: { x: 0, y: 0, rotate: 0 },
-    lower_fang2: { x: 0, y: 0, rotate: 0 },
-    lower_fang3: { x: 0, y: 0, rotate: 0 },
-    lower_fang4: { x: 0, y: 0, rotate: 0 },
-    horn1: { x: 0, y: 0, rotate: 0 },
-    horn2: { x: 0, y: 0, rotate: 0 },
-    spine_head1: { x: 0, y: 0, rotate: 0 },
-    spine_head2: { x: 0, y: 0, rotate: 0 },
-    spine_head3: { x: 0, y: 0, rotate: 0 },
-    eye_base: { x: 0, y: 0, rotate: 0 },
-    eye_pupil: { x: 0, y: 0, rotate: 0 },
-    eye_specular: { x: 0, y: 0, rotate: 0 },
-    eye_brow: { x: 0, y: 0, rotate: 0 },
-    frontClaw_arm: { x: 0, y: 0, rotate: 0 },
-    frontClaw_claw1: { x: 0, y: 0, rotate: 0 },
-    frontClaw_claw2: { x: 0, y: 0, rotate: 0 },
-    frontClaw_claw3: { x: 0, y: 0, rotate: 0 },
+  const savedConfig = useMemo(() => loadSavedConfig(), []);
+
+  const [dragonOffsets, setDragonOffsets] = useState<Record<string, { x: number; y: number; rotate: number; scale?: number }>>(() => {
+    return savedConfig?.dragonOffsets || DEFAULT_DRAGON_OFFSETS;
   });
+
+  const [dragonFills, setDragonFills] = useState<Record<string, string>>(() => {
+    return savedConfig?.dragonFills || DEFAULT_DRAGON_FILLS;
+  });
+
+  const [deletedShapes, setDeletedShapes] = useState<Record<string, boolean>>(() => {
+    return savedConfig?.deletedShapes || DEFAULT_DELETED_SHAPES;
+  });
+
+  const [customShapes, setCustomShapes] = useState<any[]>(() => {
+    return savedConfig?.customShapes || DEFAULT_CUSTOM_SHAPES;
+  });
+
+  const [dragonGeometries, setDragonGeometries] = useState<Record<string, string>>(() => {
+    return savedConfig?.dragonGeometries || DEFAULT_DRAGON_GEOMETRIES;
+  });
+
+  const [layerOrder, setLayerOrder] = useState<string[]>(() => {
+    return savedConfig?.layerOrder || DEFAULT_LAYER_ORDER;
+  });
+
   const [selectedDragonPart, setSelectedDragonPart] = useState<string | null>(null);
   const [showDragonEditor, setShowDragonEditor] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
 
-  // Custom Fills & Deletions
-  const [dragonFills, setDragonFills] = useState<Record<string, string>>({});
-  const [deletedShapes, setDeletedShapes] = useState<Record<string, boolean>>({});
-
   // Spawner states
-  const [customShapes, setCustomShapes] = useState<any[]>([]);
   const [spawnerType, setSpawnerType] = useState<"circle" | "ellipse" | "rect" | "polygon" | "path">("circle");
   const [spawnerColor, setSpawnerColor] = useState("#b91c1c");
 
@@ -316,6 +446,33 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [draggingShapeId, setDraggingShapeId] = useState<string | null>(null);
   const dragShapeStart = useRef({ mouseX: 0, mouseY: 0, shapeX: 0, shapeY: 0 });
 
+  // Vertex Node Dragging
+  const [draggingNode, setDraggingNode] = useState<{ shapeId: string; xIdx: number; yIdx: number } | null>(null);
+  const dragNodeStart = useRef({ mouseX: 0, mouseY: 0, nodeX: 0, nodeY: 0 });
+
+  // Sync state to localStorage
+  useEffect(() => {
+    const config = {
+      dragonOffsets,
+      dragonFills,
+      deletedShapes,
+      customShapes,
+      dragonGeometries,
+      layerOrder
+    };
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(config));
+  }, [dragonOffsets, dragonFills, deletedShapes, customShapes, dragonGeometries, layerOrder]);
+
+  // Scroll selected layer stack row into view automatically
+  useEffect(() => {
+    if (selectedDragonPart) {
+      const el = document.getElementById(`layer-row-${selectedDragonPart}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }
+  }, [selectedDragonPart]);
+
   function handlePanelDragStart(e: React.MouseEvent) {
     setIsDraggingPanel(true);
     dragStartOffset.current = {
@@ -325,7 +482,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   }
 
   function handleStartDragShape(shapeId: string, clientX: number, clientY: number) {
-    const currentOffset = dragonOffsets[shapeId] || { x: 0, y: 0, rotate: 0 };
+    const currentOffset = dragonOffsets[shapeId] || { x: 0, y: 0, rotate: 0, scale: 1 };
     setDraggingShapeId(shapeId);
     dragShapeStart.current = {
       mouseX: clientX,
@@ -335,7 +492,49 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     };
   }
 
-  // Effect to drag Panel & drag individual SVG shapes directly
+  function handleStartDragNode(shapeId: string, xIdx: number, yIdx: number, startX: number, startY: number, mouseX: number, mouseY: number) {
+    setDraggingNode({ shapeId, xIdx, yIdx });
+    dragNodeStart.current = {
+      mouseX,
+      mouseY,
+      nodeX: startX,
+      nodeY: startY,
+    };
+  }
+
+  function handleMoveLayerUp(key: string) {
+    const idx = layerOrder.indexOf(key);
+    if (idx !== -1 && idx < layerOrder.length - 1) {
+      const newOrder = [...layerOrder];
+      const temp = newOrder[idx];
+      newOrder[idx] = newOrder[idx + 1];
+      newOrder[idx + 1] = temp;
+      setLayerOrder(newOrder);
+    }
+  }
+
+  function handleMoveLayerDown(key: string) {
+    const idx = layerOrder.indexOf(key);
+    if (idx > 0) {
+      const newOrder = [...layerOrder];
+      const temp = newOrder[idx];
+      newOrder[idx] = newOrder[idx - 1];
+      newOrder[idx - 1] = temp;
+      setLayerOrder(newOrder);
+    }
+  }
+
+  function handleSetLayerIndex(key: string, targetIdx: number) {
+    const currentIdx = layerOrder.indexOf(key);
+    if (currentIdx === -1) return;
+    const validatedIdx = Math.max(0, Math.min(layerOrder.length - 1, targetIdx));
+    const newOrder = [...layerOrder];
+    const [item] = newOrder.splice(currentIdx, 1);
+    newOrder.splice(validatedIdx, 0, item);
+    setLayerOrder(newOrder);
+  }
+
+  // Effect to drag Panel, drag individual shapes, and drag nodes
   useEffect(() => {
     function handleMouseMove(e: MouseEvent) {
       if (isDraggingPanel) {
@@ -349,7 +548,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         const dx = e.clientX - dragShapeStart.current.mouseX;
         const dy = e.clientY - dragShapeStart.current.mouseY;
         
-        // Calculate viewBox scale relative to actual SVG screen width
         const svgEl = document.querySelector(".layer-8-dragon svg");
         let scaleFactor = 1.5;
         if (svgEl) {
@@ -358,7 +556,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         }
 
         setDragonOffsets((prev) => {
-          const prevVal = prev[draggingShapeId] || { x: 0, y: 0, rotate: 0 };
+          const prevVal = prev[draggingShapeId] || { x: 0, y: 0, rotate: 0, scale: 1 };
           return {
             ...prev,
             [draggingShapeId]: {
@@ -369,14 +567,49 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           };
         });
       }
+
+      if (draggingNode) {
+        const dx = e.clientX - dragNodeStart.current.mouseX;
+        const dy = e.clientY - dragNodeStart.current.mouseY;
+
+        const svgEl = document.querySelector(".layer-8-dragon svg");
+        let scaleFactor = 1.5;
+        if (svgEl) {
+          const rect = svgEl.getBoundingClientRect();
+          scaleFactor = (1000 / rect.width) / 0.68;
+        }
+
+        setDragonGeometries((prev) => {
+          let currentGeom = prev[draggingNode.shapeId];
+          if (!currentGeom) {
+            const shapeObj = DRAGON_ORIGINAL_SHAPES.find(s => s.id === draggingNode.shapeId)
+              || customShapes.find(s => s.id === draggingNode.shapeId);
+            currentGeom = shapeObj?.d || shapeObj?.points || "";
+          }
+
+          const { tokens } = parseCoordinates(currentGeom);
+          if (tokens.length > draggingNode.yIdx) {
+            const newX = Math.round(dragNodeStart.current.nodeX + dx * scaleFactor);
+            const newY = Math.round(dragNodeStart.current.nodeY + dy * scaleFactor);
+            tokens[draggingNode.xIdx] = String(newX);
+            tokens[draggingNode.yIdx] = String(newY);
+          }
+
+          return {
+            ...prev,
+            [draggingNode.shapeId]: tokens.join(""),
+          };
+        });
+      }
     }
 
     function handleMouseUp() {
       setIsDraggingPanel(false);
       setDraggingShapeId(null);
+      setDraggingNode(null);
     }
 
-    if (isDraggingPanel || draggingShapeId) {
+    if (isDraggingPanel || draggingShapeId || draggingNode) {
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
     }
@@ -384,7 +617,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDraggingPanel, draggingShapeId]);
+  }, [isDraggingPanel, draggingShapeId, draggingNode, customShapes]);
 
   function handleAddCustomShape() {
     const id = `custom_${Date.now()}`;
@@ -405,9 +638,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     };
     setDragonOffsets((prev) => ({
       ...prev,
-      [id]: { x: 0, y: 0, rotate: 0 },
+      [id]: { x: 0, y: 0, rotate: 0, scale: 1 },
     }));
     setCustomShapes((prev) => [...prev, newShape]);
+    setLayerOrder((prev) => [id, ...prev]);
     setSelectedDragonPart(id);
   }
 
@@ -706,6 +940,9 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           fills={dragonFills}
           deletedShapes={deletedShapes}
           onStartDragShape={handleStartDragShape}
+          geometries={dragonGeometries}
+          onStartDragNode={handleStartDragNode}
+          layerOrder={layerOrder}
         />
 
         {/* Layer 9: Section 2 - Cosmetic Combat Exchange (50% Opacity Background Burst) */}
@@ -1246,35 +1483,37 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             </div>
 
             <p style={{ fontSize: "0.72rem", margin: "0 0 8px 0", color: "#94a3b8" }}>
-              Click any shape on screen or select a layer stack row below to shift and rotate.
+              Click/drag shapes directly on screen (hold Shift), or drag blue vertex points to edit shape nodes!
             </p>
 
             {/* Photoshop-style Layer Stack */}
             <div className="rpg-layers-stack" style={{ maxHeight: "250px" }}>
               {(() => {
-                const originals = Object.entries(SHAPE_LABELS).map(([key, name]) => ({ key, name }));
-                const customs = customShapes.map((s) => ({ key: s.id, name: s.name }));
-                const layers = [...customs, ...originals].filter(l => !deletedShapes[l.key]);
+                const activeLayers = [...layerOrder]
+                  .reverse()
+                  .filter((id) => !deletedShapes[id]);
 
-                return layers.map((layer) => {
-                  const isSelected = selectedDragonPart === layer.key;
-                  const offset = dragonOffsets[layer.key] || { x: 0, y: 0, rotate: 0 };
+                return activeLayers.map((layerId) => {
+                  const isSelected = selectedDragonPart === layerId;
+                  const offset = dragonOffsets[layerId] || { x: 0, y: 0, rotate: 0, scale: 1 };
+                  const friendlyName = SHAPE_LABELS[layerId] || customShapes.find(s => s.id === layerId)?.name || `✨ Custom Shape (${layerId.slice(-4)})`;
                   
                   return (
                     <div
-                      key={layer.key}
+                      key={layerId}
+                      id={`layer-row-${layerId}`}
                       className={`rpg-layer-row ${isSelected ? "is-selected" : ""}`}
-                      onClick={() => setSelectedDragonPart(layer.key)}
+                      onClick={() => setSelectedDragonPart(layerId)}
                     >
                       <div className="rpg-layer-info">
-                        <span className="rpg-layer-name">{layer.name}</span>
-                        <span className="rpg-layer-coords">X:{offset.x} Y:{offset.y} R:{offset.rotate}°</span>
+                        <span className="rpg-layer-name">{friendlyName}</span>
+                        <span className="rpg-layer-coords">X:{offset.x} Y:{offset.y} R:{offset.rotate}° S:{(offset.scale ?? 1).toFixed(2)}x</span>
                       </div>
 
                       {isSelected && (
                         <div className="rpg-layer-controls" onClick={(e) => e.stopPropagation()}>
                           <p style={{ fontSize: "0.62rem", color: "#64748b", margin: "0 0 6px 0" }}>
-                            💡 Hold <strong>Shift + Drag</strong> the shape on screen to position instantly.
+                            💡 Drag any blue vertex handles directly on the dragon to shape manually!
                           </p>
 
                           {/* Position Coordinates */}
@@ -1288,7 +1527,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                                   const val = parseInt(e.target.value) || 0;
                                   setDragonOffsets((prev) => ({
                                     ...prev,
-                                    [layer.key]: { ...prev[layer.key], x: val }
+                                    [layerId]: { ...prev[layerId], x: val }
                                   }));
                                 }}
                               />
@@ -1302,7 +1541,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                                   const val = parseInt(e.target.value) || 0;
                                   setDragonOffsets((prev) => ({
                                     ...prev,
-                                    [layer.key]: { ...prev[layer.key], y: val }
+                                    [layerId]: { ...prev[layerId], y: val }
                                   }));
                                 }}
                               />
@@ -1321,7 +1560,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                                   const val = parseInt(e.target.value) || 0;
                                   setDragonOffsets((prev) => ({
                                     ...prev,
-                                    [layer.key]: { ...prev[layer.key], rotate: val }
+                                    [layerId]: { ...prev[layerId], rotate: val }
                                   }));
                                 }}
                               />
@@ -1333,7 +1572,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                               onClick={() => {
                                 setDragonOffsets((prev) => ({
                                   ...prev,
-                                  [layer.key]: { ...prev[layer.key], rotate: ((prev[layer.key]?.rotate ?? 0) - 5) % 360 }
+                                  [layerId]: { ...prev[layerId], rotate: ((prev[layerId]?.rotate ?? 0) - 5) % 360 }
                                 }));
                               }}
                               title="Rotate CCW 5°"
@@ -1347,13 +1586,90 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                               onClick={() => {
                                 setDragonOffsets((prev) => ({
                                   ...prev,
-                                  [layer.key]: { ...prev[layer.key], rotate: ((prev[layer.key]?.rotate ?? 0) + 5) % 360 }
+                                  [layerId]: { ...prev[layerId], rotate: ((prev[layerId]?.rotate ?? 0) + 5) % 360 }
                                 }));
                               }}
                               title="Rotate CW 5°"
                             >
                               ↻
                             </button>
+                          </div>
+
+                          {/* Scale Controls */}
+                          <div style={{ display: "grid", gap: "2px", marginTop: "8px" }}>
+                            <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "flex", justifyContent: "space-between" }}>
+                              <span>Scale:</span>
+                              <span>{(offset.scale ?? 1).toFixed(2)}x</span>
+                            </label>
+                            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                              <input
+                                type="range"
+                                min="0.2"
+                                max="3.0"
+                                step="0.05"
+                                style={{ flex: 1, accentColor: "#38bdf8" }}
+                                value={offset.scale ?? 1}
+                                onChange={(e) => {
+                                  const val = parseFloat(e.target.value);
+                                  setDragonOffsets((prev) => ({
+                                    ...prev,
+                                    [layerId]: { ...prev[layerId], scale: val }
+                                  }));
+                                }}
+                              />
+                              <input
+                                type="number"
+                                min="0.2"
+                                max="3.0"
+                                step="0.05"
+                                style={{ width: "50px", padding: "2px 4px", background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", fontSize: "0.65rem" }}
+                                value={offset.scale ?? 1}
+                                onChange={(e) => {
+                                  const val = parseFloat(e.target.value) || 1;
+                                  setDragonOffsets((prev) => ({
+                                    ...prev,
+                                    [layerId]: { ...prev[layerId], scale: val }
+                                  }));
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Layer Depth Reordering */}
+                          <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "8px" }}>
+                            <span style={{ fontSize: "0.65rem", color: "#94a3b8" }}>Order:</span>
+                            <button
+                              type="button"
+                              className="rpg-dpad-btn"
+                              style={{ padding: "2px 6px", fontSize: "0.65rem" }}
+                              onClick={() => handleMoveLayerUp(layerId)}
+                              title="Bring Forward"
+                            >
+                              ▲ Up
+                            </button>
+                            <button
+                              type="button"
+                              className="rpg-dpad-btn"
+                              style={{ padding: "2px 6px", fontSize: "0.65rem" }}
+                              onClick={() => handleMoveLayerDown(layerId)}
+                              title="Send Backward"
+                            >
+                              ▼ Down
+                            </button>
+                            <input
+                              type="number"
+                              min="1"
+                              max={layerOrder.length}
+                              style={{ width: "45px", padding: "2px 4px", background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", fontSize: "0.65rem" }}
+                              value={layerOrder.indexOf(layerId) + 1}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value);
+                                if (!isNaN(val)) {
+                                  handleSetLayerIndex(layerId, val - 1);
+                                }
+                              }}
+                            />
+                            <span style={{ fontSize: "0.65rem", color: "#64748b" }}>/ {layerOrder.length}</span>
                           </div>
 
                           {/* Color Fill Selector */}
@@ -1363,15 +1679,15 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                               <input
                                 type="color"
                                 style={{ width: "100%", height: "24px", padding: "0", border: "none", background: "transparent", cursor: "pointer" }}
-                                value={dragonFills[layer.key] || (layer.key.startsWith("custom_") ? (customShapes.find(s => s.id === layer.key)?.fill || "#b91c1c") : "#7f1d1d")}
+                                value={dragonFills[layerId] || (layerId.startsWith("custom_") ? (customShapes.find(s => s.id === layerId)?.fill || "#b91c1c") : (DRAGON_ORIGINAL_SHAPES.find(s => s.id === layerId)?.defaultFill || "#7f1d1d"))}
                                 onChange={(e) => {
                                   const val = e.target.value;
-                                  if (layer.key.startsWith("custom_")) {
-                                    setCustomShapes((prev) => prev.map((s) => s.id === layer.key ? { ...s, fill: val } : s));
+                                  if (layerId.startsWith("custom_")) {
+                                    setCustomShapes((prev) => prev.map((s) => s.id === layerId ? { ...s, fill: val } : s));
                                   } else {
                                     setDragonFills((prev) => ({
                                       ...prev,
-                                      [layer.key]: val,
+                                      [layerId]: val,
                                     }));
                                   }
                                 }}
@@ -1379,9 +1695,9 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                             </label>
                           </div>
 
-                          {/* Custom Shape Parameter Modification (Width, height, radius, path) */}
-                          {layer.key.startsWith("custom_") && (() => {
-                            const cs = customShapes.find((s) => s.id === layer.key);
+                          {/* Custom Shape Parameters Modifier */}
+                          {layerId.startsWith("custom_") && (() => {
+                            const cs = customShapes.find((s) => s.id === layerId);
                             if (!cs) return null;
                             return (
                               <div style={{ display: "grid", gap: "6px", marginTop: "8px", borderTop: "1px solid #334155", paddingTop: "8px" }}>
@@ -1491,12 +1807,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                             className="rpg-admin-action-btn reset"
                             style={{ background: "#b91c1c", padding: "4px", fontSize: "0.65rem", marginTop: "8px", width: "100%" }}
                             onClick={() => {
-                              if (layer.key.startsWith("custom_")) {
-                                setCustomShapes((prev) => prev.filter((s) => s.id !== layer.key));
+                              if (layerId.startsWith("custom_")) {
+                                setCustomShapes((prev) => prev.filter((s) => s.id !== layerId));
+                                setLayerOrder((prev) => prev.filter((id) => id !== layerId));
                               } else {
                                 setDeletedShapes((prev) => ({
                                   ...prev,
-                                  [layer.key]: true,
+                                  [layerId]: true,
                                 }));
                               }
                               setSelectedDragonPart(null);
@@ -1523,10 +1840,12 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     dragonFills,
                     deletedShapes,
                     customShapes,
+                    dragonGeometries,
+                    layerOrder,
                   };
                   const codeStr = JSON.stringify(exportData, null, 2);
                   navigator.clipboard.writeText(codeStr);
-                  alert("Copied full layout, color overrides & custom shapes config to clipboard!");
+                  alert("Copied full layout, geometries, fills & custom shapes config to clipboard!");
                 }}
               >
                 📋 Copy Layout & Shapes Config
@@ -1535,11 +1854,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 type="button"
                 className="rpg-admin-action-btn reset"
                 onClick={() => {
-                  if (confirm("Reset all customizations, colors, and coordinates to 0?")) {
-                    setDragonOffsets({});
-                    setDragonFills({});
-                    setDeletedShapes({});
-                    setCustomShapes([]);
+                  if (confirm("Reset all customizations, colors, and coordinates to default?")) {
+                    setDragonOffsets(DEFAULT_DRAGON_OFFSETS);
+                    setDragonFills(DEFAULT_DRAGON_FILLS);
+                    setDeletedShapes(DEFAULT_DELETED_SHAPES);
+                    setCustomShapes(DEFAULT_CUSTOM_SHAPES);
+                    setDragonGeometries(DEFAULT_DRAGON_GEOMETRIES);
+                    setLayerOrder(DEFAULT_LAYER_ORDER);
                     setSelectedDragonPart(null);
                   }
                 }}
