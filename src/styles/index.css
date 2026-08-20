@@ -5055,6 +5055,11 @@ footer {
 .room-title-compact { margin: 0; font-family: var(--font-heading); font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1; }
 .compact-project-header h2 { font-size: clamp(1.65rem, 3vw, 2.45rem); }
 .compact-project-header p { margin: .25rem 0 0; }
+.compact-project-header { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 1rem; }
+.compact-project-priority { display: flex; gap: .55rem; margin: 0; }
+.compact-project-priority div { display: grid; gap: .2rem; min-width: 108px; padding: .55rem .7rem; border: 1px solid color-mix(in srgb, var(--color-text) 22%, transparent); border-radius: 11px; background: color-mix(in srgb, var(--color-blue) 10%, var(--color-surface)); }
+.compact-project-priority dt { color: var(--color-muted); font-size: .68rem; font-weight: 900; text-transform: uppercase; }
+.compact-project-priority dd { margin: 0; font-size: .88rem; font-weight: 900; }
 .project-plan-view, .project-progress-view { width: min(100%, 1080px); margin: 0 auto; }
 .project-plan-summary, .progress-metrics-card, .project-brief-card, .phase-timeline-card, .game-status-preview, .team-tab { padding: clamp(1rem, 2.4vw, 1.5rem); border: 2px solid var(--color-text); border-radius: 20px; background: var(--color-surface); color: var(--color-text); }
 .project-plan-summary-heading, .project-section-heading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
@@ -5079,6 +5084,7 @@ footer {
 .phase-timeline li.is-complete { border-color: var(--color-green); }
 .phase-timeline li div { display: grid; gap: .2rem; }
 .phase-timeline li small { color: var(--color-muted); font-size: .76rem; font-weight: 800; }
+.phase-timeline-description { margin: .2rem 0 0; color: var(--color-muted); font-size: .78rem; line-height: 1.35; }
 .phase-timeline-marker { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--color-blue); color: var(--text-on-blue); font-weight: 900; }
 .phase-timeline li.is-complete .phase-timeline-marker { background: var(--color-green); color: var(--text-on-green); }
 .phase-timeline li.is-upcoming .phase-timeline-marker { background: transparent; color: var(--color-muted); border: 1px solid currentColor; }
@@ -5097,6 +5103,27 @@ footer {
 .task-secondary-details dl { display: grid; gap: .35rem; margin: .65rem 0 0; }
 .task-secondary-details dl div { display: flex; justify-content: space-between; gap: .7rem; }
 .task-secondary-details dd { margin: 0; text-align: right; }
+.project-plan-breakdown { display: grid; gap: 1rem; padding: clamp(1rem, 2.4vw, 1.5rem); border: 2px solid var(--color-text); border-radius: 20px; background: var(--color-surface); color: var(--color-text); }
+.project-plan-breakdown > .project-section-heading h2 { font-size: clamp(1.8rem, 3vw, 2.65rem); }
+.project-plan-breakdown > .project-section-heading p { margin: .25rem 0 0; color: var(--color-muted); }
+.project-plan-breakdown .phase-timeline-card, .task-outline-card { padding: 0; border: 0; background: transparent; }
+.project-plan-breakdown .phase-timeline-card h3, .task-outline-card h3 { margin: .1rem 0 .25rem; font-size: clamp(1.25rem, 2.5vw, 1.8rem); }
+.task-outline-list { display: grid; gap: .75rem; }
+.task-outline-phase { padding: .75rem; border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent); border-radius: 13px; background: color-mix(in srgb, var(--color-page) 72%, var(--color-surface)); }
+.task-outline-phase h4 { margin: 0 0 .55rem; font-size: 1rem; }
+.task-outline-phase ul { display: grid; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.task-outline-phase li { display: flex; align-items: center; justify-content: space-between; gap: .8rem; padding: .55rem .65rem; border-radius: 9px; background: var(--color-surface); }
+.task-outline-phase li > div { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; }
+.task-outline-phase li > div:first-child { min-width: 0; }
+.task-outline-phase li > div:last-child { flex: 0 0 auto; justify-content: flex-end; color: var(--color-muted); font-size: .78rem; font-weight: 800; }
+.task-outline-phase li strong { overflow-wrap: anywhere; }
+.task-outline-phase li span { white-space: nowrap; }
+.task-outline-status { padding: .2rem .4rem; border: 1px solid currentColor; border-radius: 999px; font-size: .68rem; text-transform: uppercase; }
+.task-outline-status-completed, .task-outline-status-verified { color: var(--text-on-green); background: var(--color-green); }
+.task-outline-status-in_progress { color: var(--text-on-blue); background: var(--color-blue); }
+.task-outline-status-blocked, .task-outline-status-changes_requested { color: var(--text-on-orange); background: var(--color-orange); }
+.task-outline-status-review, .task-outline-status-submitted, .task-outline-status-awaiting_creator { color: var(--text-on-pink); background: var(--color-pink); }
+.project-empty-inline { margin: 0; padding: .8rem; border: 1px dashed color-mix(in srgb, var(--color-text) 35%, transparent); border-radius: 11px; color: var(--color-muted); }
 .guided-helper { margin-top: -.8rem; color: var(--color-muted); }
 .framework-choice.is-recommended, .allocation-mode-card.is-recommended { border-color: var(--color-yellow); }
 .framework-selected-mark { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--color-yellow); color: var(--color-navy); font-weight: 900; }
@@ -5111,11 +5138,15 @@ footer {
 .ai-allocation-note span { color: var(--color-muted); font-size: .85rem; }
 
 @media (max-width: 760px) {
+  .compact-project-header { grid-template-columns: 1fr; align-items: stretch; }
+  .compact-project-priority { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .project-plan-summary-heading, .project-section-heading, .project-next-action { align-items: stretch; flex-direction: column; }
   .project-plan-metrics, .progress-metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .game-status-preview { grid-template-columns: 1fr; align-items: stretch; }
   .game-status-preview dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .game-status-preview .quiet-button { width: 100%; }
+  .task-outline-phase li { align-items: stretch; flex-direction: column; }
+  .task-outline-phase li > div:last-child { justify-content: flex-start; }
 }
 
 @media (max-width: 420px) {
@@ -5987,5 +6018,4 @@ footer {
 .rpg-admin-action-btn:hover {
   filter: brightness(1.1);
 }
-
 
