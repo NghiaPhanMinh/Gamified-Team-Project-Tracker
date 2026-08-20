@@ -67,8 +67,8 @@ export function TeamWorkspace({
     <section className="room-workspace" aria-labelledby="room-title">
       <header className="room-command-header">
         <div>
-          <p className="kicker">Room</p>
-          <h1 className="display-heading" id="room-title">{workspace.team.name}</h1>
+          <p className="room-breadcrumb">Projects / {workspace.team.name}</p>
+          <h1 className="room-title-compact" id="room-title">{workspace.team.name}</h1>
           <p>{workspace.members.length} {workspace.members.length === 1 ? "member" : "members"} · live updates</p>
         </div>
         <div className="room-header-actions">
@@ -79,14 +79,14 @@ export function TeamWorkspace({
 
       <div className="room-switch-row">
         <label><span>Current room</span><select value={selectedTeamId} onChange={(event) => onSelectTeam(event.target.value as Id<"teams">)}>{teams.map((team) => <option key={team._id} value={team._id}>{team.name} · {team.memberCount}</option>)}</select></label>
-        <button className="primary-button" type="button" onClick={onAddTeam}>Create Another Project</button>
+        <button className="secondary-button" type="button" onClick={onAddTeam}>Create Another Project</button>
       </div>
 
       <ProjectHub
         teamId={selectedTeamId}
         members={workspace.members.map((member) => ({ profileId: member.profileId, displayName: member.displayName }))}
         currentProfileId={workspace.currentProfileId}
-        requestedProjectTab="overview"
+        requestedProjectTab="plan"
       />
       <details className="room-tools">
         <summary>Room tools · Framework library</summary>

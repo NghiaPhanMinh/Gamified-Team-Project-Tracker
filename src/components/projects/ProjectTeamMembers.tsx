@@ -117,7 +117,7 @@ export function ProjectTeamMembers({ projectId }: { projectId: Id<"projects"> })
 
   return (
     <section className="team-members-tab" aria-labelledby="team-members-title">
-      <header className="project-list-heading"><div><p className="card-eyebrow">Team Members</p><h3 id="team-members-title">Skills, capacity, and busy times</h3></div></header>
+      <header className="project-list-heading"><div><p className="card-eyebrow">Members</p><h3 id="team-members-title">Skills, capacity, and busy times</h3></div></header>
 
       {finalPlan ? <aside className="final-meeting-overlay" aria-label="Final meeting selected"><strong>Final meeting selected</strong><span>{DAYS[finalPlan.dayOfWeek]} · {timeLabel(finalPlan.startMinute)} · {finalPlan.durationMinutes} min · {finalPlan.meetingMode ?? "online"}</span></aside> : null}
 

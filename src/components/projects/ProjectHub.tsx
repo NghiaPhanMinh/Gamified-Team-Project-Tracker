@@ -20,7 +20,7 @@ type ProjectHubProps = {
 
 export function ProjectHub({
   teamId,
-  requestedProjectTab = "overview",
+  requestedProjectTab = "plan",
 }: ProjectHubProps) {
   const projects = useQuery(api.projects.listForTeam, { teamId });
   const [openProjectId, setOpenProjectId] = useState<Id<"projects"> | null>(null);

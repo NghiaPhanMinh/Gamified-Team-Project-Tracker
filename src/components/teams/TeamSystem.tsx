@@ -40,7 +40,12 @@ export function TeamSystem({
   if (activeSection === "home") {
     const nextTask = personalTaskGroups
       ?.flatMap((group) => group.tasks.map((task) => ({ ...task, projectTitle: group.projectTitle })))
-      .filter((task) => task.isMine && !["verified", "completed"].includes(task.status))
+      .filter((task) => {
+        const needsAcceptance = task.isMine && task.acceptanceStatus === "pending";
+        const needsReview = task.isReviewer && ["submitted", "review"].includes(task.status);
+        const isActiveMine = task.isMine && !["verified", "completed"].includes(task.status);
+        return needsAcceptance || needsReview || isActiveMine || task.isOpenForClaiming;
+      })
       .sort((first, second) => first.dueDate.localeCompare(second.dueDate))[0];
 
     return (
@@ -52,11 +57,18 @@ export function TeamSystem({
         </header>
 
         <div className="home-next-grid">
-          {rooms[0] ? (
+          {nextTask ? (
+            <article className="home-focus-card home-next-action-card">
+              <p className="card-eyebrow">Your next action</p>
+              <h2>{nextTask.title}</h2>
+              <p>{nextTask.projectTitle} · due {nextTask.dueDate}</p>
+              <button className="primary-button" type="button" onClick={() => onOpenProjects("personal-tasks")}>Open task</button>
+            </article>
+          ) : rooms[0] ? (
             <article className="home-focus-card">
-              <p className="card-eyebrow">Recently accessed room</p>
-              <h2>{rooms[0].name}</h2>
-              <p>{rooms[0].memberCount} {rooms[0].memberCount === 1 ? "member" : "members"} · realtime workspace</p>
+              <p className="card-eyebrow">Your next step</p>
+              <h2>Continue your project</h2>
+              <p>{rooms[0].name} · {rooms[0].memberCount} {rooms[0].memberCount === 1 ? "member" : "members"}</p>
               <button className="primary-button" type="button" onClick={() => onOpenRoom(rooms[0]._id)}>Continue project</button>
             </article>
           ) : (
@@ -69,11 +81,13 @@ export function TeamSystem({
           )}
 
           <aside className="home-due-card">
-            <p className="card-eyebrow">Due next</p>
+            <p className="card-eyebrow">Project at a glance</p>
             {nextTask ? (
-              <><h2>{nextTask.title}</h2><p>{nextTask.projectTitle} · due {nextTask.dueDate}</p><button className="quiet-button" type="button" onClick={() => onOpenProjects("personal-tasks")}>Open my tasks</button></>
+              <><h2>Due {nextTask.dueDate}</h2><p>{nextTask.projectTitle} is the next deadline in your queue.</p><button className="quiet-button" type="button" onClick={() => onOpenProjects("personal-tasks")}>View all my tasks</button></>
+            ) : rooms[0] ? (
+              <><h2>{rooms[0].name}</h2><p>{rooms[0].memberCount} {rooms[0].memberCount === 1 ? "member" : "members"} · realtime workspace</p><button className="quiet-button" type="button" onClick={() => onOpenRoom(rooms[0]._id)}>Open project</button></>
             ) : (
-              <><h2>No urgent tasks</h2><p>Your next assigned task will appear here.</p></>
+              <><h2>Start with a project</h2><p>Create a room or join your team with a code.</p></>
             )}
           </aside>
         </div>
