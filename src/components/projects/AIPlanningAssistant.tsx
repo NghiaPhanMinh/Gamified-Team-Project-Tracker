@@ -133,13 +133,13 @@ export function AIPlanningAssistant({
     <section className="ai-planning-assistant" aria-labelledby="ai-planning-title">
       <div className="ai-planning-heading">
         <div>
-          <p className="card-eyebrow">Optional planning helper</p>
-          <h3 className="display-heading" id="ai-planning-title">Ask AI to interpret the brief</h3>
+          <p className="card-eyebrow">AI-assisted project planning</p>
+          <h3 className="display-heading" id="ai-planning-title">Build the project plan with AI</h3>
         </div>
         <span>Draft only</span>
       </div>
       <p className="ai-safety-note">
-        AI suggestions are temporary and editable. Nothing is saved, assigned, or treated as fair until a person moves it into the manual form and confirms it.
+        AI creates a reviewable draft. Nothing is saved or assigned until a person checks the plan and confirms it.
       </p>
       {usage && !usage.platformGenerationAvailable && !byokActive ? <div className="feature-gate-card" role="status"><strong>AI GENERATION USED</strong><p>This Free project has used its platform AI draft. Editing and unlimited manual planning remain available, or activate a session-only key in Profile → AI Settings.</p></div> : null}
 
@@ -162,7 +162,7 @@ export function AIPlanningAssistant({
             type="submit"
             disabled={isGenerating || workspace.project.status === "archived" || (usage !== undefined && !usage.platformGenerationAvailable && !byokActive)}
           >
-            {isGenerating ? "Building a draft…" : draft ? "Generate a fresh draft" : "Generate AI draft"}
+            {isGenerating ? "Building a draft…" : draft ? "Generate a fresh draft" : "Generate AI Project Plan"}
           </button>
         </div>
       </form>
@@ -187,13 +187,12 @@ export function AIPlanningAssistant({
           </header>
 
           <section className="ai-output-card ai-plan-output" aria-labelledby="ai-plan-output-title">
-            <div className="ai-draft-section-heading"><h4 id="ai-plan-output-title">Suggested tasks</h4><span>{draft.tasks.length}</span></div>
-
-          <section className="ai-draft-section" aria-labelledby="ai-task-title">
+          <section className="ai-draft-section" aria-labelledby="ai-plan-output-title">
             <div className="ai-draft-section-heading">
-              <h4 id="ai-task-title">Suggested tasks</h4>
+              <h4 id="ai-plan-output-title">Suggested project plan</h4>
               <span>{draft.tasks.length}</span>
             </div>
+            <div className="ai-allocation-note"><strong>Suggested Allocation</strong><span>Owners and explanations are editable before the plan is saved.</span></div>
             <div className="ai-task-list">
               {draft.tasks.map((task) => (
                 <details key={task.tempId}>
@@ -258,24 +257,15 @@ export function AIPlanningAssistant({
           </section>
           </section>
 
-          <section className="ai-output-card ai-risk-output" aria-labelledby="ai-risk-output-title">
-          <div className="ai-draft-section-heading"><h4 id="ai-risk-output-title">Risks, assumptions & meeting suggestions</h4><span>Check</span></div>
-          <div className="ai-notes-grid">
-            <section>
-              <h4>Risks to check</h4>
-              <ul>{draft.risks.map((risk) => <li key={risk}>{risk}</li>)}</ul>
-            </section>
-            <section>
-              <h4>Assumptions to verify</h4>
-              <ul>{draft.assumptions.map((assumption) => <li key={assumption}>{assumption}</li>)}</ul>
-            </section>
-            <section>
-              <h4>Meeting suggestions</h4>
-              <p>Open Team Members to use the deterministic calendar overlap. AI can explain those saved windows, but never invent availability.</p>
-            </section>
-          </div>
-          <p className="ai-model-note">Generated through a free AI route. This draft is not saved.</p>
-          </section>
+          <details className="ai-output-card ai-risk-output">
+            <summary className="ai-draft-section-heading"><h4>Risks & assumptions</h4><span>Check</span></summary>
+            <div className="ai-notes-grid">
+              <section><h4>Risks to check</h4><ul>{draft.risks.map((risk) => <li key={risk}>{risk}</li>)}</ul></section>
+              <section><h4>Assumptions to verify</h4><ul>{draft.assumptions.map((assumption) => <li key={assumption}>{assumption}</li>)}</ul></section>
+              <section><h4>Meeting suggestions</h4><p>Open Team in the project workspace to use deterministic calendar overlap. AI never invents availability.</p></section>
+            </div>
+            <p className="ai-model-note">Generated through a free AI route. This draft is not saved.</p>
+          </details>
           <section className="ai-adjust-plan" aria-labelledby="ai-adjust-title">
             <div><h4 id="ai-adjust-title">Adjust Plan</h4><p>Describe one change and generate a fresh, fully validated draft.</p></div>
             <textarea maxLength={1500} value={adjustment} onChange={(event) => setAdjustment(event.target.value)} placeholder="For example: reduce the plan to eight tasks and keep testing in week three." />
@@ -283,7 +273,7 @@ export function AIPlanningAssistant({
           </section>
           <div className="ai-save-actions">
             <p>Saving is a human confirmation. Invalid or partial output is rejected by the server.</p>
-            <button className="primary-button" type="button" disabled={isGenerating} onClick={() => void handleSavePlan()}>{isGenerating ? "Saving…" : "Save reviewed plan"}</button>
+            <button className="primary-button" type="button" disabled={isGenerating} onClick={() => void handleSavePlan()}>{isGenerating ? "Saving…" : "Save Plan & Allocations"}</button>
           </div>
           {saveMessage ? <p className="form-success" role="status">{saveMessage}</p> : null}
         </div>

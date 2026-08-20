@@ -11,7 +11,7 @@ vi.mock("convex/react", () => ({
 describe("ProjectOnboarding", () => {
   afterEach(cleanup);
 
-  it("keeps task creation separate from allocation and retains earlier input", () => {
+  it("uses the new structure-to-create flow and retains earlier input", () => {
     render(
       <ProjectOnboarding
         mode="create"
@@ -21,12 +21,12 @@ describe("ProjectOnboarding", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: /choose a way to work/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /choose your project structure/i })).toBeInTheDocument();
     expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
-      "1Framework",
+      "1Structure",
       "2Brief",
-      "3Tasks",
-      "4Allocation",
+      "3Plan",
+      "4Allocate",
       "5Create",
     ]);
 
@@ -34,9 +34,8 @@ describe("ProjectOnboarding", () => {
     const projectName = screen.getByLabelText(/project name/i);
     fireEvent.change(projectName, { target: { value: "Studio launch" } });
     fireEvent.change(screen.getByLabelText(/project brief/i), { target: { value: "Create and test a campaign prototype." } });
-    fireEvent.click(screen.getByRole("button", { name: /continue to tasks/i }));
-    fireEvent.click(screen.getByRole("button", { name: /^ai generate tasks/i }));
-    fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /continue to project plan/i }));
+    fireEvent.click(screen.getByRole("button", { name: /continue to allocation/i }));
     fireEvent.click(screen.getByRole("button", { name: /back/i }));
     fireEvent.click(screen.getByRole("button", { name: /back/i }));
 

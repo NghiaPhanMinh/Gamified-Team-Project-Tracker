@@ -88,28 +88,28 @@ vi.mock("./ProjectTeamMembers", () => ({ ProjectTeamMembers: () => <div>Members<
 vi.mock("./DailyEvidenceFeed", () => ({ DailyEvidenceFeed: () => <div>Daily feed</div> }));
 vi.mock("./AIPlanningAssistant", () => ({ AIPlanningAssistant: () => null }));
 
-describe("ProjectWorkspace Battle hierarchy", () => {
+describe("ProjectWorkspace information hierarchy", () => {
   afterEach(cleanup);
 
-  it("uses one dominant Battle in Overview and places tools after sticky tasks", () => {
+  it("opens on Project Plan and keeps the battle below the progress metrics", () => {
     render(<ProjectWorkspace projectId={"project-1" as Id<"projects">} onClose={vi.fn()} />);
 
-    expect(screen.getAllByLabelText("Shared Battle Scene")).toHaveLength(1);
-    expect(screen.queryByRole("button", { name: "Battle Scene" })).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Your next move" })).toBeInTheDocument();
-    expect(screen.getByText("More Tools")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Project Plan" })).toHaveClass("is-active");
+    expect(screen.getByRole("heading", { name: "What are we making?" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Project phases" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Shared project Battle scene")).not.toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("button", { name: "Progress" }));
     const battle = screen.getByLabelText("Shared project Battle scene");
     const taskBoard = screen.getByRole("region", { name: "Your next move" });
-    const tools = screen.getByText("More Tools").closest("details");
     expect(battle.compareDocumentPosition(taskBoard) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(taskBoard.compareDocumentPosition(tools!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByText("Daily progress")).toBeInTheDocument();
   });
 
   it("opens the existing evidence workflow directly from the owner task note", () => {
     render(<ProjectWorkspace projectId={"project-1" as Id<"projects">} onClose={vi.fn()} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Submit Task" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue task" }));
 
     expect(screen.getByRole("dialog", { name: "Final illustration" })).toBeInTheDocument();
     expect(screen.getByText("Existing evidence workflow")).toBeInTheDocument();
