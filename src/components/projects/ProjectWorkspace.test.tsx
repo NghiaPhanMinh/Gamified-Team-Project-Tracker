@@ -91,12 +91,22 @@ vi.mock("./AIPlanningAssistant", () => ({ AIPlanningAssistant: () => null }));
 describe("ProjectWorkspace information hierarchy", () => {
   afterEach(cleanup);
 
-  it("opens on Project Plan and keeps the battle below the progress metrics", () => {
+  it("reads as brief, plan, responsibilities, actions, then game status", () => {
     render(<ProjectWorkspace projectId={"project-1" as Id<"projects">} onClose={vi.fn()} />);
 
     expect(screen.getByRole("button", { name: "Project Plan" })).toHaveClass("is-active");
-    expect(screen.getByRole("heading", { name: "What are we making?" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Project phases" })).toBeInTheDocument();
+    const brief = screen.getByRole("heading", { name: "Project Brief" });
+    const plan = screen.getByRole("heading", { name: "Project Plan" });
+    const responsibilities = screen.getByRole("heading", { name: "Tasks & Responsibilities" });
+    const action = screen.getByRole("heading", { name: "Final illustration" });
+    const game = screen.getByRole("heading", { name: "Battle status" });
+    expect(screen.getByText("Launch the campaign.")).toBeInTheDocument();
+    expect(screen.getByText("Anh")).toBeInTheDocument();
+    expect(screen.getByText("In Progress")).toBeInTheDocument();
+    expect(brief.compareDocumentPosition(plan) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(plan.compareDocumentPosition(responsibilities) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(responsibilities.compareDocumentPosition(action) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(action.compareDocumentPosition(game) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.queryByLabelText("Shared project Battle scene")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Progress" }));

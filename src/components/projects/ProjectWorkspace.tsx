@@ -408,7 +408,8 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
   return (
     <section className="project-workspace" aria-labelledby="open-project-title">
       <header className="open-project-header compact-project-header">
-        <div><p className="kicker">Project</p><h2 id="open-project-title">{workspace.project.title}</h2><p>{formatDeadline(workspace.project.deadline)} · {workspace.project.frameworkName}</p></div>
+        <div><p className="kicker">Project</p><h2 id="open-project-title">{workspace.project.title}</h2><p className="project-deadline-line">{formatDeadline(workspace.project.deadline)} · {workspace.project.frameworkName}</p></div>
+        <dl className="compact-project-priority"><div><dt>Progress</dt><dd>{progressPercent}%</dd></div><div><dt>Current phase</dt><dd>{currentPhase ?? "Project work"}</dd></div></dl>
         <button className="quiet-button" type="button" onClick={onClose}>Close project</button>
       </header>
 
@@ -420,42 +421,46 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
 
       {activeTab === "plan" ? (
         <div className="project-overview-flow project-plan-view">
-          <section className="project-plan-summary" aria-labelledby="project-plan-title">
-            <div className="project-plan-summary-heading">
-              <div><p className="card-eyebrow">Project plan</p><h2 id="project-plan-title">{workspace.project.title}</h2><p className="project-deadline-line">{formatDeadline(workspace.project.deadline)} · {workspace.project.frameworkName}</p></div>
-              <span className="project-progress-pill">{progressPercent}% complete</span>
-            </div>
-            <dl className="project-plan-metrics">
-              <div><dt>Overall progress</dt><dd>{progressPercent}%</dd></div>
-              <div><dt>Current phase</dt><dd>{currentPhase ?? "Project work"}</dd></div>
-              <div><dt>Tasks complete</dt><dd>{completedTaskCount} of {workspace.tasks.length}</dd></div>
-            </dl>
+          <section className="project-brief-card" aria-labelledby="project-brief-visible-title">
+            <div className="project-section-heading"><div><p className="card-eyebrow">Section 1</p><h2 id="project-brief-visible-title">Project Brief</h2></div>{workspace.canManageProject ? <button className="quiet-button" type="button" onClick={() => setBriefOpen(true)}>Edit Brief</button> : <span className="read-only-label">Read only</span>}</div>
+            <p>{workspace.project.description || "No project brief has been added yet."}</p>
+            <div className="project-brief-meta project-brief-summary-meta"><strong>Deadline</strong><span>{formatProjectDate(workspace.project.deadline)}</span><span>{workspace.members.length} team members</span><span>{workspace.project.frameworkName}</span></div>
           </section>
+
+          <section className="project-plan-breakdown" aria-labelledby="project-plan-title">
+            <div className="project-section-heading"><div><p className="card-eyebrow">Section 2</p><h2 id="project-plan-title">Project Plan</h2><p>How we are going to complete this project.</p></div><button className="quiet-button" type="button" onClick={() => setActiveTab("tasks")}>Open Tasks</button></div>
+
+            <section className="phase-timeline-card" aria-labelledby="phase-timeline-title">
+              <div className="project-section-heading"><div><p className="card-eyebrow">Framework breakdown</p><h3 id="phase-timeline-title">Project phases</h3></div></div>
+              <ol className="phase-timeline">
+                {workspace.phases.map((phase) => {
+                  const phaseTasks = workspace.tasks.filter((task) => task.phaseId === phase._id);
+                  const complete = phaseTasks.length > 0 && phaseTasks.every((task) => ["completed", "verified"].includes(task.status));
+                  const isCurrent = !complete && phase.title === currentPhase;
+                  return <li key={phase._id} className={complete ? "is-complete" : isCurrent ? "is-current" : "is-upcoming"}><span className="phase-timeline-marker">{complete ? "✓" : isCurrent ? "●" : "○"}</span><div><strong>{phase.title}</strong><small>{complete ? "Completed" : isCurrent ? "Current phase" : "Upcoming"} · {phaseTasks.length} task{phaseTasks.length === 1 ? "" : "s"}</small>{phase.description ? <p className="phase-timeline-description">{phase.description}</p> : null}</div></li>;
+                })}
+              </ol>
+            </section>
+
+            <section className="task-outline-card" aria-labelledby="task-outline-title">
+              <div className="project-section-heading"><div><p className="card-eyebrow">Task outline</p><h3 id="task-outline-title">Tasks &amp; Responsibilities</h3><p>Who is responsible for what?</p></div></div>
+              {workspace.tasks.length === 0 ? <p className="project-empty-inline">No tasks have been added yet.</p> : <div className="task-outline-list">{workspace.phases.map((phase) => {
+                const phaseTasks = workspace.tasks.filter((task) => task.phaseId === phase._id);
+                if (phaseTasks.length === 0) return null;
+                return <section key={phase._id} className="task-outline-phase"><h4>{phase.title}</h4><ul>{phaseTasks.map((task) => {
+                  const owner = task.assignmentState === "unassigned" ? "Unassigned" : task.isOpenForClaiming ? "Open for Claiming" : memberNameById.get(task.primaryOwnerProfileId) ?? "Team member";
+                  return <li key={task._id}><div><strong>{task.title}</strong><span>{owner}</span></div><div><span>Due {formatProjectDate(task.dueDate)}</span><span className={`task-outline-status task-outline-status-${task.status}`}>{STATUS_LABELS[task.status as TaskStatus]}</span></div></li>;
+                })}</ul></section>;
+              })}</div>}
+            </section>
+          </section>
+
+          {workspace.canManageProject && (workspace.project.setupMode === "ai" || workspace.tasks.length === 0) ? <AIPlanningAssistant workspace={workspace} onUseTask={useAiTask} /> : null}
 
           <section className="next-action-card project-next-action" aria-labelledby="next-action-title">
             <div><p className="card-eyebrow">Your next action</p><h2 id="next-action-title">{nextAction ? nextAction.task.title : "You are up to date"}</h2><p>{nextAction ? `${nextAction.label} · ${nextAction.task.dueDate}` : "No action is waiting for you right now. Check the project progress or help with an open task."}</p></div>
             {nextAction ? <button className="primary-button" type="button" disabled={isSaving} onClick={handleNextAction}>{nextAction.label}</button> : <button className="secondary-button" type="button" onClick={() => setActiveTab("progress")}>View progress</button>}
           </section>
-
-          <section className="project-brief-card" aria-labelledby="project-brief-visible-title">
-            <div className="project-section-heading"><div><p className="card-eyebrow">Project brief</p><h2 id="project-brief-visible-title">What are we making?</h2></div>{workspace.canManageProject ? <button className="quiet-button" type="button" onClick={() => setBriefOpen(true)}>Edit brief</button> : <span className="read-only-label">Read only</span>}</div>
-            <p>{workspace.project.description || "No project brief has been added yet."}</p>
-            <div className="project-brief-meta"><span>Deadline {formatProjectDate(workspace.project.deadline)}</span><span>{workspace.members.length} team members</span><span>{workspace.phases.length} phases</span></div>
-          </section>
-
-          <section className="phase-timeline-card" aria-labelledby="phase-timeline-title">
-            <div className="project-section-heading"><div><p className="card-eyebrow">Plan structure</p><h2 id="phase-timeline-title">Project phases</h2></div><button className="quiet-button" type="button" onClick={() => setActiveTab("tasks")}>Open tasks</button></div>
-            <ol className="phase-timeline">
-              {workspace.phases.map((phase) => {
-                const phaseTasks = workspace.tasks.filter((task) => task.phaseId === phase._id);
-                const complete = phaseTasks.length > 0 && phaseTasks.every((task) => ["completed", "verified"].includes(task.status));
-                const isCurrent = !complete && phase.title === currentPhase;
-                return <li key={phase._id} className={complete ? "is-complete" : isCurrent ? "is-current" : "is-upcoming"}><span className="phase-timeline-marker">{complete ? "✓" : isCurrent ? "●" : "○"}</span><div><strong>{phase.title}</strong><small>{complete ? "Completed" : isCurrent ? "Current phase" : "Upcoming"} · {phaseTasks.length} task{phaseTasks.length === 1 ? "" : "s"}</small></div></li>;
-              })}
-            </ol>
-          </section>
-
-          {workspace.canManageProject && (workspace.project.setupMode === "ai" || workspace.tasks.length === 0) ? <AIPlanningAssistant workspace={workspace} onUseTask={useAiTask} /> : null}
 
           <section className="game-status-preview" aria-labelledby="game-status-preview-title">
             <div><p className="card-eyebrow">Project health</p><h2 id="game-status-preview-title">Battle status</h2><p>{remainingBossDamage} DMG remains across {workspace.tasks.length} project tasks.</p></div>
