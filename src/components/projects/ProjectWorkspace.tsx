@@ -93,7 +93,7 @@ function projectTaskProgress(tasks: Workspace["tasks"]) {
 
 function ProjectShareButton({ teamId }: { teamId: Id<"teams"> }) {
   const teamWorkspace = useQuery(api.teams.getWorkspace, { teamId });
-  const [copyStatus, setCopyStatus] = useState("Share code");
+  const [copied, setCopied] = useState(false);
 
   if (!teamWorkspace || !teamWorkspace.team) return null;
   const joinCode = teamWorkspace.team.joinCode;
@@ -101,16 +101,16 @@ function ProjectShareButton({ teamId }: { teamId: Id<"teams"> }) {
   async function copyCode() {
     try {
       await navigator.clipboard.writeText(joinCode);
-      setCopyStatus("Copied!");
-      setTimeout(() => setCopyStatus("Share code"), 2000);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 4000);
     } catch {
-      setCopyStatus(joinCode);
+      setCopied(true);
     }
   }
 
   return (
     <button className="quiet-button share-code-btn" type="button" onClick={() => void copyCode()}>
-      📋 {copyStatus}
+      📋 {copied ? `Code: ${joinCode} (Copied!)` : "Share code"}
     </button>
   );
 }

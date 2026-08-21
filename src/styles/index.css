@@ -475,7 +475,7 @@ h1 span {
 .team-workspace {
   width: min(100% - 2rem, 80rem);
   margin: 0 auto;
-  padding: clamp(2rem, 5vw, 5rem) 0;
+  padding: 0.5rem 0 2rem 0;
 }
 
 .team-loading {
@@ -2427,9 +2427,9 @@ footer {
 }
 
 .project-workspace {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 4px solid var(--color-navy);
+  margin-top: 0.25rem;
+  padding-top: 0;
+  border-top: none;
 }
 
 .project-workspace-loading {

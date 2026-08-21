@@ -1499,19 +1499,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const dragonX = 730 + damageClearedFraction * 60;
 
   return (
-    <section className={`battle-page ${activeEvent ? "has-new-attack" : ""} ${defeated ? "is-defeated" : ""}`} aria-labelledby="battle-title">
+    <section className={`battle-page ${activeEvent ? "has-new-attack" : ""} ${defeated ? "is-defeated" : ""}`} aria-label="Project Battle Scene">
       <SVGDefs />
-
-      <header className="battle-summary">
-        <div>
-          <p className="kicker">Realtime encounter landscape</p>
-          <h3 id="battle-title" className="battle-title-large">{state.project.title}</h3>
-        </div>
-        <dl>
-          <div><dt>Goblins Left</dt><dd>{optionalMetrics.goblinsRemaining ?? 0} / {optionalMetrics.totalGoblinsForProject ?? 0}</dd></div>
-          <div><dt>Tasks Left</dt><dd>{state.remainingRequiredTasks}</dd></div>
-        </dl>
-      </header>
 
       {/* Main 10-Layer Geometric SVG Landscape Scene */}
       <div className="landscape-scene-container" style={{ position: "relative" }} aria-label="Interactive project encounter scene">
