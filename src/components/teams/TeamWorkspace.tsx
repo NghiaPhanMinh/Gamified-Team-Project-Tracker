@@ -86,7 +86,7 @@ export function TeamWorkspace({
         teamId={selectedTeamId}
         members={workspace.members.map((member) => ({ profileId: member.profileId, displayName: member.displayName }))}
         currentProfileId={workspace.currentProfileId}
-        requestedProjectTab="plan"
+        requestedProjectTab="progress"
       />
       <details className="room-tools">
         <summary>Room tools · Framework library</summary>

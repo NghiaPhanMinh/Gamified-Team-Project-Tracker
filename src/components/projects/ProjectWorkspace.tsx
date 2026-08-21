@@ -422,78 +422,157 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
 
       {activeTab === "plan" ? (
         <div className="project-overview-flow project-plan-view">
-          <section className="project-brief-card" aria-labelledby="project-brief-visible-title">
-            <div className="project-section-heading"><div><p className="card-eyebrow">Section 1</p><h2 id="project-brief-visible-title">Project Brief</h2></div>{workspace.canManageProject ? <button className="quiet-button" type="button" onClick={() => setBriefOpen(true)}>Edit Brief</button> : <span className="read-only-label">Read only</span>}</div>
-            <p>{workspace.project.description || "No project brief has been added yet."}</p>
-            <div className="project-brief-meta project-brief-summary-meta"><strong>Deadline</strong><span>{formatProjectDate(workspace.project.deadline)}</span><span>{workspace.members.length} team members</span><span>{workspace.project.frameworkName}</span></div>
-          </section>
+          {workspace.canManageProject ? (
+            <AIPlanningAssistant workspace={workspace} onUseTask={useAiTask} />
+          ) : null}
 
           <section className="project-plan-breakdown" aria-labelledby="project-plan-title">
-            <div className="project-section-heading"><div><p className="card-eyebrow">Section 2</p><h2 id="project-plan-title">Project Plan</h2><p>How we are going to complete this project.</p></div><button className="quiet-button" type="button" onClick={() => setActiveTab("tasks")}>Open Tasks</button></div>
+            <div className="project-section-heading">
+              <div>
+                <p className="card-eyebrow">Project Framework &amp; Responsibilities</p>
+                <h2 id="project-plan-title">Task Responsibilities</h2>
+                <p>Consolidated outline of project brief, deadline, phases, and task allocations.</p>
+              </div>
+              <div className="project-plan-actions">
+                {workspace.canManageProject ? (
+                  <button className="quiet-button" type="button" onClick={() => setBriefOpen(true)}>
+                    Edit Brief &amp; Deadline
+                  </button>
+                ) : null}
+                <button className="primary-button" type="button" onClick={() => setActiveTab("tasks")}>
+                  Open Task Board
+                </button>
+              </div>
+            </div>
+
+            <section className="project-brief-card" aria-labelledby="project-brief-visible-title">
+              <div className="project-section-heading">
+                <div>
+                  <p className="card-eyebrow">Brief Details</p>
+                  <h3 id="project-brief-visible-title">{workspace.project.title}</h3>
+                </div>
+              </div>
+              <p>{workspace.project.description || "No project brief has been added yet."}</p>
+              <div className="project-brief-meta project-brief-summary-meta">
+                <strong>Deadline</strong>
+                <span>{formatProjectDate(workspace.project.deadline)}</span>
+                <span>{workspace.members.length} team members</span>
+                <span>{workspace.project.frameworkName}</span>
+              </div>
+            </section>
 
             <section className="phase-timeline-card" aria-labelledby="phase-timeline-title">
-              <div className="project-section-heading"><div><p className="card-eyebrow">Framework breakdown</p><h3 id="phase-timeline-title">Project phases</h3></div></div>
+              <div className="project-section-heading">
+                <div>
+                  <p className="card-eyebrow">Framework breakdown</p>
+                  <h3 id="phase-timeline-title">Project phases</h3>
+                </div>
+              </div>
               <ol className="phase-timeline">
                 {workspace.phases.map((phase) => {
                   const phaseTasks = workspace.tasks.filter((task) => task.phaseId === phase._id);
                   const complete = phaseTasks.length > 0 && phaseTasks.every((task) => ["completed", "verified"].includes(task.status));
                   const isCurrent = !complete && phase.title === currentPhase;
-                  return <li key={phase._id} className={complete ? "is-complete" : isCurrent ? "is-current" : "is-upcoming"}><span className="phase-timeline-marker">{complete ? "✓" : isCurrent ? "●" : "○"}</span><div><strong>{phase.title}</strong><small>{complete ? "Completed" : isCurrent ? "Current phase" : "Upcoming"} · {phaseTasks.length} task{phaseTasks.length === 1 ? "" : "s"}</small>{phase.description ? <p className="phase-timeline-description">{phase.description}</p> : null}</div></li>;
+                  return (
+                    <li key={phase._id} className={complete ? "is-complete" : isCurrent ? "is-current" : "is-upcoming"}>
+                      <span className="phase-timeline-marker">{complete ? "✓" : isCurrent ? "●" : "○"}</span>
+                      <div>
+                        <strong>{phase.title}</strong>
+                        <small>{complete ? "Completed" : isCurrent ? "Current phase" : "Upcoming"} · {phaseTasks.length} task{phaseTasks.length === 1 ? "" : "s"}</small>
+                        {phase.description ? <p className="phase-timeline-description">{phase.description}</p> : null}
+                      </div>
+                    </li>
+                  );
                 })}
               </ol>
             </section>
 
             <section className="task-outline-card" aria-labelledby="task-outline-title">
-              <div className="project-section-heading"><div><p className="card-eyebrow">Task outline</p><h3 id="task-outline-title">Tasks &amp; Responsibilities</h3><p>Who is responsible for what?</p></div></div>
-              {workspace.tasks.length === 0 ? <p className="project-empty-inline">No tasks have been added yet.</p> : <div className="task-outline-list">{workspace.phases.map((phase) => {
-                const phaseTasks = workspace.tasks.filter((task) => task.phaseId === phase._id);
-                if (phaseTasks.length === 0) return null;
-                return <section key={phase._id} className="task-outline-phase"><h4>{phase.title}</h4><ul>{phaseTasks.map((task) => {
-                  const owner = task.assignmentState === "unassigned" ? "Unassigned" : task.isOpenForClaiming ? "Open for Claiming" : memberNameById.get(task.primaryOwnerProfileId) ?? "Team member";
-                  return <li key={task._id}><div><strong>{task.title}</strong><span>{owner}</span></div><div><span>Due {formatProjectDate(task.dueDate)}</span><span className={`task-outline-status task-outline-status-${task.status}`}>{STATUS_LABELS[task.status as TaskStatus]}</span></div></li>;
-                })}</ul></section>;
-              })}</div>}
+              <div className="project-section-heading">
+                <div>
+                  <p className="card-eyebrow">Task Outline</p>
+                  <h3 id="task-outline-title">Tasks &amp; Responsibilities</h3>
+                  <p>Who is responsible for what?</p>
+                </div>
+              </div>
+              {workspace.tasks.length === 0 ? (
+                <p className="project-empty-inline">No tasks have been added yet.</p>
+              ) : (
+                <div className="task-outline-list">
+                  {workspace.phases.map((phase) => {
+                    const phaseTasks = workspace.tasks.filter((task) => task.phaseId === phase._id);
+                    if (phaseTasks.length === 0) return null;
+                    return (
+                      <section key={phase._id} className="task-outline-phase">
+                        <h4>{phase.title}</h4>
+                        <ul>
+                          {phaseTasks.map((task) => {
+                            const owner = task.assignmentState === "unassigned" ? "Unassigned" : task.isOpenForClaiming ? "Open for Claiming" : memberNameById.get(task.primaryOwnerProfileId) ?? "Team member";
+                            return (
+                              <li key={task._id}>
+                                <div>
+                                  <strong>{task.title}</strong>
+                                  <span>{owner}</span>
+                                </div>
+                                <div>
+                                  <span>Due {formatProjectDate(task.dueDate)}</span>
+                                  <span className={`task-outline-status task-outline-status-${task.status}`}>{STATUS_LABELS[task.status as TaskStatus]}</span>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </section>
+                    );
+                  })}
+                </div>
+              )}
             </section>
-          </section>
-
-          {workspace.canManageProject && (workspace.project.setupMode === "ai" || workspace.tasks.length === 0) ? <AIPlanningAssistant workspace={workspace} onUseTask={useAiTask} /> : null}
-
-          <section className="next-action-card project-next-action" aria-labelledby="next-action-title">
-            <div><p className="card-eyebrow">Your next action</p><h2 id="next-action-title">{nextAction ? nextAction.task.title : "You are up to date"}</h2><p>{nextAction ? `${nextAction.label} · ${nextAction.task.dueDate}` : "No action is waiting for you right now. Check the project progress or help with an open task."}</p></div>
-            {nextAction ? <button className="primary-button" type="button" disabled={isSaving} onClick={handleNextAction}>{nextAction.label}</button> : <button className="secondary-button" type="button" onClick={() => setActiveTab("progress")}>View progress</button>}
-          </section>
-
-          <section className="game-status-preview" aria-labelledby="game-status-preview-title">
-            <div><p className="card-eyebrow">Project health</p><h2 id="game-status-preview-title">Battle status</h2><p>{remainingBossDamage} DMG remains across {workspace.tasks.length} project tasks.</p></div>
-            <dl><div><dt>Boss HP</dt><dd>{remainingBossDamage}/{totalBossDamage || 0}</dd></div><div><dt>Tasks complete</dt><dd>{completedTaskCount}/{workspace.tasks.length}</dd></div></dl>
-            <button className="quiet-button" type="button" onClick={() => setActiveTab("progress")}>View Battle</button>
           </section>
         </div>
       ) : null}
 
       {activeTab === "progress" ? (
         <div className="project-overview-flow battle-workspace-overview project-progress-view">
-          <section className="progress-metrics-card" aria-labelledby="progress-title">
-            <div><p className="card-eyebrow">Project progress</p><h2 id="progress-title">How the work is moving</h2></div>
-            <dl className="progress-metrics-grid"><div><dt>Deadline</dt><dd>{formatDeadline(workspace.project.deadline)}</dd></div><div><dt>Overall progress</dt><dd>{progressPercent}%</dd></div><div><dt>Current phase</dt><dd>{currentPhase ?? "Project work"}</dd></div><div><dt>Tasks remaining</dt><dd>{workspace.tasks.length - completedTaskCount}</dd></div></dl>
+          <section className="project-brief-card project-brief-banner" aria-labelledby="project-brief-visible-title">
+            <div className="project-section-heading">
+              <div>
+                <p className="card-eyebrow">Project Brief Summary</p>
+                <h2 id="project-brief-visible-title">{workspace.project.title}</h2>
+              </div>
+              <button className="primary-button" type="button" onClick={() => setActiveTab("plan")}>
+                📝 View / Edit Project Plan
+              </button>
+            </div>
+            <p>{workspace.project.description || "No project brief has been added yet."}</p>
+            <div className="project-brief-meta project-brief-summary-meta">
+              <strong>Deadline</strong>
+              <span>{formatProjectDate(workspace.project.deadline)}</span>
+              <span>{workspace.members.length} team members</span>
+              <span>{workspace.project.frameworkName}</span>
+            </div>
           </section>
 
           <section className="shared-battle-stage" aria-label="Shared project Battle scene">
             <BattleScene projectId={workspace.project._id} currentPhase={currentPhase} tasksLocked={Boolean(workspace.project.tasksLocked)} />
           </section>
 
-          <BattleTaskBoard
-            tasks={battleTasks}
-            canManageProject={workspace.canManageProject}
-            tasksLocked={Boolean(workspace.project.tasksLocked)}
-            disabled={isSaving}
-            onOpenDetails={(taskId) => setOpenBattleTaskId(taskId as Id<"tasks">)}
-            onClaim={(taskId) => void runAction(() => claimTask({ taskId: taskId as Id<"tasks"> }), "The task could not be claimed.")}
-            onAccept={(taskId) => void runAction(() => acceptTask({ taskId: taskId as Id<"tasks"> }), "The request could not be accepted.")}
-            onDecline={(taskId) => void runAction(() => declineTask({ taskId: taskId as Id<"tasks"> }), "The request could not be declined.")}
-          />
-
-          <section className="progress-feed-section" aria-labelledby="progress-feed-title"><div className="project-section-heading"><div><p className="card-eyebrow">Evidence and activity</p><h2 id="progress-feed-title">Daily progress</h2></div><span className="read-only-label">Live feed</span></div><DailyEvidenceFeed projectId={workspace.project._id} /></section>
+          <section className="next-action-card project-next-action" aria-labelledby="next-action-title">
+            <div>
+              <p className="card-eyebrow">Your next action</p>
+              <h2 id="next-action-title">{nextAction ? nextAction.task.title : "You are up to date"}</h2>
+              <p>{nextAction ? `${nextAction.label} · ${nextAction.task.dueDate}` : "No action is waiting for you right now. Check the project progress or help with an open task."}</p>
+            </div>
+            {nextAction ? (
+              <button className="primary-button" type="button" disabled={isSaving} onClick={handleNextAction}>
+                {nextAction.label}
+              </button>
+            ) : (
+              <button className="secondary-button" type="button" onClick={() => setActiveTab("tasks")}>
+                View Task Board
+              </button>
+            )}
+          </section>
 
           <details className="battle-more-tools">
             <summary><span>More Tools</span><span className="battle-tools-alerts">{needsMyReviewCount > 0 ? `${needsMyReviewCount} to review` : null}{requestTasks.length > 0 ? `${requestTasks.length} task request${requestTasks.length === 1 ? "" : "s"}` : null}{workspace.canManageProject && completionRequests.length > 0 ? `${completionRequests.length} approval${completionRequests.length === 1 ? "" : "s"}` : null}</span></summary>
@@ -517,6 +596,19 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
       {activeTab === "tasks" ? (
         <section className="tasks-room-tab" aria-labelledby="team-tasks-title">
           <header className="project-list-heading"><div><p className="card-eyebrow">Required project work</p><h3 id="team-tasks-title">Tasks</h3><p>Task owners attach evidence, assigned reviewers recommend completion, and the creator makes the final call.</p></div>{workspace.canManageProject ? <button className="primary-button" type="button" onClick={() => { if (showTaskForm) resetTaskForm(); setShowTaskForm((current) => !current); }}>{showTaskForm ? "Close task form" : "Add Task"}</button> : null}</header>
+
+          <BattleTaskBoard
+            tasks={battleTasks}
+            canManageProject={workspace.canManageProject}
+            tasksLocked={Boolean(workspace.project.tasksLocked)}
+            disabled={isSaving}
+            onOpenDetails={(taskId) => setOpenBattleTaskId(taskId as Id<"tasks">)}
+            onClaim={(taskId) => void runAction(() => claimTask({ taskId: taskId as Id<"tasks"> }), "The task could not be claimed.")}
+            onAccept={(taskId) => void runAction(() => acceptTask({ taskId: taskId as Id<"tasks"> }), "The request could not be accepted.")}
+            onDecline={(taskId) => void runAction(() => declineTask({ taskId: taskId as Id<"tasks"> }), "The request could not be declined.")}
+          />
+
+          <section className="progress-feed-section" aria-labelledby="progress-feed-title"><div className="project-section-heading"><div><p className="card-eyebrow">Evidence and activity</p><h2 id="progress-feed-title">Daily progress</h2></div><span className="read-only-label">Live feed</span></div><DailyEvidenceFeed projectId={workspace.project._id} /></section>
 
           {requestTasks.length > 0 ? <section className="task-request-panel"><p className="card-eyebrow">Task requests</p>{requestTasks.map((task) => <article key={task._id}><div><strong>{task.title}</strong><span>Requested by the room creator · weight {task.weight}</span></div><div><button className="primary-button" type="button" onClick={() => void runAction(() => acceptTask({ taskId: task._id }), "The task request could not be accepted.")}>Accept</button><button className="quiet-button" type="button" onClick={() => void runAction(() => declineTask({ taskId: task._id }), "The task request could not be declined.")}>Decline</button></div></article>)}</section> : null}
 
@@ -542,31 +634,7 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
             </form>
           ) : null}
 
-          <div className="task-filter-bar">
-            <label><span>Search</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Task or skill" /></label>
-            <label><span>Status</span><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="all">All statuses</option>{Object.entries(STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-            <label><span>Reviewer</span><select value={reviewerFilter} onChange={(event) => setReviewerFilter(event.target.value)}><option value="all">All reviewers</option><option value="later">Owner chooses later</option>{workspace.members.map((member) => <option key={member.profileId} value={member.profileId}>{member.displayName}</option>)}</select></label>
-            <label className="inline-check-field"><input type="checkbox" checked={needsMyReview} onChange={(event) => setNeedsMyReview(event.target.checked)} /><span>Needs My Review</span></label>
-          </div>
-
-          {filteredTasks.length === 0 ? <div className="project-empty"><strong>No tasks match.</strong><p>Change the filters or ask the creator to add the first task.</p></div> : <div className="task-card-list">{filteredTasks.map((task) => {
-            const ownerLabel = task.assignmentState === "unassigned" ? "Unassigned" : task.isOpenForClaiming ? "Open for claiming" : memberNameById.get(task.primaryOwnerProfileId) ?? "Team member";
-            const reviewerLabel = task.reviewerProfileId ? memberNameById.get(task.reviewerProfileId) ?? "Reviewer" : "Owner chooses later";
-            return <article key={task._id} className={`project-task-card task-${task.status}`}>
-              <div className="task-card-top"><div><span className="project-status">{STATUS_LABELS[task.status as TaskStatus]}</span><small>{phaseNameById.get(task.phaseId)} · due {formatProjectDate(task.dueDate)}</small></div></div>
-              <h4>{task.title}</h4><p className="task-card-description">{task.description}</p>
-              <div className="task-primary-meta"><span>Owner: {ownerLabel}</span><span>Due {formatProjectDate(task.dueDate)}</span></div>
-              <details className="task-secondary-details"><summary>Task details</summary><dl><div><dt>Reviewer</dt><dd>{reviewerLabel}</dd></div><div><dt>Weight</dt><dd>{task.weight} · {task.damage ?? 20} DMG</dd></div><div><dt>Skills</dt><dd>{(task.requiredSkills ?? []).join(", ") || "No skills specified"}</dd></div></dl></details>
-              <div className="task-card-actions">
-                {task.isOpenForClaiming ? <button className="primary-button" type="button" onClick={() => void runAction(() => claimTask({ taskId: task._id }), "The task could not be claimed.")}>Claim Task</button> : null}
-                {task.primaryOwnerProfileId === workspace.currentProfileId && task.acceptanceStatus === "pending" ? <><button className="primary-button" type="button" onClick={() => void runAction(() => acceptTask({ taskId: task._id }), "The request could not be accepted.")}>Accept</button><button className="quiet-button" type="button" onClick={() => void runAction(() => declineTask({ taskId: task._id }), "The request could not be declined.")}>Decline</button></> : null}
-                {task.primaryOwnerProfileId === workspace.currentProfileId && task.acceptanceStatus !== "pending" && task.status === "todo" && task.assignmentState !== "unassigned" ? <button className="secondary-button" type="button" onClick={() => void runAction(() => updateTaskStatus({ taskId: task._id, status: "in_progress" }), "The task could not be started.")}>Start Task</button> : null}
-                <button className="quiet-button" type="button" onClick={() => setOpenEvidenceTaskId((current) => current === task._id ? null : task._id)}>{openEvidenceTaskId === task._id ? "Close evidence" : "Evidence & Review"}</button>
-                {workspace.canManageProject ? <><button className="quiet-button" type="button" onClick={() => editTask(task)}>Edit</button><button className="danger-button" type="button" onClick={() => void runAction(() => deleteTask({ taskId: task._id }), "The task could not be deleted.")}>Delete</button></> : null}
-              </div>
-              {openEvidenceTaskId === task._id ? <TaskEvidencePanel taskId={task._id} taskTitle={task.title} taskStatus={task.status as TaskStatus} requiresReview reviewerName={task.reviewerProfileId ? memberNameById.get(task.reviewerProfileId) : undefined} /> : null}
-            </article>;
-          })}</div>}
+          {battleTasks.length === 0 ? <div className="project-empty"><strong>No tasks in this project yet.</strong><p>Click Add Task to create the first task.</p></div> : null}
         </section>
       ) : null}
 
