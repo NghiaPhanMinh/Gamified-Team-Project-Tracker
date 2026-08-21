@@ -217,6 +217,26 @@ export function AIPlanningAssistant({
             </button>
           </header>
 
+          {draft.milestones && draft.milestones.length > 0 ? (
+            <section className="ai-output-card ai-milestones-output" aria-labelledby="ai-milestones-output-title">
+              <div className="ai-draft-section-heading">
+                <h4 id="ai-milestones-output-title">Suggested Milestones</h4>
+                <span>{draft.milestones.length}</span>
+              </div>
+              <div className="ai-milestones-grid">
+                {draft.milestones.map((milestone) => (
+                  <div key={milestone.tempId} className="ai-milestone-card">
+                    <div>
+                      <strong>{milestone.title}</strong>
+                      <small>Due {milestone.dueDate} · {workspace.phases.find((p) => p._id === milestone.phaseId)?.title ?? "Phase"}</small>
+                    </div>
+                    <p>{milestone.description}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
           <section className="ai-output-card ai-plan-output" aria-labelledby="ai-plan-output-title">
           <section className="ai-draft-section" aria-labelledby="ai-plan-output-title">
             <div className="ai-draft-section-heading">

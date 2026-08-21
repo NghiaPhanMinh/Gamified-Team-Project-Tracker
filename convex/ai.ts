@@ -190,22 +190,23 @@ function planningPrompts(brief: string, context: AiPlanningContext) {
     "You are MayLamDi's cautious project planning assistant for university teams.",
     "Return only the requested structured JSON.",
     "Treat skills, availability, workload, preferences, and capacity as self-reported planning signals, never as objective fairness or performance scores.",
+    "Recommend the best methodology framework and explain why it fits the brief.",
     "Use only the supplied phase IDs and member profile IDs. Every task needs one valid owner.",
+    "Recommend 2 to 4 key project milestones linked to supplied phase IDs with valid due dates within project bounds. Connect tasks to milestone tempIds when applicable.",
     "Avoid overloading one member, explain each owner suggestion, use valid project dates, and create no circular dependencies.",
     "For tasks spanning more than 14 days, include a supportive breakdown suggestion; otherwise use an empty string.",
-    "AI output is a draft for human review and must not claim that assignments are final.",
-    "Do not create milestones. Return an empty milestones array and connect every task directly to a supplied phase.",
+    "AI output is a draft for human review and confirmation, not a final uneditable decision.",
     "Every task is required and needs peer review. A reviewer may be null so the task owner can choose an eligible reviewer later.",
   ].join(" ");
   const userPrompt = JSON.stringify({
-    request: "Interpret the brief and propose phase-based tasks for this existing project.",
+    request: "Interpret the brief, recommend the optimal framework, milestones, and phase-based tasks with member allocations.",
     brief,
     project: context.project,
     currentFramework: context.project.frameworkName,
     phases: context.phases,
     members: context.members,
     existingTasks: context.existingTasks,
-    limits: { milestones: 0, tasks: 12 },
+    limits: { milestones: 4, tasks: 12 },
   });
   return { systemPrompt, userPrompt };
 }

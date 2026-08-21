@@ -34,13 +34,33 @@ export const savePlan = mutation({
       members: members.map((member) => ({ profileId: member.profileId })),
     });
     const now = Date.now();
+
+    // 1. Insert Milestones
+    const milestoneIds = new Map<string, Id<"milestones">>();
+    for (const milestone of plan.milestones) {
+      const milestoneId = await ctx.db.insert("milestones", {
+        projectId: project._id,
+        phaseId: milestone.phaseId as Id<"phases">,
+        title: milestone.title,
+        description: milestone.description,
+        dueDate: milestone.dueDate,
+        status: "planned",
+        requiredTaskIds: [],
+        createdAt: now,
+        updatedAt: now,
+      });
+      milestoneIds.set(milestone.tempId, milestoneId);
+    }
+
+    // 2. Insert Tasks
     const taskIds = new Map<string, Id<"tasks">>();
     for (const task of plan.tasks) {
       const isOpenForClaiming = project.allocationStrategy === "self_selection";
+      const dbMilestoneId = task.milestoneTempId ? milestoneIds.get(task.milestoneTempId) : undefined;
       const taskId = await ctx.db.insert("tasks", {
         projectId: project._id,
         phaseId: task.phaseId as Id<"phases">,
-        milestoneId: undefined,
+        milestoneId: dbMilestoneId,
         title: task.title,
         description: task.description,
         primaryOwnerProfileId: task.primaryOwnerProfileId as Id<"userProfiles">,
@@ -75,6 +95,7 @@ export const savePlan = mutation({
       taskIds.set(task.tempId, taskId);
     }
 
+    // 3. Update task dependencies & milestone requiredTaskIds
     for (const task of plan.tasks) {
       const taskId = taskIds.get(task.tempId)!;
       await ctx.db.patch(taskId, {
@@ -89,7 +110,20 @@ export const savePlan = mutation({
         createdAt: now,
       });
     }
+
+    for (const milestone of plan.milestones) {
+      const dbMilestoneId = milestoneIds.get(milestone.tempId);
+      if (!dbMilestoneId) continue;
+      const matchingTaskIds = plan.tasks
+        .filter((t) => t.milestoneTempId === milestone.tempId)
+        .map((t) => taskIds.get(t.tempId)!)
+        .filter(Boolean);
+      await ctx.db.patch(dbMilestoneId, {
+        requiredTaskIds: matchingTaskIds,
+      });
+    }
+
     await refreshProjectProgress(ctx, project, profile._id);
-    return { taskCount: plan.tasks.length, milestoneCount: 0 };
+    return { taskCount: plan.tasks.length, milestoneCount: plan.milestones.length };
   },
 });
