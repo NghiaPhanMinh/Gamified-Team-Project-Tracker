@@ -5,6 +5,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { BUILT_IN_FRAMEWORKS } from "../../data/frameworks";
 import { getErrorMessage } from "../../lib/errors";
+import { trackEvent } from "../../lib/analytics";
 
 type ProjectOnboardingProps = {
   mode: "create" | "join";
@@ -140,6 +141,12 @@ export function ProjectOnboarding({
     setError(null);
     const validationError = validateStep();
     if (validationError) { setError(validationError); return; }
+    if (step === 2) {
+      trackEvent("brief_submitted", {
+        has_deadline: Boolean(deadline),
+        target_member_count: Number(targetMemberCount),
+      });
+    }
     if (step < 5) { setStep((current) => current + 1); return; }
 
     setIsSaving(true);
@@ -177,6 +184,17 @@ export function ProjectOnboarding({
         setupMode: taskCreationMode,
         taskCreationMode,
         allocationStrategy: allocationMode,
+      });
+
+      trackEvent("project_created", {
+        framework_type: selectedFramework.type,
+        allocation_strategy: allocationMode,
+        task_creation_mode: taskCreationMode,
+      });
+
+      trackEvent("project_launched", {
+        framework_type: selectedFramework.type,
+        task_creation_mode: taskCreationMode,
       });
 
       if (taskCreationMode === "manual") {

@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { getErrorMessage } from "../../lib/errors";
+import { trackEvent } from "../../lib/analytics";
 
 type EvidenceType = "note" | "link" | "image" | "pdf";
 
@@ -137,6 +138,10 @@ export function TaskEvidencePanel({
       setUrl("");
       setFile(null);
       setUploadProgress(0);
+      trackEvent("evidence_submitted", {
+        evidence_type: type,
+        has_file: type === "image" || type === "pdf",
+      });
     } catch (caughtError) {
       setError(getErrorMessage(caughtError, "The evidence could not be saved."));
     } finally {
@@ -150,6 +155,9 @@ export function TaskEvidencePanel({
 
     try {
       await submitReview({ taskId, status, comment: reviewComment });
+      trackEvent("review_completed", {
+        review_status: status,
+      });
       setReviewComment("");
     } catch (caughtError) {
       setError(getErrorMessage(caughtError, "The review could not be submitted."));

@@ -5,6 +5,7 @@ import type { FunctionReturnType } from "convex/server";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { getErrorMessage } from "../../lib/errors";
+import { trackEvent } from "../../lib/analytics";
 import { BattleScene } from "../game/BattleScene";
 import { AIPlanningAssistant, type AiTaskSuggestion } from "./AIPlanningAssistant";
 import { AllocationWorkbench } from "./AllocationWorkbench";
@@ -591,7 +592,13 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
         {(workspace.canManageProject || workspace.isTeamOwner) && !workspace.project.tasksLocked ? <section className="task-allocation-lock"><div><strong>Allocation</strong><span>Freeze the required task count and reveal the shared Boss HP baseline.</span></div><button className="secondary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => lockTasks({ projectId: workspace.project._id }), "The task list could not be locked.")}>Lock project task list</button></section> : null}
         {workspace.project.tasksLocked ? <p className="task-lock-state">🔒 Task allocation baseline is locked for this Battle.</p> : null}
 
-        {workspace.canManageProject && openBattleTask.status === "awaiting_creator" ? <section className="battle-completion-actions"><strong>Reviewer recommends completion</strong><div><button className="primary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => decideCompletion({ taskId: openBattleTask._id, decision: "approve" }), "The task could not be completed.")}>Approve Complete</button><button className="secondary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => decideCompletion({ taskId: openBattleTask._id, decision: "reject" }), "The task could not be returned.")}>Return to In Progress</button></div></section> : null}
+        {workspace.canManageProject && openBattleTask.status === "awaiting_creator" ? <section className="battle-completion-actions"><strong>Reviewer recommends completion</strong><div><button className="primary-button" type="button" disabled={isSaving} onClick={() => void runAction(async () => {
+          await decideCompletion({ taskId: openBattleTask._id, decision: "approve" });
+          trackEvent("task_completed", {
+            weight: openBattleTask.weight,
+            damage: openBattleTask.damage ?? 20,
+          });
+        }, "The task could not be completed.")}>Approve Complete</button><button className="secondary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => decideCompletion({ taskId: openBattleTask._id, decision: "reject" }), "The task could not be returned.")}>Return to In Progress</button></div></section> : null}
 
         <TaskEvidencePanel taskId={openBattleTask._id} taskTitle={openBattleTask.title} taskStatus={openBattleTask.status as TaskStatus} requiresReview={openBattleTask.requiresReview} reviewerName={openBattleTask.reviewerProfileId ? memberNameById.get(openBattleTask.reviewerProfileId) : undefined} />
         <TaskTradePanel key={openBattleTask._id} projectId={workspace.project._id} initialTaskId={openBattleTask.primaryOwnerProfileId === workspace.currentProfileId ? openBattleTask._id : undefined} />

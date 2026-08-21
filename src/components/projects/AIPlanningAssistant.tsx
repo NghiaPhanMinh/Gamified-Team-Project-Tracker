@@ -7,6 +7,7 @@ import { getErrorMessage } from "../../lib/errors";
 import { getByokSession } from "../../lib/byokSession";
 import { friendlyAiError } from "../../lib/aiErrors";
 import { AI_RETRY_DELAYS_MS, isRetryablePlatformAiError } from "../../lib/aiRetry";
+import { trackEvent } from "../../lib/analytics";
 
 type Workspace = FunctionReturnType<typeof api.tasks.getWorkspace>;
 type AiPlan = FunctionReturnType<typeof api.ai.generateProjectPlan>;
@@ -35,9 +36,14 @@ export function AIPlanningAssistant({
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const byokActive = getByokSession() !== null;
 
-  useEffect(() => () => {
-    if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
-  }, []);
+  useEffect(() => {
+    trackEvent("ai_assistant_opened", {
+      project_status: workspace.project.status,
+    });
+    return () => {
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+    };
+  }, [workspace.project.status]);
 
   async function generateDraft(nextBrief: string) {
     const byok = getByokSession();
@@ -72,8 +78,20 @@ export function AIPlanningAssistant({
     setRetryNotice(null);
     setIsGenerating(true);
 
+    trackEvent("brief_submitted", {
+      brief_length: brief.length,
+    });
+    trackEvent("ai_prompt_submitted", {
+      prompt_type: "initial_brief",
+      prompt_length: brief.length,
+    });
+
     try {
       const result = await generateDraft(brief);
+      trackEvent("ai_plan_generated", {
+        task_count: result.tasks.length,
+        risk_count: result.risks.length,
+      });
       setDraft(result);
       setSaveMessage(null);
     } catch (caughtError) {
@@ -89,9 +107,19 @@ export function AIPlanningAssistant({
     setError(null);
     setRetryNotice(null);
     setIsGenerating(true);
+
+    trackEvent("ai_prompt_submitted", {
+      prompt_type: "adjustment",
+      prompt_length: adjustment.trim().length,
+    });
+
     try {
       const adjustedBrief = `${brief}\n\nHuman adjustment request: ${adjustment.trim()}`.slice(0, 8000);
       const result = await generateDraft(adjustedBrief);
+      trackEvent("ai_plan_generated", {
+        task_count: result.tasks.length,
+        risk_count: result.risks.length,
+      });
       setDraft(result);
       setAdjustment("");
       setSaveMessage("A revised draft is ready. Review it before saving.");
@@ -110,6 +138,9 @@ export function AIPlanningAssistant({
     setIsGenerating(true);
     try {
       const result = await savePlan({ projectId: workspace.project._id, plan: draft });
+      trackEvent("plan_confirmed", {
+        task_count: result.taskCount,
+      });
       setSaveMessage(`${result.taskCount} tasks were saved. Assigned teammates can now accept or decline.`);
     } catch (caughtError) {
       setError(getErrorMessage(caughtError, "The reviewed AI plan could not be saved."));
@@ -247,7 +278,12 @@ export function AIPlanningAssistant({
                       <small>Dependencies: {task.dependencyTempIds.length ? task.dependencyTempIds.join(", ") : "none"} · Collaborators: {task.collaboratorProfileIds.length}</small>
                     </div>
                     {task.longTaskBreakdown ? <p className="long-task-guidance ai-field-wide">{task.longTaskBreakdown}</p> : null}
-                    <button className="primary-button ai-field-wide" type="button" onClick={() => onUseTask(task)}>
+                    <button className="primary-button ai-field-wide" type="button" onClick={() => {
+                      trackEvent("ai_recommendation_accepted", {
+                        recommendation_type: "task_suggestion",
+                      });
+                      onUseTask(task);
+                    }}>
                       Review in manual task form
                     </button>
                   </div>

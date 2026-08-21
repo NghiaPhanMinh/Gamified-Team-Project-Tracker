@@ -2,7 +2,7 @@ export const CHARACTER_PALETTE = [
   { name: "Yellow", value: "#FFF73F" },
   { name: "Orange", value: "#FEAA01" },
   { name: "Pink", value: "#FF8AE7" },
-  { name: "Magenta", value: "#FD39E4" },
+  { name: "Purple", value: "#FD39E4" },
   { name: "Green", value: "#1DD851" },
   { name: "Blue", value: "#4CA0FE" },
   { name: "White", value: "#FFFDED" },
