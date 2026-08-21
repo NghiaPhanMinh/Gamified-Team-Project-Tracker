@@ -146,7 +146,7 @@ export function ProfileCenter({
   const initialByok = getByokSession();
   const [useOwnKey, setUseOwnKey] = useState(initialByok !== null);
   const [apiKey, setApiKey] = useState(initialByok?.apiKey ?? "");
-  const [model, setModel] = useState(initialByok?.model ?? "google/gemma-3-27b-it:free");
+  const [model, setModel] = useState(initialByok?.model ?? "openrouter/free");
 
   /* Realtime profile data arrives after the first render; hydrate once without
      overwriting edits made while the save request is in flight. */
