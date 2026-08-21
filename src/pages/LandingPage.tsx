@@ -27,7 +27,7 @@ export function LandingPage() {
             <GoogleSignInButton />
             <a className="quiet-button" href="#how-it-works">See how it works</a>
           </div>
-          <p className="marketing-signin-note">Sign in once to create or join a project room and keep your contribution trail private.</p>
+          <p className="marketing-signin-note">Sign in once to keep your contribution trail private.</p>
           <div className="marketing-proof" aria-label="MayLamDi principles">
             <span>✓ Clear project plans</span>
             <span>✓ Explainable allocation</span>
