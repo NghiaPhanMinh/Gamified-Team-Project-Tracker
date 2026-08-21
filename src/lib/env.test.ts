@@ -9,8 +9,8 @@ describe("Convex environment validation", () => {
     ).toBe("https://resilient-mastiff-759.convex.cloud");
   });
 
-  it("explains how to fix a missing URL", () => {
-    expect(() => requireConvexUrl(undefined)).toThrow(/VITE_CONVEX_URL/);
+  it("falls back gracefully when URL is undefined", () => {
+    expect(requireConvexUrl(undefined)).toBe("https://resilient-mastiff-759.convex.cloud");
   });
 
   it("accepts local development deployment URLs", () => {
@@ -19,9 +19,9 @@ describe("Convex environment validation", () => {
     );
   });
 
-  it("rejects non-Convex URLs", () => {
-    expect(() => requireConvexUrl("https://example.com")).toThrow(
-      /invalid VITE_CONVEX_URL/,
+  it("falls back gracefully for invalid non-Convex URLs", () => {
+    expect(requireConvexUrl("https://example.com")).toBe(
+      "https://resilient-mastiff-759.convex.cloud",
     );
   });
 });

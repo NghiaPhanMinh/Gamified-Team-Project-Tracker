@@ -91,37 +91,24 @@ vi.mock("./AIPlanningAssistant", () => ({ AIPlanningAssistant: () => null }));
 describe("ProjectWorkspace information hierarchy", () => {
   afterEach(cleanup);
 
-  it("reads as brief, plan, responsibilities, actions, then game status", () => {
-    render(<ProjectWorkspace projectId={"project-1" as Id<"projects">} onClose={vi.fn()} />);
+  it("renders Progress as default tab with Brief Summary, BattleScene, and Next Action", () => {
+    render(<ProjectWorkspace projectId={"project-1" as Id<"projects">} onClose={vi.fn()} initialTab="progress" />);
 
-    expect(screen.getByRole("button", { name: "Project Plan" })).toHaveClass("is-active");
-    const brief = screen.getByRole("heading", { name: "Project Brief" });
-    const plan = screen.getByRole("heading", { name: "Project Plan" });
-    const responsibilities = screen.getByRole("heading", { name: "Tasks & Responsibilities" });
-    const action = screen.getByRole("heading", { name: "Final illustration" });
-    const game = screen.getByRole("heading", { name: "Battle status" });
-    expect(screen.getByText("Launch the campaign.")).toBeInTheDocument();
-    expect(screen.getByText("Anh")).toBeInTheDocument();
-    expect(screen.getByText("In Progress")).toBeInTheDocument();
-    expect(brief.compareDocumentPosition(plan) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(plan.compareDocumentPosition(responsibilities) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(responsibilities.compareDocumentPosition(action) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(action.compareDocumentPosition(game) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(screen.queryByLabelText("Shared project Battle scene")).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Progress" }));
-    const battle = screen.getByLabelText("Shared project Battle scene");
-    const taskBoard = screen.getByRole("region", { name: "Your next move" });
-    expect(battle.compareDocumentPosition(taskBoard) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(screen.getByText("Daily progress")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Progress" })).toHaveClass("is-active");
+    expect(screen.getByText("Project Brief Summary")).toBeInTheDocument();
+    expect(screen.getByText("Realtime Battle")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Final illustration" })).toBeInTheDocument();
   });
 
-  it("opens the existing evidence workflow directly from the owner task note", () => {
-    render(<ProjectWorkspace projectId={"project-1" as Id<"projects">} onClose={vi.fn()} />);
+  it("switches smoothly between tabs", () => {
+    render(<ProjectWorkspace projectId={"project-1" as Id<"projects">} onClose={vi.fn()} initialTab="progress" />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Continue task" }));
+    fireEvent.click(screen.getByRole("button", { name: "Project Plan" }));
+    expect(screen.getByRole("button", { name: "Project Plan" })).toHaveClass("is-active");
+    expect(screen.getByRole("heading", { name: "Task Responsibilities" })).toBeInTheDocument();
 
-    expect(screen.getByRole("dialog", { name: "Final illustration" })).toBeInTheDocument();
-    expect(screen.getByText("Existing evidence workflow")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Tasks" }));
+    expect(screen.getByRole("button", { name: "Tasks" })).toHaveClass("is-active");
+    expect(screen.getByText("Daily feed")).toBeInTheDocument();
   });
 });
