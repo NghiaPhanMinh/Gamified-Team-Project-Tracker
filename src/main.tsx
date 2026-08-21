@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { convexClient } from "./lib/convex";
 import "./styles/index.css";
+import "./styles/design-tokens.css";
 
 const root = document.getElementById("root");
 

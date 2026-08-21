@@ -4,54 +4,60 @@ import { ThemeToggle } from "../components/theme/ThemeToggle";
 
 export function LandingPage() {
   return (
-    <main className="site-shell">
-      <nav className="topbar" aria-label="Primary navigation">
+    <main className="marketing-shell">
+      <header className="marketing-header">
         <a className="nav-brand" href="/" aria-label="MayLamDi home">
           <BrandLogo compact />
           <span>MayLamDi</span>
         </a>
-        <div className="nav-actions">
+        <div className="marketing-header-actions">
           <ThemeToggle />
         </div>
-      </nav>
+      </header>
 
-      <section className="hero" aria-labelledby="hero-title">
-        <div className="hero-copy">
-          <p className="kicker">Group projects, without the guessing game.</p>
-          <h1 className="display-heading" id="hero-title">
-            Make the work
-            <span> feel shared.</span>
-          </h1>
-          <p className="hero-summary">
-            MayLamDi helps university teams plan projects, divide work fairly,
-            stay ahead of risks, and keep a clear contribution trail.
+      <section className="marketing-hero" aria-labelledby="marketing-title">
+        <div>
+          <p className="kicker">Teamwork tracking &amp; task allocation</p>
+          <h1 id="marketing-title">Make the work <em>feel shared.</em></h1>
+          <p className="marketing-copy">
+            Create or join a project room, then move from brief to plan to execution
+            together with less guesswork.
           </p>
-          <div className="hero-actions">
+          <div className="marketing-actions">
             <GoogleSignInButton />
-            <p>Sign in once to create or join a project room and keep your contribution trail private.</p>
+            <a className="quiet-button" href="#how-it-works">See how it works</a>
+          </div>
+          <p className="marketing-signin-note">Sign in once to create or join a project room and keep your contribution trail private.</p>
+          <div className="marketing-proof" aria-label="MayLamDi principles">
+            <span>✓ Clear project plans</span>
+            <span>✓ Explainable allocation</span>
+            <span>✓ Supportive progress tracking</span>
           </div>
         </div>
 
-        <div className="hero-art" aria-label="MayLamDi brand mark">
-          <div className="logo-orbit" aria-hidden="true" />
-          <BrandLogo className="hero-logo" />
-          <span className="floating-chip chip-one">fairness-first</span>
-          <span className="floating-chip chip-two">realtime</span>
-          <span className="floating-chip chip-three">human control</span>
+        <div className="marketing-preview" aria-label="MayLamDi workspace preview">
+          <div className="marketing-preview-top">
+            <span className="card-eyebrow">Project at a glance</span>
+            <span className="live-badge">Live workspace</span>
+          </div>
+          <div className="marketing-preview-card">
+            <span className="card-eyebrow">Brand campaign · Ideation</span>
+            <h2>Build a direction your team can share.</h2>
+            <p>Brief → plan → execute, with clear ownership at every step.</p>
+            <div className="progress-track" aria-label="Project progress 68%"><span style={{ width: "68%" }} /></div>
+          </div>
+          <div className="marketing-preview-grid">
+            <div className="marketing-mini-card"><span className="card-eyebrow">Team workload</span><strong>Balanced</strong><small>Visible before work drifts</small></div>
+            <div className="marketing-mini-card"><span className="card-eyebrow">AI support</span><strong>Reviewable</strong><small>Suggestions stay with your team</small></div>
+          </div>
         </div>
       </section>
 
-      <section className="landing-intro-grid" aria-label="How MayLamDi helps">
-        <h2 className="landing-intro-heading">How MayLamDi helps</h2>
-        <article><span>01</span><h2>Plan together</h2><p>Turn a brief into editable phases, tasks, deadlines, and clear meeting windows.</p></article>
-        <article><span>02</span><h2>Share work fairly</h2><p>Use skills, availability, workload, self-selection, or explainable AI suggestions.</p></article>
-        <article><span>03</span><h2>Prove progress</h2><p>Submit evidence, get a teammate review, and turn verified work into boss damage.</p></article>
+      <section className="marketing-features" id="how-it-works" aria-label="How MayLamDi works">
+        <article className="marketing-feature"><span className="card-eyebrow">01 / Understand</span><h2>Start with the brief.</h2><p>Keep the assignment purpose, requirements, deadline, and constraints visible to everyone.</p></article>
+        <article className="marketing-feature"><span className="card-eyebrow">02 / Share</span><h2>Plan work fairly.</h2><p>See who owns what, how much effort it carries, and where workload needs attention.</p></article>
+        <article className="marketing-feature"><span className="card-eyebrow">03 / Move</span><h2>Make progress visible.</h2><p>Track contribution and celebrate team moments without turning collaboration into a ranking.</p></article>
       </section>
-
-      <footer>
-        <BrandLogo compact />
-        <p>MayLamDi — shared work, clearly planned.</p>
-      </footer>
     </main>
   );
 }
