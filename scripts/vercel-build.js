@@ -21,7 +21,6 @@ if (!hasProductionDeployKey) {
 const result = spawnSync(command, args, {
   env: process.env,
   stdio: "inherit",
-  shell: true,
 });
 
 if (result.error) {
