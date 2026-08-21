@@ -110,9 +110,41 @@ body {
   margin: 0;
   background: var(--color-page);
   color: var(--color-text);
+}
+
+/* Smooth Light/Dark Mode Theme Transitions */
+body,
+.authenticated-shell,
+.app-header,
+.app-sidebar,
+.app-content,
+.project-workspace,
+.open-project-header,
+.project-tabs,
+.project-tabs button,
+.theme-toggle,
+.primary-button,
+.secondary-button,
+.quiet-button,
+.activity-center,
+.room-workspace,
+.project-plan-summary,
+.project-brief-card,
+.phase-timeline-card,
+.task-card,
+header,
+aside,
+nav,
+section,
+article,
+input,
+select,
+textarea {
   transition:
-    background-color 180ms ease,
-    color 180ms ease;
+    background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 button,
