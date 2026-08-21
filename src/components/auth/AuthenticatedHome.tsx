@@ -13,29 +13,6 @@ import { MAIN_NAV_ITEMS, getPathForSection, type MainSection, type ProjectsView 
 
 import { ActivityCenter } from "../teams/ActivityCenter";
 
-function HeaderShareButton({ teamId }: { teamId: Id<"teams"> }) {
-  const workspace = useQuery(api.teams.getWorkspace, { teamId });
-  const [copyStatus, setCopyStatus] = useState("Share code");
-
-  if (!workspace) return null;
-  const joinCode = workspace.team.joinCode;
-
-  async function copyCode() {
-    try {
-      await navigator.clipboard.writeText(joinCode);
-      setCopyStatus("Copied!");
-      setTimeout(() => setCopyStatus("Share code"), 2000);
-    } catch {
-      setCopyStatus(joinCode);
-    }
-  }
-
-  return (
-    <button className="quiet-button" type="button" onClick={() => void copyCode()}>
-      {copyStatus}
-    </button>
-  );
-}
 
 export function AuthenticatedHome() {
   const { signOut } = useAuthActions();
@@ -167,19 +144,7 @@ export function AuthenticatedHome() {
           <span>MayLamDi</span>
         </Link>
         <div className="nav-actions">
-          {activeRoomId ? (
-            <>
-              <ActivityCenter teamId={activeRoomId} />
-              <HeaderShareButton teamId={activeRoomId} />
-              <button
-                className="quiet-button"
-                type="button"
-                onClick={() => openProjects("create")}
-              >
-                + Create Project
-              </button>
-            </>
-          ) : null}
+          {activeRoomId ? <ActivityCenter teamId={activeRoomId} /> : null}
           <ThemeToggle />
           <button
             className="secondary-button"

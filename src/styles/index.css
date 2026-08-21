@@ -217,6 +217,32 @@ footer .brand-logo {
   gap: 0.6rem;
 }
 
+.project-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.project-title-large {
+  font-size: clamp(1.8rem, 4vw, 2.5rem) !important;
+  font-weight: 900 !important;
+  margin: 0 !important;
+  line-height: 1.15 !important;
+}
+
+.battle-title-large {
+  font-size: clamp(1.75rem, 3.5vw, 2.35rem) !important;
+  font-weight: 900 !important;
+  margin: 0 !important;
+  line-height: 1.15 !important;
+}
+
+.share-code-btn {
+  font-size: 0.85rem;
+  padding: 0.35rem 0.75rem;
+}
+
 .theme-toggle {
   display: inline-flex;
   align-items: center;

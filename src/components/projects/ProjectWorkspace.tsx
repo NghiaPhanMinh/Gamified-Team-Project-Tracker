@@ -91,6 +91,30 @@ function projectTaskProgress(tasks: Workspace["tasks"]) {
   return totalWeight ? Math.round((completedWeight / totalWeight) * 100) : 0;
 }
 
+function ProjectShareButton({ teamId }: { teamId: Id<"teams"> }) {
+  const teamWorkspace = useQuery(api.teams.getWorkspace, { teamId });
+  const [copyStatus, setCopyStatus] = useState("Share code");
+
+  if (!teamWorkspace || !teamWorkspace.team) return null;
+  const joinCode = teamWorkspace.team.joinCode;
+
+  async function copyCode() {
+    try {
+      await navigator.clipboard.writeText(joinCode);
+      setCopyStatus("Copied!");
+      setTimeout(() => setCopyStatus("Share code"), 2000);
+    } catch {
+      setCopyStatus(joinCode);
+    }
+  }
+
+  return (
+    <button className="quiet-button share-code-btn" type="button" onClick={() => void copyCode()}>
+      📋 {copyStatus}
+    </button>
+  );
+}
+
 export function ProjectWorkspace({ projectId, onClose, initialTab = "progress" }: ProjectWorkspaceProps) {
   const workspace = useQuery(api.tasks.getWorkspace, { projectId });
   if (workspace === undefined) {
@@ -395,7 +419,10 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
       <header className="open-project-header compact-project-header">
         <div>
           <p className="kicker">Project</p>
-          <h2 id="open-project-title">{workspace.project.title}</h2>
+          <div className="project-title-row">
+            <h2 id="open-project-title" className="project-title-large">{workspace.project.title}</h2>
+            <ProjectShareButton teamId={workspace.project.teamId} />
+          </div>
           <p className="project-deadline-line">
             {formatDeadline(workspace.project.deadline)} · {workspace.project.frameworkName}
             {workspace.project.description ? ` · ${workspace.project.description}` : ""}
@@ -409,7 +436,6 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
           <button className="primary-button" type="button" onClick={() => setActiveTab("plan")}>
             📝 View / Edit Plan
           </button>
-          <button className="quiet-button" type="button" onClick={onClose}>Close project</button>
         </div>
       </header>
 

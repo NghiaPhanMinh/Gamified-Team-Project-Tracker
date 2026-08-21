@@ -1505,11 +1505,9 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       <header className="battle-summary">
         <div>
           <p className="kicker">Realtime encounter landscape</p>
-          <h3 id="battle-title">{state.project.title}</h3>
+          <h3 id="battle-title" className="battle-title-large">{state.project.title}</h3>
         </div>
         <dl>
-          <div><dt>Deadline</dt><dd>{state.project.deadline}</dd></div>
-          {currentPhase ? <div><dt>Current Phase</dt><dd>{currentPhase}</dd></div> : null}
           <div><dt>Goblins Left</dt><dd>{optionalMetrics.goblinsRemaining ?? 0} / {optionalMetrics.totalGoblinsForProject ?? 0}</dd></div>
           <div><dt>Tasks Left</dt><dd>{state.remainingRequiredTasks}</dd></div>
         </dl>
