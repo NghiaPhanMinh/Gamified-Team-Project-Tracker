@@ -1,4 +1,5 @@
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
+import { BrowserRouter } from "react-router-dom";
 
 import { AuthenticatedHome } from "./components/auth/AuthenticatedHome";
 import { AuthLoadingPage } from "./components/auth/AuthLoadingPage";
@@ -6,7 +7,7 @@ import { LandingPage } from "./pages/LandingPage";
 
 export function App() {
   return (
-    <>
+    <BrowserRouter>
       <AuthLoading>
         <AuthLoadingPage />
       </AuthLoading>
@@ -16,6 +17,6 @@ export function App() {
       <Authenticated>
         <AuthenticatedHome />
       </Authenticated>
-    </>
+    </BrowserRouter>
   );
 }

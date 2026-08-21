@@ -1,6 +1,7 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -8,10 +9,13 @@ import { BrandLogo } from "../brand/BrandLogo";
 import { TeamSystem } from "../teams/TeamSystem";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import { ProfileCenter } from "../profile/ProfileCenter";
-import { MAIN_NAV_ITEMS, type MainSection, type ProjectsView } from "../../lib/navigation";
+import { MAIN_NAV_ITEMS, getPathForSection, type MainSection, type ProjectsView } from "../../lib/navigation";
 
 export function AuthenticatedHome() {
   const { signOut } = useAuthActions();
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const profile = useQuery(api.profiles.getOrNull);
   const profileComplete =
     profile !== undefined &&
@@ -24,9 +28,6 @@ export function AuthenticatedHome() {
   const ensureProfile = useMutation(api.profiles.ensureCurrent);
   const hasRequestedProfile = useRef(false);
   const [profileError, setProfileError] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState<MainSection>("home");
-  const [projectsView, setProjectsView] = useState<ProjectsView>("index");
-  const [selectedRoomId, setSelectedRoomId] = useState<Id<"teams"> | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -42,6 +43,35 @@ export function AuthenticatedHome() {
       );
     });
   }, [ensureProfile, profile]);
+
+  // Synchronize state from current URL location
+  const path = location.pathname;
+  let activeSection: MainSection = "home";
+  let projectsView: ProjectsView = "index";
+  let selectedRoomId: Id<"teams"> | null = null;
+
+  if (path.startsWith("/profile")) {
+    activeSection = "profile";
+  } else if (path.startsWith("/projects/create")) {
+    activeSection = "projects";
+    projectsView = "create";
+  } else if (path.startsWith("/projects/join")) {
+    activeSection = "projects";
+    projectsView = "join";
+  } else if (path.startsWith("/projects/my-tasks")) {
+    activeSection = "projects";
+    projectsView = "personal-tasks";
+  } else if (path.startsWith("/rooms/")) {
+    activeSection = "projects";
+    projectsView = "room";
+    const roomIdStr = path.replace("/rooms/", "").split("/")[0];
+    if (roomIdStr) {
+      selectedRoomId = roomIdStr as Id<"teams">;
+    }
+  } else if (path.startsWith("/projects")) {
+    activeSection = "projects";
+    projectsView = "index";
+  }
 
   if (profileError) {
     return (
@@ -75,7 +105,7 @@ export function AuthenticatedHome() {
     return (
       <main className="authenticated-shell profile-gate-shell">
         <header className="app-header">
-          <a className="nav-brand" href="/" aria-label="MayLamDi home"><BrandLogo compact /><span>MayLamDi</span></a>
+          <Link className="nav-brand" to="/" aria-label="MayLamDi home"><BrandLogo compact /><span>MayLamDi</span></Link>
           <div className="nav-actions"><ThemeToggle /><button className="secondary-button" type="button" onClick={() => void signOut()}>Sign out</button></div>
         </header>
         <div className="profile-gate-content"><ProfileCenter setupRequired /></div>
@@ -86,12 +116,16 @@ export function AuthenticatedHome() {
   const availableRooms = rooms ?? [];
   const activeRoomId = availableRooms.some((room) => room._id === selectedRoomId)
     ? selectedRoomId
-    : (availableRooms[0]?._id ?? null);
+    : (availableRooms[0]?._id ?? selectedRoomId);
 
   function openProjects(view: ProjectsView, roomId?: Id<"teams">) {
-    setActiveSection("projects");
-    setProjectsView(view);
-    if (roomId) setSelectedRoomId(roomId);
+    const targetPath = getPathForSection("projects", view, roomId);
+    navigate(targetPath);
+    setMobileMenuOpen(false);
+  }
+
+  function handleNavClick(item: (typeof MAIN_NAV_ITEMS)[number]) {
+    navigate(item.path);
     setMobileMenuOpen(false);
   }
 
@@ -102,10 +136,10 @@ export function AuthenticatedHome() {
           setSidebarOpen((current) => !current);
           setMobileMenuOpen((current) => !current);
         }}>☰</button>
-        <a className="nav-brand" href="/" aria-label="MayLamDi home">
+        <Link className="nav-brand" to="/" aria-label="MayLamDi home">
           <BrandLogo compact />
           <span>MayLamDi</span>
-        </a>
+        </Link>
         <div className="nav-actions">
           <ThemeToggle />
           <button
@@ -120,11 +154,7 @@ export function AuthenticatedHome() {
       <aside className={`app-sidebar ${mobileMenuOpen ? "is-mobile-open" : ""}`} aria-label="Main navigation">
         <nav>
           {MAIN_NAV_ITEMS.map((item) => (
-            <button key={item.id} className={activeSection === item.id ? "is-active" : ""} type="button" onClick={() => {
-              setActiveSection(item.id);
-              if (item.id === "projects") setProjectsView("index");
-              setMobileMenuOpen(false);
-            }}>
+            <button key={item.id} className={activeSection === item.id ? "is-active" : ""} type="button" onClick={() => handleNavClick(item)}>
               <span aria-hidden="true">{item.icon}</span><strong>{item.label}</strong>
             </button>
           ))}
@@ -154,7 +184,7 @@ export function AuthenticatedHome() {
             projectsView={projectsView}
             rooms={availableRooms}
             selectedRoomId={activeRoomId}
-            onNavigateHome={() => setActiveSection("home")}
+            onNavigateHome={() => navigate("/")}
             onOpenProjects={(view) => openProjects(view)}
             onOpenRoom={(roomId) => openProjects("room", roomId)}
           />
