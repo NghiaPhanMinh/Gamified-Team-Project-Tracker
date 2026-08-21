@@ -32,12 +32,12 @@ type TaskStatus =
   | "verified"
   | "awaiting_creator";
 
-export type ProjectTab = "plan" | "tasks" | "progress" | "team";
+export type ProjectTab = "progress" | "tasks" | "plan" | "team";
 
 const PROJECT_TABS: { value: ProjectTab; label: string }[] = [
-  { value: "plan", label: "Project Plan" },
-  { value: "tasks", label: "Tasks" },
   { value: "progress", label: "Progress" },
+  { value: "tasks", label: "Tasks" },
+  { value: "plan", label: "Project Plan" },
   { value: "team", label: "Team" },
 ];
 
@@ -91,7 +91,7 @@ function projectTaskProgress(tasks: Workspace["tasks"]) {
   return totalWeight ? Math.round((completedWeight / totalWeight) * 100) : 0;
 }
 
-export function ProjectWorkspace({ projectId, onClose, initialTab = "plan" }: ProjectWorkspaceProps) {
+export function ProjectWorkspace({ projectId, onClose, initialTab = "progress" }: ProjectWorkspaceProps) {
   const workspace = useQuery(api.tasks.getWorkspace, { projectId });
   if (workspace === undefined) {
     return <section className="project-workspace project-workspace-loading" aria-busy="true"><p>Opening the project…</p></section>;
