@@ -6,8 +6,8 @@ describe("simplified navigation", () => {
   it("exposes only the three top-level destinations", () => {
     expect(MAIN_NAV_ITEMS.map((item) => item.label)).toEqual([
       "Home",
-      "Projects",
       "Profile",
+      "Projects",
     ]);
   });
 });

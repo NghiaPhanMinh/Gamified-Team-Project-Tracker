@@ -7,8 +7,8 @@ export type ProjectsView = "index" | "create" | "join" | "room" | "personal-task
 
 export const MAIN_NAV_ITEMS: { id: MainSection; label: string; icon: string; path: string }[] = [
   { id: "home", label: "Home", icon: "⌂", path: "/" },
-  { id: "projects", label: "Projects", icon: "▣", path: "/projects" },
   { id: "profile", label: "Profile", icon: "☺", path: "/profile" },
+  { id: "projects", label: "Projects", icon: "▣", path: "/projects" },
 ];
 
 export function getPathForSection(section: MainSection, view?: ProjectsView, roomId?: string): string {
