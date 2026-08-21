@@ -274,10 +274,6 @@ async function requestPlan(input: {
         ...(input.mode === "structured"
           ? { response_format: { type: "json_schema", json_schema: planSchema } }
           : {}),
-        // This task needs a bounded JSON result, not a hidden reasoning trace.
-        // Free reasoning models can otherwise spend the entire output budget on
-        // excluded thinking and return an empty final response.
-        reasoning: { effort: "none", exclude: true },
         temperature: 0.2,
         max_completion_tokens: 6_000,
       }),
