@@ -64,24 +64,7 @@ export function TeamWorkspace({
   }
 
   return (
-    <section className="room-workspace" aria-labelledby="room-title">
-      <header className="room-command-header">
-        <div>
-          <p className="room-breadcrumb">Projects / {workspace.team.name}</p>
-          <h1 className="room-title-compact" id="room-title">{workspace.team.name}</h1>
-          <p>{workspace.members.length} {workspace.members.length === 1 ? "member" : "members"} · live updates</p>
-        </div>
-        <div className="room-header-actions">
-          <ActivityCenter teamId={selectedTeamId} />
-          <button className="quiet-button" type="button" onClick={() => void copyCode()}>{copyStatus}</button>
-        </div>
-      </header>
-
-      <div className="room-switch-row">
-        <label><span>Current room</span><select value={selectedTeamId} onChange={(event) => onSelectTeam(event.target.value as Id<"teams">)}>{teams.map((team) => <option key={team._id} value={team._id}>{team.name} · {team.memberCount}</option>)}</select></label>
-        <button className="secondary-button" type="button" onClick={onAddTeam}>Create Another Project</button>
-      </div>
-
+    <section className="room-workspace">
       <ProjectHub
         teamId={selectedTeamId}
         members={workspace.members.map((member) => ({ profileId: member.profileId, displayName: member.displayName }))}

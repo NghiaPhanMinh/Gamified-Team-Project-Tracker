@@ -95,7 +95,8 @@ describe("ProjectWorkspace information hierarchy", () => {
     render(<ProjectWorkspace projectId={"project-1" as Id<"projects">} onClose={vi.fn()} initialTab="progress" />);
 
     expect(screen.getByRole("button", { name: "Progress" })).toHaveClass("is-active");
-    expect(screen.getByText("Project Brief Summary")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Campaign" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "📝 View / Edit Plan" })).toBeInTheDocument();
     expect(screen.getByText("Realtime Battle")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Final illustration" })).toBeInTheDocument();
   });

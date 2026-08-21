@@ -393,9 +393,24 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
   return (
     <section className="project-workspace" aria-labelledby="open-project-title">
       <header className="open-project-header compact-project-header">
-        <div><p className="kicker">Project</p><h2 id="open-project-title">{workspace.project.title}</h2><p className="project-deadline-line">{formatDeadline(workspace.project.deadline)} · {workspace.project.frameworkName}</p></div>
-        <dl className="compact-project-priority"><div><dt>Progress</dt><dd>{progressPercent}%</dd></div><div><dt>Current phase</dt><dd>{currentPhase ?? "Project work"}</dd></div></dl>
-        <button className="quiet-button" type="button" onClick={onClose}>Close project</button>
+        <div>
+          <p className="kicker">Project</p>
+          <h2 id="open-project-title">{workspace.project.title}</h2>
+          <p className="project-deadline-line">
+            {formatDeadline(workspace.project.deadline)} · {workspace.project.frameworkName}
+            {workspace.project.description ? ` · ${workspace.project.description}` : ""}
+          </p>
+        </div>
+        <dl className="compact-project-priority">
+          <div><dt>Progress</dt><dd>{progressPercent}%</dd></div>
+          <div><dt>Current phase</dt><dd>{currentPhase ?? "Project work"}</dd></div>
+        </dl>
+        <div className="open-project-header-actions">
+          <button className="primary-button" type="button" onClick={() => setActiveTab("plan")}>
+            📝 View / Edit Plan
+          </button>
+          <button className="quiet-button" type="button" onClick={onClose}>Close project</button>
+        </div>
       </header>
 
       <nav className="project-tabs" aria-label="Project sections">
@@ -518,25 +533,6 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
 
       {activeTab === "progress" ? (
         <div className="project-overview-flow battle-workspace-overview project-progress-view">
-          <section className="project-brief-card project-brief-banner" aria-labelledby="project-brief-visible-title">
-            <div className="project-section-heading">
-              <div>
-                <p className="card-eyebrow">Project Brief Summary</p>
-                <h2 id="project-brief-visible-title">{workspace.project.title}</h2>
-              </div>
-              <button className="primary-button" type="button" onClick={() => setActiveTab("plan")}>
-                📝 View / Edit Project Plan
-              </button>
-            </div>
-            <p>{workspace.project.description || "No project brief has been added yet."}</p>
-            <div className="project-brief-meta project-brief-summary-meta">
-              <strong>Deadline</strong>
-              <span>{formatProjectDate(workspace.project.deadline)}</span>
-              <span>{workspace.members.length} team members</span>
-              <span>{workspace.project.frameworkName}</span>
-            </div>
-          </section>
-
           <section className="shared-battle-stage" aria-label="Shared project Battle scene">
             <BattleScene projectId={workspace.project._id} currentPhase={currentPhase} tasksLocked={Boolean(workspace.project.tasksLocked)} />
           </section>
