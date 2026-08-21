@@ -106,8 +106,6 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
 }) {
   const createTask = useMutation(api.tasks.createTask);
   const updateTask = useMutation(api.tasks.updateTask);
-  const deleteTask = useMutation(api.tasks.deleteTask);
-  const updateTaskStatus = useMutation(api.tasks.updateTaskStatus);
   const createPhase = useMutation(api.tasks.createPhase);
   const renamePhase = useMutation(api.tasks.renamePhase);
   const claimTask = useMutation(api.tasks.claimTask);
@@ -121,7 +119,6 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
   const [activeTab, setActiveTab] = useState<ProjectTab>(initialTab);
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<Id<"tasks"> | null>(null);
-  const [openEvidenceTaskId, setOpenEvidenceTaskId] = useState<Id<"tasks"> | null>(null);
   const [openBattleTaskId, setOpenBattleTaskId] = useState<Id<"tasks"> | null>(null);
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
@@ -133,9 +130,6 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
   const [taskDifficulty, setTaskDifficulty] = useState("2");
   const [taskDueDate, setTaskDueDate] = useState(workspace.project.deadline);
   const [taskSkills, setTaskSkills] = useState("");
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [reviewerFilter, setReviewerFilter] = useState("all");
   const [needsMyReview, setNeedsMyReview] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
   const [briefTitle, setBriefTitle] = useState(workspace.project.title);
@@ -214,16 +208,6 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
     })();
   }, [createTask, workspace]);
 
-  const filteredTasks = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return workspace.tasks.filter((task) => {
-      const matchesText = !query || `${task.title} ${task.description} ${(task.requiredSkills ?? []).join(" ")}`.toLowerCase().includes(query);
-      const matchesStatus = statusFilter === "all" || task.status === statusFilter;
-      const matchesReviewer = reviewerFilter === "all" || (reviewerFilter === "later" ? !task.reviewerProfileId : task.reviewerProfileId === reviewerFilter);
-      const matchesMine = !needsMyReview || (task.reviewerProfileId === workspace.currentProfileId && ["submitted", "review"].includes(task.status));
-      return matchesText && matchesStatus && matchesReviewer && matchesMine;
-    });
-  }, [needsMyReview, reviewerFilter, search, statusFilter, workspace.currentProfileId, workspace.tasks]);
 
   const completionRequests = workspace.tasks.filter((task) => task.status === "awaiting_creator");
   const requestTasks = workspace.tasks.filter((task) =>
