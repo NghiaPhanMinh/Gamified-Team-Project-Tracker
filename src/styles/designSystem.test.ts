@@ -1,0 +1,23 @@
+import { describe, expect, it } from "vitest";
+import css from "./design-tokens.css?raw";
+
+describe("MayLamDi design-system contract", () => {
+  it("uses the supplied light and dark surface tokens", () => {
+    expect(css).toContain("--mld-bg: #fffdec");
+    expect(css).toContain("--mld-surface-01: #fffef9");
+    expect(css).toContain("--mld-bg: #071216");
+    expect(css).toContain("--mld-surface-01: #0b181c");
+  });
+
+  it("uses Inter and the supplied spacing, radius, and control scales", () => {
+    expect(css).toContain("--mld-font-ui: Inter");
+    expect(css).toContain("--mld-space-9: 96px");
+    expect(css).toContain("--mld-radius-card: 14px");
+    expect(css).toContain("min-height: 44px");
+  });
+
+  it("includes the specified mobile bottom navigation treatment", () => {
+    expect(css).toContain(".mobile-bottom-nav");
+    expect(css).toContain("grid-template-columns: repeat(5, 1fr)");
+  });
+});

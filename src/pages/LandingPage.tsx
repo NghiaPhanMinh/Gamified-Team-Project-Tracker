@@ -1,6 +1,7 @@
 import { GoogleSignInButton } from "../components/auth/GoogleSignInButton";
 import { BrandLogo } from "../components/brand/BrandLogo";
 import { ThemeToggle } from "../components/theme/ThemeToggle";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 export function LandingPage() {
   return (
@@ -25,13 +26,13 @@ export function LandingPage() {
           </p>
           <div className="marketing-actions">
             <GoogleSignInButton />
-            <a className="quiet-button" href="#how-it-works">See how it works</a>
+            <a className="quiet-button" href="#how-it-works">See how it works <ArrowRight aria-hidden="true" /></a>
           </div>
           <p className="marketing-signin-note">Sign in once to keep your contribution trail private.</p>
           <div className="marketing-proof" aria-label="MayLamDi principles">
-            <span>✓ Clear project plans</span>
-            <span>✓ Explainable allocation</span>
-            <span>✓ Supportive progress tracking</span>
+            <span><CheckCircle2 aria-hidden="true" /> Clear project plans</span>
+            <span><CheckCircle2 aria-hidden="true" /> Explainable allocation</span>
+            <span><CheckCircle2 aria-hidden="true" /> Supportive progress tracking</span>
           </div>
         </div>
 

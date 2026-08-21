@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
+import { Check, Clipboard, PencilLine } from "lucide-react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -110,22 +111,22 @@ function ProjectShareButton({ teamId }: { teamId: Id<"teams"> }) {
 
   return (
     <button className="quiet-button share-code-btn" type="button" onClick={() => void copyCode()}>
-      📋 {copied ? `Code: ${joinCode} (Copied!)` : "Share code"}
+      {copied ? <Check aria-hidden="true" /> : <Clipboard aria-hidden="true" />}
+      {copied ? `Code: ${joinCode} (Copied!)` : "Share code"}
     </button>
   );
 }
 
-export function ProjectWorkspace({ projectId, onClose, initialTab = "progress" }: ProjectWorkspaceProps) {
+export function ProjectWorkspace({ projectId, initialTab = "progress" }: ProjectWorkspaceProps) {
   const workspace = useQuery(api.tasks.getWorkspace, { projectId });
   if (workspace === undefined) {
     return <section className="project-workspace project-workspace-loading" aria-busy="true"><p>Opening the project…</p></section>;
   }
-  return <ProjectWorkspaceReady workspace={workspace} onClose={onClose} initialTab={initialTab} />;
+  return <ProjectWorkspaceReady workspace={workspace} initialTab={initialTab} />;
 }
 
-function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
+function ProjectWorkspaceReady({ workspace, initialTab }: {
   workspace: Workspace;
-  onClose: () => void;
   initialTab: ProjectTab;
 }) {
   const createTask = useMutation(api.tasks.createTask);
@@ -154,7 +155,7 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
   const [taskDifficulty, setTaskDifficulty] = useState("2");
   const [taskDueDate, setTaskDueDate] = useState(workspace.project.deadline);
   const [taskSkills, setTaskSkills] = useState("");
-  const [needsMyReview, setNeedsMyReview] = useState(false);
+  const [, setNeedsMyReview] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
   const [briefTitle, setBriefTitle] = useState(workspace.project.title);
   const [briefDescription, setBriefDescription] = useState(workspace.project.description);
@@ -245,11 +246,6 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
   )?.title ?? workspace.phases.at(-1)?.title;
   const progressPercent = projectTaskProgress(workspace.tasks);
   const completedTaskCount = workspace.tasks.filter((task) => ["completed", "verified"].includes(task.status)).length;
-  const totalBossDamage = workspace.tasks.reduce((total, task) => total + (task.damage ?? 20), 0);
-  const completedBossDamage = workspace.tasks
-    .filter((task) => ["completed", "verified"].includes(task.status))
-    .reduce((total, task) => total + (task.damage ?? 20), 0);
-  const remainingBossDamage = Math.max(totalBossDamage - completedBossDamage, 0);
   const nextAction = workspace.tasks
     .map((task) => {
       if (task.primaryOwnerProfileId === workspace.currentProfileId && task.acceptanceStatus === "pending") {
@@ -434,7 +430,7 @@ function ProjectWorkspaceReady({ workspace, onClose, initialTab }: {
         </dl>
         <div className="open-project-header-actions">
           <button className="primary-button" type="button" onClick={() => setActiveTab("plan")}>
-            📝 View / Edit Plan
+            <PencilLine aria-hidden="true" /> View / Edit Plan
           </button>
         </div>
       </header>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQuery } from "convex/react";
+import { X } from "lucide-react";
 
 import { api } from "../../../convex/_generated/api";
 import { getErrorMessage } from "../../lib/errors";
@@ -119,7 +120,7 @@ function SkillPicker({
         <div className="profile-skill-options">{choices.length ? choices.map((skill) => { const selected = skills.includes(skill) || softwareSkills.includes(skill); return <button key={skill} type="button" className={selected ? "is-selected" : ""} aria-pressed={selected} onClick={() => toggle(skill)}>{skill}</button>; }) : <p>{mode === "search" ? "Type a skill to search." : "No recommendations available."}</p>}</div>
       ) : null}
       <div className="selected-profile-skills" aria-live="polite">
-        {[...skills, ...softwareSkills].map((skill) => <button key={skill} type="button" onClick={() => toggle(skill)}>{skill}<span aria-hidden="true"> ×</span></button>)}
+        {[...skills, ...softwareSkills].map((skill) => <button key={skill} type="button" aria-label={`Remove ${skill}`} onClick={() => toggle(skill)}><span>{skill}</span><X aria-hidden="true" /></button>)}
       </div>
     </div>
   );
@@ -289,4 +290,3 @@ export function ProfileCenter({
     </section>
   );
 }
-

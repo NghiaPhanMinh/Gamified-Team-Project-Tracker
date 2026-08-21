@@ -1,5 +1,15 @@
 import { useState } from "react";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
+import {
+  Bell,
+  CheckCircle2,
+  FilePlus2,
+  FolderKanban,
+  History,
+  ListTodo,
+  Sparkles,
+  UsersRound,
+} from "lucide-react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -16,13 +26,13 @@ function localDateTime(timestamp: number) {
   }).format(new Date(timestamp));
 }
 
-function actionGlyph(action: string) {
-  if (action.includes("review")) return "✓";
-  if (action.includes("evidence")) return "+";
-  if (action.includes("task") || action.includes("milestone")) return "◆";
-  if (action.includes("project") || action.includes("framework")) return "▣";
-  if (action.includes("member") || action.includes("team")) return "●";
-  return "✦";
+function ActionIcon({ action }: { action: string }) {
+  if (action.includes("review")) return <CheckCircle2 aria-hidden="true" />;
+  if (action.includes("evidence")) return <FilePlus2 aria-hidden="true" />;
+  if (action.includes("task") || action.includes("milestone")) return <ListTodo aria-hidden="true" />;
+  if (action.includes("project") || action.includes("framework")) return <FolderKanban aria-hidden="true" />;
+  if (action.includes("member") || action.includes("team")) return <UsersRound aria-hidden="true" />;
+  return <Sparkles aria-hidden="true" />;
 }
 
 export function ActivityCenter({ teamId }: ActivityCenterProps) {
@@ -68,9 +78,7 @@ export function ActivityCenter({ teamId }: ActivityCenterProps) {
           <strong id="activity-center-title">Activity & notifications</strong>
         </span>
         <span className="activity-bell" aria-hidden="true">
-          <svg viewBox="0 0 24 24" focusable="false">
-            <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
-          </svg>
+          <Bell />
         </span>
         {unread !== undefined && unread.count > 0 ? (
           <span className="notification-count has-unread" aria-label={`${unread.count}${unread.hasMore ? "+" : ""} unread notifications`}>
@@ -117,7 +125,7 @@ export function ActivityCenter({ teamId }: ActivityCenterProps) {
                   className={activity.isUnread ? "activity-item is-unread" : "activity-item"}
                 >
                   <span className="activity-glyph" aria-hidden="true">
-                    {actionGlyph(activity.action)}
+                    <ActionIcon action={activity.action} />
                   </span>
                   <div>
                     <div className="activity-item-heading">
@@ -139,6 +147,7 @@ export function ActivityCenter({ teamId }: ActivityCenterProps) {
               type="button"
               onClick={() => loadMore(12)}
             >
+              <History aria-hidden="true" />
               Load older activity
             </button>
           ) : null}
