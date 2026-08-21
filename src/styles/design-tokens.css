@@ -559,6 +559,23 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   margin-bottom: 0;
 }
 
+.signed-in-welcome {
+  display: grid;
+  justify-content: start;
+  align-items: start;
+  gap: var(--mld-space-2);
+}
+
+.signed-in-welcome .kicker,
+.signed-in-welcome .display-heading,
+.signed-in-welcome > p:last-child {
+  margin: 0;
+}
+
+.signed-in-welcome > p:last-child {
+  max-width: 56ch;
+}
+
 .focused-page-heading p,
 .signed-in-welcome p,
 .team-hero p,
@@ -677,6 +694,33 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 .home-focus-card p,
 .home-focus-card .card-eyebrow {
   color: #fffdec;
+}
+
+.home-focus-card h2,
+.home-due-card h2 {
+  margin: var(--mld-space-2) 0;
+  font-size: var(--mld-h2-size);
+  line-height: var(--mld-h2-leading);
+}
+
+:root[data-theme="dark"] .home-focus-card {
+  border-color: var(--mld-border);
+  background: #101517;
+  color: #fffdec;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .home-focus-card h2,
+:root[data-theme="dark"] .home-focus-card p,
+:root[data-theme="dark"] .home-focus-card .card-eyebrow {
+  color: #fffdec;
+}
+
+:root[data-theme="dark"] .card-eyebrow,
+:root[data-theme="dark"] .kicker,
+:root[data-theme="dark"] .overline,
+:root[data-theme="dark"] .mini-label {
+  color: var(--mld-muted);
 }
 
 .home-focus-card .primary-button {
