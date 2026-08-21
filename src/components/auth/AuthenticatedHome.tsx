@@ -2,6 +2,16 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
+import {
+  FolderKanban,
+  FolderOpen,
+  Home,
+  ListChecks,
+  Menu,
+  PanelLeftClose,
+  UserRound,
+  X,
+} from "lucide-react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -13,6 +23,16 @@ import { MAIN_NAV_ITEMS, getPathForSection, type MainSection, type ProjectsView 
 
 import { ActivityCenter } from "../teams/ActivityCenter";
 
+const NAV_ICONS = {
+  home: Home,
+  projects: FolderKanban,
+  profile: UserRound,
+} as const;
+
+function NavigationIcon({ section }: { section: MainSection }) {
+  const Icon = NAV_ICONS[section];
+  return <Icon aria-hidden="true" />;
+}
 
 export function AuthenticatedHome() {
   const { signOut } = useAuthActions();
@@ -135,10 +155,13 @@ export function AuthenticatedHome() {
   return (
     <main className={`authenticated-shell app-shell ${sidebarOpen ? "sidebar-expanded" : "sidebar-collapsed"}`}>
       <header className="app-header">
-        <button className="nav-menu-button" type="button" aria-label="Toggle navigation" onClick={() => {
-          setSidebarOpen((current) => !current);
-          setMobileMenuOpen((current) => !current);
-        }}>☰</button>
+        <button className="nav-menu-button" type="button" aria-label="Toggle sidebar" onClick={() => {
+          if (window.matchMedia("(max-width: 760px)").matches) {
+            setMobileMenuOpen((current) => !current);
+          } else {
+            setSidebarOpen((current) => !current);
+          }
+        }}>{mobileMenuOpen ? <X aria-hidden="true" /> : sidebarOpen ? <PanelLeftClose aria-hidden="true" /> : <Menu aria-hidden="true" />}</button>
         <Link className="nav-brand" to="/" aria-label="MayLamDi home">
           <BrandLogo compact />
           <span>MayLamDi</span>
@@ -159,7 +182,7 @@ export function AuthenticatedHome() {
         <nav>
           {MAIN_NAV_ITEMS.map((item) => (
             <button key={item.id} className={activeSection === item.id ? "is-active" : ""} type="button" onClick={() => handleNavClick(item)}>
-              <span aria-hidden="true">{item.icon}</span><strong>{item.label}</strong>
+              <NavigationIcon section={item.id} /><strong>{item.label}</strong>
             </button>
           ))}
           <div className="sidebar-room-tree" aria-label="Project rooms">
@@ -170,11 +193,11 @@ export function AuthenticatedHome() {
                 type="button"
                 onClick={() => openProjects("room", room._id)}
               >
-                <span aria-hidden="true">├</span><strong>{room.name}</strong>
+                <FolderOpen aria-hidden="true" /><strong>{room.name}</strong>
               </button>
             ))}
             <button className={projectsView === "personal-tasks" ? "is-active is-room" : "is-room"} type="button" onClick={() => openProjects("personal-tasks")}>
-              <span aria-hidden="true">└</span><strong>My Tasks</strong>
+              <ListChecks aria-hidden="true" /><strong>My Tasks</strong>
             </button>
           </div>
         </nav>
@@ -194,6 +217,13 @@ export function AuthenticatedHome() {
           />
         </div>
       </div>
+      <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
+        <button className={activeSection === "home" ? "is-active" : ""} type="button" onClick={() => { navigate("/"); setMobileMenuOpen(false); }}><Home aria-hidden="true" /><span>Home</span></button>
+        <button className={activeSection === "projects" && projectsView !== "personal-tasks" ? "is-active" : ""} type="button" onClick={() => openProjects("index")}><FolderKanban aria-hidden="true" /><span>Projects</span></button>
+        <button className={projectsView === "personal-tasks" ? "is-active" : ""} type="button" onClick={() => openProjects("personal-tasks")}><ListChecks aria-hidden="true" /><span>Tasks</span></button>
+        <button className={activeSection === "profile" ? "is-active" : ""} type="button" onClick={() => { navigate("/profile"); setMobileMenuOpen(false); }}><UserRound aria-hidden="true" /><span>Profile</span></button>
+        <button className={mobileMenuOpen ? "is-active" : ""} type="button" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((current) => !current)}><Menu aria-hidden="true" /><span>More</span></button>
+      </nav>
     </main>
   );
 }

@@ -1,4 +1,5 @@
 import { useTheme } from "../../hooks/useTheme";
+import { Moon, Sun } from "lucide-react";
 
 export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
@@ -12,7 +13,7 @@ export function ThemeToggle() {
       aria-label={`Switch to ${nextTheme} mode`}
       aria-pressed={theme === "dark"}
     >
-      <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
+      {theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
       <span>{theme === "dark" ? "Light" : "Dark"}</span>
     </button>
   );
