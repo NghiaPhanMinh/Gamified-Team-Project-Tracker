@@ -147,11 +147,7 @@ export function BattleTaskBoard({
   return (
     <section className="battle-task-board" aria-labelledby="battle-task-board-title">
       <header className="battle-task-board-heading">
-        <div>
-          <p className="card-eyebrow">Live task strip</p>
-          <h3 id="battle-task-board-title">Your next move</h3>
-        </div>
-        <span>{tasks.filter((task) => !["completed", "verified"].includes(task.status)).length} active</span>
+        <span>{tasks.filter((task) => !["completed", "verified"].includes(task.status)).length} active tasks</span>
       </header>
 
       <section className="battle-task-group" aria-labelledby="my-battle-tasks-title">

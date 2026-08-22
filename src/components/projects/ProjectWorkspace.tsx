@@ -645,7 +645,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
 
       {activeTab === "tasks" ? (
         <section className="tasks-room-tab" aria-labelledby="team-tasks-title">
-          <header className="project-list-heading"><div><p className="card-eyebrow">Required project work</p><h3 id="team-tasks-title">Tasks</h3><p>Task owners attach evidence, assigned reviewers recommend completion, and the creator makes the final call.</p></div>{workspace.canManageProject ? <button className="primary-button" type="button" onClick={() => { if (showTaskForm) resetTaskForm(); setShowTaskForm((current) => !current); }}>{showTaskForm ? "Close task form" : "Add Task"}</button> : null}</header>
+          <header className="project-list-heading"><div><h3 id="team-tasks-title">Tasks</h3></div>{workspace.canManageProject ? <button className="primary-button" type="button" onClick={() => { if (showTaskForm) resetTaskForm(); setShowTaskForm((current) => !current); }}>{showTaskForm ? "Close task form" : "Add Task"}</button> : null}</header>
 
           <BattleTaskBoard
             tasks={battleTasks}
