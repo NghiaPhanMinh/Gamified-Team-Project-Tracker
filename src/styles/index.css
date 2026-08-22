@@ -6603,5 +6603,47 @@ footer {
   color: #0f172a !important;
 }
 
+/* Inline Deadline & Quick Presets Layout */
+.deadline-inline-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.deadline-input-preset-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.deadline-input-preset-row input[type="date"] {
+  flex: 1 1 180px;
+}
+
+.deadline-preset-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.preset-pill-btn {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-text) 30%, transparent);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preset-pill-btn:hover {
+  border-color: #0f172a;
+  background-color: #facc15;
+  color: #0f172a;
+}
+
+
 
 
