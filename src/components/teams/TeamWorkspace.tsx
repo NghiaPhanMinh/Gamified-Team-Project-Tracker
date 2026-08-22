@@ -8,10 +8,6 @@ import type { BuiltInFramework } from "../../data/frameworks";
 import { CustomFrameworkSection } from "../frameworks/CustomFrameworkSection";
 import { FrameworkLibrary } from "../frameworks/FrameworkLibrary";
 import { ProjectHub } from "../projects/ProjectHub";
-import { ActivityCenter } from "./ActivityCenter";
-import { CharacterCustomizer } from "./CharacterCustomizer";
-import type { SpellType } from "../../lib/character";
-import { ProfileCenter } from "../profile/ProfileCenter";
 
 type RoomSummary = {
   _id: Id<"teams">;
@@ -24,7 +20,7 @@ type TeamWorkspaceProps = {
   teams: RoomSummary[];
   onAddTeam: () => void;
   onSelectTeam: (teamId: Id<"teams">) => void;
-  activeSection: MainSection;
+  activeSection?: MainSection;
 };
 
 export function TeamWorkspace({
@@ -44,15 +40,6 @@ export function TeamWorkspace({
 
   const currentMember = workspace.members.find((member) => member.profileId === workspace.currentProfileId);
   const joinCode = workspace.team.joinCode;
-
-  if (activeSection === "profile") {
-    return (
-      <ProfileCenter
-        roomControl={<label className="compact-room-select"><span>Room</span><select value={selectedTeamId} onChange={(event) => onSelectTeam(event.target.value as Id<"teams">)}>{teams.map((team) => <option key={team._id} value={team._id}>{team.name}</option>)}</select></label>}
-        character={currentMember ? <CharacterCustomizer key={`${selectedTeamId}:${currentMember.characterFill}:${currentMember.characterOutline}:${currentMember.spellType ?? "none"}`} teamId={selectedTeamId} member={{ displayName: currentMember.displayName, characterFill: currentMember.characterFill, characterOutline: currentMember.characterOutline, spellType: currentMember.spellType as SpellType | undefined }} /> : undefined}
-      />
-    );
-  }
 
   async function copyCode() {
     try {

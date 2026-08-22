@@ -128,11 +128,9 @@ function SkillPicker({
 
 export function ProfileCenter({
   character,
-  roomControl,
   setupRequired = false,
 }: {
   character?: ReactNode;
-  roomControl?: ReactNode;
   setupRequired?: boolean;
 }) {
   const profile = useQuery(api.profiles.getOrNull);
@@ -189,7 +187,6 @@ export function ProfileCenter({
           </h1>
           <p className="profile-subtext">Save these preferences once. MayLamDi reuses them when planning fair project work.</p>
         </div>
-        {roomControl}
       </header>
 
       <form className="profile-setup-form" onSubmit={submit}>

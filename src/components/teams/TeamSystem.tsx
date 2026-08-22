@@ -101,10 +101,7 @@ export function TeamSystem({
   }
 
   if (activeSection === "profile") {
-    if (!selectedRoomId) {
-      return <ProfileCenter />;
-    }
-    return <TeamWorkspace selectedTeamId={selectedRoomId} teams={rooms} onAddTeam={() => onOpenProjects("create")} onSelectTeam={onOpenRoom} activeSection="profile" />;
+    return <ProfileCenter />;
   }
 
   if (projectsView === "create" || projectsView === "join") {
