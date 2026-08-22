@@ -658,7 +658,9 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
             onDecline={(taskId) => void runAction(() => declineTask({ taskId: taskId as Id<"tasks"> }), "The request could not be declined.")}
           />
 
-          <section className="progress-feed-section" aria-labelledby="progress-feed-title"><div className="project-section-heading"><div><p className="card-eyebrow">Evidence and activity</p><h2 id="progress-feed-title">Daily progress</h2></div><span className="read-only-label">Live feed</span></div><DailyEvidenceFeed projectId={workspace.project._id} /></section>
+          <section className="progress-feed-section">
+            <DailyEvidenceFeed projectId={workspace.project._id} />
+          </section>
 
           {requestTasks.length > 0 ? <section className="task-request-panel"><p className="card-eyebrow">Task requests</p>{requestTasks.map((task) => <article key={task._id}><div><strong>{task.title}</strong><span>Requested by the room creator · weight {task.weight}</span></div><div><button className="primary-button" type="button" onClick={() => void runAction(() => acceptTask({ taskId: task._id }), "The task request could not be accepted.")}>Accept</button><button className="quiet-button" type="button" onClick={() => void runAction(() => declineTask({ taskId: task._id }), "The task request could not be declined.")}>Decline</button></div></article>)}</section> : null}
 

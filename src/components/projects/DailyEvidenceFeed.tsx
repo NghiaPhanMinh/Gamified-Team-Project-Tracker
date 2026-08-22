@@ -65,47 +65,45 @@ export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
     <section className="daily-evidence-feed" aria-labelledby="daily-feed-title">
       <header className="daily-feed-header">
         <div>
-          <p className="kicker">Daily Progress Log &amp; Defense</p>
-          <h3 className="display-heading" id="daily-feed-title">Team Daily Evidence Feed</h3>
-          <p className="daily-feed-guidance">
-            The Daily Feed collects real proof (screenshots, links, design drafts) from team members every day.
-            AI &amp; team leads use this transparent activity timeline to track genuine contributions and celebrate progress.
-            <strong> Minimum daily requirement: at least 20 words OR 2 pictures attached.</strong>
+          <div className="daily-feed-title-row">
+            <h3 className="display-heading" id="daily-feed-title">Nhật ký Bằng chứng Hàng ngày</h3>
+            <span className="read-only-label">LIVE FEED</span>
+          </div>
+          <p className="daily-feed-requirement">
+            <strong>Yêu cầu tối thiểu:</strong> Từ 20 từ trở lên HOẶC đính kèm từ 2 hình ảnh.
           </p>
         </div>
       </header>
 
       {/* New Post Form */}
       <form className="daily-post-form" onSubmit={handleSubmit}>
-        <h4>Share Daily Work Evidence</h4>
-
         {error ? <p className="form-error" role="alert">{error}</p> : null}
 
         <label className="daily-text-field">
-          <span>Work Description / Progress Notes</span>
+          <span className="field-label">Mô tả tiến độ / Bằng chứng làm việc</span>
           <textarea
-            rows={4}
+            rows={3}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Describe what you built, researched, or accomplished today (at least 20 words required if no images attached)..."
+            placeholder="Mô tả kết quả công việc hôm nay (ít nhất 20 từ nếu không đính kèm ảnh)..."
           />
         </label>
 
         {/* Live Validation Counters */}
         <div className="daily-validation-status-bar">
           <span className={`validation-counter ${wordCount >= 20 ? "is-valid" : ""}`}>
-            📝 {wordCount}/20 words {wordCount >= 20 ? "✓" : ""}
+            📝 {wordCount}/20 từ {wordCount >= 20 ? "✓" : ""}
           </span>
           <span className={`validation-counter ${imageCount >= 2 ? "is-valid" : ""}`}>
-            🖼️ {imageCount}/2 pictures {imageCount >= 2 ? "✓" : ""}
+            🖼️ {imageCount}/2 ảnh {imageCount >= 2 ? "✓" : ""}
           </span>
           {isValidSubmission ? (
             <span className="validation-result-badge is-valid-badge">
-              ⚔️ Valid Submission — Defeats Today’s Goblin!
+              ⚔️ Đã đủ điều kiện thủ thành hôm nay!
             </span>
           ) : (
             <span className="validation-result-badge is-warning-badge">
-              ⚠️ Needs 20 words or 2 images to count towards goblin defense
+              ⚠️ Cần từ 20 từ hoặc 2 ảnh để hoàn thành thủ thành
             </span>
           )}
         </div>
@@ -117,10 +115,10 @@ export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
             type="url"
             value={imageInput}
             onChange={(e) => setImageInput(e.target.value)}
-            placeholder="Paste image URL (e.g. screenshot link)..."
+            placeholder="Dán URL hình ảnh (ví dụ: link minh chứng)..."
           />
           <button className="secondary-button" type="button" onClick={handleAddImage}>
-            Attach image
+            Đính kèm ảnh
           </button>
         </div>
 
@@ -129,25 +127,27 @@ export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
           <div className="attached-images-preview">
             {imageUrls.map((url, idx) => (
               <div key={idx} className="attached-image-chip">
-                <span>Image {idx + 1}</span>
-                <button type="button" onClick={() => handleRemoveImage(idx)}>×</button>
+                <span>Ảnh {idx + 1}</span>
+                <button type="button" onClick={() => handleRemoveImage(idx)} aria-label={`Xóa ảnh ${idx + 1}`}>×</button>
               </div>
             ))}
           </div>
         ) : null}
 
-        <button className="primary-button" type="submit" disabled={isPosting || (!text && imageUrls.length === 0)}>
-          {isPosting ? "Posting evidence..." : "Post daily evidence"}
-        </button>
+        <div className="daily-form-actions">
+          <button className="primary-button" type="submit" disabled={isPosting || (!text && imageUrls.length === 0)}>
+            {isPosting ? "Đang đăng bằng chứng..." : "Đăng bằng chứng"}
+          </button>
+        </div>
       </form>
 
       {/* Feed List */}
       <div className="daily-feed-list" aria-label="Team daily evidence log">
-        <h4 className="feed-list-title">Team Evidence Activity</h4>
+        <h4 className="feed-list-title">Hoạt động bằng chứng nhóm</h4>
         {posts === undefined ? (
-          <p>Loading daily evidence feed...</p>
+          <p>Đang tải nhật ký bằng chứng...</p>
         ) : posts.length === 0 ? (
-          <p className="empty-feed-notice">No daily evidence posted yet today. Be the first to post!</p>
+          <p className="empty-feed-notice">Chưa có bằng chứng nào được đăng hôm nay. Hãy là người đầu tiên đăng!</p>
         ) : (
           posts.map((post) => (
             <article key={post._id} className={`daily-feed-card ${post.isValid ? "feed-card-valid" : "feed-card-invalid"}`}>
@@ -162,21 +162,21 @@ export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
                 <span className="feed-author-name">{post.authorName}</span>
                 <time className="feed-post-time">{new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time>
                 {post.isValid ? (
-                  <span className="feed-status-tag valid-tag">🛡️ Goblin Slayed</span>
+                  <span className="feed-status-tag valid-tag">🛡️ Đã hạ Goblin</span>
                 ) : (
-                  <span className="feed-status-tag invalid-tag">⚠️ Logged (Short)</span>
+                  <span className="feed-status-tag invalid-tag">⚠️ Đã ghi nhận (Ngắn)</span>
                 )}
               </header>
               <p className="feed-post-text">{post.text}</p>
               {post.imageUrls && post.imageUrls.length > 0 ? (
                 <div className="feed-post-images">
                   {post.imageUrls.map((url: string, idx: number) => (
-                    <img key={idx} src={url} alt={`Evidence attachment ${idx + 1}`} className="feed-image-preview" />
+                    <img key={idx} src={url} alt={`Minh chứng ${idx + 1}`} className="feed-image-preview" />
                   ))}
                 </div>
               ) : null}
               <footer className="feed-card-footer">
-                <span>{post.wordCount} words · {post.imageCount} images</span>
+                <span>{post.wordCount} từ · {post.imageCount} hình ảnh</span>
               </footer>
             </article>
           ))
