@@ -5104,6 +5104,11 @@ footer {
 .battle-task-drawer { width: min(95vw, 760px); height: 100%; overflow: auto; padding: clamp(1rem, 3vw, 1.6rem); border-left: 3px solid var(--color-text); background: var(--color-surface); color: var(--color-text); box-shadow: -8px 0 0 var(--color-blue); }
 .battle-task-drawer-heading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
 .battle-task-drawer-heading h3 { margin: .15rem 0; font-size: clamp(2rem, 5vw, 3.8rem); }
+
+.task-create-drawer-backdrop { position: fixed; z-index: 95; inset: 0; display: flex; justify-content: flex-end; background: rgb(18 31 37 / .66); backdrop-filter: blur(4px); }
+.task-create-drawer { width: min(95vw, 640px); height: 100%; overflow-y: auto; padding: clamp(1rem, 3vw, 1.8rem); border-left: 3px solid var(--color-text); background: var(--color-surface); color: var(--color-text); box-shadow: -8px 0 0 var(--color-yellow); }
+.task-drawer-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.2rem; padding-bottom: 1rem; border-bottom: 2px solid color-mix(in srgb, var(--color-text) 18%, transparent); }
+.task-drawer-header h3 { margin: 0.15rem 0 0; font-size: clamp(1.8rem, 4vw, 2.8rem); }
 .battle-task-detail-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
 .battle-task-detail-meta > div { display: grid; gap: .15rem; padding: .7rem; border: 1px solid color-mix(in srgb, var(--color-text) 28%, transparent); border-radius: 11px; }
 .battle-task-detail-meta dt { color: var(--color-muted); font-size: .7rem; font-weight: 900; text-transform: uppercase; }

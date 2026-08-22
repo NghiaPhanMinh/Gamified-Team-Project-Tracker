@@ -616,47 +616,6 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
 
           {workspace.canManageProject ? <details className="phase-manager"><summary>Manage phases</summary><div className="phase-chip-editor">{workspace.phases.map((phase) => <div key={phase._id}>{renamingPhaseId === phase._id ? <form onSubmit={(event) => { event.preventDefault(); void runAction(async () => { await renamePhase({ phaseId: phase._id, title: renamePhaseName }); setRenamingPhaseId(null); }, "The phase could not be renamed."); }}><input value={renamePhaseName} onChange={(event) => setRenamePhaseName(event.target.value)} /><button type="submit" className="quiet-button">Save</button></form> : <><span>{phase.title}</span><button className="text-link" type="button" onClick={() => { setRenamingPhaseId(phase._id); setRenamePhaseName(phase.title); }}>Rename</button></>}</div>)}</div><form className="inline-phase-form" onSubmit={addPhase}><input required maxLength={100} value={newPhaseName} onChange={(event) => setNewPhaseName(event.target.value)} placeholder="New phase name" /><button className="secondary-button" type="submit">Add phase</button></form></details> : null}
 
-          {showTaskForm && workspace.canManageProject ? (
-            <form className="compact-plan-form task-create-form" onSubmit={submitTask}>
-              <div className="task-form-heading"><div><p className="card-eyebrow">{editingTaskId ? "Edit task" : "New task"}</p><h3>{editingTaskId ? "Update required task" : "Create required task"}</h3></div></div>
-
-              <fieldset className="task-form-section">
-                <legend>1. Basic Information</legend>
-                <div className="project-field-grid">
-                  <label className="project-field-wide"><span>Task Title</span><input required maxLength={120} value={taskTitle} onChange={(event) => setTaskTitle(event.target.value)} placeholder="e.g. Design 3D character asset" /></label>
-                  <label className="project-field-wide"><span>Description</span><textarea required maxLength={1500} value={taskDescription} onChange={(event) => setTaskDescription(event.target.value)} placeholder="Describe expected output, deliverables, and guidelines..." /></label>
-                  <label className="project-field-wide"><span>Phase</span><select value={taskPhaseId || workspace.phases[0]?._id || ""} onChange={(event) => setTaskPhaseId(event.target.value)}>{workspace.phases.map((phase) => <option key={phase._id} value={phase._id}>{phase.title}</option>)}</select></label>
-                </div>
-              </fieldset>
-
-              <fieldset className="task-form-section">
-                <legend>2. Time &amp; Scope Impact</legend>
-                <div className="project-field-grid">
-                  <label><span>Due Date</span><input required type="date" max={workspace.project.deadline} value={taskDueDate} onChange={(event) => setTaskDueDate(event.target.value)} /></label>
-                  <label className="project-field-wide">
-                    <span>Task Scope &amp; Contribution Level <small>Replaces complex weight &amp; difficulty calculations.</small></span>
-                    <select value={taskWeight} onChange={(event) => { setTaskWeight(event.target.value); setTaskDifficulty(event.target.value); }}>
-                      <option value="1">1 — Small / Light (15m–1h work · 10 Dragon DMG)</option>
-                      <option value="3">3 — Medium / Standard (Half day to 1 day work · 30 Dragon DMG)</option>
-                      <option value="5">5 — Large / Major (Multi-day core work · 50 Dragon DMG)</option>
-                    </select>
-                  </label>
-                </div>
-              </fieldset>
-
-              <fieldset className="task-form-section">
-                <legend>3. Assignment &amp; Peer Verification</legend>
-                <div className="project-field-grid">
-                  <label><span>Task Owner</span><select value={taskOwner} onChange={(event) => { setTaskOwner(event.target.value); if (taskReviewerId === event.target.value) setTaskReviewerId(""); }}><option value="__open">Open for claiming</option><option value="__unassigned">Unassigned until allocation</option>{workspace.members.map((member) => <option key={member.profileId} value={member.profileId}>{member.displayName}</option>)}</select></label>
-                  <label><span>Peer Reviewer <small>Member who checks evidence before task completion.</small></span><select value={taskReviewerId} onChange={(event) => setTaskReviewerId(event.target.value)}><option value="">Owner chooses reviewer later</option>{workspace.members.filter((member) => member.profileId !== taskOwner).map((member) => { const load = reviewerLoadById.get(member.profileId) ?? 0; return <option key={member.profileId} value={member.profileId}>{member.displayName} · {load}/{workspace.fairReviewCapacity} reviews</option>; })}</select></label>
-                  <label className="project-field-wide"><span>Required Skills <small>Auto-suggested from team profile skills.</small></span><input value={taskSkills} onChange={(event) => setTaskSkills(event.target.value)} placeholder="e.g. 3D Modeling, Blender, Animation" /></label>
-                </div>
-              </fieldset>
-
-              <div className="task-form-actions"><button className="primary-button" type="submit" disabled={isSaving}>{isSaving ? "Saving…" : editingTaskId ? "Update Task" : "Create Task"}</button><button className="quiet-button" type="button" onClick={() => { resetTaskForm(); setShowTaskForm(false); }}>Cancel</button></div>
-            </form>
-          ) : null}
-
           {battleTasks.length === 0 ? <div className="project-empty"><strong>No tasks in this project yet.</strong><p>Click Add Task to create the first task.</p></div> : null}
         </section>
       ) : null}
@@ -695,6 +654,59 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
         <TaskTradePanel key={openBattleTask._id} projectId={workspace.project._id} initialTaskId={openBattleTask.primaryOwnerProfileId === workspace.currentProfileId ? openBattleTask._id : undefined} />
         {workspace.canManageProject ? <button className="quiet-button" type="button" onClick={() => { editTask(openBattleTask); setOpenBattleTaskId(null); setActiveTab("tasks"); }}>Edit task in plan</button> : null}
       </aside></div> : null}
+
+      {showTaskForm && workspace.canManageProject ? (
+        <div className="task-create-drawer-backdrop" role="presentation" onClick={() => { resetTaskForm(); setShowTaskForm(false); }}>
+          <aside className="task-create-drawer" role="dialog" aria-modal="true" aria-labelledby="task-create-drawer-title" onClick={(event) => event.stopPropagation()}>
+            <header className="task-drawer-header">
+              <div>
+                <p className="card-eyebrow">{editingTaskId ? "Edit task" : "New task"}</p>
+                <h3 id="task-create-drawer-title">{editingTaskId ? "Update required task" : "Create required task"}</h3>
+              </div>
+              <button className="quiet-button" type="button" onClick={() => { resetTaskForm(); setShowTaskForm(false); }}>
+                Close
+              </button>
+            </header>
+
+            <form className="compact-plan-form task-create-form" onSubmit={submitTask}>
+              <fieldset className="task-form-section">
+                <legend>1. Basic Information</legend>
+                <div className="project-field-grid">
+                  <label className="project-field-wide"><span>Task Title</span><input required maxLength={120} value={taskTitle} onChange={(event) => setTaskTitle(event.target.value)} placeholder="e.g. Design 3D character asset" /></label>
+                  <label className="project-field-wide"><span>Description</span><textarea required maxLength={1500} value={taskDescription} onChange={(event) => setTaskDescription(event.target.value)} placeholder="Describe expected output, deliverables, and guidelines..." /></label>
+                  <label className="project-field-wide"><span>Phase</span><select value={taskPhaseId || workspace.phases[0]?._id || ""} onChange={(event) => setTaskPhaseId(event.target.value)}>{workspace.phases.map((phase) => <option key={phase._id} value={phase._id}>{phase.title}</option>)}</select></label>
+                </div>
+              </fieldset>
+
+              <fieldset className="task-form-section">
+                <legend>2. Time &amp; Scope Impact</legend>
+                <div className="project-field-grid">
+                  <label><span>Due Date</span><input required type="date" max={workspace.project.deadline} value={taskDueDate} onChange={(event) => setTaskDueDate(event.target.value)} /></label>
+                  <label className="project-field-wide">
+                    <span>Task Scope &amp; Contribution Level <small>Replaces complex weight &amp; difficulty calculations.</small></span>
+                    <select value={taskWeight} onChange={(event) => { setTaskWeight(event.target.value); setTaskDifficulty(event.target.value); }}>
+                      <option value="1">1 — Small / Light (15m–1h work · 10 Dragon DMG)</option>
+                      <option value="3">3 — Medium / Standard (Half day to 1 day work · 30 Dragon DMG)</option>
+                      <option value="5">5 — Large / Major (Multi-day core work · 50 Dragon DMG)</option>
+                    </select>
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset className="task-form-section">
+                <legend>3. Assignment &amp; Peer Verification</legend>
+                <div className="project-field-grid">
+                  <label><span>Task Owner</span><select value={taskOwner} onChange={(event) => { setTaskOwner(event.target.value); if (taskReviewerId === event.target.value) setTaskReviewerId(""); }}><option value="__open">Open for claiming</option><option value="__unassigned">Unassigned until allocation</option>{workspace.members.map((member) => <option key={member.profileId} value={member.profileId}>{member.displayName}</option>)}</select></label>
+                  <label><span>Peer Reviewer <small>Member who checks evidence before task completion.</small></span><select value={taskReviewerId} onChange={(event) => setTaskReviewerId(event.target.value)}><option value="">Owner chooses reviewer later</option>{workspace.members.filter((member) => member.profileId !== taskOwner).map((member) => { const load = reviewerLoadById.get(member.profileId) ?? 0; return <option key={member.profileId} value={member.profileId}>{member.displayName} · {load}/{workspace.fairReviewCapacity} reviews</option>; })}</select></label>
+                  <label className="project-field-wide"><span>Required Skills <small>Auto-suggested from team profile skills.</small></span><input value={taskSkills} onChange={(event) => setTaskSkills(event.target.value)} placeholder="e.g. 3D Modeling, Blender, Animation" /></label>
+                </div>
+              </fieldset>
+
+              <div className="task-form-actions"><button className="primary-button" type="submit" disabled={isSaving}>{isSaving ? "Saving…" : editingTaskId ? "Update Task" : "Create Task"}</button><button className="quiet-button" type="button" onClick={() => { resetTaskForm(); setShowTaskForm(false); }}>Cancel</button></div>
+            </form>
+          </aside>
+        </div>
+      ) : null}
     </section>
   );
 }
