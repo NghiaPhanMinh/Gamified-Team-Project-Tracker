@@ -24,6 +24,39 @@ const phaseStatusValidator = v.union(
   v.literal("completed"),
 );
 
+async function ensureProjectMember(
+  ctx: MutationCtx,
+  projectId: Id<"projects">,
+  profileId: Id<"userProfiles">,
+) {
+  const existing = await ctx.db
+    .query("projectMembers")
+    .withIndex("by_project_and_user", (indexQuery) =>
+      indexQuery.eq("projectId", projectId).eq("profileId", profileId),
+    )
+    .unique();
+
+  if (existing !== null) {
+    return existing;
+  }
+
+  const profile = await ctx.db.get(profileId);
+  const now = Date.now();
+  const id = await ctx.db.insert("projectMembers", {
+    projectId,
+    profileId,
+    skills: [...(profile?.skills ?? []), ...(profile?.softwareSkills ?? [])],
+    availability: "",
+    currentWorkload: "medium",
+    preferences: "",
+    weeklyCapacity: profile?.weeklyCapacity,
+    availabilityMode: "busy",
+    joinedAt: now,
+  });
+
+  return (await ctx.db.get(id))!;
+}
+
 async function requireProjectWriteAccess(
   ctx: MutationCtx,
   projectId: Id<"projects">,
@@ -39,16 +72,7 @@ async function requireProjectWriteAccess(
   }
 
   const { membership, profile } = await requireTeamMember(ctx, project.teamId);
-  const projectMembership = await ctx.db
-    .query("projectMembers")
-    .withIndex("by_project_and_user", (indexQuery) =>
-      indexQuery.eq("projectId", projectId).eq("profileId", profile._id),
-    )
-    .unique();
-
-  if (projectMembership === null) {
-    throw new Error("Only project members can change this project.");
-  }
+  const projectMembership = await ensureProjectMember(ctx, projectId, profile._id);
 
   return { project, profile, membership, projectMembership };
 }

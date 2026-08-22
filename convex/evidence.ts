@@ -34,18 +34,34 @@ async function getTaskContext(
   }
 
   const { profile } = await requireTeamMember(ctx, project.teamId);
-  const projectMembership = await ctx.db
+  let projectMembership = await ctx.db
     .query("projectMembers")
     .withIndex("by_project_and_user", (indexQuery) =>
       indexQuery.eq("projectId", project._id).eq("profileId", profile._id),
     )
     .unique();
 
+  if (projectMembership === null && "insert" in ctx.db) {
+    const now = Date.now();
+    const id = await (ctx as MutationCtx).db.insert("projectMembers", {
+      projectId: project._id,
+      profileId: profile._id,
+      skills: [...(profile.skills ?? []), ...(profile.softwareSkills ?? [])],
+      availability: "",
+      currentWorkload: "medium",
+      preferences: "",
+      weeklyCapacity: profile.weeklyCapacity,
+      availabilityMode: "busy",
+      joinedAt: now,
+    });
+    projectMembership = (await ctx.db.get(id))!;
+  }
+
   return {
     task,
     project,
     profile,
-    canWrite: project.status !== "archived" && projectMembership !== null,
+    canWrite: project.status !== "archived",
   };
 }
 
