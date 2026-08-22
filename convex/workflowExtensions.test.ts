@@ -95,9 +95,10 @@ describe("extended project workflows", () => {
     await owner.asUser.mutation(api.availability.updateMine, { ...common, blocks: [{ dayOfWeek: 1, startMinute: 600, endMinute: 780 }] });
     await member.asUser.mutation(api.availability.updateMine, { ...common, blocks: [{ dayOfWeek: 1, startMinute: 660, endMinute: 840 }] });
     const result = await owner.asUser.query(api.availability.getForProject, { projectId });
-    expect(result.suggestions[0]).toMatchObject({ dayOfWeek: 0, startMinute: 480, endMinute: 540 });
-    expect(result.suggestions[0].attendeeProfileIds).toHaveLength(2);
-    expect(result.suggestions.find((slot) => slot.dayOfWeek === 1 && slot.startMinute === 660)).toBeUndefined();
+    expect(result).not.toBeNull();
+    expect(result!.suggestions[0]).toMatchObject({ dayOfWeek: 0, startMinute: 480, endMinute: 540 });
+    expect(result!.suggestions[0].attendeeProfileIds).toHaveLength(2);
+    expect(result!.suggestions.find((slot) => slot.dayOfWeek === 1 && slot.startMinute === 660)).toBeUndefined();
     await expect(outsider.asUser.query(api.availability.getForProject, { projectId })).rejects.toThrow(/do not have access/i);
   });
 
@@ -122,7 +123,8 @@ describe("extended project workflows", () => {
     await owner.asUser.mutation(api.availability.selectMeeting, { meetingPlanId });
 
     const result = await member.asUser.query(api.availability.getForProject, { projectId });
-    expect(result.plans[0]).toMatchObject({
+    expect(result).not.toBeNull();
+    expect(result!.plans[0]).toMatchObject({
       _id: meetingPlanId,
       status: "selected",
       meetingMode: "online",
