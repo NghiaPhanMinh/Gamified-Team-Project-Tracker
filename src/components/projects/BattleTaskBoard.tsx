@@ -91,7 +91,7 @@ function BattleTaskNote({
         ) : null}
         {action === "submit" ? (
           <button className="primary-button" type="button" disabled={disabled} onClick={() => onOpenDetails(task.id)}>
-            {task.status === "changes_requested" ? "Resubmit Task" : "Submit Task"}
+            {task.status === "todo" ? "MayLamDi" : task.status === "changes_requested" ? "Resubmit Task" : "Submit Task"}
           </button>
         ) : null}
         {action === "review" ? (
