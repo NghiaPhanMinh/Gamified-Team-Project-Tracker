@@ -314,7 +314,7 @@ export const updateSharedNote = mutation({
 
 export const updateCharacter = mutation({
   args: {
-    teamId: v.id("teams"),
+    teamId: v.optional(v.id("teams")),
     fill: v.string(),
     outline: v.string(),
     spellType: v.optional(
@@ -332,27 +332,50 @@ export const updateCharacter = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    const { membership, profile } = await requireTeamMember(ctx, args.teamId);
+    const profile = await requireUserProfile(ctx);
     const colours = validateCharacterColours(args.fill, args.outline);
     const now = Date.now();
 
-    await ctx.db.patch(membership._id, {
+    await ctx.db.patch(profile._id, {
       characterFill: colours.fill,
       characterOutline: colours.outline,
       spellType: args.spellType,
+      updatedAt: now,
     });
-    await ctx.db.patch(args.teamId, { updatedAt: now });
-    await ctx.db.insert("activityLogs", {
-      teamId: args.teamId,
-      actorProfileId: profile._id,
-      action: "character_changed",
-      metadata: {
+
+    if (args.teamId) {
+      const { membership } = await requireTeamMember(ctx, args.teamId);
+      await ctx.db.patch(membership._id, {
         characterFill: colours.fill,
         characterOutline: colours.outline,
         spellType: args.spellType,
-      },
-      createdAt: now,
-    });
+      });
+      await ctx.db.patch(args.teamId, { updatedAt: now });
+      await ctx.db.insert("activityLogs", {
+        teamId: args.teamId,
+        actorProfileId: profile._id,
+        action: "character_changed",
+        metadata: {
+          characterFill: colours.fill,
+          characterOutline: colours.outline,
+          spellType: args.spellType,
+        },
+        createdAt: now,
+      });
+    } else {
+      const memberships = await ctx.db
+        .query("teamMembers")
+        .withIndex("by_user", (query) => query.eq("profileId", profile._id))
+        .collect();
+
+      for (const membership of memberships) {
+        await ctx.db.patch(membership._id, {
+          characterFill: colours.fill,
+          characterOutline: colours.outline,
+          spellType: args.spellType,
+        });
+      }
+    }
 
     return null;
   },

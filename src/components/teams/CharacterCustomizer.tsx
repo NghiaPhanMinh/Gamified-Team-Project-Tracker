@@ -12,7 +12,7 @@ import {
 import { getErrorMessage } from "../../lib/errors";
 
 type CharacterCustomizerProps = {
-  teamId: Id<"teams">;
+  teamId?: Id<"teams">;
   member: {
     displayName: string;
     characterFill: string;

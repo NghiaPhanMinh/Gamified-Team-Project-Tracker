@@ -129,6 +129,9 @@ export default defineSchema({
     softwareSkills: v.optional(v.array(v.string())),
     weeklyCapacity: v.optional(v.number()),
     profileCompletedAt: v.optional(v.number()),
+    characterFill: v.optional(v.string()),
+    characterOutline: v.optional(v.string()),
+    spellType: v.optional(spellType),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

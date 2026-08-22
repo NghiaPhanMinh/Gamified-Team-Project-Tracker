@@ -5,6 +5,8 @@ import { X } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import { getErrorMessage } from "../../lib/errors";
 import { clearByokSession, getByokSession, setByokSession } from "../../lib/byokSession";
+import { CharacterCustomizer } from "../teams/CharacterCustomizer";
+import type { SpellType } from "../../lib/character";
 
 const SKILL_CATEGORIES = {
   Creative: [
@@ -203,14 +205,19 @@ export function ProfileCenter({
               <span className="profile-user-email">{profile?.email}</span>
             </div>
           </div>
-          {character ? (
-            <details className="compact-character-settings">
-              <summary>Customise my character</summary>
-              {character}
-            </details>
-          ) : (
-            <p className="profile-character-note">Character customisation becomes available after you enter a room.</p>
-          )}
+          <details className="compact-character-settings">
+            <summary>Customise my character avatar</summary>
+            {profile ? (
+              <CharacterCustomizer
+                member={{
+                  displayName: profile.displayName,
+                  characterFill: profile.characterFill ?? "#FFF73F",
+                  characterOutline: profile.characterOutline ?? "#4CA0FE",
+                  spellType: profile.spellType as SpellType | undefined,
+                }}
+              />
+            ) : null}
+          </details>
         </section>
 
         <section className="profile-settings-card" aria-labelledby="work-profile-title">
