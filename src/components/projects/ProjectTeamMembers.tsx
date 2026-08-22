@@ -143,10 +143,6 @@ export function ProjectTeamMembers({ projectId }: { projectId: Id<"projects"> })
 
       <section className="availability-editor" aria-labelledby="availability-title">
         <div><h4 id="availability-title">Mark your busy hours</h4></div>
-        <div className="availability-preferences">
-          <label><span>Preferred duration</span><select value={duration} onChange={(event) => setDuration(event.target.value)}><option value="30">30 minutes</option><option value="45">45 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option><option value="120">2 hours</option></select></label>
-          <label><span>Cadence</span><select value={cadence} onChange={(event) => setCadence(event.target.value as typeof cadence)}><option value="weekly">Weekly</option><option value="fortnightly">Fortnightly</option><option value="as_needed">As needed</option></select></label>
-        </div>
         <div className="full-day-busy-row"><span>Full day busy:</span>{DAYS.map((day, dayOfWeek) => <button className="text-link" key={day} type="button" onClick={() => toggleFullDay(dayOfWeek)}>{day.slice(0, 3)}</button>)}</div>
         <div className="availability-calendar" role="grid" aria-label="Weekly busy times from 8 AM to 9 PM">
           <span className="availability-corner" />{DAYS.map((day) => <strong key={day} role="columnheader">{day.slice(0, 3)}</strong>)}
