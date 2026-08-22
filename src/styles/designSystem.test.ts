@@ -39,7 +39,11 @@ describe("MayLamDi design-system contract", () => {
   it("keeps landing polish responsive and reduced-motion safe", () => {
     expect(css).toContain(".marketing-title-sketch path");
     expect(css).toContain("@keyframes marketing-sketch-draw");
+    expect(css).toContain("stroke-width: 3");
+    expect(css).toContain("stroke-width: 1.5");
     expect(css).toContain(".marketing-hero-logo-stage");
+    expect(css).toContain("grid-column: 1 / -1");
+    expect(css).toContain('"preview-primary preview-supporting"');
     expect(css).toContain("padding: 68px 0 76px");
     expect(css).toContain("stroke-dashoffset: 0");
   });

@@ -55,4 +55,15 @@ describe("MayLamDi landing page", () => {
     expect(screen.getByText("feel shared.").parentElement).toHaveClass("marketing-title-hook");
     expect(container.querySelectorAll(".marketing-title-sketch path")).toHaveLength(2);
   });
+
+  it("places the existing project preview across the full hero grid", () => {
+    const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
+
+    const hero = container.querySelector<HTMLElement>(".marketing-hero");
+    const visual = container.querySelector<HTMLElement>(".marketing-hero-visual");
+    const preview = container.querySelector<HTMLElement>(".marketing-preview");
+
+    expect(preview?.parentElement).toBe(hero);
+    expect(visual).not.toContainElement(preview);
+  });
 });

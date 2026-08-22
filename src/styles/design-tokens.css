@@ -1467,34 +1467,37 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 }
 
 .marketing-title-trigger .marketing-title-sketch {
+  --sketch-x: clamp(14px, 2vw, 24px);
+  --sketch-y: clamp(12px, 1.5vw, 18px);
   position: absolute;
   z-index: 0;
-  inset: -18% -9% -13%;
-  width: 118%;
-  height: 131%;
+  top: calc(var(--sketch-y) * -1);
+  left: calc(var(--sketch-x) * -1);
+  width: calc(100% + (var(--sketch-x) * 2));
+  height: calc(100% + (var(--sketch-y) * 2));
   overflow: visible;
   pointer-events: none;
-  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--mld-info) 42%, transparent));
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--mld-info) 24%, transparent));
   transition: filter 300ms ease, transform 300ms ease;
 }
 
 .marketing-title-sketch path {
   fill: none;
   stroke: var(--mld-info);
-  stroke-width: 5;
+  stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 760;
-  stroke-dashoffset: 760;
+  stroke-dasharray: 780;
+  stroke-dashoffset: 780;
   vector-effect: non-scaling-stroke;
   animation:
     marketing-sketch-draw 1.05s cubic-bezier(0.55, 0.08, 0.26, 0.98) 650ms forwards,
-    marketing-sketch-pulse 2.8s ease-in-out 1.85s infinite;
+    marketing-sketch-pencil-pulse 3.2s ease-in-out 1.85s infinite;
 }
 
 .marketing-title-sketch path + path {
-  stroke-width: 2.75;
-  opacity: 0.58;
+  stroke-width: 1.5;
+  animation-name: marketing-sketch-draw, marketing-sketch-pencil-ghost;
   animation-delay: 820ms, 2.05s;
 }
 
@@ -1515,7 +1518,7 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 
 .marketing-title-trigger:hover .marketing-title-sketch,
 .marketing-title-trigger:focus-visible .marketing-title-sketch {
-  filter: drop-shadow(0 0 13px color-mix(in srgb, var(--mld-info) 72%, transparent));
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--mld-info) 52%, transparent));
   transform: rotate(-1deg) scale(1.015);
 }
 
@@ -1541,14 +1544,21 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   }
 }
 
-@keyframes marketing-sketch-pulse {
+@keyframes marketing-sketch-pencil-pulse {
   0%, 100% {
-    opacity: 0.82;
-    stroke-width: 4.5;
+    opacity: 0.84;
   }
   50% {
-    opacity: 1;
-    stroke-width: 5.5;
+    opacity: 0.96;
+  }
+}
+
+@keyframes marketing-sketch-pencil-ghost {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.48;
   }
 }
 
@@ -1557,7 +1567,6 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   min-width: 0;
   justify-items: center;
   align-content: start;
-  gap: clamp(28px, 3vw, 44px);
 }
 
 .marketing-hero-logo-stage {
@@ -1621,10 +1630,41 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   animation: marketing-logo-orbit 46s linear reverse infinite;
 }
 
-.marketing-hero-visual .marketing-preview {
+.marketing-hero > .marketing-preview {
   position: relative;
   z-index: 3;
-  width: min(100%, 520px);
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1.75fr) minmax(280px, 0.85fr);
+  grid-template-areas:
+    "preview-top preview-top"
+    "preview-primary preview-supporting";
+  width: 100%;
+  padding: clamp(28px, 3vw, 40px);
+  gap: clamp(20px, 2vw, 24px);
+}
+
+.marketing-hero > .marketing-preview .marketing-preview-top {
+  grid-area: preview-top;
+}
+
+.marketing-hero > .marketing-preview .marketing-preview-card {
+  grid-area: preview-primary;
+  display: flex;
+  min-height: 260px;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(28px, 3vw, 40px);
+}
+
+.marketing-hero > .marketing-preview .marketing-preview-grid {
+  grid-area: preview-supporting;
+  grid-template-columns: 1fr;
+}
+
+.marketing-hero > .marketing-preview .marketing-mini-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 @keyframes marketing-logo-float {
@@ -1834,6 +1874,18 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   .marketing-hero-logo-stage {
     width: min(68vw, 440px);
   }
+
+  .marketing-hero > .marketing-preview {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "preview-top"
+      "preview-primary"
+      "preview-supporting";
+  }
+
+  .marketing-hero > .marketing-preview .marketing-preview-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 620px) {
@@ -1854,8 +1906,8 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
     width: min(88vw, 340px);
   }
 
-  .marketing-hero-visual .marketing-preview {
-    width: 100%;
+  .marketing-hero > .marketing-preview .marketing-preview-grid {
+    grid-template-columns: 1fr;
   }
 }
 

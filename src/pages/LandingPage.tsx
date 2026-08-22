@@ -112,12 +112,12 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
                 <em>feel shared.</em>
                 <svg
                   className="marketing-title-sketch"
-                  viewBox="0 0 330 120"
+                  viewBox="0 0 340 126"
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
-                  <path d="M21 67C17 31 65 9 160 8C258 7 316 28 313 65C309 101 251 113 160 111C72 109 26 98 21 67Z" />
-                  <path d="M13 62C18 23 75 4 166 10C262 15 324 35 317 73C311 106 244 117 151 108C66 101 9 91 13 62Z" />
+                  <path d="M22 64C13 31 57 9 154 7C255 3 326 25 329 59C332 93 277 105 174 106C82 107 29 94 22 64" />
+                  <path d="M13 60C18 24 77 4 171 10C267 15 334 35 321 73C311 101 247 109 152 101C67 94 9 84 13 60" />
                 </svg>
               </span>
             </button>
@@ -152,22 +152,22 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
             <span className="marketing-logo-orbit marketing-logo-orbit--inner" aria-hidden="true" />
             <BrandLogo className="marketing-hero-logo" />
           </div>
+        </div>
 
-          <div className="marketing-preview" aria-label="MayLamDi workspace preview">
-            <div className="marketing-preview-top">
-              <span className="card-eyebrow">Project at a glance</span>
-              <span className="live-badge">Live workspace</span>
-            </div>
-            <div className="marketing-preview-card">
-              <span className="card-eyebrow">Brand campaign · Ideation</span>
-              <h2>Build a direction your team can share.</h2>
-              <p>Brief → plan → execute, with clear ownership at every step.</p>
-              <div className="progress-track" aria-label="Project progress 68%"><span style={{ width: "68%" }} /></div>
-            </div>
-            <div className="marketing-preview-grid">
-              <div className="marketing-mini-card"><span className="card-eyebrow">Team workload</span><strong>Balanced</strong><small>Visible before work drifts</small></div>
-              <div className="marketing-mini-card"><span className="card-eyebrow">AI support</span><strong>Reviewable</strong><small>Suggestions stay with your team</small></div>
-            </div>
+        <div className="marketing-preview" aria-label="MayLamDi workspace preview">
+          <div className="marketing-preview-top">
+            <span className="card-eyebrow">Project at a glance</span>
+            <span className="live-badge">Live workspace</span>
+          </div>
+          <div className="marketing-preview-card">
+            <span className="card-eyebrow">Brand campaign · Ideation</span>
+            <h2>Build a direction your team can share.</h2>
+            <p>Brief → plan → execute, with clear ownership at every step.</p>
+            <div className="progress-track" aria-label="Project progress 68%"><span style={{ width: "68%" }} /></div>
+          </div>
+          <div className="marketing-preview-grid">
+            <div className="marketing-mini-card"><span className="card-eyebrow">Team workload</span><strong>Balanced</strong><small>Visible before work drifts</small></div>
+            <div className="marketing-mini-card"><span className="card-eyebrow">AI support</span><strong>Reviewable</strong><small>Suggestions stay with your team</small></div>
           </div>
         </div>
       </section>
