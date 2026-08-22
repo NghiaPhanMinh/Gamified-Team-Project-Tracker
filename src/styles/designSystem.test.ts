@@ -59,4 +59,13 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("background: var(--mld-surface-01)");
     expect(css).toContain("z-index: 40");
   });
+
+  it("keeps framework cards colourful, aligned, and readable", () => {
+    expect(css).toContain("background: var(--framework-card-color)");
+    expect(css).toContain("grid-template-columns: repeat(7, minmax(150px, 1fr))");
+    expect(css).toContain("min-height: 5.25rem");
+    expect(css).toContain(".framework-preview-note");
+    expect(css).toContain("background: #fff73f");
+    expect(css).toContain("color: #101517");
+  });
 });

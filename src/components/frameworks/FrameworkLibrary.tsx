@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 import {
   BUILT_IN_FRAMEWORKS,
@@ -8,6 +8,16 @@ import {
 type FrameworkLibraryProps = {
   onDuplicate: (framework: BuiltInFramework) => void;
 };
+
+const FRAMEWORK_CARD_COLORS = [
+  "#FF8AE7",
+  "#FFF73F",
+  "#FEAA01",
+  "#1DD851",
+  "#FD39E4",
+  "#4CA0FE",
+  "#17A738",
+] as const;
 
 export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
   const [selectedFrameworkId, setSelectedFrameworkId] = useState(
@@ -62,23 +72,27 @@ export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
         role="group"
         aria-label="Built-in framework templates"
       >
-        {visibleFrameworks.map((framework, index) => (
-          <button
-            key={framework.id}
-            className={`framework-picker-card framework-accent-${framework.accent}`}
-            type="button"
-            aria-pressed={framework.id === selectedFramework.id}
-            onClick={() => setSelectedFrameworkId(framework.id)}
-          >
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <strong>{framework.shortName}</strong>
-            <small>
-              {framework.phases.length}{" "}
-              {framework.phases.length === 1 ? "phase" : "phases"}
-              {" · "}{framework.disciplines.slice(0, 2).join(" · ")}
-            </small>
-          </button>
-        ))}
+        {visibleFrameworks.map((framework) => {
+          const frameworkIndex = BUILT_IN_FRAMEWORKS.findIndex((item) => item.id === framework.id);
+          return (
+            <button
+              key={framework.id}
+              className={`framework-picker-card framework-accent-${framework.accent}`}
+              type="button"
+              style={{ "--framework-card-color": FRAMEWORK_CARD_COLORS[frameworkIndex] } as CSSProperties}
+              aria-pressed={framework.id === selectedFramework.id}
+              onClick={() => setSelectedFrameworkId(framework.id)}
+            >
+              <span className="framework-card-number">{String(frameworkIndex + 1).padStart(2, "0")}</span>
+              <strong className="framework-card-title">{framework.shortName}</strong>
+              <small className="framework-card-meta">
+                {framework.phases.length}{" "}
+                {framework.phases.length === 1 ? "phase" : "phases"}
+                {" · "}{framework.disciplines.slice(0, 2).join(" · ")}
+              </small>
+            </button>
+          );
+        })}
       </div>
 
       <article

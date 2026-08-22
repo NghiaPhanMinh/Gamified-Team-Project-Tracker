@@ -709,6 +709,163 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   padding: var(--mld-space-5);
 }
 
+/* Framework Library: persistent palette identity, readable contrast, and a
+ * shared card rhythm across every built-in template. */
+.framework-library {
+  gap: var(--mld-space-6);
+}
+
+.framework-library-heading {
+  gap: var(--mld-space-5);
+}
+
+.framework-library-heading h2,
+.custom-framework-heading h2 {
+  line-height: 1.02;
+}
+
+.framework-library-heading > div > p:last-child,
+.custom-framework-heading > div > p:last-child,
+.framework-preview > header p:last-child {
+  line-height: 1.5;
+}
+
+.framework-library-controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--mld-space-4);
+}
+
+.framework-library-controls label {
+  display: grid;
+  flex: 1 1 360px;
+  gap: var(--mld-space-2);
+  max-width: 620px;
+  color: var(--mld-text);
+  font-weight: 600;
+}
+
+.framework-library-controls input {
+  width: 100%;
+}
+
+.framework-library .version-badge {
+  background: #fff73f;
+  color: #101517;
+}
+
+.framework-picker {
+  grid-template-columns: repeat(7, minmax(150px, 1fr));
+  gap: var(--mld-space-3);
+  margin: 0 0 var(--mld-space-5);
+  padding: var(--mld-space-2) var(--mld-space-2) var(--mld-space-4);
+  scroll-padding-inline: var(--mld-space-2);
+}
+
+.framework-picker-card {
+  display: flex;
+  min-height: 228px;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: var(--mld-space-4);
+  border: 2px solid #101517;
+  background: var(--framework-card-color);
+  color: #101517;
+  box-shadow: 0 2px 0 rgba(16, 21, 23, 0.18);
+  scroll-snap-align: start;
+}
+
+.framework-picker-card:hover {
+  border-color: #101517;
+  background: var(--framework-card-color);
+  color: #101517;
+  box-shadow: 5px 5px 0 rgba(16, 21, 23, 0.72);
+  transform: translateY(-3px);
+}
+
+.framework-picker-card[aria-pressed="true"] {
+  border-color: #101517;
+  background: var(--framework-card-color);
+  color: #101517;
+  outline: 3px solid var(--mld-info);
+  outline-offset: 3px;
+  box-shadow: 5px 5px 0 #101517;
+  transform: none;
+}
+
+.framework-picker-card[aria-pressed="true"]:hover {
+  box-shadow: 7px 7px 0 #101517;
+  transform: none;
+}
+
+.framework-picker-card .framework-card-number {
+  color: #101517;
+  font-size: var(--mld-body-small-size);
+  line-height: var(--mld-body-small-leading);
+}
+
+.framework-picker-card .framework-card-title {
+  display: block;
+  min-height: 5.25rem;
+  margin-top: var(--mld-space-4);
+  color: #101517;
+  font-size: var(--mld-body-large-size);
+  line-height: 1.15;
+}
+
+.framework-picker-card .framework-card-meta {
+  display: block;
+  margin-top: var(--mld-space-5);
+  color: #101517;
+  font-size: var(--mld-body-small-size);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.framework-preview > header,
+.framework-preview > header h3,
+.framework-preview > header p,
+.framework-preview > header .card-eyebrow {
+  color: #101517;
+}
+
+.framework-preview h3 {
+  line-height: 1.02;
+}
+
+.framework-preview .discipline-tags span,
+.framework-preview .phase-number {
+  border-color: #101517;
+  color: #101517;
+}
+
+.framework-preview-note {
+  background: #fff73f;
+  color: #101517;
+  line-height: 1.45;
+}
+
+.framework-preview-note button {
+  border-color: #101517;
+  background: #1dd851;
+  color: #101517;
+}
+
+.custom-framework-section,
+.custom-framework-section .kicker,
+.custom-framework-section .display-heading,
+.custom-framework-heading > div > p:last-child {
+  color: #101517;
+}
+
+.custom-framework-heading .secondary-button {
+  border-color: #101517;
+  background: #101517;
+  color: #fffdec;
+}
+
 .home-focus-card {
   min-height: 240px;
   background: #101517;
@@ -1443,6 +1600,21 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 
   .project-tabs {
     flex-wrap: nowrap;
+  }
+
+  .framework-library-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .framework-library-controls label {
+    flex-basis: auto;
+    max-width: none;
+  }
+
+  .framework-picker {
+    grid-template-columns: repeat(7, minmax(168px, 72vw));
+    scroll-snap-type: x proximity;
   }
 }
 

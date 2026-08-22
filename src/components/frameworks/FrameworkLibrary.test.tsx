@@ -35,4 +35,24 @@ describe("FrameworkLibrary", () => {
       expect.objectContaining({ id: "academic-research" }),
     );
   });
+
+  it("keeps all built-in cards persistently coloured and numbered", () => {
+    const { container } = render(<FrameworkLibrary onDuplicate={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /View all frameworks/i }));
+
+    const cards = [...container.querySelectorAll<HTMLElement>(".framework-picker-card")];
+    expect(cards).toHaveLength(7);
+    expect(cards.map((card) => card.style.getPropertyValue("--framework-card-color"))).toEqual([
+      "#FF8AE7",
+      "#FFF73F",
+      "#FEAA01",
+      "#1DD851",
+      "#FD39E4",
+      "#4CA0FE",
+      "#17A738",
+    ]);
+    expect(cards.map((card) => card.querySelector(".framework-card-number")?.textContent)).toEqual([
+      "01", "02", "03", "04", "05", "06", "07",
+    ]);
+  });
 });
