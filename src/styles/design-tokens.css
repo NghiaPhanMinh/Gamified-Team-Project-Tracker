@@ -2674,6 +2674,77 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   color: #fffdec;
 }
 
+/* Project task rhythm: keep each section distinct without changing its structure. */
+.tasks-room-tab {
+  display: grid;
+  gap: var(--mld-space-6);
+}
+
+.tasks-room-tab > .project-list-heading,
+.tasks-room-tab > .battle-task-board,
+.tasks-room-tab > .progress-feed-section,
+.tasks-room-tab > .phase-manager {
+  margin: 0;
+}
+
+.battle-task-board {
+  gap: var(--mld-space-5);
+  padding: clamp(var(--mld-space-4), 3vw, var(--mld-space-5));
+}
+
+.battle-task-board-heading {
+  gap: var(--mld-space-4);
+}
+
+.battle-task-board-heading > div {
+  display: grid;
+  gap: var(--mld-space-2);
+}
+
+.battle-task-board-heading .card-eyebrow,
+.battle-task-board-heading h3 {
+  margin: 0;
+}
+
+.battle-task-group {
+  gap: var(--mld-space-4);
+}
+
+.battle-task-group-heading {
+  gap: var(--mld-space-3);
+}
+
+.battle-task-strip {
+  gap: var(--mld-space-4);
+  padding-block: var(--mld-space-1);
+}
+
+.progress-feed-section {
+  gap: var(--mld-space-5);
+}
+
+.framework-preview .discipline-tags span {
+  border-color: #101517;
+  background: #101517;
+  color: #fffdec;
+}
+
+.framework-preview .discipline-tags span:hover,
+.framework-preview .discipline-tags span:focus-visible {
+  border-color: #101517;
+  background: #101517;
+  color: #fffdec;
+}
+
+.waiting-label,
+.battle-task-waiting {
+  max-width: 100%;
+  padding: var(--mld-space-3) var(--mld-space-4);
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 760px) {
   .team-members-tab {
     gap: var(--mld-space-5);

@@ -89,4 +89,21 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain(".phase-rename-button");
     expect(css).toContain(".phase-manager .inline-phase-form .secondary-button");
   });
+
+  it("uses the shared spacing scale for task sections and task-board internals", () => {
+    expect(css).toContain(".tasks-room-tab");
+    expect(css).toContain("gap: var(--mld-space-6)");
+    expect(css).toContain(".battle-task-board-heading > div");
+    expect(css).toContain("gap: var(--mld-space-5)");
+    expect(css).toContain(".battle-task-strip");
+  });
+
+  it("keeps framework disciplines and reviewer waiting states readable", () => {
+    expect(css).toContain(".framework-preview .discipline-tags span");
+    expect(css).toContain("background: #101517");
+    expect(css).toContain("color: #fffdec");
+    expect(css).toContain(".battle-task-waiting");
+    expect(css).toContain("line-height: 1.4");
+    expect(css).toContain("padding: var(--mld-space-3) var(--mld-space-4)");
+  });
 });

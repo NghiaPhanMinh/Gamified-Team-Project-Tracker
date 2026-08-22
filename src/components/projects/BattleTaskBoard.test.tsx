@@ -84,6 +84,13 @@ describe("BattleTaskBoard", () => {
     expect(getBattleTaskAction({ ...baseTask, status: "awaiting_creator", isMine: true }, false)).toBe("waiting_approval");
   });
 
+  it("uses clear English when submitted work is waiting for review", () => {
+    renderBoard([{ ...baseTask, status: "submitted", isMine: false, isReviewer: false }]);
+
+    expect(screen.getByText("Waiting for Review")).toBeInTheDocument();
+    expect(screen.queryByText(/Đợi người làm/i)).not.toBeInTheDocument();
+  });
+
   it("shows the allocation lock beside the owner only after the project task list is locked", () => {
     const { rerender } = render(
       <BattleTaskBoard

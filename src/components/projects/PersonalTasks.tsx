@@ -6,6 +6,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { getErrorMessage } from "../../lib/errors";
 import { TaskEvidencePanel } from "./TaskEvidencePanel";
 import { TaskTradePanel } from "./TaskTradePanel";
+import { REVIEW_WAITING_MESSAGE } from "./reviewCopy";
 
 type SectionName = "Action Needed" | "In Progress" | "Waiting Review" | "Waiting Creator" | "Complete";
 
@@ -62,7 +63,7 @@ export function PersonalTasks({ onOpenRoom }: { onOpenRoom: (roomId: Id<"teams">
                 {task.isOpenForClaiming ? <button className="primary-button" type="button" disabled={pendingTaskId === task._id} onClick={() => void run(task._id, async () => { await claimTask({ taskId: task._id }); setOpenTaskId(task._id); })}>MayLamDi</button> : null}
                 {task.isMine && task.status === "todo" && task.acceptanceStatus !== "pending" ? <button className="primary-button" type="button" disabled={pendingTaskId === task._id} onClick={() => void run(task._id, async () => { await updateStatus({ taskId: task._id, status: "in_progress" }); setOpenTaskId(task._id); })}>MayLamDi</button> : null}
                 {(task.isMine || task.isReviewer) && !["completed", "verified"].includes(task.status) ? <button className="secondary-button" type="button" onClick={() => setOpenTaskId((current) => current === task._id ? null : task._id)}>{task.isReviewer ? "MayReviewDi" : "Evidence & Review"}</button> : null}
-                {task.isReviewer && !["submitted", "review", "completed", "verified"].includes(task.status) ? <span className="waiting-label">Đợi người làm hoàn thiện mới review được</span> : null}
+                {task.isReviewer && !["submitted", "review", "completed", "verified"].includes(task.status) ? <span className="waiting-label">{REVIEW_WAITING_MESSAGE}</span> : null}
                 {task.status === "awaiting_creator" ? <span className="waiting-label">Waiting for room creator</span> : null}
               </div>
               {openTaskId === task._id ? <TaskEvidencePanel taskId={task._id} taskTitle={task.title} taskStatus={task.status} requiresReview={task.requiresReview} reviewerName={task.reviewerName === "Owner chooses later" ? undefined : task.reviewerName} /> : null}

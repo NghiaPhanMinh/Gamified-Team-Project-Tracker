@@ -4,6 +4,7 @@ import {
   type BattleTaskSummary,
 } from "./battleTaskAction";
 import { CharacterAvatar } from "../common/CharacterAvatar";
+import { REVIEW_WAITING_MESSAGE } from "./reviewCopy";
 
 export type { BattleTaskSummary } from "./battleTaskAction";
 
@@ -100,7 +101,7 @@ function BattleTaskNote({
         {action === "approve" ? (
           <button className="primary-button" type="button" onClick={() => onOpenDetails(task.id)}>Approve Completion</button>
         ) : null}
-        {action === "waiting_review" ? <span className="battle-task-waiting">{task.isReviewer ? "Đợi người làm hoàn thiện mới review được" : "Waiting for Review"}</span> : null}
+        {action === "waiting_review" ? <span className="battle-task-waiting">{task.isReviewer ? REVIEW_WAITING_MESSAGE : "Waiting for Review"}</span> : null}
         {action === "waiting_approval" ? <span className="battle-task-waiting">Waiting for Approval</span> : null}
         {action === "complete" ? <span className="battle-task-complete">Completed ✓</span> : null}
         {action === "details" ? (

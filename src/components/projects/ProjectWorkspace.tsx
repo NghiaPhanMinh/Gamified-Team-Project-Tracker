@@ -15,6 +15,7 @@ import { BattleTaskBoard, type BattleTaskSummary } from "./BattleTaskBoard";
 import { ProjectTeamMembers } from "./ProjectTeamMembers";
 import { TaskEvidencePanel } from "./TaskEvidencePanel";
 import { TaskTradePanel } from "./TaskTradePanel";
+import { REVIEW_WAITING_MESSAGE } from "./reviewCopy";
 import { DailyEvidenceFeed } from "./DailyEvidenceFeed";
 
 type ProjectWorkspaceProps = {
@@ -269,7 +270,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
         return { task, label: "MayLamDi", actionType: task.status === "todo" ? "Assigned to you · Not started yet" : "Assigned to you · In progress", kind: "open" as const, priority: 5 };
       }
       if (task.reviewerProfileId === workspace.currentProfileId && !["completed", "verified"].includes(task.status)) {
-        return { task, label: "MayReviewDi", actionType: "Đợi người làm hoàn thiện mới review được", kind: "review_waiting" as const, priority: 6 };
+        return { task, label: "MayReviewDi", actionType: REVIEW_WAITING_MESSAGE, kind: "review_waiting" as const, priority: 6 };
       }
       return null;
     })

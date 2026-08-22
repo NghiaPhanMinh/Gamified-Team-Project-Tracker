@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { REVIEW_WAITING_MESSAGE } from "./reviewCopy";
 import { getErrorMessage } from "../../lib/errors";
 import { trackEvent } from "../../lib/analytics";
 
@@ -331,7 +332,7 @@ export function TaskEvidencePanel({
           ) : taskStatus === "awaiting_creator" ? (
             <p>The reviewer recommended completion. Waiting for the room creator’s final decision.</p>
           ) : !details.isTaskOwner && !canReviewNow ? (
-            <p className="waiting-label">Đợi người làm hoàn thiện mới review được.</p>
+            <p className="waiting-label">{REVIEW_WAITING_MESSAGE}</p>
           ) : (
             <p>Add evidence, then use Submit for Review when the work is ready.</p>
           )}
