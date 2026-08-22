@@ -95,12 +95,12 @@ function BattleTaskNote({
           </button>
         ) : null}
         {action === "review" ? (
-          <button className="primary-button" type="button" onClick={() => onOpenDetails(task.id)}>Review</button>
+          <button className="primary-button" type="button" onClick={() => onOpenDetails(task.id)}>MayReviewDi</button>
         ) : null}
         {action === "approve" ? (
           <button className="primary-button" type="button" onClick={() => onOpenDetails(task.id)}>Approve Completion</button>
         ) : null}
-        {action === "waiting_review" ? <span className="battle-task-waiting">Waiting for Review</span> : null}
+        {action === "waiting_review" ? <span className="battle-task-waiting">{task.isReviewer ? "Đợi người làm hoàn thiện mới review được" : "Waiting for Review"}</span> : null}
         {action === "waiting_approval" ? <span className="battle-task-waiting">Waiting for Approval</span> : null}
         {action === "complete" ? <span className="battle-task-complete">Completed ✓</span> : null}
         {action === "details" ? (

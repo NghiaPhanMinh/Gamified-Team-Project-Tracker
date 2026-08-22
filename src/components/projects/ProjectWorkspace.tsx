@@ -256,7 +256,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
         return { task, label: "Accept task", actionType: "Task request pending your acceptance", kind: "accept" as const, priority: 1 };
       }
       if (task.reviewerProfileId === workspace.currentProfileId && ["submitted", "review"].includes(task.status)) {
-        return { task, label: "Review task", actionType: "Task submitted for your peer review", kind: "review" as const, priority: 2 };
+        return { task, label: "MayReviewDi", actionType: "Sẵn sàng review · Nộp minh chứng thành công", kind: "review" as const, priority: 2 };
       }
       if (workspace.canManageProject && task.status === "awaiting_creator") {
         return { task, label: "Approve completion", actionType: "Task waiting for creator approval", kind: "approve" as const, priority: 3 };
@@ -266,6 +266,9 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
       }
       if (task.primaryOwnerProfileId === workspace.currentProfileId && !["completed", "verified"].includes(task.status)) {
         return { task, label: "MayLamDi", actionType: task.status === "todo" ? "Assigned to you · Not started yet" : "Assigned to you · In progress", kind: "open" as const, priority: 5 };
+      }
+      if (task.reviewerProfileId === workspace.currentProfileId && !["completed", "verified"].includes(task.status)) {
+        return { task, label: "MayReviewDi", actionType: "Đợi người làm hoàn thiện mới review được", kind: "review_waiting" as const, priority: 6 };
       }
       return null;
     })

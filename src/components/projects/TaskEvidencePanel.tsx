@@ -330,6 +330,8 @@ export function TaskEvidencePanel({
             <p>Waiting for {reviewerName ?? "the assigned reviewer"}.</p>
           ) : taskStatus === "awaiting_creator" ? (
             <p>The reviewer recommended completion. Waiting for the room creator’s final decision.</p>
+          ) : !details.isTaskOwner && !canReviewNow ? (
+            <p className="waiting-label">Đợi người làm hoàn thiện mới review được.</p>
           ) : (
             <p>Add evidence, then use Submit for Review when the work is ready.</p>
           )}
