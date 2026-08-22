@@ -11,8 +11,8 @@ type DailyEvidenceFeedProps = {
 };
 
 export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
-  const posts = useQuery((api as any).daily.listForProject, { projectId });
-  const postMutation = useMutation((api as any).daily.postDailyEvidence);
+  const posts = useQuery(api.daily.listForProject, { projectId });
+  const postMutation = useMutation(api.daily.postDailyEvidence);
 
   const [text, setText] = useState("");
   const [imageInput, setImageInput] = useState("");
@@ -113,6 +113,7 @@ export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
         {/* Image Attachment Links Input */}
         <div className="daily-image-input-row">
           <input
+            className="daily-image-url-input"
             type="url"
             value={imageInput}
             onChange={(e) => setImageInput(e.target.value)}
@@ -148,7 +149,7 @@ export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
         ) : posts.length === 0 ? (
           <p className="empty-feed-notice">No daily evidence posted yet today. Be the first to post!</p>
         ) : (
-          posts.map((post: any) => (
+          posts.map((post) => (
             <article key={post._id} className={`daily-feed-card ${post.isValid ? "feed-card-valid" : "feed-card-invalid"}`}>
               <header className="feed-card-header">
                 <CharacterAvatar

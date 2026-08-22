@@ -2542,6 +2542,14 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   gap: var(--mld-space-3);
 }
 
+.daily-image-input-row .daily-image-url-input {
+  color-scheme: light;
+  border-color: #101517 !important;
+  background: #fffef9 !important;
+  color: #101517 !important;
+  caret-color: #101517;
+}
+
 .attached-images-preview {
   display: flex;
   flex-wrap: wrap;
