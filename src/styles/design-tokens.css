@@ -1470,6 +1470,18 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   }
 }
 
+@media (max-width: 850px) {
+  .framework-library-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .framework-library-controls label {
+    flex-basis: auto;
+    max-width: none;
+  }
+}
+
 @media (max-width: 760px) {
   .app-shell {
     --app-sidebar-width: 0px;
@@ -1600,16 +1612,6 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 
   .project-tabs {
     flex-wrap: nowrap;
-  }
-
-  .framework-library-controls {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .framework-library-controls label {
-    flex-basis: auto;
-    max-width: none;
   }
 
   .framework-picker {
