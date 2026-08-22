@@ -6533,10 +6533,10 @@ footer {
   display: inline-flex;
   align-items: center;
   padding: 0.25rem 0.65rem;
-  border: 2px solid var(--color-navy);
+  border: 2px solid #0f172a !important;
   border-radius: 999px;
-  background: var(--color-yellow);
-  color: var(--color-navy);
+  background-color: #facc15 !important;
+  color: #0f172a !important;
   font-size: 0.82rem;
   font-weight: 900;
   letter-spacing: 0.02em;
@@ -6569,5 +6569,39 @@ footer {
   font-size: 0.82rem;
   font-weight: 800;
 }
+
+/* Enforce Yellow Frame with Solid Black Text & Border in both Light & Dark modes */
+.project-badge-tag,
+.app-sidebar button.is-active,
+.project-tabs button.is-active,
+.personal-status-section > header span,
+.battle-task-board-heading > span,
+.battle-task-group-heading > span,
+.project-progress-pill {
+  background-color: #facc15 !important;
+  color: #0f172a !important;
+  border: 2px solid #0f172a !important;
+  font-weight: 900 !important;
+}
+
+:root[data-theme="dark"] .project-badge-tag,
+:root[data-theme="dark"] .app-sidebar button.is-active,
+:root[data-theme="dark"] .project-tabs button.is-active,
+:root[data-theme="dark"] .personal-status-section > header span,
+:root[data-theme="dark"] .battle-task-board-heading > span,
+:root[data-theme="dark"] .battle-task-group-heading > span,
+:root[data-theme="dark"] .project-progress-pill {
+  background-color: #facc15 !important;
+  color: #0f172a !important;
+  border: 2px solid #0f172a !important;
+  font-weight: 900 !important;
+}
+
+.project-badge-tag *,
+.app-sidebar button.is-active *,
+.project-tabs button.is-active * {
+  color: #0f172a !important;
+}
+
 
 
