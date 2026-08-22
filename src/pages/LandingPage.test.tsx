@@ -39,11 +39,19 @@ describe("MayLamDi landing page", () => {
   it("renders the looping card sequence and replays the branded title burst", () => {
     render(<MemoryRouter><LandingPage /></MemoryRouter>);
 
+    expect(screen.getAllByAltText("MayLamDi logo")).toHaveLength(2);
     expect(screen.getAllByText("Start with the brief.")).toHaveLength(2);
     expect(screen.getAllByText("Plan work fairly.")).toHaveLength(2);
     expect(screen.getAllByText("Make progress visible.")).toHaveLength(2);
 
     fireEvent.click(screen.getByRole("button", { name: /make teamwork.*feel shared/i }));
     expect(screen.getAllByText("MAYLAMDI")).toHaveLength(42);
+  });
+
+  it("marks feel shared with a responsive hand-drawn annotation", () => {
+    const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
+
+    expect(screen.getByText("feel shared.").parentElement).toHaveClass("marketing-title-hook");
+    expect(container.querySelectorAll(".marketing-title-sketch path")).toHaveLength(2);
   });
 });

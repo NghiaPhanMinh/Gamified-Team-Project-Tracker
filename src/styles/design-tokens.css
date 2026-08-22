@@ -1405,6 +1405,12 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 }
 
 /* Landing-page interactions: branded motion without changing the product flow. */
+.marketing-hero {
+  align-items: start;
+  padding-top: var(--mld-space-8);
+  padding-bottom: var(--mld-space-8);
+}
+
 .marketing-title {
   max-width: 10ch;
 }
@@ -1426,16 +1432,91 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   text-align: left;
   text-wrap: balance;
   cursor: pointer;
-  animation: marketing-title-breathe 3.8s ease-in-out infinite;
+  animation: none;
 }
 
 .marketing-title-trigger em {
+  position: relative;
+  z-index: 1;
   color: var(--mld-xp);
   font: inherit;
 }
 
+.marketing-title-hook {
+  position: relative;
+  display: inline-block;
+  isolation: isolate;
+  white-space: nowrap;
+  transform-origin: center;
+  transition: filter 300ms ease, transform 300ms ease;
+}
+
+:root .marketing-title-trigger > span:first-child {
+  color: var(--mld-text);
+  text-shadow: none;
+}
+
+:root .marketing-title-trigger .marketing-title-hook {
+  color: inherit;
+  text-shadow: none;
+}
+
+:root .marketing-title-trigger .marketing-title-hook em {
+  color: var(--mld-xp);
+  text-shadow: none;
+}
+
+.marketing-title-trigger .marketing-title-sketch {
+  position: absolute;
+  z-index: 0;
+  inset: -18% -9% -13%;
+  width: 118%;
+  height: 131%;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--mld-info) 42%, transparent));
+  transition: filter 300ms ease, transform 300ms ease;
+}
+
+.marketing-title-sketch path {
+  fill: none;
+  stroke: var(--mld-info);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 760;
+  stroke-dashoffset: 760;
+  vector-effect: non-scaling-stroke;
+  animation:
+    marketing-sketch-draw 1.05s cubic-bezier(0.55, 0.08, 0.26, 0.98) 650ms forwards,
+    marketing-sketch-pulse 2.8s ease-in-out 1.85s infinite;
+}
+
+.marketing-title-sketch path + path {
+  stroke-width: 2.75;
+  opacity: 0.58;
+  animation-delay: 820ms, 2.05s;
+}
+
 .marketing-title-trigger:hover {
-  text-shadow: 0 0 24px color-mix(in srgb, var(--mld-team) 52%, transparent);
+  text-shadow: none;
+}
+
+.marketing-title-trigger:hover .marketing-title-hook em,
+.marketing-title-trigger:focus-visible .marketing-title-hook em {
+  text-shadow: 0 0 18px color-mix(in srgb, var(--mld-team) 58%, transparent);
+}
+
+.marketing-title-trigger:hover .marketing-title-hook,
+.marketing-title-trigger:focus-visible .marketing-title-hook {
+  filter: saturate(1.14) brightness(1.08);
+  transform: translateY(-2px) scale(1.035);
+}
+
+.marketing-title-trigger:hover .marketing-title-sketch,
+.marketing-title-trigger:focus-visible .marketing-title-sketch {
+  filter: drop-shadow(0 0 13px color-mix(in srgb, var(--mld-info) 72%, transparent));
+  transform: rotate(-1deg) scale(1.015);
 }
 
 .marketing-title-trigger:focus-visible {
@@ -1451,6 +1532,113 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   50% {
     transform: scale(1.015);
     text-shadow: 0 0 18px color-mix(in srgb, var(--mld-team) 30%, transparent);
+  }
+}
+
+@keyframes marketing-sketch-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes marketing-sketch-pulse {
+  0%, 100% {
+    opacity: 0.82;
+    stroke-width: 4.5;
+  }
+  50% {
+    opacity: 1;
+    stroke-width: 5.5;
+  }
+}
+
+.marketing-hero-visual {
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  align-content: center;
+}
+
+.marketing-hero-logo-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(350px, 36vw, 470px);
+  max-width: 100%;
+  aspect-ratio: 1;
+  margin-bottom: -54px;
+  animation: marketing-logo-float 6s ease-in-out infinite;
+}
+
+.marketing-hero-logo {
+  position: relative;
+  z-index: 2;
+  width: 82%;
+  height: 82%;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 30px color-mix(in srgb, var(--mld-team) 24%, transparent));
+}
+
+.marketing-logo-orbit {
+  position: absolute;
+  z-index: 1;
+  border: 2px dashed color-mix(in srgb, var(--mld-info) 64%, transparent);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.marketing-logo-orbit::before,
+.marketing-logo-orbit::after {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--mld-text);
+  border-radius: 50%;
+  background: var(--mld-primary);
+  content: "";
+}
+
+.marketing-logo-orbit::before {
+  top: 12%;
+  right: 7%;
+}
+
+.marketing-logo-orbit::after {
+  bottom: 15%;
+  left: 5%;
+  background: var(--mld-team);
+}
+
+.marketing-logo-orbit--outer {
+  inset: 2%;
+  animation: marketing-logo-orbit 34s linear infinite;
+}
+
+.marketing-logo-orbit--inner {
+  inset: 10%;
+  border-color: color-mix(in srgb, var(--mld-primary) 74%, transparent);
+  transform: rotate(21deg);
+  animation: marketing-logo-orbit 46s linear reverse infinite;
+}
+
+.marketing-hero-visual .marketing-preview {
+  position: relative;
+  z-index: 3;
+  width: min(100%, 520px);
+}
+
+@keyframes marketing-logo-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes marketing-logo-orbit {
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -1488,7 +1676,7 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 .marketing-marquee {
   --marquee-gap: var(--mld-space-5);
   width: 100%;
-  padding: 28px 0 36px;
+  padding: 68px 0 76px;
   overflow: hidden;
   mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
 }
@@ -1502,8 +1690,10 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 }
 
 .marketing-feature-group {
+  position: relative;
   display: flex;
   gap: var(--marquee-gap);
+  isolation: isolate;
 }
 
 .marketing-feature {
@@ -1566,7 +1756,7 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 
 @media (hover: hover) and (pointer: fine) {
   .marketing-feature:hover {
-    z-index: 2;
+    z-index: 5;
     filter: saturate(1.05);
     transform: scale(1.08);
     box-shadow: 0 0 34px color-mix(in srgb, var(--feature-accent) 74%, transparent);
@@ -1635,6 +1825,14 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   .marketing-feature {
     flex-basis: clamp(280px, 48vw, 340px);
   }
+
+  .marketing-hero-visual {
+    margin-top: var(--mld-space-5);
+  }
+
+  .marketing-hero-logo-stage {
+    width: min(68vw, 440px);
+  }
 }
 
 @media (max-width: 620px) {
@@ -1650,13 +1848,34 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
     flex-basis: min(78vw, 310px);
     padding: var(--mld-space-5);
   }
+
+  .marketing-hero-logo-stage {
+    width: min(88vw, 340px);
+    margin-bottom: -32px;
+  }
+
+  .marketing-hero-visual .marketing-preview {
+    width: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .marketing-title-trigger,
   .marketing-marquee-track,
-  .maylamdi-burst-word {
+  .maylamdi-burst-word,
+  .marketing-hero-logo-stage,
+  .marketing-logo-orbit {
     animation: none;
+  }
+
+  .marketing-title-sketch path {
+    stroke-dashoffset: 0;
+    animation: none;
+  }
+
+  .marketing-title-trigger:hover .marketing-title-hook,
+  .marketing-title-trigger:focus-visible .marketing-title-hook {
+    transform: none;
   }
 
   .marketing-marquee {
