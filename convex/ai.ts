@@ -233,7 +233,14 @@ function parseJsonResponse(content: string): unknown {
     try {
       return JSON.parse(candidate);
     } catch {
-      // Try the next bounded representation before rejecting the response.
+      try {
+        const repaired = candidate
+          .replace(/,\s*([}\]])/g, "$1")
+          .replace(/[\u0000-\u001F\u007F-\u009F]/g, " ");
+        return JSON.parse(repaired);
+      } catch {
+        // Try next candidate
+      }
     }
   }
 

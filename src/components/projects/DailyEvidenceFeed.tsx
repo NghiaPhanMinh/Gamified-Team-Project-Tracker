@@ -64,10 +64,12 @@ export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
     <section className="daily-evidence-feed" aria-labelledby="daily-feed-title">
       <header className="daily-feed-header">
         <div>
-          <p className="kicker">Daily Goblin Defense</p>
+          <p className="kicker">Daily Progress Log &amp; Defense</p>
           <h3 className="display-heading" id="daily-feed-title">Team Daily Evidence Feed</h3>
           <p className="daily-feed-guidance">
-            Post your daily work updates to slay your daily goblin. Minimum requirement to defeat today’s goblin: <strong>at least 20 words of text OR 2 pictures attached</strong>.
+            The Daily Feed collects real proof (screenshots, links, design drafts) from team members every day.
+            AI &amp; team leads use this transparent activity timeline to track genuine contributions and celebrate progress.
+            <strong> Minimum daily requirement: at least 20 words OR 2 pictures attached.</strong>
           </p>
         </div>
       </header>

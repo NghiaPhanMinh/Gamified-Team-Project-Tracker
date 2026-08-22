@@ -286,6 +286,13 @@ footer .brand-logo {
   color: #ffffff;
 }
 
+:root[data-theme="dark"] .nav-actions .activity-center-toggle {
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid rgba(255, 253, 236, 0.26);
+  box-shadow: none;
+}
+
 .open-project-header-actions {
   display: flex;
   align-items: center;
@@ -2426,6 +2433,22 @@ footer {
   border-radius: 1.25rem;
   background: var(--color-cream);
   box-shadow: 5px 5px 0 var(--color-navy);
+}
+
+.task-form-section {
+  margin: 0 0 1.25rem 0;
+  padding: 1rem 1.25rem;
+  border: 2px solid color-mix(in srgb, var(--color-text) 22%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--color-page) 60%, var(--color-surface));
+}
+
+.task-form-section > legend {
+  padding: 0 0.5rem;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--color-blue);
 }
 
 .project-card-grid > article > div:first-child {
@@ -5059,7 +5082,7 @@ footer {
 .battle-task-note.task-awaiting_creator { background: var(--color-orange); color: var(--text-on-orange); }
 .battle-task-note.task-completed, .battle-task-note.task-verified { background: var(--color-green); color: var(--text-on-green); }
 .battle-task-note-main { display: grid; grid-template-columns: 1fr auto; align-content: start; gap: .45rem .6rem; width: 100%; padding: 1rem; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
-.battle-task-note-main > strong { grid-column: 1 / -1; min-height: 2.7em; font-family: var(--font-heading); font-size: clamp(1.35rem, 2.2vw, 2rem); line-height: .98; }
+.battle-task-note-main > strong { grid-column: 1 / -1; font-family: var(--font-heading); font-size: clamp(1.2rem, 2vw, 1.65rem); line-height: 1.25; word-break: break-word; overflow-wrap: anywhere; }
 .battle-task-phase, .battle-task-status { width: fit-content; padding: .25rem .45rem; border: 2px solid currentColor; border-radius: 999px; font-size: .67rem; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; }
 .battle-task-status { justify-self: end; }
 .battle-task-owner, .battle-task-date, .battle-task-reviewer, .battle-task-impact { font-size: .8rem; font-weight: 800; }
