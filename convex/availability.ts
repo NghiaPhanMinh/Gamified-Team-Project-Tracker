@@ -107,7 +107,26 @@ export const updateMine = mutation({
 export const getForProject = query({
   args: { projectId: v.id("projects") },
   handler: async (ctx, args) => {
-    const { profile, project } = await requireProjectMember(ctx, args.projectId);
+    const project = await ctx.db.get(args.projectId);
+    if (!project) return null;
+    const { profile, membership } = await requireTeamMember(ctx, project.teamId);
+    const projectMembership = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project_and_user", (q) =>
+        q.eq("projectId", args.projectId).eq("profileId", profile._id),
+      )
+      .unique();
+
+    if (!projectMembership && membership.role !== "owner") {
+      return {
+        currentProfileId: profile._id,
+        canManageMeetings: false,
+        members: [],
+        blocks: [],
+        suggestions: [],
+        plans: [],
+      };
+    }
     const [blocks, memberships, plans, votes, tasks] = await Promise.all([
       ctx.db.query("availabilityBlocks").withIndex("by_project", (q) => q.eq("projectId", args.projectId)).collect(),
       ctx.db.query("projectMembers").withIndex("by_project", (q) => q.eq("projectId", args.projectId)).collect(),

@@ -33,7 +33,7 @@ async function accessForProject(ctx: QueryCtx, projectId: Id<"projects">) {
     .query("projectMembers")
     .withIndex("by_project_and_user", (q) => q.eq("projectId", project._id).eq("profileId", profile._id))
     .unique();
-  if (!projectMembership && membership.role !== "owner") throw new Error("Only project members can use AI planning.");
+  const isAllowed = Boolean(projectMembership || membership.role === "owner");
   const tier = await activeTier(ctx, profile._id);
   const usage = await ctx.db
     .query("aiUsage")
@@ -42,6 +42,7 @@ async function accessForProject(ctx: QueryCtx, projectId: Id<"projects">) {
   return {
     profileId: profile._id,
     tier,
+    isAllowed,
     entitlement: TIER_ENTITLEMENTS[tier],
     successfulPlatformPlanGenerations: usage.filter((item) => item.success && item.operation === "project_plan").length,
   };
@@ -70,8 +71,9 @@ export const getProjectUsage = query({
       limit: access.entitlement.platformPlanGenerationsPerProject,
       used: access.successfulPlatformPlanGenerations,
       platformGenerationAvailable:
-        access.entitlement.platformPlanGenerationsPerProject === null ||
-        access.successfulPlatformPlanGenerations < access.entitlement.platformPlanGenerationsPerProject,
+        access.isAllowed &&
+        (access.entitlement.platformPlanGenerationsPerProject === null ||
+        access.successfulPlatformPlanGenerations < access.entitlement.platformPlanGenerationsPerProject),
     };
   },
 });

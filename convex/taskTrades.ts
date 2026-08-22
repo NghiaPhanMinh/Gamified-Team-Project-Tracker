@@ -29,7 +29,23 @@ function isTradeableStatus(status: string) {
 export const listForProject = query({
   args: { projectId: v.id("projects") },
   handler: async (ctx, args) => {
-    const { profile } = await requireProjectMember(ctx, args.projectId);
+    const project = await ctx.db.get(args.projectId);
+    if (!project) return { currentProfileId: null, trades: [] };
+    const { profile } = await requireTeamMember(ctx, project.teamId);
+    const member = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project_and_user", (q) =>
+        q.eq("projectId", args.projectId).eq("profileId", profile._id),
+      )
+      .unique();
+
+    if (!member) {
+      return {
+        currentProfileId: profile._id,
+        trades: [],
+      };
+    }
+
     const trades = await ctx.db
       .query("taskTrades")
       .withIndex("by_project", (q) => q.eq("projectId", args.projectId))
