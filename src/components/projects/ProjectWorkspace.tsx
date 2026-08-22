@@ -258,7 +258,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
         return { task, label: "Approve completion", kind: "approve" as const, priority: 3 };
       }
       if (task.isOpenForClaiming) {
-        return { task, label: "Claim task", kind: "claim" as const, priority: 4 };
+        return { task, label: "MayLamDi", kind: "claim" as const, priority: 4 };
       }
       if (task.primaryOwnerProfileId === workspace.currentProfileId && !["completed", "verified"].includes(task.status)) {
         return { task, label: task.status === "todo" ? "Start task" : "Continue task", kind: "open" as const, priority: 5 };
@@ -677,7 +677,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
           <div><dt>Status</dt><dd>{STATUS_LABELS[openBattleTask.status as TaskStatus]}</dd></div>
         </dl>
 
-        {openBattleTask.isOpenForClaiming ? <button className="primary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => claimTask({ taskId: openBattleTask._id }), "The task could not be claimed.")}>Claim Task</button> : null}
+        {openBattleTask.isOpenForClaiming ? <button className="primary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => claimTask({ taskId: openBattleTask._id }), "The task could not be claimed.")}>MayLamDi</button> : null}
         {openBattleTask.primaryOwnerProfileId === workspace.currentProfileId && openBattleTask.acceptanceStatus === "pending" ? <div className="battle-drawer-action-row"><button className="primary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => acceptTask({ taskId: openBattleTask._id }), "The request could not be accepted.")}>Accept</button><button className="quiet-button" type="button" disabled={isSaving} onClick={() => void runAction(() => declineTask({ taskId: openBattleTask._id }), "The request could not be declined.")}>Decline</button></div> : null}
 
         {(workspace.canManageProject || workspace.isTeamOwner) && !workspace.project.tasksLocked ? <section className="task-allocation-lock"><div><strong>Allocation</strong><span>Freeze the required task count and reveal the shared Boss HP baseline.</span></div><button className="secondary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => lockTasks({ projectId: workspace.project._id }), "The task list could not be locked.")}>Lock project task list</button></section> : null}

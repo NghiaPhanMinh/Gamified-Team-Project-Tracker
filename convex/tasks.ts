@@ -1022,8 +1022,16 @@ export const claimTask = mutation({
     const task = await ctx.db.get(args.taskId);
     if (task === null) throw new Error("This task no longer exists.");
     const { project, profile } = await requireProjectWriteAccess(ctx, task.projectId);
-    if (!task.isOpenForClaiming) throw new Error("This task is not open for claiming.");
-    if (task.status !== "todo") throw new Error("Only a to-do task can be claimed.");
+
+    // If current user is already the assigned owner, return idempotently
+    if (task.primaryOwnerProfileId === profile._id && task.assignmentState === "assigned") {
+      return task._id;
+    }
+
+    // Allow claiming tasks that are open for claiming, unassigned, or open
+    if (!task.isOpenForClaiming && task.assignmentState !== "unassigned" && task.assignmentState !== "open") {
+      throw new Error("This task is not open for claiming or is already assigned.");
+    }
 
     const now = Date.now();
     await ctx.db.patch(task._id, {

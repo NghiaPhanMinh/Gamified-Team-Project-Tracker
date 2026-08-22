@@ -68,7 +68,7 @@ describe("BattleTaskBoard", () => {
     const openNote = screen.getByRole("button", { name: "Open details for Open task" }).closest("article");
     const proposedNote = screen.getByRole("button", { name: "Open details for Proposed task" }).closest("article");
 
-    fireEvent.click(within(openNote!).getByRole("button", { name: "Claim Task" }));
+    fireEvent.click(within(openNote!).getByRole("button", { name: "MayLamDi" }));
     fireEvent.click(within(proposedNote!).getByRole("button", { name: "Accept" }));
     fireEvent.click(within(proposedNote!).getByRole("button", { name: "Decline" }));
 
