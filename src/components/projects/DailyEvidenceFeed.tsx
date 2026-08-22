@@ -66,11 +66,11 @@ export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
       <header className="daily-feed-header">
         <div>
           <div className="daily-feed-title-row">
-            <h3 className="display-heading" id="daily-feed-title">Nhật ký Bằng chứng Hàng ngày</h3>
+            <h3 className="display-heading" id="daily-feed-title">Daily Evidence Feed</h3>
             <span className="read-only-label">LIVE FEED</span>
           </div>
           <p className="daily-feed-requirement">
-            <strong>Yêu cầu tối thiểu:</strong> Từ 20 từ trở lên HOẶC đính kèm từ 2 hình ảnh.
+            <strong>Minimum requirement:</strong> At least 20 words OR 2 pictures attached.
           </p>
         </div>
       </header>
@@ -80,30 +80,30 @@ export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
         {error ? <p className="form-error" role="alert">{error}</p> : null}
 
         <label className="daily-text-field">
-          <span className="field-label">Mô tả tiến độ / Bằng chứng làm việc</span>
+          <span className="field-label">Work Description / Progress Notes</span>
           <textarea
             rows={3}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Mô tả kết quả công việc hôm nay (ít nhất 20 từ nếu không đính kèm ảnh)..."
+            placeholder="Describe what you built, researched, or accomplished today (at least 20 words required if no images attached)..."
           />
         </label>
 
         {/* Live Validation Counters */}
         <div className="daily-validation-status-bar">
           <span className={`validation-counter ${wordCount >= 20 ? "is-valid" : ""}`}>
-            📝 {wordCount}/20 từ {wordCount >= 20 ? "✓" : ""}
+            📝 {wordCount}/20 words {wordCount >= 20 ? "✓" : ""}
           </span>
           <span className={`validation-counter ${imageCount >= 2 ? "is-valid" : ""}`}>
-            🖼️ {imageCount}/2 ảnh {imageCount >= 2 ? "✓" : ""}
+            🖼️ {imageCount}/2 pictures {imageCount >= 2 ? "✓" : ""}
           </span>
           {isValidSubmission ? (
             <span className="validation-result-badge is-valid-badge">
-              ⚔️ Đã đủ điều kiện thủ thành hôm nay!
+              ⚔️ Valid Submission — Defeats Today’s Goblin!
             </span>
           ) : (
             <span className="validation-result-badge is-warning-badge">
-              ⚠️ Cần từ 20 từ hoặc 2 ảnh để hoàn thành thủ thành
+              ⚠️ Needs 20 words or 2 images to count towards goblin defense
             </span>
           )}
         </div>
@@ -115,10 +115,10 @@ export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
             type="url"
             value={imageInput}
             onChange={(e) => setImageInput(e.target.value)}
-            placeholder="Dán URL hình ảnh (ví dụ: link minh chứng)..."
+            placeholder="Paste image URL (e.g. screenshot link)..."
           />
           <button className="secondary-button" type="button" onClick={handleAddImage}>
-            Đính kèm ảnh
+            Attach image
           </button>
         </div>
 
@@ -127,8 +127,8 @@ export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
           <div className="attached-images-preview">
             {imageUrls.map((url, idx) => (
               <div key={idx} className="attached-image-chip">
-                <span>Ảnh {idx + 1}</span>
-                <button type="button" onClick={() => handleRemoveImage(idx)} aria-label={`Xóa ảnh ${idx + 1}`}>×</button>
+                <span>Image {idx + 1}</span>
+                <button type="button" onClick={() => handleRemoveImage(idx)} aria-label={`Remove image ${idx + 1}`}>×</button>
               </div>
             ))}
           </div>
@@ -136,18 +136,18 @@ export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
 
         <div className="daily-form-actions">
           <button className="primary-button" type="submit" disabled={isPosting || (!text && imageUrls.length === 0)}>
-            {isPosting ? "Đang đăng bằng chứng..." : "Đăng bằng chứng"}
+            {isPosting ? "Posting evidence..." : "Post daily evidence"}
           </button>
         </div>
       </form>
 
       {/* Feed List */}
       <div className="daily-feed-list" aria-label="Team daily evidence log">
-        <h4 className="feed-list-title">Hoạt động bằng chứng nhóm</h4>
+        <h4 className="feed-list-title">Team Evidence Activity</h4>
         {posts === undefined ? (
-          <p>Đang tải nhật ký bằng chứng...</p>
+          <p>Loading daily evidence feed...</p>
         ) : posts.length === 0 ? (
-          <p className="empty-feed-notice">Chưa có bằng chứng nào được đăng hôm nay. Hãy là người đầu tiên đăng!</p>
+          <p className="empty-feed-notice">No daily evidence posted yet today. Be the first to post!</p>
         ) : (
           posts.map((post) => (
             <article key={post._id} className={`daily-feed-card ${post.isValid ? "feed-card-valid" : "feed-card-invalid"}`}>
@@ -162,21 +162,21 @@ export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
                 <span className="feed-author-name">{post.authorName}</span>
                 <time className="feed-post-time">{new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time>
                 {post.isValid ? (
-                  <span className="feed-status-tag valid-tag">🛡️ Đã hạ Goblin</span>
+                  <span className="feed-status-tag valid-tag">🛡️ Goblin Slayed</span>
                 ) : (
-                  <span className="feed-status-tag invalid-tag">⚠️ Đã ghi nhận (Ngắn)</span>
+                  <span className="feed-status-tag invalid-tag">⚠️ Logged (Short)</span>
                 )}
               </header>
               <p className="feed-post-text">{post.text}</p>
               {post.imageUrls && post.imageUrls.length > 0 ? (
                 <div className="feed-post-images">
                   {post.imageUrls.map((url: string, idx: number) => (
-                    <img key={idx} src={url} alt={`Minh chứng ${idx + 1}`} className="feed-image-preview" />
+                    <img key={idx} src={url} alt={`Evidence attachment ${idx + 1}`} className="feed-image-preview" />
                   ))}
                 </div>
               ) : null}
               <footer className="feed-card-footer">
-                <span>{post.wordCount} từ · {post.imageCount} hình ảnh</span>
+                <span>{post.wordCount} words · {post.imageCount} images</span>
               </footer>
             </article>
           ))
