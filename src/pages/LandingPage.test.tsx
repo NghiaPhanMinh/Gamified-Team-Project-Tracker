@@ -37,12 +37,13 @@ describe("MayLamDi landing page", () => {
   });
 
   it("renders the looping card sequence and replays the branded title burst", () => {
-    render(<MemoryRouter><LandingPage /></MemoryRouter>);
+    const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
 
     expect(screen.getAllByAltText("MayLamDi logo")).toHaveLength(2);
-    expect(screen.getAllByText("Start with the brief.")).toHaveLength(2);
-    expect(screen.getAllByText("Plan work fairly.")).toHaveLength(2);
-    expect(screen.getAllByText("Make progress visible.")).toHaveLength(2);
+    expect(container.querySelectorAll(".marketing-feature-group")).toHaveLength(4);
+    expect(screen.getAllByText("Start with the brief.")).toHaveLength(4);
+    expect(screen.getAllByText("Plan work fairly.")).toHaveLength(4);
+    expect(screen.getAllByText("Make progress visible.")).toHaveLength(4);
 
     fireEvent.click(screen.getByRole("button", { name: /make teamwork.*feel shared/i }));
     expect(screen.getAllByText("MAYLAMDI")).toHaveLength(42);

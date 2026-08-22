@@ -39,6 +39,8 @@ const FEATURES = [
   },
 ] as const;
 
+const MARQUEE_GROUP_COUNT = 4;
+
 const BURST_COLORS = ["#fff73f", "#ff8ae7", "#4ca0fe", "#1dd851", "#feaa01"];
 
 function buildBurstWords(): BurstWord[] {
@@ -174,11 +176,11 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
         <h2 className="sr-only" id="how-it-works-title">See how it works</h2>
         <div className="marketing-marquee">
           <div className="marketing-marquee-track">
-            {[0, 1].map((groupIndex) => (
+            {Array.from({ length: MARQUEE_GROUP_COUNT }, (_, groupIndex) => (
               <div
                 className="marketing-feature-group"
                 key={groupIndex}
-                aria-hidden={groupIndex === 1 ? "true" : undefined}
+                aria-hidden={groupIndex > 0 ? "true" : undefined}
               >
                 {FEATURES.map((feature) => (
                   <article

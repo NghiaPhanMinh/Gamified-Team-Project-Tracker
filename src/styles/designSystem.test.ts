@@ -23,6 +23,8 @@ describe("MayLamDi design-system contract", () => {
 
   it("keeps the landing marquee seamless and motion-sensitive", () => {
     expect(css).toContain("@keyframes marketing-marquee");
+    expect(css).toContain("padding-inline-end: var(--marquee-gap)");
+    expect(css).toContain("transform: translate3d(-25%, 0, 0)");
     expect(css).toContain("animation-play-state: paused");
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");
     expect(css).toContain("overflow-x: auto");
