@@ -1401,6 +1401,64 @@ select:focus-visible {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
+.character-avatar-orb {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  border-style: solid;
+  border-radius: 42% 58% 52% 48% / 52% 42% 58% 48%;
+  font-family: var(--font-display, sans-serif);
+  font-weight: 900;
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.character-avatar-orb.size-xs {
+  width: 22px;
+  height: 22px;
+  border-width: 2px;
+  font-size: 0.65rem;
+}
+
+.character-avatar-orb.size-sm {
+  width: 30px;
+  height: 30px;
+  border-width: 2.5px;
+  font-size: 0.82rem;
+}
+
+.character-avatar-orb.size-md {
+  width: 44px;
+  height: 44px;
+  border-width: 3px;
+  font-size: 1.15rem;
+}
+
+.character-avatar-orb.size-lg {
+  width: 64px;
+  height: 64px;
+  border-width: 4px;
+  font-size: 1.6rem;
+}
+
+.character-avatar-orb .avatar-spell-badge {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  display: grid;
+  place-items: center;
+  width: 44%;
+  height: 44%;
+  min-width: 12px;
+  min-height: 12px;
+  border-radius: 50%;
+  font-size: 0.55em;
+  font-style: normal;
+  line-height: 1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
 .palette-option,
 .spell-grid button {
   min-height: 3.2rem;

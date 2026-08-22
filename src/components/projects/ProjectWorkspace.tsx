@@ -271,25 +271,31 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
     .filter((item): item is NonNullable<typeof item> => item !== null)
     .sort((first, second) => first.priority - second.priority || first.task.dueDate.localeCompare(second.task.dueDate))[0];
   const openBattleTask = workspace.tasks.find((task) => task._id === openBattleTaskId);
-  const battleTasks: BattleTaskSummary[] = workspace.tasks.map((task) => ({
-    id: task._id,
-    title: task.title,
-    phase: phaseNameById.get(task.phaseId) ?? "Project work",
-    owner: task.assignmentState === "unassigned"
-      ? "Unassigned"
-      : task.isOpenForClaiming
-        ? "Open for claiming"
-        : memberNameById.get(task.primaryOwnerProfileId) ?? "Team member",
-    reviewer: task.reviewerProfileId ? memberNameById.get(task.reviewerProfileId) ?? "Reviewer" : "Choose later",
-    dueDate: task.dueDate,
-    status: task.status as TaskStatus,
-    weight: task.weight,
-    damage: task.damage ?? ((task.difficulty ?? 1) <= 1 ? 10 : task.difficulty === 2 ? 20 : 30),
-    isMine: task.primaryOwnerProfileId === workspace.currentProfileId,
-    isReviewer: task.reviewerProfileId === workspace.currentProfileId,
-    isOpenForClaiming: Boolean(task.isOpenForClaiming),
-    acceptanceStatus: task.acceptanceStatus,
-  }));
+  const battleTasks: BattleTaskSummary[] = workspace.tasks.map((task) => {
+    const ownerMember = workspace.members.find((m) => m?.profileId === task.primaryOwnerProfileId);
+    return {
+      id: task._id,
+      title: task.title,
+      phase: phaseNameById.get(task.phaseId) ?? "Project work",
+      owner: task.assignmentState === "unassigned"
+        ? "Unassigned"
+        : task.isOpenForClaiming
+          ? "Open for claiming"
+          : memberNameById.get(task.primaryOwnerProfileId) ?? "Team member",
+      ownerFill: ownerMember?.characterFill,
+      ownerOutline: ownerMember?.characterOutline,
+      ownerSpellType: ownerMember?.spellType,
+      reviewer: task.reviewerProfileId ? memberNameById.get(task.reviewerProfileId) ?? "Reviewer" : "Choose later",
+      dueDate: task.dueDate,
+      status: task.status as TaskStatus,
+      weight: task.weight,
+      damage: task.damage ?? ((task.difficulty ?? 1) <= 1 ? 10 : task.difficulty === 2 ? 20 : 30),
+      isMine: task.primaryOwnerProfileId === workspace.currentProfileId,
+      isReviewer: task.reviewerProfileId === workspace.currentProfileId,
+      isOpenForClaiming: Boolean(task.isOpenForClaiming),
+      acceptanceStatus: task.acceptanceStatus,
+    };
+  });
 
   function resetTaskForm() {
     setTaskTitle("");

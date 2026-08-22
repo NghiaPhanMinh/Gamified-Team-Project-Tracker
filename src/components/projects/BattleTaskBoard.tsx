@@ -3,6 +3,7 @@ import {
   type BattleTaskStatus,
   type BattleTaskSummary,
 } from "./battleTaskAction";
+import { CharacterAvatar } from "../common/CharacterAvatar";
 
 export type { BattleTaskSummary } from "./battleTaskAction";
 
@@ -60,7 +61,16 @@ function BattleTaskNote({
       >
         <span className="battle-task-phase">{task.phase}</span>
         <strong>{task.title}</strong>
-        <span className="battle-task-owner">
+        <span className="battle-task-owner" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+          {!task.isOpenForClaiming && task.owner !== "Unassigned" ? (
+            <CharacterAvatar
+              fill={task.ownerFill}
+              outline={task.ownerOutline}
+              spellType={task.ownerSpellType as any}
+              name={task.owner}
+              size="xs"
+            />
+          ) : null}
           {task.owner}{tasksLocked && !task.isOpenForClaiming ? <span aria-label="Task allocation locked"> 🔒</span> : null}
         </span>
         <span className="battle-task-date">Due {task.dueDate}</span>

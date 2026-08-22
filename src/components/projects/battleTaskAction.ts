@@ -14,6 +14,9 @@ export type BattleTaskSummary = {
   title: string;
   phase: string;
   owner: string;
+  ownerFill?: string;
+  ownerOutline?: string;
+  ownerSpellType?: string;
   reviewer: string;
   dueDate: string;
   status: BattleTaskStatus;

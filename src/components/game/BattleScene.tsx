@@ -13,6 +13,7 @@ import { LandscapeGoblins } from "./landscape/LandscapeGoblins";
 import { LandscapePlayers } from "./landscape/LandscapePlayers";
 import { LandscapeDragon, DRAGON_ORIGINAL_SHAPES, parseCoordinates } from "./landscape/LandscapeDragon";
 import { LandscapeFX } from "./landscape/LandscapeFX";
+import { CharacterAvatar } from "../common/CharacterAvatar";
 
 type BattleSceneProps = { projectId: Id<"projects">; currentPhase?: string; tasksLocked?: boolean };
 
@@ -2226,15 +2227,24 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               {state.members.map((member) => {
                 const sharePercent = member.targetHpShare > 0 ? Math.min(100, Math.round((member.damageDealt / member.targetHpShare) * 100)) : 0;
                 return (
-                  <div key={member.profileId} style={{ background: "rgba(255, 255, 255, 0.7)", padding: "0.4rem 0.6rem", borderRadius: "6px", fontSize: "0.8rem", border: "1px solid rgba(0,0,0,0.08)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
-                      <strong>{member.displayName}</strong>
-                      <span style={{ fontWeight: 600, color: member.isShareComplete ? "#15803d" : "#334155" }}>
-                        {member.damageDealt}/{member.targetHpShare} HP ({sharePercent}%)
-                      </span>
-                    </div>
-                    <div style={{ height: "6px", background: "rgba(0,0,0,0.1)", borderRadius: "3px", overflow: "hidden" }}>
-                      <div style={{ width: `${sharePercent}%`, height: "100%", background: member.isShareComplete ? "#22c55e" : "#2563eb", borderRadius: "3px", transition: "width 0.3s ease" }} />
+                  <div key={member.profileId} style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.7)", padding: "0.4rem 0.6rem", borderRadius: "6px", fontSize: "0.8rem", border: "1px solid rgba(0,0,0,0.08)" }}>
+                    <CharacterAvatar
+                      fill={member.characterFill}
+                      outline={member.characterOutline}
+                      spellType={member.spellType as any}
+                      name={member.displayName}
+                      size="xs"
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
+                        <strong style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{member.displayName}</strong>
+                        <span style={{ fontWeight: 600, color: member.isShareComplete ? "#15803d" : "#334155", marginLeft: "4px" }}>
+                          {member.damageDealt}/{member.targetHpShare} HP ({sharePercent}%)
+                        </span>
+                      </div>
+                      <div style={{ height: "6px", background: "rgba(0,0,0,0.1)", borderRadius: "3px", overflow: "hidden" }}>
+                        <div style={{ width: `${sharePercent}%`, height: "100%", background: member.isShareComplete ? "#22c55e" : "#2563eb", borderRadius: "3px", transition: "width 0.3s ease" }} />
+                      </div>
                     </div>
                   </div>
                 );

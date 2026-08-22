@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { getErrorMessage } from "../../lib/errors";
+import { CharacterAvatar } from "../common/CharacterAvatar";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const HOURS = Array.from({ length: 13 }, (_, index) => index + 8);
@@ -123,7 +124,14 @@ export function ProjectTeamMembers({ projectId }: { projectId: Id<"projects"> })
 
       <div className="member-profile-grid">
         {data.members.map((member) => <article key={member.profileId} className="member-profile-card">
-          {member.imageUrl ? <img src={member.imageUrl} alt="" /> : <span className="member-avatar">{initials(member.displayName)}</span>}
+          <CharacterAvatar
+            fill={(member as any).characterFill}
+            outline={(member as any).characterOutline}
+            spellType={(member as any).spellType}
+            name={member.displayName}
+            imageUrl={member.imageUrl}
+            size="md"
+          />
           <div><strong>{member.displayName}</strong><small>{member.weeklyCapacity ?? "?"}h/week · {member.assignedTaskCount} assigned · {member.reviewTaskCount} reviews</small></div>
           <div><small>General skills</small><div className="skill-chip-list">{member.skills.length ? member.skills.map((skill) => <span key={skill}>{skill}</span>) : <span>None saved</span>}</div></div>
           <div><small>Software skills</small><div className="skill-chip-list">{member.softwareSkills.length ? member.softwareSkills.map((skill) => <span key={skill}>{skill}</span>) : <span>None saved</span>}</div></div>

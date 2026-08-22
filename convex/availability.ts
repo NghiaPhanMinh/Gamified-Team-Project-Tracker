@@ -117,10 +117,18 @@ export const getForProject = query({
     ]);
     const members = await Promise.all(memberships.map(async (member) => {
       const memberProfile = await ctx.db.get(member.profileId);
+      const teamMember = await ctx.db
+        .query("teamMembers")
+        .withIndex("by_team_and_user", (q) => q.eq("teamId", project.teamId).eq("profileId", member.profileId))
+        .unique();
+
       return {
         profileId: member.profileId,
         displayName: memberProfile?.displayName ?? "Former member",
         imageUrl: memberProfile?.imageUrl,
+        characterFill: teamMember?.characterFill ?? memberProfile?.characterFill ?? "#FFF73F",
+        characterOutline: teamMember?.characterOutline ?? memberProfile?.characterOutline ?? "#4CA0FE",
+        spellType: teamMember?.spellType ?? memberProfile?.spellType,
         skills: memberProfile?.skills ?? member.skills,
         softwareSkills: memberProfile?.softwareSkills ?? [],
         workload: member.currentWorkload,

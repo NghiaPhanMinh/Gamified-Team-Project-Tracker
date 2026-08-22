@@ -268,6 +268,12 @@ export const getWorkspace = query({
     const members = await Promise.all(
       projectMembers.map(async (member) => {
         const profile = await ctx.db.get(member.profileId);
+        const teamMember = await ctx.db
+          .query("teamMembers")
+          .withIndex("by_team_and_user", (query) =>
+            query.eq("teamId", project.teamId).eq("profileId", member.profileId),
+          )
+          .unique();
 
         return profile === null
           ? null
@@ -275,6 +281,9 @@ export const getWorkspace = query({
               ...member,
               displayName: profile.displayName,
               imageUrl: profile.imageUrl,
+              characterFill: teamMember?.characterFill ?? profile.characterFill ?? "#FFF73F",
+              characterOutline: teamMember?.characterOutline ?? profile.characterOutline ?? "#4CA0FE",
+              spellType: teamMember?.spellType ?? profile.spellType,
               profileSkills: profile.skills ?? [],
               softwareSkills: profile.softwareSkills ?? [],
               profileWeeklyCapacity: profile.weeklyCapacity,

@@ -17,14 +17,29 @@ export const listForProject = query({
       .take(100);
 
     const authorIds = [...new Set(items.map((item) => item.authorProfileId))];
-    const authors = await Promise.all(authorIds.map((id) => ctx.db.get(id)));
+    const [authors, teamMemberships] = await Promise.all([
+      Promise.all(authorIds.map((id) => ctx.db.get(id))),
+      Promise.all(
+        authorIds.map((id) =>
+          ctx.db
+            .query("teamMembers")
+            .withIndex("by_team_and_user", (q) => q.eq("teamId", project.teamId).eq("profileId", id))
+            .unique(),
+        ),
+      ),
+    ]);
     const authorMap = new Map(authors.filter(Boolean).map((a) => [a!._id, a!]));
+    const teamMemberMap = new Map(teamMemberships.filter(Boolean).map((m) => [m!.profileId, m!]));
 
     return items.map((item) => {
       const author = authorMap.get(item.authorProfileId);
+      const teamMember = teamMemberMap.get(item.authorProfileId);
       return {
         ...item,
         authorName: author?.displayName ?? "Team member",
+        authorFill: teamMember?.characterFill ?? author?.characterFill ?? "#FFF73F",
+        authorOutline: teamMember?.characterOutline ?? author?.characterOutline ?? "#4CA0FE",
+        authorSpellType: teamMember?.spellType ?? author?.spellType,
       };
     });
   },

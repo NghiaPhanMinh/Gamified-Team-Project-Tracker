@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { getErrorMessage } from "../../lib/errors";
+import { CharacterAvatar } from "../common/CharacterAvatar";
 
 type DailyEvidenceFeedProps = {
   projectId: Id<"projects">;
@@ -150,6 +151,13 @@ export function DailyEvidenceFeed({ projectId }: DailyEvidenceFeedProps) {
           posts.map((post: any) => (
             <article key={post._id} className={`daily-feed-card ${post.isValid ? "feed-card-valid" : "feed-card-invalid"}`}>
               <header className="feed-card-header">
+                <CharacterAvatar
+                  fill={post.authorFill}
+                  outline={post.authorOutline}
+                  spellType={post.authorSpellType}
+                  name={post.authorName}
+                  size="sm"
+                />
                 <span className="feed-author-name">{post.authorName}</span>
                 <time className="feed-post-time">{new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time>
                 {post.isValid ? (
