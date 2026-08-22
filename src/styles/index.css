@@ -6570,7 +6570,7 @@ footer {
   font-weight: 800;
 }
 
-/* Enforce Yellow Frame with Solid Black Text & Border in both Light & Dark modes */
+/* MayLamDi Original Signature Yellow Card & Pill Badge Styling */
 .project-badge-tag,
 .app-sidebar button.is-active,
 .project-tabs button.is-active,
@@ -6578,10 +6578,12 @@ footer {
 .battle-task-board-heading > span,
 .battle-task-group-heading > span,
 .project-progress-pill {
-  background-color: #facc15 !important;
-  color: #0f172a !important;
-  border: 2px solid #0f172a !important;
-  font-weight: 900 !important;
+  background-color: var(--color-yellow, #fff73f) !important;
+  color: #101517 !important;
+  border: 1.5px solid #101517 !important;
+  border-radius: var(--mld-radius-pill, 999px) !important;
+  font-weight: 800 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
 }
 
 :root[data-theme="dark"] .project-badge-tag,
@@ -6591,17 +6593,20 @@ footer {
 :root[data-theme="dark"] .battle-task-board-heading > span,
 :root[data-theme="dark"] .battle-task-group-heading > span,
 :root[data-theme="dark"] .project-progress-pill {
-  background-color: #facc15 !important;
-  color: #0f172a !important;
-  border: 2px solid #0f172a !important;
-  font-weight: 900 !important;
+  background-color: var(--color-yellow, #fff73f) !important;
+  color: #101517 !important;
+  border: 1.5px solid #101517 !important;
+  border-radius: var(--mld-radius-pill, 999px) !important;
+  font-weight: 800 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
 }
 
 .project-badge-tag *,
 .app-sidebar button.is-active *,
 .project-tabs button.is-active * {
-  color: #0f172a !important;
+  color: #101517 !important;
 }
+
 
 /* Inline Deadline & Quick Presets Layout */
 .deadline-inline-field {
