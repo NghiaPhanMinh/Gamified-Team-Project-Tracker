@@ -5100,6 +5100,12 @@ footer {
 .battle-tool-links { display: flex; flex-wrap: wrap; gap: .55rem; margin: 1rem 0; }
 .battle-more-tools .planning-workload-details { margin-top: .8rem; }
 
+.room-tools { min-width: 0; margin-top: 1.25rem; padding: 1.25rem; border: 3px solid var(--color-text); border-radius: 20px; background: var(--color-surface); color: var(--color-text); }
+.room-tools > summary { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.85rem; font-family: var(--font-heading); font-size: 1.15rem; font-weight: 900; cursor: pointer; outline: none; border-radius: 10px; background: color-mix(in srgb, var(--color-text) 8%, transparent); }
+.room-tools > summary:focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; }
+.room-tools .framework-library { margin-top: 1rem; padding: 0; border: none; border-radius: 0; background: transparent; box-shadow: none; }
+.room-tools .framework-library-heading { padding-top: 0.5rem; }
+
 .battle-task-drawer-backdrop { position: fixed; z-index: 95; inset: 0; display: flex; justify-content: flex-end; background: rgb(18 31 37 / .66); }
 .battle-task-drawer { width: min(95vw, 760px); height: 100%; overflow: auto; padding: clamp(1rem, 3vw, 1.6rem); border-left: 3px solid var(--color-text); background: var(--color-surface); color: var(--color-text); box-shadow: -8px 0 0 var(--color-blue); }
 .battle-task-drawer-heading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
