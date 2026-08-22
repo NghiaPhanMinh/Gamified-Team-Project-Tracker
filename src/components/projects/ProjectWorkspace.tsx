@@ -670,7 +670,11 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
         </section>
       ) : null}
 
-      {activeTab === "team" ? <section className="team-tab" aria-labelledby="team-tab-title"><header className="project-section-heading"><div><p className="card-eyebrow">People and coordination</p><h2 id="team-tab-title">Team</h2><p>Members, skills, capacity, and deterministic meeting windows.</p></div></header><ProjectTeamMembers projectId={workspace.project._id} /></section> : null}
+      {activeTab === "team" ? (
+        <section className="team-tab">
+          <ProjectTeamMembers projectId={workspace.project._id} />
+        </section>
+      ) : null}
 
       {briefOpen ? <div className="brief-drawer-backdrop" role="presentation" onClick={() => setBriefOpen(false)}><aside className="brief-drawer" role="dialog" aria-modal="true" aria-labelledby="project-brief-title" onClick={(event) => event.stopPropagation()}><button className="guided-back-link" type="button" onClick={() => setBriefOpen(false)}>Close</button><p className="kicker">Project brief</p>{workspace.canManageProject ? <form onSubmit={saveBrief}><label><span>Project name</span><input required maxLength={100} value={briefTitle} onChange={(event) => setBriefTitle(event.target.value)} /></label><label><span>Deadline</span><input required type="date" value={briefDeadline} onChange={(event) => setBriefDeadline(event.target.value)} /></label><label><span>Brief</span><textarea required maxLength={8000} value={briefDescription} onChange={(event) => setBriefDescription(event.target.value)} /></label><button className="primary-button" type="submit" disabled={isSaving}>Save brief</button></form> : <><h3 className="display-heading" id="project-brief-title">{workspace.project.title}</h3><p>{workspace.project.description}</p><strong>Deadline {workspace.project.deadline}</strong></>}<ol className="brief-phase-list">{workspace.phases.map((phase) => <li key={phase._id}><strong>{phase.title}</strong><span>{phase.description}</span></li>)}</ol></aside></div> : null}
 

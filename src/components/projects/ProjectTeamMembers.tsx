@@ -121,7 +121,7 @@ export function ProjectTeamMembers({ projectId }: { projectId: Id<"projects"> })
 
   return (
     <section className="team-members-tab" aria-labelledby="team-members-title">
-      <header className="project-list-heading"><div><p className="card-eyebrow">Members</p><h3 id="team-members-title">Skills, capacity, and busy times</h3></div></header>
+      <header className="project-list-heading"><div><h3 id="team-members-title">Team Members &amp; Availability</h3></div></header>
 
       {finalPlan ? <aside className="final-meeting-overlay" aria-label="Final meeting selected"><strong>Final meeting selected</strong><span>{DAYS[finalPlan.dayOfWeek]} · {timeLabel(finalPlan.startMinute)} · {finalPlan.durationMinutes} min · {finalPlan.meetingMode ?? "online"}</span></aside> : null}
 
@@ -142,9 +142,8 @@ export function ProjectTeamMembers({ projectId }: { projectId: Id<"projects"> })
       </div>
 
       <section className="availability-editor" aria-labelledby="availability-title">
-        <div><p className="card-eyebrow">Project busy calendar</p><h4 id="availability-title">Mark the hours you are busy</h4><p>Selected blocks are unavailable. Unselected time remains available for deterministic overlap.</p></div>
+        <div><h4 id="availability-title">Mark your busy hours</h4></div>
         <div className="availability-preferences">
-          <label><span>Timezone</span><input value={timezone} onChange={(event) => setTimezone(event.target.value)} /></label>
           <label><span>Preferred duration</span><select value={duration} onChange={(event) => setDuration(event.target.value)}><option value="30">30 minutes</option><option value="45">45 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option><option value="120">2 hours</option></select></label>
           <label><span>Cadence</span><select value={cadence} onChange={(event) => setCadence(event.target.value as typeof cadence)}><option value="weekly">Weekly</option><option value="fortnightly">Fortnightly</option><option value="as_needed">As needed</option></select></label>
         </div>
