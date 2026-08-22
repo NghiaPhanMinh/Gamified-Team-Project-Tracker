@@ -192,14 +192,14 @@ export function AuthenticatedHome() {
             projectsView={projectsView}
             rooms={availableRooms}
             selectedRoomId={activeRoomId}
-            onNavigateHome={() => navigate("/")}
+            onNavigateHome={() => navigate("/home")}
             onOpenProjects={(view) => openProjects(view)}
             onOpenRoom={(roomId) => openProjects("room", roomId)}
           />
         </div>
       </div>
       <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
-        <button className={activeSection === "home" ? "is-active" : ""} type="button" onClick={() => { navigate("/"); setMobileMenuOpen(false); }}><Home aria-hidden="true" /><span>Home</span></button>
+        <button className={activeSection === "home" ? "is-active" : ""} type="button" onClick={() => { navigate("/home"); setMobileMenuOpen(false); }}><Home aria-hidden="true" /><span>Home</span></button>
         <button className={activeSection === "projects" && projectsView !== "personal-tasks" ? "is-active" : ""} type="button" onClick={() => openProjects("index")}><FolderKanban aria-hidden="true" /><span>Projects</span></button>
         <button className={projectsView === "personal-tasks" ? "is-active" : ""} type="button" onClick={() => openProjects("personal-tasks")}><ListChecks aria-hidden="true" /><span>Tasks</span></button>
         <button className={activeSection === "profile" ? "is-active" : ""} type="button" onClick={() => { navigate("/profile"); setMobileMenuOpen(false); }}><UserRound aria-hidden="true" /><span>Profile</span></button>

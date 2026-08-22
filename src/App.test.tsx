@@ -34,7 +34,7 @@ describe("MayLamDi signed-out journey", () => {
     render(<App />);
 
     expect(
-      screen.getByRole("heading", { name: /make the work.*feel shared/i }),
+      screen.getByRole("heading", { name: /make teamwork.*feel shared/i }),
     ).toBeInTheDocument();
     expect(screen.getAllByAltText("MayLamDi logo")).not.toHaveLength(0);
     expect(screen.getByText(/create or join a project room/i)).toBeInTheDocument();

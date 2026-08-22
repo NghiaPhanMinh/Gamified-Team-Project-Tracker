@@ -1,10 +1,20 @@
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, useLocation } from "react-router-dom";
 
 import { AuthenticatedHome } from "./components/auth/AuthenticatedHome";
 import { AuthLoadingPage } from "./components/auth/AuthLoadingPage";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import { LandingPage } from "./pages/LandingPage";
+
+function AuthenticatedExperience() {
+  const location = useLocation();
+
+  if (location.pathname === "/") {
+    return <LandingPage isAuthenticated />;
+  }
+
+  return <AuthenticatedHome />;
+}
 
 export function App() {
   return (
@@ -17,7 +27,7 @@ export function App() {
       </Unauthenticated>
       <Authenticated>
         <ErrorBoundary>
-          <AuthenticatedHome />
+          <AuthenticatedExperience />
         </ErrorBoundary>
       </Authenticated>
     </BrowserRouter>

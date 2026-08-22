@@ -10,4 +10,8 @@ describe("simplified navigation", () => {
       "Projects",
     ]);
   });
+
+  it("keeps the signed-in dashboard separate from the public landing page", () => {
+    expect(MAIN_NAV_ITEMS.find((item) => item.id === "home")?.path).toBe("/home");
+  });
 });

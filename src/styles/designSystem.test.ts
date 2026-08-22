@@ -20,4 +20,17 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain(".mobile-bottom-nav");
     expect(css).toContain("grid-template-columns: repeat(5, 1fr)");
   });
+
+  it("keeps the landing marquee seamless and motion-sensitive", () => {
+    expect(css).toContain("@keyframes marketing-marquee");
+    expect(css).toContain("animation-play-state: paused");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce)");
+    expect(css).toContain("overflow-x: auto");
+  });
+
+  it("uses the official local display font and blue project preview treatment", () => {
+    expect(css).toContain('/fonts/Blodestarkly-Regular.ttf');
+    expect(css).toContain(".marketing-preview-card");
+    expect(css).toContain("background: var(--mld-info)");
+  });
 });

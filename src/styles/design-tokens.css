@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "Blodestarkly";
+  src: url("/fonts/Blodestarkly-Regular.ttf") format("truetype");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
 /* MayLamDi production design language.
  * The design-system board is a reference; these semantic tokens are the
  * implementation layer shared by the real application screens.
@@ -1393,5 +1401,273 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 
   .marketing-header-actions .theme-toggle span {
     display: none;
+  }
+}
+
+/* Landing-page interactions: branded motion without changing the product flow. */
+.marketing-title {
+  max-width: 10ch;
+}
+
+.marketing-hero .marketing-title-trigger {
+  display: inline;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--mld-radius-sm);
+  background: transparent;
+  color: var(--mld-text);
+  font-family: "Blodestarkly", "Arial Black", var(--mld-font-ui);
+  font-size: clamp(52px, 6.8vw, 88px);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  text-align: left;
+  text-wrap: balance;
+  cursor: pointer;
+  animation: marketing-title-breathe 3.8s ease-in-out infinite;
+}
+
+.marketing-title-trigger em {
+  color: var(--mld-xp);
+  font: inherit;
+}
+
+.marketing-title-trigger:hover {
+  text-shadow: 0 0 24px color-mix(in srgb, var(--mld-team) 52%, transparent);
+}
+
+.marketing-title-trigger:focus-visible {
+  outline: 3px solid var(--mld-focus);
+  outline-offset: 8px;
+}
+
+@keyframes marketing-title-breathe {
+  0%, 100% {
+    transform: scale(1);
+    text-shadow: 0 0 0 transparent;
+  }
+  50% {
+    transform: scale(1.015);
+    text-shadow: 0 0 18px color-mix(in srgb, var(--mld-team) 30%, transparent);
+  }
+}
+
+.marketing-preview-card {
+  background: var(--mld-info);
+  color: #101517;
+}
+
+:root .marketing-preview-card h2,
+:root .marketing-preview-card p,
+:root .marketing-preview-card .card-eyebrow {
+  color: #101517;
+}
+
+.marketing-preview-card p,
+.marketing-preview-card .card-eyebrow {
+  opacity: 0.76;
+}
+
+.marketing-preview-card .progress-track {
+  background: color-mix(in srgb, #101517 18%, transparent);
+}
+
+.marketing-preview-card .progress-track span {
+  background: var(--mld-primary);
+}
+
+.marketing-features {
+  display: block;
+  max-width: none;
+  padding-inline: 0;
+  overflow: hidden;
+}
+
+.marketing-marquee {
+  --marquee-gap: var(--mld-space-5);
+  width: 100%;
+  padding: 28px 0 36px;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+}
+
+.marketing-marquee-track {
+  display: flex;
+  width: max-content;
+  gap: var(--marquee-gap);
+  animation: marketing-marquee 24s linear infinite;
+  will-change: transform;
+}
+
+.marketing-feature-group {
+  display: flex;
+  gap: var(--marquee-gap);
+}
+
+.marketing-feature {
+  --feature-accent: var(--mld-primary);
+  display: flex;
+  flex: 0 0 clamp(280px, 28vw, 360px);
+  flex-direction: column;
+  justify-content: space-between;
+  aspect-ratio: 1;
+  padding: clamp(24px, 3vw, 38px);
+  border: 1px solid color-mix(in srgb, #101517 55%, transparent);
+  border-radius: var(--mld-radius-lg);
+  background: var(--feature-accent);
+  color: #101517;
+  box-shadow: var(--mld-shadow);
+  transform: translateX(0) scale(1);
+  transform-origin: center;
+  transition: transform 300ms ease, box-shadow 300ms ease, filter 300ms ease;
+}
+
+.marketing-feature--yellow {
+  --feature-accent: var(--mld-primary);
+}
+
+.marketing-feature--pink {
+  --feature-accent: var(--mld-team);
+}
+
+.marketing-feature--blue {
+  --feature-accent: var(--mld-info);
+}
+
+:root .marketing-feature .card-eyebrow,
+.marketing-feature h3,
+.marketing-feature p {
+  color: #101517;
+}
+
+.marketing-feature .card-eyebrow {
+  opacity: 0.7;
+}
+
+.marketing-feature h3 {
+  max-width: 11ch;
+  margin: auto 0 var(--mld-space-4);
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.02;
+}
+
+.marketing-feature p {
+  margin: 0;
+  font-size: var(--mld-body-large-size);
+  line-height: var(--mld-body-large-leading);
+}
+
+.marketing-marquee:hover .marketing-marquee-track,
+.marketing-marquee:focus-within .marketing-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .marketing-feature:hover {
+    z-index: 2;
+    filter: saturate(1.05);
+    transform: scale(1.08);
+    box-shadow: 0 0 34px color-mix(in srgb, var(--feature-accent) 74%, transparent);
+  }
+
+  .marketing-feature:has(+ .marketing-feature:hover) {
+    transform: translateX(-16px);
+  }
+
+  .marketing-feature:hover + .marketing-feature {
+    transform: translateX(16px);
+  }
+}
+
+@keyframes marketing-marquee {
+  to {
+    transform: translateX(calc(-50% - (var(--marquee-gap) / 2)));
+  }
+}
+
+.maylamdi-burst {
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.maylamdi-burst-word {
+  position: absolute;
+  left: var(--burst-x);
+  top: var(--burst-y);
+  color: var(--burst-color);
+  font-family: "Blodestarkly", "Arial Black", var(--mld-font-ui);
+  font-size: var(--burst-size);
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  text-shadow: 0 2px 0 #101517;
+  transform: translate(-50%, -50%) rotate(var(--burst-rotation)) scale(0.35);
+  animation: maylamdi-word-burst 1.45s cubic-bezier(0.18, 0.72, 0.28, 1) var(--burst-delay) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes maylamdi-word-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--burst-rotation)) scale(0.35);
+  }
+  18%, 42% {
+    opacity: 0.98;
+    transform: translate(-50%, -50%) rotate(var(--burst-rotation)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--burst-dx)), calc(-50% + var(--burst-dy))) rotate(var(--burst-end-rotation)) scale(0.8);
+  }
+}
+
+@media (max-width: 900px) {
+  .marketing-hero .marketing-title-trigger {
+    font-size: clamp(54px, 11vw, 82px);
+  }
+
+  .marketing-feature {
+    flex-basis: clamp(280px, 48vw, 340px);
+  }
+}
+
+@media (max-width: 620px) {
+  .marketing-hero .marketing-title-trigger {
+    font-size: clamp(48px, 16vw, 68px);
+  }
+
+  .marketing-marquee {
+    mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
+  }
+
+  .marketing-feature {
+    flex-basis: min(78vw, 310px);
+    padding: var(--mld-space-5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-title-trigger,
+  .marketing-marquee-track,
+  .maylamdi-burst-word {
+    animation: none;
+  }
+
+  .marketing-marquee {
+    overflow-x: auto;
+    mask-image: none;
+    scrollbar-width: thin;
+  }
+
+  .maylamdi-burst-word {
+    opacity: 0.72;
+    transform: translate(-50%, -50%) rotate(var(--burst-rotation)) scale(0.72);
+    transition: opacity 150ms ease;
   }
 }
