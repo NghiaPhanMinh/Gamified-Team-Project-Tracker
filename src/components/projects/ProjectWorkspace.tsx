@@ -252,19 +252,19 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
   const nextAction = workspace.tasks
     .map((task) => {
       if (task.primaryOwnerProfileId === workspace.currentProfileId && task.acceptanceStatus === "pending") {
-        return { task, label: "Accept task", kind: "accept" as const, priority: 1 };
+        return { task, label: "Accept task", actionType: "Task request pending your acceptance", kind: "accept" as const, priority: 1 };
       }
       if (task.reviewerProfileId === workspace.currentProfileId && ["submitted", "review"].includes(task.status)) {
-        return { task, label: "Review task", kind: "review" as const, priority: 2 };
+        return { task, label: "Review task", actionType: "Task submitted for your peer review", kind: "review" as const, priority: 2 };
       }
       if (workspace.canManageProject && task.status === "awaiting_creator") {
-        return { task, label: "Approve completion", kind: "approve" as const, priority: 3 };
+        return { task, label: "Approve completion", actionType: "Task waiting for creator approval", kind: "approve" as const, priority: 3 };
       }
       if (task.isOpenForClaiming) {
-        return { task, label: "MayLamDi", kind: "claim" as const, priority: 4 };
+        return { task, label: "MayLamDi", actionType: "Open task available to claim", kind: "claim" as const, priority: 4 };
       }
       if (task.primaryOwnerProfileId === workspace.currentProfileId && !["completed", "verified"].includes(task.status)) {
-        return { task, label: task.status === "todo" ? "Start task" : "Continue task", kind: "open" as const, priority: 5 };
+        return { task, label: "MayLamDi", actionType: task.status === "todo" ? "Assigned to you · Not started yet" : "Assigned to you · In progress", kind: "open" as const, priority: 5 };
       }
       return null;
     })
@@ -572,7 +572,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
             <div>
               <p className="card-eyebrow">Your next action</p>
               <h2 id="next-action-title">{nextAction ? nextAction.task.title : "You are up to date"}</h2>
-              <p>{nextAction ? `${nextAction.label} · ${nextAction.task.dueDate}` : "No action is waiting for you right now. Check the project progress or help with an open task."}</p>
+              <p>{nextAction ? `${nextAction.actionType} · Due ${nextAction.task.dueDate}` : "No action is waiting for you right now. Check the project progress or help with an open task."}</p>
             </div>
             {nextAction ? (
               <button className="primary-button" type="button" disabled={isSaving} onClick={handleNextAction}>
