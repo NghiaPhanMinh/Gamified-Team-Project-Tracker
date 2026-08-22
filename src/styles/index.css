@@ -6493,3 +6493,81 @@ footer {
   font-weight: 800;
 }
 
+/* Project Badge & Personal Task Card Enhancements */
+.personal-task-card {
+  padding: 1.15rem;
+  border: 2px solid color-mix(in srgb, var(--color-text) 25%, transparent);
+  border-radius: 16px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.personal-task-card:hover {
+  border-color: var(--color-yellow);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-yellow) 20%, transparent);
+}
+
+.personal-task-card.is-expanded {
+  border-color: var(--color-yellow);
+  background: color-mix(in srgb, var(--color-yellow) 5%, var(--color-surface));
+}
+
+.personal-task-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.65rem;
+}
+
+.personal-task-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.project-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border: 2px solid var(--color-navy);
+  border-radius: 999px;
+  background: var(--color-yellow);
+  color: var(--color-navy);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.room-phase-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--color-text) 25%, transparent);
+  border-radius: 999px;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.due-date-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--color-text) 25%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-blue) 12%, var(--color-surface));
+  color: var(--color-text);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.open-room-link {
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+

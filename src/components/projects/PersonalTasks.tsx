@@ -45,7 +45,7 @@ export function PersonalTasks({ onOpenRoom }: { onOpenRoom: (roomId: Id<"teams">
 
   return (
     <section className="personal-tasks-page" aria-labelledby="personal-tasks-title">
-      <header className="focused-page-heading"><div><p className="kicker">Across every room</p><h1 className="display-heading" id="personal-tasks-title">My Tasks</h1><p>Assignments, reviews, requests, and open work in one focused place.</p></div></header>
+      <header className="focused-page-heading"><div><h1 className="display-heading" id="personal-tasks-title">My Tasks</h1></div></header>
       {error ? <p className="form-error" role="alert">{error}</p> : null}
       {groups === undefined ? <p aria-busy="true">Loading your tasks…</p> : null}
       {groups?.length === 0 ? <div className="project-empty"><strong>You are all clear.</strong><p>Assigned work and review requests will appear here.</p></div> : null}
@@ -54,15 +54,30 @@ export function PersonalTasks({ onOpenRoom }: { onOpenRoom: (roomId: Id<"teams">
         <section key={section} className={`personal-status-section personal-${section.toLowerCase().replaceAll(" ", "-")}`}>
           <header><h2>{section}</h2><span>{tasks.length}</span></header>
           <div className="personal-task-list">{tasks.map((task) => (
-            <article key={task._id} className={`personal-task-card task-${task.status}`}>
-              <div className="personal-task-room"><div><small>{task.roomName} · {task.projectTitle}</small><strong>{task.phaseName} · due {task.dueDate}</strong></div><button className="text-link" type="button" onClick={() => onOpenRoom(task.roomId)}>Open room</button></div>
-              <h3>{task.title}</h3><p>{task.description || "No task description."}</p>
+            <article
+              key={task._id}
+              className={`personal-task-card task-${task.status} ${openTaskId === task._id ? "is-expanded" : ""}`}
+              style={{ cursor: "pointer" }}
+              onClick={() => setOpenTaskId((current) => current === task._id ? null : task._id)}
+            >
+              <div className="personal-task-header-row">
+                <div className="personal-task-tags">
+                  <span className="project-badge-tag">📁 {task.projectTitle}</span>
+                  <span className="room-phase-tag">{task.roomName} • {task.phaseName}</span>
+                  <span className="due-date-tag">Due {task.dueDate}</span>
+                </div>
+                <button className="text-link open-room-link" type="button" onClick={(e) => { e.stopPropagation(); onOpenRoom(task.roomId); }}>
+                  Open room ↗
+                </button>
+              </div>
+              <h3>{task.title}</h3>
+              <p>{task.description || "No task description."}</p>
               <dl><div><dt>Weight</dt><dd>{task.weight}</dd></div><div><dt>Reviewer</dt><dd>{task.reviewerName}</dd></div><div><dt>Skills</dt><dd>{(task.requiredSkills ?? []).join(", ") || "None specified"}</dd></div></dl>
               <div className="personal-task-actions">
-                {task.isMine && task.acceptanceStatus === "pending" ? <><button className="primary-button" type="button" disabled={pendingTaskId === task._id} onClick={() => void run(task._id, () => acceptTask({ taskId: task._id }))}>Accept Task</button><button className="quiet-button" type="button" disabled={pendingTaskId === task._id} onClick={() => void run(task._id, () => declineTask({ taskId: task._id }))}>Decline</button></> : null}
-                {task.isOpenForClaiming ? <button className="primary-button" type="button" disabled={pendingTaskId === task._id} onClick={() => void run(task._id, async () => { await claimTask({ taskId: task._id }); setOpenTaskId(task._id); })}>MayLamDi</button> : null}
-                {task.isMine && task.status === "todo" && task.acceptanceStatus !== "pending" ? <button className="primary-button" type="button" disabled={pendingTaskId === task._id} onClick={() => void run(task._id, async () => { await updateStatus({ taskId: task._id, status: "in_progress" }); setOpenTaskId(task._id); })}>MayLamDi</button> : null}
-                {(task.isMine || task.isReviewer) && !["completed", "verified"].includes(task.status) ? <button className="secondary-button" type="button" onClick={() => setOpenTaskId((current) => current === task._id ? null : task._id)}>{task.isReviewer ? "MayReviewDi" : "Evidence & Review"}</button> : null}
+                {task.isMine && task.acceptanceStatus === "pending" ? <><button className="primary-button" type="button" disabled={pendingTaskId === task._id} onClick={(e) => { e.stopPropagation(); void run(task._id, () => acceptTask({ taskId: task._id })); }}>Accept Task</button><button className="quiet-button" type="button" disabled={pendingTaskId === task._id} onClick={(e) => { e.stopPropagation(); void run(task._id, () => declineTask({ taskId: task._id })); }}>Decline</button></> : null}
+                {task.isOpenForClaiming ? <button className="primary-button" type="button" disabled={pendingTaskId === task._id} onClick={(e) => { e.stopPropagation(); void run(task._id, async () => { await claimTask({ taskId: task._id }); setOpenTaskId(task._id); }); }}>MayLamDi</button> : null}
+                {task.isMine && task.status === "todo" && task.acceptanceStatus !== "pending" ? <button className="primary-button" type="button" disabled={pendingTaskId === task._id} onClick={(e) => { e.stopPropagation(); void run(task._id, async () => { await updateStatus({ taskId: task._id, status: "in_progress" }); setOpenTaskId(task._id); }); }}>MayLamDi</button> : null}
+                {(task.isMine || task.isReviewer) && !["completed", "verified"].includes(task.status) ? <button className="secondary-button" type="button" onClick={(e) => { e.stopPropagation(); setOpenTaskId((current) => current === task._id ? null : task._id); }}>{task.isReviewer ? "MayReviewDi" : "Details & Evidence"}</button> : null}
                 {task.isReviewer && !["submitted", "review", "completed", "verified"].includes(task.status) ? <span className="waiting-label">{REVIEW_WAITING_MESSAGE}</span> : null}
                 {task.status === "awaiting_creator" ? <span className="waiting-label">Waiting for room creator</span> : null}
               </div>
