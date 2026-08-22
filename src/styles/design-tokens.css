@@ -2597,6 +2597,7 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   border: 1px solid var(--mld-border);
   border-radius: var(--mld-radius-card);
   background: var(--mld-surface-01);
+  color: var(--mld-text);
 }
 
 .daily-feed-card {
@@ -2665,6 +2666,12 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   background: #fffef9;
   color: #101517;
   caret-color: #101517;
+}
+
+.phase-manager .inline-phase-form .secondary-button {
+  border-color: #101517;
+  background: #101517;
+  color: #fffdec;
 }
 
 @media (max-width: 760px) {

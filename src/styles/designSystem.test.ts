@@ -83,8 +83,10 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("caret-color: #101517");
     expect(css).toContain(".daily-post-form");
     expect(css).toContain(".daily-image-url-input");
+    expect(css).toContain(".empty-feed-notice");
     expect(css).toContain(".phase-chip-editor > div");
     expect(css).toContain("background: var(--mld-phase-color");
     expect(css).toContain(".phase-rename-button");
+    expect(css).toContain(".phase-manager .inline-phase-form .secondary-button");
   });
 });
