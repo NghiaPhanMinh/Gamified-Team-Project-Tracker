@@ -134,6 +134,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
 }) {
   const createTask = useMutation(api.tasks.createTask);
   const updateTask = useMutation(api.tasks.updateTask);
+  const updateTaskStatus = useMutation(api.tasks.updateTaskStatus);
   const createPhase = useMutation(api.tasks.createPhase);
   const renamePhase = useMutation(api.tasks.renamePhase);
   const claimTask = useMutation(api.tasks.claimTask);
@@ -408,15 +409,33 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
 
   function handleNextAction() {
     if (!nextAction) return;
+    const taskId = nextAction.task._id;
+
     if (nextAction.kind === "claim") {
-      void runAction(() => claimTask({ taskId: nextAction.task._id }), "The task could not be claimed.");
+      void runAction(async () => {
+        await claimTask({ taskId });
+        setOpenBattleTaskId(taskId);
+      }, "The task could not be claimed.");
       return;
     }
+
     if (nextAction.kind === "accept") {
-      void runAction(() => acceptTask({ taskId: nextAction.task._id }), "The request could not be accepted.");
+      void runAction(async () => {
+        await acceptTask({ taskId });
+        setOpenBattleTaskId(taskId);
+      }, "The request could not be accepted.");
       return;
     }
-    setOpenBattleTaskId(nextAction.task._id);
+
+    if (nextAction.kind === "open" && nextAction.task.status === "todo") {
+      void runAction(async () => {
+        await updateTaskStatus({ taskId, status: "in_progress" });
+        setOpenBattleTaskId(taskId);
+      }, "The task could not be started.");
+      return;
+    }
+
+    setOpenBattleTaskId(taskId);
   }
 
   return (
@@ -568,14 +587,29 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
             <BattleScene projectId={workspace.project._id} currentPhase={currentPhase} tasksLocked={Boolean(workspace.project.tasksLocked)} />
           </section>
 
-          <section className="next-action-card project-next-action" aria-labelledby="next-action-title">
+          <section
+            className="next-action-card project-next-action"
+            aria-labelledby="next-action-title"
+            style={{ cursor: nextAction ? "pointer" : "default" }}
+            onClick={() => {
+              if (nextAction) handleNextAction();
+            }}
+          >
             <div>
               <p className="card-eyebrow">Your next action</p>
               <h2 id="next-action-title">{nextAction ? nextAction.task.title : "You are up to date"}</h2>
               <p>{nextAction ? `${nextAction.actionType} · Due ${nextAction.task.dueDate}` : "No action is waiting for you right now. Check the project progress or help with an open task."}</p>
             </div>
             {nextAction ? (
-              <button className="primary-button" type="button" disabled={isSaving} onClick={handleNextAction}>
+              <button
+                className="primary-button"
+                type="button"
+                disabled={isSaving}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNextAction();
+                }}
+              >
                 {nextAction.label}
               </button>
             ) : (
