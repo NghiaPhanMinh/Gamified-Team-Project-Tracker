@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Check, Clipboard, PencilLine } from "lucide-react";
@@ -7,6 +7,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { getErrorMessage } from "../../lib/errors";
 import { trackEvent } from "../../lib/analytics";
+import { MAYLAMDI_PHASE_COLORS, paletteColorAt } from "../../lib/brandPalette";
 import { BattleScene } from "../game/BattleScene";
 import { AIPlanningAssistant, type AiTaskSuggestion } from "./AIPlanningAssistant";
 import { AllocationWorkbench } from "./AllocationWorkbench";
@@ -605,7 +606,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
             </div>
             {nextAction ? (
               <button
-                className="primary-button"
+                className="primary-button next-action-cta"
                 type="button"
                 disabled={isSaving}
                 onClick={(e) => {
@@ -660,7 +661,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
 
           {requestTasks.length > 0 ? <section className="task-request-panel"><p className="card-eyebrow">Task requests</p>{requestTasks.map((task) => <article key={task._id}><div><strong>{task.title}</strong><span>Requested by the room creator · weight {task.weight}</span></div><div><button className="primary-button" type="button" onClick={() => void runAction(() => acceptTask({ taskId: task._id }), "The task request could not be accepted.")}>Accept</button><button className="quiet-button" type="button" onClick={() => void runAction(() => declineTask({ taskId: task._id }), "The task request could not be declined.")}>Decline</button></div></article>)}</section> : null}
 
-          {workspace.canManageProject ? <details className="phase-manager"><summary>Manage phases</summary><div className="phase-chip-editor">{workspace.phases.map((phase) => <div key={phase._id}>{renamingPhaseId === phase._id ? <form onSubmit={(event) => { event.preventDefault(); void runAction(async () => { await renamePhase({ phaseId: phase._id, title: renamePhaseName }); setRenamingPhaseId(null); }, "The phase could not be renamed."); }}><input value={renamePhaseName} onChange={(event) => setRenamePhaseName(event.target.value)} /><button type="submit" className="quiet-button">Save</button></form> : <><span>{phase.title}</span><button className="text-link" type="button" onClick={() => { setRenamingPhaseId(phase._id); setRenamePhaseName(phase.title); }}>Rename</button></>}</div>)}</div><form className="inline-phase-form" onSubmit={addPhase}><input required maxLength={100} value={newPhaseName} onChange={(event) => setNewPhaseName(event.target.value)} placeholder="New phase name" /><button className="secondary-button" type="submit">Add phase</button></form></details> : null}
+          {workspace.canManageProject ? <details className="phase-manager"><summary>Manage phases</summary><div className="phase-chip-editor">{workspace.phases.map((phase, index) => <div key={phase._id} style={{ "--mld-phase-color": paletteColorAt(MAYLAMDI_PHASE_COLORS, index) } as CSSProperties}>{renamingPhaseId === phase._id ? <form onSubmit={(event) => { event.preventDefault(); void runAction(async () => { await renamePhase({ phaseId: phase._id, title: renamePhaseName }); setRenamingPhaseId(null); }, "The phase could not be renamed."); }}><input value={renamePhaseName} onChange={(event) => setRenamePhaseName(event.target.value)} /><button type="submit" className="quiet-button">Save</button></form> : <><span>{phase.title}</span><button className="text-link phase-rename-button" type="button" onClick={() => { setRenamingPhaseId(phase._id); setRenamePhaseName(phase.title); }}>Rename</button></>}</div>)}</div><form className="inline-phase-form" onSubmit={addPhase}><input required maxLength={100} value={newPhaseName} onChange={(event) => setNewPhaseName(event.target.value)} placeholder="New phase name" /><button className="secondary-button" type="submit">Add phase</button></form></details> : null}
 
           {battleTasks.length === 0 ? <div className="project-empty"><strong>No tasks in this project yet.</strong><p>Click Add Task to create the first task.</p></div> : null}
         </section>

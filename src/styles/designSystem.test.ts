@@ -68,4 +68,22 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("background: #fff73f");
     expect(css).toContain("color: #101517");
   });
+
+  it("keeps bright team and task surfaces readable and motion-safe", () => {
+    expect(css).toContain(".member-profile-card .member-skill-chip");
+    expect(css).toContain("background: var(--mld-chip-color");
+    expect(css).toContain("translateY(-2px) scale(1.06)");
+    expect(css).toContain(".availability-calendar > strong");
+    expect(css).toContain(".battle-task-note.task-in_progress");
+    expect(css).toContain(".project-next-action .next-action-cta");
+  });
+
+  it("keeps light form inputs dark and phases colour-coded in both themes", () => {
+    expect(css).toContain(".task-evidence-panel textarea");
+    expect(css).toContain("caret-color: #101517");
+    expect(css).toContain(".daily-post-form");
+    expect(css).toContain(".phase-chip-editor > div");
+    expect(css).toContain("background: var(--mld-phase-color");
+    expect(css).toContain(".phase-rename-button");
+  });
 });

@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useMutation, useQuery } from "convex/react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { getErrorMessage } from "../../lib/errors";
+import { MAYLAMDI_SKILL_COLORS, paletteColorAt } from "../../lib/brandPalette";
 import { CharacterAvatar } from "../common/CharacterAvatar";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -14,8 +15,10 @@ function timeLabel(minutes: number) {
   return `${String(hours).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 }
 
-function initials(name: string) {
-  return name.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("");
+function skillChipStyle(index: number) {
+  return {
+    "--mld-chip-color": paletteColorAt(MAYLAMDI_SKILL_COLORS, index),
+  } as CSSProperties;
 }
 
 export function ProjectTeamMembers({ projectId }: { projectId: Id<"projects"> }) {
@@ -125,16 +128,16 @@ export function ProjectTeamMembers({ projectId }: { projectId: Id<"projects"> })
       <div className="member-profile-grid">
         {data.members.map((member) => <article key={member.profileId} className="member-profile-card">
           <CharacterAvatar
-            fill={(member as any).characterFill}
-            outline={(member as any).characterOutline}
-            spellType={(member as any).spellType}
+            fill={member.characterFill}
+            outline={member.characterOutline}
+            spellType={member.spellType}
             name={member.displayName}
             imageUrl={member.imageUrl}
             size="md"
           />
           <div><strong>{member.displayName}</strong><small>{member.weeklyCapacity ?? "?"}h/week · {member.assignedTaskCount} assigned · {member.reviewTaskCount} reviews</small></div>
-          <div><small>General skills</small><div className="skill-chip-list">{member.skills.length ? member.skills.map((skill) => <span key={skill}>{skill}</span>) : <span>None saved</span>}</div></div>
-          <div><small>Software skills</small><div className="skill-chip-list">{member.softwareSkills.length ? member.softwareSkills.map((skill) => <span key={skill}>{skill}</span>) : <span>None saved</span>}</div></div>
+          <div><small>General skills</small><div className="skill-chip-list">{member.skills.length ? member.skills.map((skill, index) => <span key={skill} className="member-skill-chip" style={skillChipStyle(index)}>{skill}</span>) : <span className="member-skill-chip is-empty">None saved</span>}</div></div>
+          <div><small>Software skills</small><div className="skill-chip-list">{member.softwareSkills.length ? member.softwareSkills.map((skill, index) => <span key={skill} className="member-skill-chip" style={skillChipStyle(member.skills.length + index)}>{skill}</span>) : <span className="member-skill-chip is-empty">None saved</span>}</div></div>
         </article>)}
       </div>
 
