@@ -48,4 +48,15 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("padding: 68px 0 76px");
     expect(css).toContain("stroke-dashoffset: 0");
   });
+
+  it("keeps project identity, settings accordions, and sticky tabs theme-safe", () => {
+    expect(css).toContain(".room-index-card.room-index-card-colored");
+    expect(css).toContain("background: var(--group-color)");
+    expect(css).toContain(".project-color-marker");
+    expect(css).toContain(".profile-secondary-settings[open] > summary");
+    expect(css).toContain("background: var(--mld-info)");
+    expect(css).toContain("position: sticky");
+    expect(css).toContain("background: var(--mld-surface-01)");
+    expect(css).toContain("z-index: 40");
+  });
 });

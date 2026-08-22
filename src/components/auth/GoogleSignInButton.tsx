@@ -11,7 +11,7 @@ export function GoogleSignInButton() {
     setError(null);
 
     try {
-      await signIn("google");
+      await signIn("google", { redirectTo: "/home" });
     } catch {
       setError(
         "Google sign-in could not start. Check the OAuth setup and try again.",

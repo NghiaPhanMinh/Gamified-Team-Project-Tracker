@@ -1,4 +1,5 @@
 import { useQuery } from "convex/react";
+import type { CSSProperties } from "react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
@@ -7,6 +8,7 @@ import { PersonalTasks } from "../projects/PersonalTasks";
 import { ProjectOnboarding } from "../projects/ProjectOnboarding";
 import { TeamWorkspace } from "./TeamWorkspace";
 import { ProfileCenter } from "../profile/ProfileCenter";
+import { getGroupColor } from "../../lib/groupColors";
 
 type RoomSummary = {
   _id: Id<"teams">;
@@ -137,8 +139,14 @@ export function TeamSystem({
         <div className="project-empty"><strong>No rooms yet.</strong><p>Create a project or join your teammates to begin.</p></div>
       ) : (
         <div className="room-index-grid">
-          {rooms.map((room) => (
-            <button key={room._id} className="room-index-card" type="button" onClick={() => onOpenRoom(room._id)}>
+          {rooms.map((room, index) => (
+            <button
+              key={room._id}
+              className="room-index-card room-index-card-colored"
+              type="button"
+              style={{ "--group-color": getGroupColor(index) } as CSSProperties}
+              onClick={() => onOpenRoom(room._id)}
+            >
               <span className="live-badge"><i aria-hidden="true" /> Realtime room</span>
               <strong>{room.name}</strong>
               <small>{room.memberCount} {room.memberCount === 1 ? "member" : "members"}</small>

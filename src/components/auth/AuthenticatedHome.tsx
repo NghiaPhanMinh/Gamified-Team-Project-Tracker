@@ -1,5 +1,5 @@
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { FolderKanban, Home, ListChecks, Menu, UserRound } from "lucide-react";
@@ -10,6 +10,7 @@ import { TeamSystem } from "../teams/TeamSystem";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import { ProfileCenter } from "../profile/ProfileCenter";
 import { MAIN_NAV_ITEMS, getPathForSection, type MainSection, type ProjectsView } from "../../lib/navigation";
+import { getGroupColor } from "../../lib/groupColors";
 
 import { ActivityCenter } from "../teams/ActivityCenter";
 
@@ -167,14 +168,15 @@ export function AuthenticatedHome() {
             </button>
           ))}
           <div className="sidebar-room-tree" aria-label="Project rooms">
-            {availableRooms.map((room) => (
+            {availableRooms.map((room, index) => (
               <button
                 key={room._id}
-                className={activeSection === "projects" && projectsView === "room" && activeRoomId === room._id ? "is-active is-room" : "is-room"}
+                className={activeSection === "projects" && projectsView === "room" && activeRoomId === room._id ? "is-active is-room is-project-room" : "is-room is-project-room"}
                 type="button"
+                style={{ "--group-color": getGroupColor(index) } as CSSProperties}
                 onClick={() => openProjects("room", room._id)}
               >
-                <span aria-hidden="true">├</span><strong>{room.name}</strong>
+                <span className="project-color-marker" aria-hidden="true" /><strong>{room.name}</strong>
               </button>
             ))}
             <button className={projectsView === "personal-tasks" ? "is-active is-room" : "is-room"} type="button" onClick={() => openProjects("personal-tasks")}>
