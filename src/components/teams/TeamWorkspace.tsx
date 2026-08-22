@@ -38,6 +38,16 @@ export function TeamWorkspace({
     return <section className="team-loading" aria-busy="true"><p className="kicker">Opening room</p><h1 className="display-heading">Gathering everyone…</h1></section>;
   }
 
+  if (workspace === null) {
+    return (
+      <section className="project-empty" style={{ margin: "2rem auto", maxWidth: "600px" }}>
+        <strong>Room not found or no longer accessible.</strong>
+        <p>You may not be a member of this room or it may have been deleted.</p>
+        <button className="primary-button" type="button" onClick={() => window.location.href = "/projects"}>View My Projects</button>
+      </section>
+    );
+  }
+
   const currentMember = workspace.members.find((member) => member.profileId === workspace.currentProfileId);
   const joinCode = workspace.team.joinCode;
 

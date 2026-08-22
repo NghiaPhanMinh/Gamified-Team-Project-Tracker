@@ -122,6 +122,9 @@ export function ProjectWorkspace({ projectId, initialTab = "progress" }: Project
   if (workspace === undefined) {
     return <section className="project-workspace project-workspace-loading" aria-busy="true"><p>Opening the project…</p></section>;
   }
+  if (workspace === null) {
+    return <div className="project-empty" style={{ margin: "2rem auto" }}><strong>Project not found or no longer accessible.</strong></div>;
+  }
   return <ProjectWorkspaceReady workspace={workspace} initialTab={initialTab} />;
 }
 
