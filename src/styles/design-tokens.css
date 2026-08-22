@@ -1411,6 +1411,10 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   padding-bottom: var(--mld-space-4);
 }
 
+.marketing-hero .kicker {
+  margin: 0 0 var(--mld-space-5);
+}
+
 .marketing-title {
   max-width: 10ch;
 }
@@ -1889,6 +1893,10 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 }
 
 @media (max-width: 620px) {
+  .marketing-hero .kicker {
+    margin-bottom: var(--mld-space-4);
+  }
+
   .marketing-hero .marketing-title-trigger {
     font-size: clamp(48px, 16vw, 68px);
   }
