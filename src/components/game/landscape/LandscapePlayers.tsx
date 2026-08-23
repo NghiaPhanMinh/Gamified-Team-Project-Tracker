@@ -12,9 +12,9 @@ type LandscapePlayersProps = {
   members: PlayerMember[];
 };
 
-type MageType = "lightning" | "fire" | "ice";
+export type MageType = "lightning" | "fire" | "ice";
 
-function getMageTheme(spellType?: string, profileId: string = "", index: number = 0) {
+export function getMageTheme(spellType?: string, profileId: string = "", index: number = 0) {
   let type: MageType = "lightning";
   if (spellType === "fire") type = "fire";
   else if (spellType === "ice" || spellType === "water") type = "ice";
@@ -34,36 +34,36 @@ function getMageTheme(spellType?: string, profileId: string = "", index: number 
       type,
       name: "Lightning Mage",
       robePrimary: "#1e3a8a",
-      trim: "#60a5fa",
+      trim: "#4ca0fe",
       hat: "#172554",
-      ribbon: "#facc15",
-      orbCore: "#fef08a",
-      orbAccent: "#38bdf8",
-      glowColor: "#fde047",
+      ribbon: "#fff73f",
+      orbCore: "#fff73f",
+      orbAccent: "#4ca0fe",
+      glowColor: "#fff73f",
     };
   } else if (type === "fire") {
     return {
       type,
       name: "Fire Mage",
       robePrimary: "#991b1b",
-      trim: "#ea580c",
+      trim: "#feaa01",
       hat: "#450a0a",
-      ribbon: "#f97316",
-      orbCore: "#ef4444",
-      orbAccent: "#fde047",
-      glowColor: "#f97316",
+      ribbon: "#feaa01",
+      orbCore: "#fd39e4",
+      orbAccent: "#fff73f",
+      glowColor: "#feaa01",
     };
   } else {
     return {
       type,
       name: "Ice Mage",
       robePrimary: "#0369a1",
-      trim: "#38bdf8",
+      trim: "#ff8ae7",
       hat: "#0c4a6e",
-      ribbon: "#e0f2fe",
-      orbCore: "#7dd3fc",
+      ribbon: "#fffded",
+      orbCore: "#4ca0fe",
       orbAccent: "#ffffff",
-      glowColor: "#38bdf8",
+      glowColor: "#ff8ae7",
     };
   }
 }

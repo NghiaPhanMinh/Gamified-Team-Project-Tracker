@@ -10,8 +10,8 @@ type LandscapeGoblinsProps = {
   goblins: GoblinInfo[];
 };
 
-// Deterministically generate a random clothing color for each goblin that changes every day
-function getGoblinClothingColor(memberId: string) {
+// Deterministically generate a random clothing color from teammate palette that changes daily
+export function getGoblinClothingColor(memberId: string) {
   const today = new Date();
   const dateSeed = today.getFullYear() * 365 + today.getMonth() * 31 + today.getDate();
   let hash = dateSeed;
@@ -19,19 +19,24 @@ function getGoblinClothingColor(memberId: string) {
     hash = memberId.charCodeAt(i) + ((hash << 5) - hash);
   }
   const colors = [
-    "#991b1b", // Dark Crimson
-    "#1e3a8a", // Navy Blue
-    "#b45309", // Amber Brown
-    "#4d7c0f", // Forest Olive
-    "#6d28d9", // Regal Purple
-    "#0369a1", // Deep Sky
-    "#be185d", // Magenta Wine
-    "#15803d", // Emerald Green
-    "#c2410c", // Burnt Orange
-    "#475569", // Slate Iron
+    "#feaa01", // Vibrant Amber Orange
+    "#fff73f", // Bright Canary Yellow
+    "#ff8ae7", // Soft Pink
+    "#fd39e4", // Vivid Magenta
+    "#1dd851", // Bright Neon Green
+    "#4ca0fe", // Sky Blue
   ];
   const index = Math.abs(hash) % colors.length;
   return colors[index];
+}
+
+export function getGoblinCoordinates(index: number = 0) {
+  const offsetX = index * 45;
+  const offsetY = (index % 2) * 12;
+  return {
+    x: 490 + offsetX + 15,
+    y: 270 + offsetY + 20,
+  };
 }
 
 export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {

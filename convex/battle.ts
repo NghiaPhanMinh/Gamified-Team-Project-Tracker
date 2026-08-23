@@ -18,15 +18,18 @@ export const getState = query({
     ]);
 
     const requiredTasks = tasks.filter((task) => task.required);
+    const activeTasks = requiredTasks.length > 0 ? requiredTasks : tasks;
     const userCount = Math.max(1, memberships.length);
-    const hpSharePerPlayer = 100;
-    const maximumHp = userCount * hpSharePerPlayer; // Each user in the room = 100 HP share
 
-    // Count required tasks assigned to each user
-    const requiredTaskCountByOwner = new Map<string, number>();
-    for (const task of requiredTasks) {
-      const ownerId = task.primaryOwnerProfileId;
-      requiredTaskCountByOwner.set(ownerId, (requiredTaskCountByOwner.get(ownerId) ?? 0) + 1);
+    // Dynamic Dragon Maximum HP: Adapts directly to the sum of task damage (default 50 HP per task)
+    const totalTaskDamage = activeTasks.reduce((sum, task) => sum + (task.damage ?? 50), 0);
+    const maximumHp = Math.max(50, totalTaskDamage);
+    const hpSharePerPlayer = Math.max(1, Math.round(maximumHp / userCount));
+
+    // Map each task's damage contribution
+    const taskDamageMap = new Map<string, number>();
+    for (const task of activeTasks) {
+      taskDamageMap.set(task._id, task.damage ?? 50);
     }
 
     const appliedTaskIds = new Set<string>();
@@ -36,32 +39,28 @@ export const getState = query({
       return true;
     });
 
-    // Track damage dealt per user (each user capped at 100 HP max)
+    // Track damage dealt per user based on verified / completed task damage
     const memberDamageMap = new Map<string, number>();
 
     for (const event of uniqueEvents) {
       const attackerId = event.attackerProfileId;
-      const ownerTaskCount = requiredTaskCountByOwner.get(attackerId) ?? 1;
-      const damageForTask = Math.max(1, Math.round(100 / ownerTaskCount));
+      const damageForTask = event.damage ?? taskDamageMap.get(event.taskId) ?? 50;
       const current = memberDamageMap.get(attackerId) ?? 0;
-      memberDamageMap.set(attackerId, Math.min(100, current + damageForTask));
+      memberDamageMap.set(attackerId, current + damageForTask);
     }
 
     const eventTaskIds = new Set(uniqueEvents.map((e) => e.taskId));
-    for (const task of requiredTasks) {
+    for (const task of activeTasks) {
       if ((task.status === "completed" || task.status === "verified") && !eventTaskIds.has(task._id)) {
         const ownerId = task.primaryOwnerProfileId;
-        const ownerTaskCount = requiredTaskCountByOwner.get(ownerId) ?? 1;
-        const damageForTask = Math.max(1, Math.round(100 / ownerTaskCount));
+        const damageForTask = taskDamageMap.get(task._id) ?? 50;
         const current = memberDamageMap.get(ownerId) ?? 0;
-        memberDamageMap.set(ownerId, Math.min(100, current + damageForTask));
+        memberDamageMap.set(ownerId, current + damageForTask);
       }
     }
 
-    const damageDealt = Math.min(
-      maximumHp,
-      [...memberDamageMap.values()].reduce((sum, val) => sum + val, 0),
-    );
+    const rawDamageDealt = [...memberDamageMap.values()].reduce((sum, val) => sum + val, 0);
+    const damageDealt = Math.min(maximumHp, rawDamageDealt);
 
     const profileIds = new Set([
       ...memberships.map((member) => member.profileId),

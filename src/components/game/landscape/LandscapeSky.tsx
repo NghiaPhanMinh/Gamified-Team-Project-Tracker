@@ -18,6 +18,13 @@ export function LandscapeSky() {
 
   return (
     <>
+      {/* Layer 0: Sky Blue Canvas */}
+      <div className="landscape-layer layer-0-sky" aria-hidden="true">
+        <svg viewBox="0 0 1000 400" preserveAspectRatio="none" width="100%" height="100%">
+          <rect width="1000" height="400" fill="#4ca0fe" />
+        </svg>
+      </div>
+
       {/* Layer 1: Far Clouds */}
       <div className="landscape-layer layer-1-far-clouds" aria-hidden="true">
         <div className="cloud-far-wrapper">

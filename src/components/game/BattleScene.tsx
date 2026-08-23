@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useQuery, useMutation } from "convex/react";
+import { jsPDF } from "jspdf";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -9,11 +10,39 @@ import { SVGDefs } from "./landscape/SVGDefs";
 import { LandscapeSky } from "./landscape/LandscapeSky";
 import { LandscapeTerrain } from "./landscape/LandscapeTerrain";
 import { LandscapeVillage } from "./landscape/LandscapeVillage";
-import { LandscapeGoblins } from "./landscape/LandscapeGoblins";
-import { LandscapePlayers } from "./landscape/LandscapePlayers";
+import { LandscapeGoblins, getGoblinCoordinates } from "./landscape/LandscapeGoblins";
+import { LandscapePlayers, getMageTheme } from "./landscape/LandscapePlayers";
 import { LandscapeDragon, DRAGON_ORIGINAL_SHAPES, parseCoordinates } from "./landscape/LandscapeDragon";
 import { LandscapeFX } from "./landscape/LandscapeFX";
 import { CharacterAvatar } from "../common/CharacterAvatar";
+
+const BOSS_FUNNY_NAMES = [
+  "Lord Procrastinax the Ever-Delaying",
+  "Baron Bug-a-Lot, Scourge of Sprints",
+  "Dread Wyrm Merge-Conflictus",
+  "Archmage 404: Sleep Not Found",
+  "Ignis Deadlineus, Consumer of Weekends",
+  "Overlord Scope-Creep the Endless",
+  "Duke NullPointer the Unhandled",
+];
+
+const VILLAGE_FUNNY_NAMES = [
+  "Town of Last-Minute Hope",
+  "Sanctuary of Clean Commits",
+  "Citadel of Coffee & Prayers",
+  "The Shire of Passed Tests",
+  "Fortress of Zero Warnings",
+  "Hamlet of 11:59 PM Submissions",
+  "Haven of the All-Nighters",
+];
+
+function getFunnyName(list: string[], seed: string) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return list[Math.abs(hash) % list.length];
+}
 
 type BattleSceneProps = { projectId: Id<"projects">; currentPhase?: string; tasksLocked?: boolean };
 
@@ -763,6 +792,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const addEvidence = useMutation(api.evidence.add);
   const chooseReviewer = useMutation(api.tasks.chooseReviewer);
   const submitForReview = useMutation(api.evidence.submitForReview);
+  const deleteProjectPermanently = useMutation(api.projects.deletePermanently);
 
   const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(null);
   const [evidenceType, setEvidenceType] = useState<"note" | "link" | "image" | "pdf">("note");
@@ -773,6 +803,26 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [isSubmittingTask, setIsSubmittingTask] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [bossError, setBossError] = useState<string | null>(null);
+
+  // Admin Security Password Gate ("taolamadmin")
+  const [adminAuthenticated, setAdminAuthenticated] = useState(() => sessionStorage.getItem("taolamadmin_auth") === "true");
+  const [showAdminPasswordModal, setShowAdminPasswordModal] = useState(false);
+  const [adminPasswordInput, setAdminPasswordInput] = useState("");
+  const [adminPasswordError, setAdminPasswordError] = useState("");
+  const [adminPanelWidth, setAdminPanelWidth] = useState(480);
+  const [showLayerManagerModal, setShowLayerManagerModal] = useState(false);
+
+  // Gameplay Testing Cheats (Show attack VFX, kill goblin, 50% village HP, kill dragon)
+  const [testVillageHpOverride, setTestVillageHpOverride] = useState<number | null>(null);
+  const [testDragonHpOverride, setTestDragonHpOverride] = useState<number | null>(null);
+  const [testDeadGoblins, setTestDeadGoblins] = useState<Record<string, boolean>>({});
+
+  // Room Deletion & End Game states
+  const [showDeleteRoomModal, setShowDeleteRoomModal] = useState(false);
+  const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
+  const [isDeletingRoom, setIsDeletingRoom] = useState(false);
+  const [deleteRoomError, setDeleteRoomError] = useState<string | null>(null);
+  const [viewBattleSceneOverride, setViewBattleSceneOverride] = useState(false);
 
   // Dragon Layout Vector Editor Admin States (All individual shapes, moveable panels, pausable animation)
   const savedConfig = useMemo(() => loadSavedConfig(), []);
@@ -1227,23 +1277,19 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         imageUrls: goblinImageUrls,
       });
 
-      const currentMember = state?.members.find((m) => m.profileId === state.currentProfileId);
-      let hash = 0;
-      const pid = currentMember?.profileId || "";
-      for (let i = 0; i < pid.length; i++) {
-        hash = pid.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      const types = ["lightning", "fire", "ice"];
-      const resolvedSpell = (currentMember?.spellType && currentMember.spellType !== "spark")
-        ? currentMember.spellType
-        : types[Math.abs(hash) % types.length];
+      const memberIndex = state?.members.findIndex((m) => m.profileId === state.currentProfileId) ?? 0;
+      const currentMember = state?.members[Math.max(0, memberIndex)];
+      const mageInfo = getMageTheme(currentMember?.spellType, currentMember?.profileId, Math.max(0, memberIndex));
+      const targetCoords = getGoblinCoordinates(Math.max(0, memberIndex));
 
       setLocalAttack({
         id: `goblin_atk_${Date.now()}`,
         attackerName: currentMember?.displayName || "Adventurer",
         damage: 100,
-        spellType: resolvedSpell,
+        spellType: mageInfo.type,
         target: "goblin",
+        targetX: targetCoords.x,
+        targetY: targetCoords.y,
       });
       setGoblinText("");
       setGoblinImageInput("");
@@ -1338,23 +1384,18 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       // 4. Submit for review
       await submitForReview({ taskId: selectedTaskId });
 
-      const currentMember = state?.members.find((m) => m.profileId === state.currentProfileId);
-      let hash = 0;
-      const pid = currentMember?.profileId || "";
-      for (let i = 0; i < pid.length; i++) {
-        hash = pid.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      const types = ["lightning", "fire", "ice"];
-      const resolvedSpell = (currentMember?.spellType && currentMember.spellType !== "spark")
-        ? currentMember.spellType
-        : types[Math.abs(hash) % types.length];
+      const memberIndex = state?.members.findIndex((m) => m.profileId === state.currentProfileId) ?? 0;
+      const currentMember = state?.members[Math.max(0, memberIndex)];
+      const mageInfo = getMageTheme(currentMember?.spellType, currentMember?.profileId, Math.max(0, memberIndex));
 
       setLocalAttack({
         id: `boss_atk_${Date.now()}`,
         attackerName: currentMember?.displayName || "Adventurer",
         damage: currentTask.damage || 50,
-        spellType: resolvedSpell,
+        spellType: mageInfo.type,
         target: "dragon",
+        targetX: 750,
+        targetY: 175,
       });
 
       // Reset state and close modal
@@ -1372,6 +1413,173 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     }
   }
 
+  function generateContributionPdf() {
+    if (!state || !workspace) return;
+    const memberIndex = state.members.findIndex((m) => m.profileId === state.currentProfileId);
+    const currentMember = state.members[Math.max(0, memberIndex)];
+    const mageInfo = getMageTheme(currentMember?.spellType, currentMember?.profileId, Math.max(0, memberIndex));
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Header Background (#4ca0fe Sky Blue)
+    doc.setFillColor(76, 160, 254);
+    doc.rect(0, 0, pageWidth, 40, "F");
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("PROJECT CONTRIBUTION & PROOF OF WORK", 14, 18);
+
+    doc.setFontSize(9.5);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Official Dossier | Generated on ${new Date().toLocaleDateString()}`, 14, 26);
+    doc.text(`Project: ${state.project.title}`, 14, 33);
+
+    // Outcome Badge
+    const effectiveVillageHp = testVillageHpOverride !== null ? testVillageHpOverride : state.villageHpPercent;
+    const isSuccess = effectiveVillageHp >= 50;
+    doc.setFillColor(isSuccess ? 29 : 220, isSuccess ? 216 : 38, isSuccess ? 81 : 38);
+    doc.roundedRect(pageWidth - 65, 10, 52, 20, 3, 3, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.text(isSuccess ? "VILLAGE DEFENDED" : "VILLAGE FALLEN", pageWidth - 61, 19);
+    doc.setFontSize(8);
+    doc.text(`Village HP: ${effectiveVillageHp}%`, pageWidth - 61, 26);
+
+    // Adventurer Profile Section
+    let yPos = 52;
+    doc.setTextColor(30, 41, 59);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("ADVENTURER PROFILE", 14, yPos);
+    yPos += 6;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.text(`Name: ${currentMember?.displayName ?? "Adventurer"}`, 14, yPos);
+    doc.text(`Class: ${mageInfo.name}`, 110, yPos);
+    yPos += 5.5;
+    doc.text(`Damage Dealt to Boss: ${currentMember?.damageDealt ?? 0} HP`, 14, yPos);
+    doc.text(`Daily Goblin Slayed Today: ${currentMember?.hasSubmittedToday ? "Yes (Defeated)" : "Pending"}`, 110, yPos);
+    yPos += 10;
+
+    // Completed Quests / Tasks Section
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("ASSIGNED & VERIFIED QUESTS", 14, yPos);
+    yPos += 6;
+
+    const myTasks = workspace.tasks.filter(
+      (t) => (t.primaryOwnerProfileId === state.currentProfileId || t.collaboratorProfileIds?.includes(state.currentProfileId))
+    );
+
+    if (myTasks.length === 0) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8.5);
+      doc.text("No quest tasks assigned to this adventurer.", 14, yPos);
+      yPos += 8;
+    } else {
+      myTasks.forEach((task, idx) => {
+        if (yPos > 260) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(15, 23, 42);
+        doc.text(`${idx + 1}. [${task.status.toUpperCase()}] ${task.title}`, 14, yPos);
+        yPos += 4.5;
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`Damage: ${task.damage ?? 50} HP | Required: ${task.required ? "Yes" : "Optional"} | Due: ${task.dueDate ?? "None"}`, 18, yPos);
+        yPos += 4.5;
+        if (task.description) {
+          const splitDesc = doc.splitTextToSize(task.description, pageWidth - 36);
+          doc.text(splitDesc, 18, yPos);
+          yPos += splitDesc.length * 4;
+        }
+        yPos += 2;
+      });
+    }
+
+    yPos += 6;
+    if (yPos > 250) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    // Daily Evidence Logs Section
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(30, 41, 59);
+    doc.text("COMBAT ACTIVITY & DAMAGE LOG", 14, yPos);
+    yPos += 6;
+
+    const myEvents = state.events.filter((e) => e.attackerProfileId === state.currentProfileId);
+    if (myEvents.length === 0) {
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8.5);
+      doc.text("No verified combat events registered yet.", 14, yPos);
+      yPos += 8;
+    } else {
+      myEvents.forEach((ev) => {
+        if (yPos > 265) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(15, 23, 42);
+        const timeStr = new Date(ev.createdAt).toLocaleString();
+        doc.text(`• ${timeStr} — Cast ${ev.spellType ?? "spell"} on "${ev.taskTitle}" (-${ev.damage} HP)`, 14, yPos);
+        yPos += 4.5;
+      });
+    }
+
+    // Digital Security Verification Footer
+    if (yPos > 255) {
+      doc.addPage();
+      yPos = 20;
+    } else {
+      yPos += 10;
+    }
+    doc.setDrawColor(76, 160, 254);
+    doc.setLineWidth(0.4);
+    doc.line(14, yPos, pageWidth - 14, yPos);
+    yPos += 6;
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(7.5);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Digital Verification Hash: ${state.project._id}-${state.currentProfileId}-${Date.now().toString(36)}`, 14, yPos);
+    doc.text("Gamified Team Project Tracker Realm Engine — Tamper Proof Proof of Work", 14, yPos + 3.5);
+
+    doc.save(`${state.project.title.replace(/\s+/g, "_")}_Contribution_Dossier.pdf`);
+  }
+
+  async function handleDeleteRoom() {
+    if (!state || deleteConfirmInput.trim() !== state.project.title.trim()) {
+      setDeleteRoomError("Please type the exact project title to confirm deletion.");
+      return;
+    }
+    setIsDeletingRoom(true);
+    setDeleteRoomError(null);
+    try {
+      await deleteProjectPermanently({
+        projectId,
+        confirmationName: deleteConfirmInput.trim(),
+      });
+      window.location.reload();
+    } catch (err) {
+      setDeleteRoomError(getErrorMessage(err, "Failed to delete project room."));
+    } finally {
+      setIsDeletingRoom(false);
+    }
+  }
+
   const initialised = useRef(false);
   const latestSeenEventId = useRef<string | null>(null);
   const [activeEventId, setActiveEventId] = useState<string | null>(null);
@@ -1382,6 +1590,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     damage: number;
     spellType?: string;
     target?: "goblin" | "dragon";
+    targetX?: number;
+    targetY?: number;
   } | null>(null);
 
   useEffect(() => {
@@ -1421,6 +1631,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         damage: activeEvent.damage,
         spellType: activeEvent.spellType,
         target: "dragon" as const,
+        targetX: 750,
+        targetY: 175,
       };
     }
     return null;
@@ -1428,18 +1640,21 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
   const goblins = useMemo(() => {
     if (!state) return [];
-    return state.members.map((member) => ({
-      id: member.profileId,
-      memberId: member.profileId,
-      memberName: member.displayName,
-      goblinState: member.hasSubmittedToday ? "ghost" as const : "active" as const,
-      isDefeated: member.hasSubmittedToday,
-    }));
-  }, [state]);
+    return state.members.map((member) => {
+      const isDefeated = (testDeadGoblins[member.profileId] ?? false) || member.hasSubmittedToday;
+      return {
+        id: member.profileId,
+        memberId: member.profileId,
+        memberName: member.displayName,
+        goblinState: isDefeated ? ("ghost" as const) : ("active" as const),
+        isDefeated,
+      };
+    });
+  }, [state, testDeadGoblins]);
 
   const players = useMemo(() => {
     if (!state) return [];
-    return state.members.map((member) => ({
+    return state.members.map((member, idx) => ({
       profileId: member.profileId,
       displayName: member.displayName,
       characterFill: member.characterFill,
@@ -1492,12 +1707,219 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     return <section className="battle-loading" aria-busy="true">Preparing the battle scene…</section>;
   }
 
-  const hpPercent = state.maximumHp === 0 ? 100 : Math.round((state.remainingHp / state.maximumHp) * 100);
-  const defeated = state.maximumHp > 0 && state.remainingHp === 0;
+  const funnyBossName = useMemo(() => getFunnyName(BOSS_FUNNY_NAMES, state?.project._id || "boss"), [state?.project._id]);
+  const funnyVillageName = useMemo(() => getFunnyName(VILLAGE_FUNNY_NAMES, state?.project._id || "village"), [state?.project._id]);
+
+  const rawRemainingHp = testDragonHpOverride !== null ? testDragonHpOverride : state.remainingHp;
+  const hpPercent = state.maximumHp === 0 ? 100 : Math.round((rawRemainingHp / state.maximumHp) * 100);
+  const defeated = state.maximumHp > 0 && rawRemainingHp === 0;
+  const effectiveVillageHp = testVillageHpOverride !== null ? testVillageHpOverride : state.villageHpPercent;
   const optionalMetrics = state as typeof state & OptionalBattleMetrics;
 
   const damageClearedFraction = (100 - hpPercent) / 100;
   const dragonX = 730 + damageClearedFraction * 60;
+
+  // Post-Deadline End-Game Screen (Overrides active game scene when deadline is reached)
+  if (state.isOverdue && !viewBattleSceneOverride) {
+    const isVillageDefended = effectiveVillageHp >= 50;
+    return (
+      <section className="battle-page" aria-labelledby="endgame-title">
+        <SVGDefs />
+        <div
+          style={{
+            background: isVillageDefended
+              ? "linear-gradient(135deg, #064e3b 0%, #0f172a 100%)"
+              : "linear-gradient(135deg, #450a0a 0%, #0f172a 100%)",
+            border: `3px solid ${isVillageDefended ? "#1dd851" : "#ef4444"}`,
+            borderRadius: "24px",
+            padding: "clamp(1.5rem, 4vw, 3rem)",
+            color: "#ffffff",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+            gap: "1.5rem",
+            boxShadow: isVillageDefended ? "0 0 40px rgba(29, 216, 81, 0.2)" : "0 0 40px rgba(239, 68, 68, 0.2)",
+          }}
+        >
+          {/* Top Graphic Emblem */}
+          <div style={{ fontSize: "4rem" }}>
+            {isVillageDefended ? "🏰 🎉" : "🏚️ 💔"}
+          </div>
+
+          <div>
+            <h2 id="endgame-title" style={{ margin: "0 0 8px 0", fontSize: "clamp(1.8rem, 4vw, 2.6rem)", color: isVillageDefended ? "#86efac" : "#fca5a5", fontFamily: "var(--font-heading), serif" }}>
+              {isVillageDefended ? "YOU SUCCESSFULLY DEFENDED THE VILLAGE!" : "YOU FAILED TO PROTECT THE VILLAGE!"}
+            </h2>
+            <p style={{ margin: 0, fontSize: "1.05rem", color: "#e2e8f0", maxWidth: "640px" }}>
+              {isVillageDefended
+                ? `The deadline has passed and the realm stands triumphant! ${funnyVillageName} was saved with ${effectiveVillageHp}% HP intact.`
+                : `The deadline has expired before sufficient task quests were completed. ${funnyBossName} and the goblin horde overwhelmed the defenses.`}
+            </p>
+          </div>
+
+          {/* Metrics Grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem", width: "100%", maxWidth: "620px" }}>
+            <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "12px", padding: "14px" }}>
+              <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Village Status</div>
+              <div style={{ fontSize: "1.4rem", fontWeight: 900, color: isVillageDefended ? "#4ade80" : "#f87171" }}>
+                {effectiveVillageHp}% HP
+              </div>
+            </div>
+            <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "12px", padding: "14px" }}>
+              <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Boss Remaining</div>
+              <div style={{ fontSize: "1.4rem", fontWeight: 900, color: "#fde047" }}>
+                {rawRemainingHp} / {state.maximumHp} HP
+              </div>
+            </div>
+            <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "12px", padding: "14px" }}>
+              <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Verified Quests</div>
+              <div style={{ fontSize: "1.4rem", fontWeight: 900, color: "#38bdf8" }}>
+                {workspace?.tasks.filter(t => t.status === "verified" || t.status === "completed").length ?? 0}
+              </div>
+            </div>
+          </div>
+
+          {/* Post-Deadline Actions */}
+          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center", marginTop: "10px" }}>
+            <button
+              type="button"
+              onClick={generateContributionPdf}
+              style={{ background: "#4ca0fe", color: "#ffffff", border: "2px solid #ffffff", borderRadius: "12px", padding: "12px 22px", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", boxShadow: "0 4px 14px rgba(76, 160, 254, 0.4)" }}
+            >
+              📜 Download Contribution Dossier (PDF)
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowLeaderboardModal(true)}
+              style={{ background: "#d97706", color: "#ffffff", border: "2px solid #fde68a", borderRadius: "12px", padding: "12px 20px", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer" }}
+            >
+              🏆 Final Leaderboard
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewBattleSceneOverride(true)}
+              style={{ background: "#334155", color: "#ffffff", border: "1px solid #64748b", borderRadius: "12px", padding: "12px 18px", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer" }}
+            >
+              👀 View Battle Canvas
+            </button>
+            {workspace?.project?.creatorProfileId === state.currentProfileId && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteRoomModal(true)}
+                style={{ background: "#991b1b", color: "#ffffff", border: "1px solid #ef4444", borderRadius: "12px", padding: "12px 18px", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer" }}
+              >
+                🗑️ Delete Party Room
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Modals on End-Game screen */}
+        {showLeaderboardModal && (
+          <div className="rpg-modal-overlay" onClick={() => setShowLeaderboardModal(false)}>
+            <div className="rpg-parchment-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="rpg-modal-header">
+                <h2>🏆 Hall of Fame & Combat Log</h2>
+                <button type="button" className="rpg-btn-close" onClick={() => setShowLeaderboardModal(false)}>✕</button>
+              </div>
+              <div className="rpg-modal-body">
+                <div style={{ display: "grid", gap: "1rem" }}>
+                  <div className="leaderboard-table-container">
+                    <table className="rpg-leaderboard-table">
+                      <thead>
+                        <tr>
+                          <th>Rank</th>
+                          <th>Adventurer</th>
+                          <th>Role</th>
+                          <th>Damage Dealt</th>
+                          <th>Goblin Slayed</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(leaderboardData ?? state.members).map((m: any, idx: number) => {
+                          const currentMember = state.members.find(sm => sm.profileId === (m.profileId || m.userId));
+                          const mage = getMageTheme(currentMember?.spellType, currentMember?.profileId, idx);
+                          return (
+                            <tr key={m.profileId || m.userId || idx}>
+                              <td>{idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`}</td>
+                              <td><strong>{m.displayName || m.userName}</strong></td>
+                              <td><span style={{ fontSize: "0.75rem", padding: "2px 6px", borderRadius: "4px", background: "rgba(255,255,255,0.1)" }}>{mage.name}</span></td>
+                              <td><strong>{m.damageDealt ?? 0} HP</strong></td>
+                              <td>{m.hasSubmittedToday ? "✅ Defeated" : "❌ Pending"}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="combat-log-box" style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", padding: "12px", maxHeight: "200px", overflowY: "auto" }}>
+                    <h4 style={{ margin: "0 0 8px 0", fontSize: "0.9rem", color: "#facc15" }}>📜 Verified Combat Activity Log</h4>
+                    {state.events.length === 0 ? (
+                      <p style={{ margin: 0, fontSize: "0.8rem", color: "#94a3b8" }}>No combat attacks registered.</p>
+                    ) : (
+                      <ol style={{ margin: 0, paddingLeft: "1.2rem", fontSize: "0.8rem", display: "grid", gap: "6px" }}>
+                        {[...state.events].reverse().map((ev) => (
+                          <li key={ev._id}>
+                            <strong>{ev.attackerName} dealt {ev.damage} damage</strong>
+                            <span style={{ color: "#94a3b8", display: "block", fontSize: "0.72rem" }}>Verified “{ev.taskTitle}” by {ev.reviewerName}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Permanent Delete Room Confirmation Modal */}
+        {showDeleteRoomModal && (
+          <div className="rpg-modal-overlay" onClick={() => setShowDeleteRoomModal(false)}>
+            <div className="rpg-parchment-modal" style={{ maxWidth: "460px" }} onClick={(e) => e.stopPropagation()}>
+              <div className="rpg-modal-header">
+                <h2>🗑️ Delete Party Room</h2>
+                <button type="button" className="rpg-btn-close" onClick={() => setShowDeleteRoomModal(false)}>✕</button>
+              </div>
+              <div className="rpg-modal-body">
+                <p style={{ margin: "0 0 12px 0", fontSize: "0.9rem", color: "#fca5a5" }}>
+                  ⚠️ <strong>Warning:</strong> This will permanently delete this room, all tasks, milestones, evidence artifacts, and combat history.
+                </p>
+                <label style={{ display: "grid", gap: "6px", fontSize: "0.85rem", color: "#e2e8f0" }}>
+                  <span>Type <strong>{state.project.title}</strong> to confirm:</span>
+                  <input
+                    type="text"
+                    value={deleteConfirmInput}
+                    onChange={(e) => setDeleteConfirmInput(e.target.value)}
+                    placeholder={state.project.title}
+                    style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #64748b", background: "#1e293b", color: "#ffffff" }}
+                  />
+                </label>
+                {deleteRoomError && (
+                  <p style={{ color: "#ef4444", fontSize: "0.8rem", margin: "8px 0 0 0" }}>{deleteRoomError}</p>
+                )}
+                <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "16px" }}>
+                  <button type="button" onClick={() => setShowDeleteRoomModal(false)} style={{ padding: "8px 14px", borderRadius: "6px", background: "#334155", color: "#fff", border: "none", cursor: "pointer" }}>
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isDeletingRoom || deleteConfirmInput.trim() !== state.project.title.trim()}
+                    onClick={handleDeleteRoom}
+                    style={{ padding: "8px 16px", borderRadius: "6px", background: "#b91c1c", color: "#fff", border: "none", fontWeight: "bold", cursor: "pointer", opacity: deleteConfirmInput.trim() === state.project.title.trim() ? 1 : 0.5 }}
+                  >
+                    {isDeletingRoom ? "Deleting…" : "Permanently Delete"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+    );
+  }
 
   return (
     <section className={`battle-page ${activeEvent ? "has-new-attack" : ""} ${defeated ? "is-defeated" : ""}`} aria-label="Project Battle Scene">
@@ -1520,9 +1942,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           className="rpg-btn-leaderboard rpg-btn-layout-admin"
           style={{ right: "185px" }}
           onClick={() => {
-            setShowDragonEditor((prev) => !prev);
-            if (!selectedDragonPart) {
-              setSelectedDragonPart("headNeck");
+            if (!adminAuthenticated) {
+              setShowAdminPasswordModal(true);
+            } else {
+              setShowDragonEditor((prev) => !prev);
+              if (!selectedDragonPart) {
+                setSelectedDragonPart("headNeck");
+              }
             }
           }}
           type="button"
@@ -1540,7 +1966,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           Attack
         </button>
 
-        {/* Floating Mob-Style Boss HP Bar (Intimidating flame outline + moveable position) */}
+        {/* Floating Mob-Style Boss HP Bar (With Humorous Boss Name & Moveable Position) */}
         <div
           className="boss-hp-mob-style"
           role="progressbar"
@@ -1551,12 +1977,34 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           style={{
             left: `calc(${Math.min(92, Math.max(8, (dragonX / 10) - 2.5))}% + ${dragonHpBarPos.x}px)`,
             top: `calc(85px + ${dragonHpBarPos.y}px)`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            overflow: "hidden",
+            position: "absolute",
           }}
         >
           <div
             className="boss-hp-mob-fill"
             style={{ width: `${hpPercent}%` }}
           />
+          <span
+            style={{
+              position: "absolute",
+              zIndex: 2,
+              fontSize: "0.68rem",
+              fontWeight: 900,
+              fontFamily: "var(--font-heading), serif",
+              color: "#ffffff",
+              textShadow: "0 1px 3px #000, 0 0 4px #000",
+              letterSpacing: "0.03em",
+              whiteSpace: "nowrap",
+              pointerEvents: "none",
+              padding: "0 6px",
+            }}
+          >
+            🐲 {funnyBossName} ({hpPercent}%)
+          </span>
         </div>
 
         {/* Layer 0, 1, 2: Sky & Parallax Clouds */}
@@ -1565,8 +2013,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         {/* Layer 3, 4: Section 4 - Top-Down 3/4 Perspective Grassland */}
         <LandscapeTerrain />
 
-        {/* Layer 5: Section 3 & 5 - Grounded Village & Anchored Village HP Bar */}
-        <LandscapeVillage villageHpPercent={state.villageHpPercent} />
+        {/* Layer 5: Section 3 & 5 - Grounded Village & Anchored Village HP Bar with Humorous Town Name */}
+        <LandscapeVillage
+          villageHpPercent={effectiveVillageHp}
+          villageName={funnyVillageName}
+        />
 
         {/* Layer 6: Section 8 - Daily Goblins Wave System (1 per active player) */}
         <LandscapeGoblins goblins={goblins} />
@@ -2444,7 +2895,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                                   [layerId]: { ...offset, rotate: nextVal }
                                 };
                                 setDragonOffsets(nextOffsets);
-                                pushHistoryState(nextOffsets);
+                                pushHistoryState(nextOffsets, dragonFills, deletedShapes, customShapes, dragonGeometries, layerOrder);
                               }}
                               title="Rotate CCW 5°"
                             >
@@ -2461,7 +2912,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                                   [layerId]: { ...offset, rotate: nextVal }
                                 };
                                 setDragonOffsets(nextOffsets);
-                                pushHistoryState(nextOffsets);
+                                pushHistoryState(nextOffsets, dragonFills, deletedShapes, customShapes, dragonGeometries, layerOrder);
                               }}
                               title="Rotate CW 5°"
                             >
@@ -2568,112 +3019,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                               />
                             </label>
                           </div>
-
-                          {/* Custom Shape Parameters Modifier */}
-                          {layerId.startsWith("custom_") && (() => {
-                            const cs = customShapes.find((s) => s.id === layerId);
-                            if (!cs) return null;
-                            return (
-                              <div style={{ display: "grid", gap: "6px", marginTop: "8px", borderTop: "1px solid #334155", paddingTop: "8px" }}>
-                                {cs.type === "circle" && (
-                                  <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                                    Radius:
-                                    <input
-                                      type="number"
-                                      style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                                      value={cs.rx}
-                                      onChange={(e) => {
-                                        const val = parseInt(e.target.value) || 0;
-                                        setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, rx: val } : s));
-                                      }}
-                                    />
-                                  </label>
-                                )}
-                                {cs.type === "ellipse" && (
-                                  <>
-                                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                                      Radius X:
-                                      <input
-                                        type="number"
-                                        style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                                        value={cs.rx}
-                                        onChange={(e) => {
-                                          const val = parseInt(e.target.value) || 0;
-                                          setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, rx: val } : s));
-                                        }}
-                                      />
-                                    </label>
-                                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                                      Radius Y:
-                                      <input
-                                        type="number"
-                                        style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                                        value={cs.ry}
-                                        onChange={(e) => {
-                                          const val = parseInt(e.target.value) || 0;
-                                          setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, ry: val } : s));
-                                        }}
-                                      />
-                                    </label>
-                                  </>
-                                )}
-                                {cs.type === "rect" && (
-                                  <>
-                                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                                      Width:
-                                      <input
-                                        type="number"
-                                        style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                                        value={cs.width}
-                                        onChange={(e) => {
-                                          const val = parseInt(e.target.value) || 0;
-                                          setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, width: val } : s));
-                                        }}
-                                      />
-                                    </label>
-                                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                                      Height:
-                                      <input
-                                        type="number"
-                                        style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                                        value={cs.height}
-                                        onChange={(e) => {
-                                          const val = parseInt(e.target.value) || 0;
-                                          setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, height: val } : s));
-                                        }}
-                                      />
-                                    </label>
-                                  </>
-                                )}
-                                {cs.type === "polygon" && (
-                                  <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                                    Points:
-                                    <input
-                                      type="text"
-                                      style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                                      value={cs.points}
-                                      onChange={(e) => {
-                                        setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, points: e.target.value } : s));
-                                      }}
-                                    />
-                                  </label>
-                                )}
-                                {cs.type === "path" && (
-                                  <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                                    Path (d):
-                                    <input
-                                      type="text"
-                                      style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                                      value={cs.d}
-                                      onChange={(e) => {
-                                        setCustomShapes((prev) => prev.map((s) => s.id === cs.id ? { ...s, d: e.target.value } : s));
-                                      }}
-                                    />
-                                  </label>
-                                )}
-                              </div>
-                            );
-                          })()}
 
                           {/* Duplicate Element Action */}
                           <button
@@ -2800,22 +3145,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           </div>
         </div>
       )}
-
-      <details className="combat-log">
-        <summary><strong id="combat-log-title">Combat log</strong><span>{state.events.length} verified attacks</span></summary>
-        {state.events.length === 0 ? (
-          <p>No attacks yet. A submitted task deals damage only after its assigned reviewer verifies it.</p>
-        ) : (
-          <ol>
-            {[...state.events].reverse().map((event) => (
-              <li key={event._id}>
-                <strong>{event.attackerName} dealt {event.damage} damage</strong>
-                <span>{event.reviewerName} verified “{event.taskTitle}” · {new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(event.createdAt)}</span>
-              </li>
-            ))}
-          </ol>
-        )}
-      </details>
     </section>
   );
 }

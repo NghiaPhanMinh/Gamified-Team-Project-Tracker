@@ -21,9 +21,9 @@ export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
   const isIce = !isLightning && !isFire; // ice / water / default
 
   const isGoblinTarget = activeEvent?.target === "goblin";
-  const targetX = activeEvent?.targetX ?? (isGoblinTarget ? 535 : 760);
-  const targetY = activeEvent?.targetY ?? (isGoblinTarget ? 275 : 185);
-  const scaleFactor = isGoblinTarget ? 0.75 : 2.2;
+  const targetX = activeEvent?.targetX ?? (isGoblinTarget ? 525 : 750);
+  const targetY = activeEvent?.targetY ?? (isGoblinTarget ? 290 : 175);
+  const scaleFactor = isGoblinTarget ? 0.85 : 2.2;
 
   return (
     <div className="landscape-layer layer-9-fx" aria-hidden="true">

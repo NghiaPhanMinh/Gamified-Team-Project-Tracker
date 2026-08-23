@@ -39,14 +39,14 @@ export function LandscapeTerrain() {
           </defs>
 
           {/* 10% Horizon Dark Forest Green Band (y = 100 to 130) */}
-          <rect x="0" y="100" width="1000" height="300" fill="#166534" />
+          <rect x="0" y="100" width="1000" height="300" fill="#17a738" />
 
           {/* 10% Horizon Mid Meadow Green Band (y = 128 to 160) */}
-          <path d="M0,130 Q260,120 520,135 T1000,128 L1000,400 L0,400 Z" fill="#15803d" />
+          <path d="M0,130 Q260,120 520,135 T1000,128 L1000,400 L0,400 Z" fill="#17a738" opacity="0.9" />
 
           {/* 80% Main Bright Lush Meadow (y = 155 to 400) */}
-          <path d="M0,158 Q280,148 580,165 T1000,155 L1000,400 L0,400 Z" fill="#22c55e" />
-          <rect x="0" y="165" width="1000" height="235" fill="#22c55e" />
+          <path d="M0,158 Q280,148 580,165 T1000,155 L1000,400 L0,400 Z" fill="#1dd851" />
+          <rect x="0" y="165" width="1000" height="235" fill="#1dd851" />
 
           {/* --- Curvy Winding Dirt / Cobblestone Pathway --- */}
           {/* Pathway Outer Dirt Foundation */}

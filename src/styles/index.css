@@ -4510,28 +4510,28 @@ footer {
 
 .battle-page { display: grid; gap: 1rem; }
 :root {
-  --scene-sky-top: #5c7c99;
-  --scene-sky-bottom: #d6c8b4;
-  --scene-cloud: #f4ede2;
+  --scene-sky-top: #4ca0fe;
+  --scene-sky-bottom: #93c5fd;
+  --scene-cloud: #ffffff;
   --scene-cloud-near: #ffffff;
-  --scene-land: #4a6b53;
-  --scene-hills: #385241;
-  --scene-house-wall: #e3d5c3;
-  --scene-house-roof: #9c5a4c;
+  --scene-land: #17a738;
+  --scene-hills: #334155;
+  --scene-house-wall: #ffffff;
+  --scene-house-roof: #feaa01;
   --scene-boss-slate: #2a343d;
   --scene-ember-danger: #d9532f;
   --scene-ember-gold: #f4a261;
 }
 
 :root[data-theme="dark"] {
-  --scene-sky-top: #1e293b;
-  --scene-sky-bottom: #334155;
-  --scene-cloud: #64748b;
-  --scene-cloud-near: #94a3b8;
-  --scene-land: #1e3a29;
-  --scene-hills: #14281d;
-  --scene-house-wall: #475569;
-  --scene-house-roof: #7f1d1d;
+  --scene-sky-top: #4ca0fe;
+  --scene-sky-bottom: #60a5fa;
+  --scene-cloud: #ffffff;
+  --scene-cloud-near: #ffffff;
+  --scene-land: #17a738;
+  --scene-hills: #1e293b;
+  --scene-house-wall: #ffffff;
+  --scene-house-roof: #feaa01;
   --scene-boss-slate: #0f172a;
   --scene-ember-danger: #ef4444;
   --scene-ember-gold: #f59e0b;
