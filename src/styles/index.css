@@ -6689,6 +6689,70 @@ footer {
   border-top: 1px dashed color-mix(in srgb, var(--color-text) 20%, transparent);
 }
 
+/* Solo Project Self-Approval Panel High Contrast in Light & Dark Mode */
+.solo-complete-panel {
+  margin: 1rem 0;
+  padding: 1.1rem;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--color-yellow, #fff73f) 20%, var(--color-surface));
+  border: 1.5px solid var(--color-yellow, #fff73f);
+  color: var(--color-text);
+}
+
+.solo-complete-panel p {
+  margin: 0 0 0.85rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.solo-complete-panel .primary-button {
+  background-color: var(--color-yellow, #fff73f) !important;
+  color: #101517 !important;
+  border: 1.5px solid #101517 !important;
+  border-radius: var(--mld-radius-pill, 999px) !important;
+  font-weight: 800 !important;
+  padding: 0.65rem 1.25rem;
+}
+
+.solo-complete-panel .primary-button:disabled {
+  opacity: 0.65 !important;
+  cursor: not-allowed;
+}
+
+:root[data-theme="dark"] .solo-complete-panel {
+  background: rgba(255, 247, 63, 0.12) !important;
+  border: 1.5px solid var(--color-yellow, #fff73f) !important;
+  color: #ffffff !important;
+}
+
+:root[data-theme="dark"] .solo-complete-panel p {
+  color: #ffffff !important;
+}
+
+:root[data-theme="dark"] .solo-complete-panel .primary-button {
+  background-color: var(--color-yellow, #fff73f) !important;
+  color: #101517 !important;
+}
+
+/* Next Action Card Solid Black Kicker & Text */
+.next-action-card,
+.next-action-card .card-eyebrow,
+.next-action-card h2,
+.next-action-card p,
+:root[data-theme="dark"] .next-action-card,
+:root[data-theme="dark"] .next-action-card .card-eyebrow,
+:root[data-theme="dark"] .next-action-card h2,
+:root[data-theme="dark"] .next-action-card p {
+  color: #101517 !important;
+}
+
+.next-action-card .card-eyebrow,
+:root[data-theme="dark"] .next-action-card .card-eyebrow {
+  opacity: 0.85 !important;
+  font-weight: 800 !important;
+}
+
+
 
 
 

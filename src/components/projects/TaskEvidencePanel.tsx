@@ -301,8 +301,8 @@ export function TaskEvidencePanel({
       )}
 
       {details.isSoloProject && details.isTaskOwner && !["completed", "verified"].includes(taskStatus) ? (
-        <div className="solo-complete-panel" style={{ margin: "1rem 0", padding: "1rem", borderRadius: "12px", background: "color-mix(in srgb, var(--color-yellow) 15%, var(--color-surface))", border: "2px solid var(--color-yellow)" }}>
-          <p style={{ margin: "0 0 0.75rem", fontWeight: 800 }}>⚡ <strong>Solo Project:</strong> You can self-approve and complete your task once evidence is added.</p>
+        <div className="solo-complete-panel">
+          <p>⚡ <strong>Solo Project:</strong> You can self-approve and complete your task once evidence is added.</p>
           <button
             className="primary-button submit-review-button"
             type="button"
