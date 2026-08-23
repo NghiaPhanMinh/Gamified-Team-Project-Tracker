@@ -392,11 +392,16 @@ export function AIPlanningAssistant({
             <textarea maxLength={1500} value={adjustment} onChange={(event) => setAdjustment(event.target.value)} placeholder="For example: reduce the plan to eight tasks and keep testing in week three." />
             <button className="secondary-button" type="button" disabled={isGenerating || !adjustment.trim()} onClick={() => void handleAdjustment()}>{isGenerating ? "Revising…" : "Generate adjusted draft"}</button>
           </section>
-          <div className="ai-save-actions">
-            <p>Saving is a human confirmation. Invalid or partial output is rejected by the server.</p>
-            <button className="primary-button" type="button" disabled={isGenerating} onClick={() => void handleSavePlan()}>{isGenerating ? "Saving…" : "Save Plan & Allocations"}</button>
+          <div className="ai-save-actions-hero">
+            <div className="ai-save-notice">
+              <strong>✨ Ready to Launch Your Project?</strong>
+              <p>Clicking confirm saves all AI generated tasks, assigns team responsibilities, and unlocks the Battle Board, Tasks, and Progress tabs!</p>
+            </div>
+            <button className="primary-button hero-save-plan-button" type="button" disabled={isGenerating} onClick={() => void handleSavePlan()}>
+              {isGenerating ? "🚀 Saving & Launching Project…" : "✅ Confirm & Save Plan"}
+            </button>
           </div>
-          {saveMessage ? <p className="form-success" role="status">{saveMessage}</p> : null}
+          {saveMessage ? <p className="form-success" role="status" style={{ marginTop: "1rem", fontSize: "1.05rem", fontWeight: 800 }}>{saveMessage}</p> : null}
         </div>
       ) : null}
     </section>

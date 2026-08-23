@@ -613,8 +613,34 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
       </header>
 
       <nav className="project-tabs" aria-label="Project sections">
-        {PROJECT_TABS.map((tab) => <button key={tab.value} type="button" className={activeTab === tab.value ? "is-active" : ""} onClick={() => setActiveTab(tab.value)}>{tab.label}</button>)}
+        {PROJECT_TABS.map((tab) => {
+          const isLocked = workspace.tasks.length === 0 && tab.value !== "plan";
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              className={activeTab === tab.value ? "is-active" : isLocked ? "is-locked" : ""}
+              disabled={isLocked}
+              style={isLocked ? { opacity: 0.55, cursor: "not-allowed" } : undefined}
+              title={isLocked ? "Chủ phòng phải bấm Save Plan & Allocations trước để mở khóa tab này!" : ""}
+              onClick={() => {
+                if (!isLocked) setActiveTab(tab.value);
+              }}
+            >
+              {tab.label} {isLocked ? "🔒" : ""}
+            </button>
+          );
+        })}
       </nav>
+
+      {workspace.tasks.length === 0 ? (
+        <div className="plan-lock-notice" style={{ margin: "0.5rem 0 0.85rem", padding: "0.75rem 1rem", borderRadius: "14px", background: "color-mix(in srgb, var(--color-pink) 15%, var(--color-surface))", border: "2px solid var(--color-pink)", color: "var(--color-text)", display: "flex", alignItems: "center", gap: "0.6rem" }}>
+          <span style={{ fontSize: "1.2rem" }}>🔒</span>
+          <p style={{ margin: 0, fontSize: "0.88rem", fontWeight: 700 }}>
+            Các tab <strong>Progress</strong>, <strong>Tasks</strong>, và <strong>Team</strong> tạm thời bị khóa. {workspace.canManageProject ? "Bạn (Chủ phòng) vui lòng bấm 'Confirm & Save Plan' bên dưới để kích hoạt dự án &amp; mở khóa toàn bộ các tab!" : "Đang chờ Chủ phòng kiểm tra kế hoạch và bấm 'Confirm &amp; Save Plan' để khởi chạy dự án!"}
+          </p>
+        </div>
+      ) : null}
 
       {overdueTasks.length > 0 || inactiveMembers.length > 0 ? (
         <aside className="room-risk-banner" style={{ margin: "0.5rem 0 0.75rem", padding: "0.65rem 1rem", borderRadius: "12px", background: "color-mix(in srgb, #ef4444 12%, var(--color-surface))", border: "1.5px solid #ef4444", color: "var(--color-text)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.6rem" }}>
