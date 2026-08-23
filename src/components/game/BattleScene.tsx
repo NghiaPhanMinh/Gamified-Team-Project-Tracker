@@ -1,6 +1,19 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { jsPDF } from "jspdf";
+import {
+  ClipboardCheck,
+  FileDown,
+  Gamepad2,
+  Shield,
+  ShieldCheck,
+  ShieldX,
+  Sparkles,
+  Target,
+  Trash2,
+  TriangleAlert,
+  Trophy,
+} from "lucide-react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -762,6 +775,112 @@ function loadSavedConfig() {
     console.error("Error loading config from localStorage:", e);
   }
   return null;
+}
+
+type BattleResultBoardProps = {
+  variant: "success" | "failed";
+  title: string;
+  description: string;
+  villageHp: number;
+  bossRemainingHp: number;
+  bossMaximumHp: number;
+  verifiedQuests: number;
+  canDeleteRoom: boolean;
+  onDownloadContribution: () => void;
+  onOpenLeaderboard: () => void;
+  onViewBattle: () => void;
+  onDeleteRoom: () => void;
+};
+
+function BattleResultBoard({
+  variant,
+  title,
+  description,
+  villageHp,
+  bossRemainingHp,
+  bossMaximumHp,
+  verifiedQuests,
+  canDeleteRoom,
+  onDownloadContribution,
+  onOpenLeaderboard,
+  onViewBattle,
+  onDeleteRoom,
+}: BattleResultBoardProps) {
+  const isSuccess = variant === "success";
+  const ResultIcon = isSuccess ? ShieldCheck : ShieldX;
+  const BadgeIcon = isSuccess ? ShieldCheck : TriangleAlert;
+
+  return (
+    <div className={`battle-result-board is-${variant}`} data-result-variant={variant}>
+      <div className="battle-result-accent-rail" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
+
+      <header className="battle-result-header">
+        <div className="battle-result-emblem" aria-hidden="true">
+          <ResultIcon strokeWidth={2} />
+          {isSuccess ? <Sparkles className="battle-result-emblem-detail" /> : <TriangleAlert className="battle-result-emblem-detail" />}
+        </div>
+        <div className="battle-result-badge">
+          <BadgeIcon size={17} strokeWidth={2.25} aria-hidden="true" />
+          <span>{isSuccess ? "Project defended" : "Defense failed"}</span>
+        </div>
+        <h2 id="endgame-title" className="battle-result-title">{title}</h2>
+        <p className="battle-result-description">{description}</p>
+      </header>
+
+      <dl className="battle-result-stats" aria-label="Final battle statistics">
+        <div className="battle-result-stat is-village">
+          <div className="battle-result-stat-heading">
+            <Shield size={20} strokeWidth={2} aria-hidden="true" />
+            <dt>Village Status</dt>
+          </div>
+          <dd>{villageHp}% HP</dd>
+        </div>
+        <div className="battle-result-stat is-boss">
+          <div className="battle-result-stat-heading">
+            <Target size={20} strokeWidth={2} aria-hidden="true" />
+            <dt>Boss Remaining</dt>
+          </div>
+          <dd>{bossRemainingHp} / {bossMaximumHp} HP</dd>
+        </div>
+        <div className="battle-result-stat is-quests">
+          <div className="battle-result-stat-heading">
+            <ClipboardCheck size={20} strokeWidth={2} aria-hidden="true" />
+            <dt>Verified Quests</dt>
+          </div>
+          <dd>{verifiedQuests}</dd>
+        </div>
+      </dl>
+
+      <div className="battle-result-main-actions" aria-label="Result actions">
+        <button type="button" className="battle-result-action is-primary" onClick={onDownloadContribution}>
+          <FileDown size={20} strokeWidth={2} aria-hidden="true" />
+          Download Contribution Dossier (PDF)
+        </button>
+        <button type="button" className="battle-result-action is-leaderboard" onClick={onOpenLeaderboard}>
+          <Trophy size={20} strokeWidth={2} aria-hidden="true" />
+          Final Leaderboard
+        </button>
+        <button type="button" className="battle-result-action is-battle" onClick={onViewBattle}>
+          <Gamepad2 size={20} strokeWidth={2} aria-hidden="true" />
+          View Battle Canvas
+        </button>
+      </div>
+
+      {canDeleteRoom && (
+        <div className="battle-result-danger-zone">
+          <span>Room controls</span>
+          <button type="button" className="battle-result-delete" onClick={onDeleteRoom}>
+            <Trash2 size={18} strokeWidth={2} aria-hidden="true" />
+            Delete Party Room
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function BattleScene({ projectId, currentPhase, tasksLocked = true }: BattleSceneProps) {
@@ -1722,98 +1841,32 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   // Post-Deadline End-Game Screen (Overrides active game scene when deadline is reached)
   if (state.isOverdue && !viewBattleSceneOverride) {
     const isVillageDefended = effectiveVillageHp >= 50;
+    const resultVariant = isVillageDefended ? "success" : "failed";
+    const resultTitle = isVillageDefended
+      ? "YOU SUCCESSFULLY DEFENDED THE VILLAGE!"
+      : "YOU FAILED TO PROTECT THE VILLAGE!";
+    const resultDescription = isVillageDefended
+      ? `The deadline has passed and the realm stands triumphant! ${funnyVillageName} was saved with ${effectiveVillageHp}% HP intact.`
+      : `The deadline has expired before sufficient task quests were completed. ${funnyBossName} and the goblin horde overwhelmed the defenses.`;
+    const verifiedQuestCount = workspace?.tasks.filter(t => t.status === "verified" || t.status === "completed").length ?? 0;
+
     return (
-      <section className="battle-page" aria-labelledby="endgame-title">
+      <section className="battle-page battle-result-page" aria-labelledby="endgame-title">
         <SVGDefs />
-        <div
-          style={{
-            background: isVillageDefended
-              ? "linear-gradient(135deg, #064e3b 0%, #0f172a 100%)"
-              : "linear-gradient(135deg, #450a0a 0%, #0f172a 100%)",
-            border: `3px solid ${isVillageDefended ? "#1dd851" : "#ef4444"}`,
-            borderRadius: "24px",
-            padding: "clamp(1.5rem, 4vw, 3rem)",
-            color: "#ffffff",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
-            gap: "1.5rem",
-            boxShadow: isVillageDefended ? "0 0 40px rgba(29, 216, 81, 0.2)" : "0 0 40px rgba(239, 68, 68, 0.2)",
-          }}
-        >
-          {/* Top Graphic Emblem */}
-          <div style={{ fontSize: "4rem" }}>
-            {isVillageDefended ? "🏰 🎉" : "🏚️ 💔"}
-          </div>
-
-          <div>
-            <h2 id="endgame-title" style={{ margin: "0 0 8px 0", fontSize: "clamp(1.8rem, 4vw, 2.6rem)", color: isVillageDefended ? "#86efac" : "#fca5a5", fontFamily: "var(--font-heading), serif" }}>
-              {isVillageDefended ? "YOU SUCCESSFULLY DEFENDED THE VILLAGE!" : "YOU FAILED TO PROTECT THE VILLAGE!"}
-            </h2>
-            <p style={{ margin: 0, fontSize: "1.05rem", color: "#e2e8f0", maxWidth: "640px" }}>
-              {isVillageDefended
-                ? `The deadline has passed and the realm stands triumphant! ${funnyVillageName} was saved with ${effectiveVillageHp}% HP intact.`
-                : `The deadline has expired before sufficient task quests were completed. ${funnyBossName} and the goblin horde overwhelmed the defenses.`}
-            </p>
-          </div>
-
-          {/* Metrics Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem", width: "100%", maxWidth: "620px" }}>
-            <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "12px", padding: "14px" }}>
-              <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Village Status</div>
-              <div style={{ fontSize: "1.4rem", fontWeight: 900, color: isVillageDefended ? "#4ade80" : "#f87171" }}>
-                {effectiveVillageHp}% HP
-              </div>
-            </div>
-            <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "12px", padding: "14px" }}>
-              <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Boss Remaining</div>
-              <div style={{ fontSize: "1.4rem", fontWeight: 900, color: "#fde047" }}>
-                {rawRemainingHp} / {state.maximumHp} HP
-              </div>
-            </div>
-            <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "12px", padding: "14px" }}>
-              <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Verified Quests</div>
-              <div style={{ fontSize: "1.4rem", fontWeight: 900, color: "#38bdf8" }}>
-                {workspace?.tasks.filter(t => t.status === "verified" || t.status === "completed").length ?? 0}
-              </div>
-            </div>
-          </div>
-
-          {/* Post-Deadline Actions */}
-          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center", marginTop: "10px" }}>
-            <button
-              type="button"
-              onClick={generateContributionPdf}
-              style={{ background: "#4ca0fe", color: "#ffffff", border: "2px solid #ffffff", borderRadius: "12px", padding: "12px 22px", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", boxShadow: "0 4px 14px rgba(76, 160, 254, 0.4)" }}
-            >
-              📜 Download Contribution Dossier (PDF)
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowLeaderboardModal(true)}
-              style={{ background: "#d97706", color: "#ffffff", border: "2px solid #fde68a", borderRadius: "12px", padding: "12px 20px", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer" }}
-            >
-              🏆 Final Leaderboard
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewBattleSceneOverride(true)}
-              style={{ background: "#334155", color: "#ffffff", border: "1px solid #64748b", borderRadius: "12px", padding: "12px 18px", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer" }}
-            >
-              👀 View Battle Canvas
-            </button>
-            {workspace?.project?.creatorProfileId === state.currentProfileId && (
-              <button
-                type="button"
-                onClick={() => setShowDeleteRoomModal(true)}
-                style={{ background: "#991b1b", color: "#ffffff", border: "1px solid #ef4444", borderRadius: "12px", padding: "12px 18px", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer" }}
-              >
-                🗑️ Delete Party Room
-              </button>
-            )}
-          </div>
-        </div>
+        <BattleResultBoard
+          variant={resultVariant}
+          title={resultTitle}
+          description={resultDescription}
+          villageHp={effectiveVillageHp}
+          bossRemainingHp={rawRemainingHp}
+          bossMaximumHp={state.maximumHp}
+          verifiedQuests={verifiedQuestCount}
+          canDeleteRoom={workspace?.project?.creatorProfileId === state.currentProfileId}
+          onDownloadContribution={generateContributionPdf}
+          onOpenLeaderboard={() => setShowLeaderboardModal(true)}
+          onViewBattle={() => setViewBattleSceneOverride(true)}
+          onDeleteRoom={() => setShowDeleteRoomModal(true)}
+        />
 
         {/* Modals on End-Game screen */}
         {showLeaderboardModal && (

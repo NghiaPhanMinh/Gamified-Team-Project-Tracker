@@ -1,0 +1,45 @@
+import { describe, expect, it } from "vitest";
+
+import battleSource from "./BattleScene.tsx?raw";
+import styles from "../../styles/index.css?raw";
+
+describe("shared end-of-game result board", () => {
+  it("uses one component system for success and failure without changing the result gate", () => {
+    expect(battleSource).toContain("function BattleResultBoard");
+    expect(battleSource).toContain('variant: "success" | "failed"');
+    expect(battleSource).toContain('const isVillageDefended = effectiveVillageHp >= 50;');
+    expect(battleSource).toContain('const resultVariant = isVillageDefended ? "success" : "failed";');
+    expect(battleSource).toContain('<BattleResultBoard');
+    expect(battleSource).toContain('data-result-variant={variant}');
+  });
+
+  it("keeps the result content and actions while replacing result-board emoji with Lucide icons", () => {
+    expect(battleSource).toContain("YOU SUCCESSFULLY DEFENDED THE VILLAGE!");
+    expect(battleSource).toContain("YOU FAILED TO PROTECT THE VILLAGE!");
+    expect(battleSource).toContain("Village Status");
+    expect(battleSource).toContain("Boss Remaining");
+    expect(battleSource).toContain("Verified Quests");
+    expect(battleSource).toContain("Download Contribution Dossier (PDF)");
+    expect(battleSource).toContain("Final Leaderboard");
+    expect(battleSource).toContain("View Battle Canvas");
+    expect(battleSource).toContain("Delete Party Room");
+    expect(battleSource).toContain("ShieldCheck");
+    expect(battleSource).toContain("ShieldX");
+    expect(battleSource).toContain("FileDown");
+    expect(battleSource).toContain("Gamepad2");
+    expect(battleSource).not.toContain('"🏰 🎉"');
+    expect(battleSource).not.toContain('"🏚️ 💔"');
+  });
+
+  it("uses the MayLamDi palette, responsive layouts, and light/dark treatments", () => {
+    expect(styles).toContain(".battle-result-board.is-failed");
+    expect(styles).toContain("--result-accent: var(--color-green)");
+    expect(styles).toContain("--result-accent: var(--color-orange)");
+    expect(styles).toContain("background: var(--color-yellow)");
+    expect(styles).toContain("background: var(--color-pink)");
+    expect(styles).toContain("background: var(--color-blue)");
+    expect(styles).toContain(':root[data-theme="dark"] .battle-result-board');
+    expect(styles).toContain(".battle-result-stats,");
+    expect(styles).toContain("grid-template-columns: 1fr;");
+  });
+});
