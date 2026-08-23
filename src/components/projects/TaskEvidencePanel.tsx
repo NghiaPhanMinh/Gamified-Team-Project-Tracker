@@ -335,7 +335,7 @@ export function TaskEvidencePanel({
       ) : null}
 
       {!details.isSoloProject && requiresReview && details.isTaskOwner && ["todo", "in_progress", "changes_requested"].includes(taskStatus) ? (
-        <button className="primary-button submit-review-button" type="button" disabled={isSaving || details.evidence.length === 0 || !reviewerName} onClick={() => void handleSubmitForReview()}>
+        <button className="primary-button submit-review-button maylamdi-button" type="button" disabled={isSaving || details.evidence.length === 0 || !reviewerName} onClick={() => void handleSubmitForReview()}>
           MayLamDi
         </button>
       ) : null}

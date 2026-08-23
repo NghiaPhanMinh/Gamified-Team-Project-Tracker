@@ -6610,6 +6610,33 @@ footer {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
 }
 
+/* MayLamDi Key Visual Pink Action Button */
+.maylamdi-button,
+button.maylamdi-button,
+:root[data-theme="dark"] .maylamdi-button,
+:root[data-theme="dark"] button.maylamdi-button {
+  background-color: var(--color-pink, #ff8ae7) !important;
+  color: #101517 !important;
+  border: 2px solid #101517 !important;
+  font-weight: 900 !important;
+  box-shadow: 2px 2px 0 #101517 !important;
+  transition: transform 0.1s ease, box-shadow 0.1s ease !important;
+}
+
+.maylamdi-button:hover,
+button.maylamdi-button:hover {
+  background-color: var(--color-pink, #ff8ae7) !important;
+  color: #101517 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 3px 3px 0 #101517 !important;
+}
+
+.maylamdi-button:active,
+button.maylamdi-button:active {
+  transform: translateY(1px) !important;
+  box-shadow: 1px 1px 0 #101517 !important;
+}
+
 .project-badge-tag *,
 .app-sidebar button.is-active *,
 .project-tabs button.is-active * {
