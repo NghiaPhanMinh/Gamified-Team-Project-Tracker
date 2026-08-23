@@ -2021,17 +2021,34 @@ select:focus-visible {
   gap: 1rem;
 }
 
+/* Light Mode (Default) - Custom Framework Builder & Labels */
+.custom-framework-builder {
+  background: var(--color-cream, #fffec9);
+  color: #101517;
+  border: 3px solid #101517;
+}
+
 .custom-framework-builder label,
 .framework-basics label,
-.custom-phase-fields label,
-:root[data-theme="dark"] .custom-framework-builder label,
-:root[data-theme="dark"] .framework-basics label,
-:root[data-theme="dark"] .custom-phase-fields label {
+.custom-phase-fields label {
   display: grid;
   align-content: start;
   gap: 0.45rem;
   font-size: 0.88rem !important;
   font-weight: 800 !important;
+  color: #101517 !important;
+}
+
+/* Dark Mode - Custom Framework Builder & Labels */
+:root[data-theme="dark"] .custom-framework-builder {
+  background: var(--color-surface, #101517);
+  color: #ffffff;
+  border: 3px solid var(--color-text, #ffffff);
+}
+
+:root[data-theme="dark"] .custom-framework-builder label,
+:root[data-theme="dark"] .framework-basics label,
+:root[data-theme="dark"] .custom-phase-fields label {
   color: #ffffff !important;
 }
 
@@ -2094,7 +2111,17 @@ select:focus-visible {
   list-style: none;
 }
 
-.custom-phase-editor,
+/* Phase Cards: Solid WHITE in Light Mode */
+.custom-phase-editor {
+  padding: 1.25rem !important;
+  border: 3px solid #101517 !important;
+  border-radius: 1.25rem !important;
+  background: #ffffff !important;
+  color: #101517 !important;
+  box-shadow: 4px 4px 0 #101517 !important;
+}
+
+/* Phase Cards: Dark Navy in Dark Mode */
 :root[data-theme="dark"] .custom-phase-editor {
   padding: 1.25rem !important;
   border: 3px solid var(--color-pink, #ff8ae7) !important;
