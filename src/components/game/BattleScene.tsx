@@ -1703,12 +1703,12 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     });
   }, [workspace?.milestones, startStr, deadlineStr]);
 
+  const funnyBossName = useMemo(() => getFunnyName(BOSS_FUNNY_NAMES, state?.project._id || "boss"), [state?.project._id]);
+  const funnyVillageName = useMemo(() => getFunnyName(VILLAGE_FUNNY_NAMES, state?.project._id || "village"), [state?.project._id]);
+
   if (state === undefined) {
     return <section className="battle-loading" aria-busy="true">Preparing the battle scene…</section>;
   }
-
-  const funnyBossName = useMemo(() => getFunnyName(BOSS_FUNNY_NAMES, state?.project._id || "boss"), [state?.project._id]);
-  const funnyVillageName = useMemo(() => getFunnyName(VILLAGE_FUNNY_NAMES, state?.project._id || "village"), [state?.project._id]);
 
   const rawRemainingHp = testDragonHpOverride !== null ? testDragonHpOverride : state.remainingHp;
   const hpPercent = state.maximumHp === 0 ? 100 : Math.round((rawRemainingHp / state.maximumHp) * 100);
