@@ -483,22 +483,26 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
         </div>
       </header>
 
+      <nav className="project-tabs" aria-label="Project sections">
+        {PROJECT_TABS.map((tab) => <button key={tab.value} type="button" className={activeTab === tab.value ? "is-active" : ""} onClick={() => setActiveTab(tab.value)}>{tab.label}</button>)}
+      </nav>
+
       {overdueTasks.length > 0 || inactiveMembers.length > 0 ? (
-        <aside className="room-risk-banner" style={{ margin: "0.75rem 0", padding: "0.85rem 1.15rem", borderRadius: "12px", background: "color-mix(in srgb, #ef4444 12%, var(--color-surface))", border: "1.5px solid #ef4444", color: "var(--color-text)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem" }}>
+        <aside className="room-risk-banner" style={{ margin: "0.5rem 0 0.75rem", padding: "0.65rem 1rem", borderRadius: "12px", background: "color-mix(in srgb, #ef4444 12%, var(--color-surface))", border: "1.5px solid #ef4444", color: "var(--color-text)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.6rem" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-            <span style={{ fontSize: "1.2rem" }}>🚨</span>
+            <span style={{ fontSize: "1.1rem" }}>🚨</span>
             <div>
-              <strong style={{ fontSize: "0.92rem", display: "block" }}>
+              <strong style={{ fontSize: "0.9rem", display: "block" }}>
                 Attention Required: {overdueTasks.length ? `${overdueTasks.length} overdue task(s)` : ""} {overdueTasks.length && inactiveMembers.length ? " · " : ""} {inactiveMembers.length ? `${inactiveMembers.length} member(s) inactive (7+ days)` : ""}
               </strong>
-              <small style={{ opacity: 0.85 }}>Overdue tasks reduce Village Defense HP by 25% each.</small>
+              <small style={{ opacity: 0.85, fontSize: "0.8rem" }}>Overdue tasks reduce Village Defense HP by 25% each.</small>
             </div>
           </div>
           {workspace.canManageProject && overdueTasks.length > 0 ? (
             <button
               className="quiet-button"
               type="button"
-              style={{ fontWeight: 800, textDecoration: "underline" }}
+              style={{ fontWeight: 800, textDecoration: "underline", fontSize: "0.85rem" }}
               onClick={() => setActiveTab("tasks")}
             >
               Manage Overdue Tasks
@@ -506,10 +510,6 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
           ) : null}
         </aside>
       ) : null}
-
-      <nav className="project-tabs" aria-label="Project sections">
-        {PROJECT_TABS.map((tab) => <button key={tab.value} type="button" className={activeTab === tab.value ? "is-active" : ""} onClick={() => setActiveTab(tab.value)}>{tab.label}</button>)}
-      </nav>
       {error ? <p className="form-error" role="alert">{error}</p> : null}
       {isSaving ? <p className="workspace-saving" role="status">Saving changes…</p> : null}
 
