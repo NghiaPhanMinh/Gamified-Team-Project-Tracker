@@ -1124,3 +1124,46 @@ export const chooseReviewer = mutation({
     return task._id;
   },
 });
+
+export const releaseOverdueTask = mutation({
+  args: { taskId: v.id("tasks") },
+  handler: async (ctx, args) => {
+    const task = await ctx.db.get(args.taskId);
+    if (!task) throw new Error("This task no longer exists.");
+    const { project, profile } = await requireProjectWriteAccess(ctx, task.projectId);
+
+    if (project.creatorProfileId !== profile._id) {
+      throw new Error("Only the room creator can release an overdue task back to the team.");
+    }
+
+    if (task.status === "completed" || task.status === "verified") {
+      throw new Error("Completed tasks cannot be released.");
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(task._id, {
+      isOpenForClaiming: true,
+      assignmentState: "open",
+      acceptanceStatus: "accepted",
+      reviewerProfileId: undefined,
+      updatedAt: now,
+    });
+
+    await ctx.db.insert("activityLogs", {
+      teamId: project.teamId,
+      projectId: project._id,
+      actorProfileId: profile._id,
+      action: "task_reassigned",
+      metadata: {
+        projectId: project._id,
+        taskId: task._id,
+        taskTitle: task.title,
+        previousOwnerProfileId: task.primaryOwnerProfileId,
+      },
+      createdAt: now,
+    });
+
+    return task._id;
+  },
+});
+

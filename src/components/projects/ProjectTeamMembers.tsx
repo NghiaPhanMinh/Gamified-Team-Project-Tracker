@@ -116,6 +116,8 @@ export function ProjectTeamMembers({ projectId }: { projectId: Id<"projects"> })
     }), "The meeting candidate could not be created.");
   }
 
+  const battleState = useQuery(api.battle.getState, { projectId });
+
   if (!data) return <section className="team-members-tab" aria-busy="true">Loading team members…</section>;
   const finalPlan = data.plans.find((plan) => plan.status === "selected");
 
@@ -126,19 +128,30 @@ export function ProjectTeamMembers({ projectId }: { projectId: Id<"projects"> })
       {finalPlan ? <aside className="final-meeting-overlay" aria-label="Final meeting selected"><strong>Final meeting selected</strong><span>{DAYS[finalPlan.dayOfWeek]} · {timeLabel(finalPlan.startMinute)} · {finalPlan.durationMinutes} min · {finalPlan.meetingMode ?? "online"}</span></aside> : null}
 
       <div className="member-profile-grid">
-        {data.members.map((member) => <article key={member.profileId} className="member-profile-card">
-          <CharacterAvatar
-            fill={member.characterFill}
-            outline={member.characterOutline}
-            spellType={member.spellType}
-            name={member.displayName}
-            imageUrl={member.imageUrl}
-            size="md"
-          />
-          <div><strong>{member.displayName}</strong><small>{member.weeklyCapacity ?? "?"}h/week · {member.assignedTaskCount} assigned · {member.reviewTaskCount} reviews</small></div>
-          <div><small>General skills</small><div className="skill-chip-list">{member.skills.length ? member.skills.map((skill, index) => <span key={skill} className="member-skill-chip" style={skillChipStyle(index)}>{skill}</span>) : <span className="member-skill-chip is-empty">None saved</span>}</div></div>
-          <div><small>Software skills</small><div className="skill-chip-list">{member.softwareSkills.length ? member.softwareSkills.map((skill, index) => <span key={skill} className="member-skill-chip" style={skillChipStyle(member.skills.length + index)}>{skill}</span>) : <span className="member-skill-chip is-empty">None saved</span>}</div></div>
-        </article>)}
+        {data.members.map((member) => {
+          const isInactive = battleState?.members.find((m) => m.profileId === member.profileId)?.isInactive7Days;
+          return (
+            <article key={member.profileId} className="member-profile-card">
+              <CharacterAvatar
+                fill={member.characterFill}
+                outline={member.characterOutline}
+                spellType={member.spellType}
+                name={member.displayName}
+                imageUrl={member.imageUrl}
+                size="md"
+              />
+              <div>
+                <strong>
+                  {member.displayName}
+                  {isInactive ? <span className="member-inactive-badge" style={{ marginLeft: "8px", padding: "2px 8px", borderRadius: "999px", background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid #ef4444", fontSize: "0.75rem", fontWeight: 800 }}>⚠️ Inactive (7+ days)</span> : null}
+                </strong>
+                <small>{member.weeklyCapacity ?? "?"}h/week · {member.assignedTaskCount} assigned · {member.reviewTaskCount} reviews</small>
+              </div>
+              <div><small>General skills</small><div className="skill-chip-list">{member.skills.length ? member.skills.map((skill, index) => <span key={skill} className="member-skill-chip" style={skillChipStyle(index)}>{skill}</span>) : <span className="member-skill-chip is-empty">None saved</span>}</div></div>
+              <div><small>Software skills</small><div className="skill-chip-list">{member.softwareSkills.length ? member.softwareSkills.map((skill, index) => <span key={skill} className="member-skill-chip" style={skillChipStyle(member.skills.length + index)}>{skill}</span>) : <span className="member-skill-chip is-empty">None saved</span>}</div></div>
+            </article>
+          );
+        })}
       </div>
 
       <section className="availability-editor" aria-labelledby="availability-title">

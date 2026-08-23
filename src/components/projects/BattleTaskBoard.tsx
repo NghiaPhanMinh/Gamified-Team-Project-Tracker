@@ -17,6 +17,7 @@ type BattleTaskBoardProps = {
   onClaim: (taskId: string) => void;
   onAccept: (taskId: string) => void;
   onDecline: (taskId: string) => void;
+  onReleaseOverdue?: (taskId: string) => void;
 };
 
 const STATUS_LABELS: Record<BattleTaskStatus, string> = {
@@ -40,6 +41,7 @@ function BattleTaskNote({
   onClaim,
   onAccept,
   onDecline,
+  onReleaseOverdue,
 }: {
   task: BattleTaskSummary;
   canManageProject: boolean;
@@ -49,8 +51,14 @@ function BattleTaskNote({
   onClaim: (taskId: string) => void;
   onAccept: (taskId: string) => void;
   onDecline: (taskId: string) => void;
+  onReleaseOverdue?: (taskId: string) => void;
 }) {
   const action = getBattleTaskAction(task, canManageProject);
+  const isOverdue = Boolean(
+    task.dueDate &&
+    new Date(`${task.dueDate}T23:59:59Z`).getTime() < Date.now() &&
+    !["completed", "verified"].includes(task.status)
+  );
 
   return (
     <article className={`battle-task-note task-${task.status} ${task.isMine ? "is-mine" : ""}`}>
@@ -74,7 +82,10 @@ function BattleTaskNote({
           ) : null}
           {task.owner}{tasksLocked && !task.isOpenForClaiming ? <span aria-label="Task allocation locked"> 🔒</span> : null}
         </span>
-        <span className="battle-task-date">Due {task.dueDate}</span>
+        <span className="battle-task-date">
+          Due {task.dueDate}
+          {isOverdue ? <strong style={{ color: "#ef4444", marginLeft: "6px", fontWeight: 800 }}>🚨 Overdue</strong> : null}
+        </span>
         <span className="battle-task-reviewer">Reviewer: {task.reviewer}</span>
         <span className="battle-task-impact">Weight {task.weight} · {task.damage} DMG</span>
         <span className="battle-task-status">{STATUS_LABELS[task.status]}</span>
@@ -101,6 +112,19 @@ function BattleTaskNote({
         {action === "approve" ? (
           <button className="primary-button" type="button" onClick={() => onOpenDetails(task.id)}>Approve Completion</button>
         ) : null}
+        {isOverdue && canManageProject && !task.isOpenForClaiming ? (
+          <button
+            className="quiet-button"
+            type="button"
+            title="Release task back to team so active members can claim it"
+            onClick={(e) => {
+              e.stopPropagation();
+              onReleaseOverdue?.(task.id);
+            }}
+          >
+            Re-open to Team
+          </button>
+        ) : null}
         {action === "waiting_review" ? <span className="battle-task-waiting">{task.isReviewer ? REVIEW_WAITING_MESSAGE : "Waiting for Review"}</span> : null}
         {action === "waiting_approval" ? <span className="battle-task-waiting">Waiting for Approval</span> : null}
         {action === "complete" ? <span className="battle-task-complete">Completed ✓</span> : null}
@@ -121,6 +145,7 @@ export function BattleTaskBoard({
   onClaim,
   onAccept,
   onDecline,
+  onReleaseOverdue,
 }: BattleTaskBoardProps) {
   const myTasks = tasks.filter((task) =>
     task.isMine &&
@@ -141,6 +166,7 @@ export function BattleTaskBoard({
       onClaim={onClaim}
       onAccept={onAccept}
       onDecline={onDecline}
+      onReleaseOverdue={onReleaseOverdue}
     />
   );
 

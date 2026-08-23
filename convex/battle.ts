@@ -118,6 +118,15 @@ export const getState = query({
             task.updatedAt >= startOfToday,
         );
         const memberDamage = memberDamageMap.get(member.profileId) ?? 0;
+        const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        const lastActivityAt = Math.max(
+          member.joinedAt ?? 0,
+          ...dailyPosts.filter((p) => p.authorProfileId === member.profileId && p.isValid).map((p) => p.createdAt),
+          ...uniqueEvents.filter((e) => e.attackerProfileId === member.profileId).map((e) => e.createdAt),
+          ...tasks.filter((t) => t.primaryOwnerProfileId === member.profileId).map((t) => t.updatedAt ?? 0),
+        );
+        const isInactive7Days = lastActivityAt > 0 && lastActivityAt < sevenDaysAgo;
+
         return {
           profileId: member.profileId,
           displayName: profileById.get(member.profileId)?.displayName ?? "Team member",
@@ -129,6 +138,8 @@ export const getState = query({
           damageDealt: memberDamage,
           targetHpShare: hpSharePerPlayer,
           isShareComplete: memberDamage >= hpSharePerPlayer,
+          lastActivityAt,
+          isInactive7Days,
         };
       }),
       events: uniqueEvents.map((event) => ({

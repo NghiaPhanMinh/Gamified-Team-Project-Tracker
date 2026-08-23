@@ -146,8 +146,23 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
   const updateBrief = useMutation(api.projects.updateBrief);
   const setProjectArchived = useMutation(api.projects.setArchived);
   const lockTasks = useMutation(api.projects.lockTasks);
+  const releaseOverdueTask = useMutation(api.tasks.releaseOverdueTask);
+  const battleState = useQuery(api.battle.getState, { projectId: workspace.project._id });
 
   const [activeTab, setActiveTab] = useState<ProjectTab>(initialTab);
+
+  const overdueTasks = useMemo(() => {
+    return workspace.tasks.filter((t) => {
+      return t.dueDate &&
+        new Date(`${t.dueDate}T23:59:59Z`).getTime() < Date.now() &&
+        !["completed", "verified"].includes(t.status);
+    });
+  }, [workspace.tasks]);
+
+  const inactiveMembers = useMemo(() => {
+    if (!battleState?.members) return [];
+    return battleState.members.filter((m) => m.isInactive7Days);
+  }, [battleState?.members]);
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<Id<"tasks"> | null>(null);
   const [openBattleTaskId, setOpenBattleTaskId] = useState<Id<"tasks"> | null>(null);
@@ -468,6 +483,30 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
         </div>
       </header>
 
+      {overdueTasks.length > 0 || inactiveMembers.length > 0 ? (
+        <aside className="room-risk-banner" style={{ margin: "0.75rem 0", padding: "0.85rem 1.15rem", borderRadius: "12px", background: "color-mix(in srgb, #ef4444 12%, var(--color-surface))", border: "1.5px solid #ef4444", color: "var(--color-text)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+            <span style={{ fontSize: "1.2rem" }}>🚨</span>
+            <div>
+              <strong style={{ fontSize: "0.92rem", display: "block" }}>
+                Attention Required: {overdueTasks.length ? `${overdueTasks.length} overdue task(s)` : ""} {overdueTasks.length && inactiveMembers.length ? " · " : ""} {inactiveMembers.length ? `${inactiveMembers.length} member(s) inactive (7+ days)` : ""}
+              </strong>
+              <small style={{ opacity: 0.85 }}>Overdue tasks reduce Village Defense HP by 25% each.</small>
+            </div>
+          </div>
+          {workspace.canManageProject && overdueTasks.length > 0 ? (
+            <button
+              className="quiet-button"
+              type="button"
+              style={{ fontWeight: 800, textDecoration: "underline" }}
+              onClick={() => setActiveTab("tasks")}
+            >
+              Manage Overdue Tasks
+            </button>
+          ) : null}
+        </aside>
+      ) : null}
+
       <nav className="project-tabs" aria-label="Project sections">
         {PROJECT_TABS.map((tab) => <button key={tab.value} type="button" className={activeTab === tab.value ? "is-active" : ""} onClick={() => setActiveTab(tab.value)}>{tab.label}</button>)}
       </nav>
@@ -656,6 +695,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
             onClaim={(taskId) => void runAction(() => claimTask({ taskId: taskId as Id<"tasks"> }), "The task could not be claimed.")}
             onAccept={(taskId) => void runAction(() => acceptTask({ taskId: taskId as Id<"tasks"> }), "The request could not be accepted.")}
             onDecline={(taskId) => void runAction(() => declineTask({ taskId: taskId as Id<"tasks"> }), "The request could not be declined.")}
+            onReleaseOverdue={(taskId) => void runAction(() => releaseOverdueTask({ taskId: taskId as Id<"tasks"> }), "The task could not be released.")}
           />
 
           <section className="progress-feed-section">
