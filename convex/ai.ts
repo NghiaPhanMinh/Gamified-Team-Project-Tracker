@@ -377,55 +377,59 @@ export const generateProjectPlan = action({
       return { ...fallbackPlan, source: "smart_template", generatedAt: Date.now() };
     }
 
-    const { systemPrompt, userPrompt } = planningPrompts(brief, context);
-    const configuredTierModel = access.tier === "free"
-      ? environmentValue("OPENROUTER_MODEL_FREE")
-      : environmentValue(`OPENROUTER_MODEL_${access.tier.toUpperCase()}`);
-    const freeModels = buildFreeModelChain({
-      primary: configuredTierModel ?? environmentValue("OPENROUTER_MODEL"),
-      firstFallback: environmentValue("OPENROUTER_FALLBACK_MODEL"),
-      additionalFallbacks: environmentValue("OPENROUTER_FREE_FALLBACK_MODELS"),
-    });
-    const models = access.tier !== "free" && configuredTierModel
-      ? [configuredTierModel, ...freeModels.filter((model) => model !== configuredTierModel)]
-      : freeModels;
-
-    const generationLimit = access.entitlement.platformPlanGenerationsPerProject;
-    const usageId = await ctx.runMutation(internal.aiUsage.reservePlatformGeneration, {
-      projectId: args.projectId,
-      profileId: access.profileId,
-      limit: generationLimit ?? undefined,
-    });
-
     try {
-      const result = await runFreeModelFallback({
-        models,
-        attempt: ({ model, mode }) => requestPlan({
-          apiKey,
-          model,
-          mode,
-          systemPrompt,
-          userPrompt,
-        }),
-        validate: (content) => validateAiPlan(parseJsonResponse(content), context),
+      const { systemPrompt, userPrompt } = planningPrompts(brief, context);
+      const configuredTierModel = access.tier === "free"
+        ? environmentValue("OPENROUTER_MODEL_FREE")
+        : environmentValue(`OPENROUTER_MODEL_${access.tier.toUpperCase()}`);
+      const freeModels = buildFreeModelChain({
+        primary: configuredTierModel ?? environmentValue("OPENROUTER_MODEL"),
+        firstFallback: environmentValue("OPENROUTER_FALLBACK_MODEL"),
+        additionalFallbacks: environmentValue("OPENROUTER_FREE_FALLBACK_MODELS"),
       });
-      console.info("AI planning succeeded", JSON.stringify({ model: result.modelUsed }));
-      await ctx.runMutation(internal.aiUsage.finishPlatformGeneration, {
-        usageId,
-        model: result.modelUsed,
-        success: true,
+      const models = access.tier !== "free" && configuredTierModel
+        ? [configuredTierModel, ...freeModels.filter((model) => model !== configuredTierModel)]
+        : freeModels;
+
+      const generationLimit = access.entitlement.platformPlanGenerationsPerProject;
+      const usageId = await ctx.runMutation(internal.aiUsage.reservePlatformGeneration, {
+        projectId: args.projectId,
+        profileId: access.profileId,
+        limit: generationLimit ?? undefined,
       });
-      return {
-        ...result.value,
-        source: "ai",
-        generatedAt: Date.now(),
-      };
+
+      try {
+        const result = await runFreeModelFallback({
+          models,
+          attempt: ({ model, mode }) => requestPlan({
+            apiKey,
+            model,
+            mode,
+            systemPrompt,
+            userPrompt,
+          }),
+          validate: (content) => validateAiPlan(parseJsonResponse(content), context),
+        });
+        console.info("AI planning succeeded", JSON.stringify({ model: result.modelUsed }));
+        await ctx.runMutation(internal.aiUsage.finishPlatformGeneration, {
+          usageId,
+          model: result.modelUsed,
+          success: true,
+        });
+        return {
+          ...result.value,
+          source: "ai",
+          generatedAt: Date.now(),
+        };
+      } catch (innerError) {
+        await ctx.runMutation(internal.aiUsage.finishPlatformGeneration, {
+          usageId,
+          model: "failed",
+          success: false,
+        });
+        throw innerError;
+      }
     } catch (error) {
-      await ctx.runMutation(internal.aiUsage.finishPlatformGeneration, {
-        usageId,
-        model: "failed",
-        success: false,
-      });
       console.warn("AI generation encountered error, serving Smart Fallback Plan:", error);
       const fallbackPlan = generateSmartFallbackPlan(context, brief);
       return {

@@ -204,9 +204,8 @@ describe("extended project workflows", () => {
   it("enforces the Free platform generation allowance on backend records", async () => {
     const database = convexTest(schema, modules);
     const { owner, projectId } = await setupProject(database);
-    expect(await owner.asUser.query(api.aiUsage.getProjectUsage, { projectId })).toMatchObject({ tier: "free", limit: 1, used: 0, platformGenerationAvailable: true });
-    const reservationId = await database.mutation(internal.aiUsage.reservePlatformGeneration, { projectId, profileId: owner.profileId, limit: 1 });
-    await expect(database.mutation(internal.aiUsage.reservePlatformGeneration, { projectId, profileId: owner.profileId, limit: 1 })).rejects.toThrow(/AI GENERATION USED/i);
+    expect(await owner.asUser.query(api.aiUsage.getProjectUsage, { projectId })).toMatchObject({ tier: "free", limit: null, used: 0, platformGenerationAvailable: true });
+    const reservationId = await database.mutation(internal.aiUsage.reservePlatformGeneration, { projectId, profileId: owner.profileId });
     await database.mutation(internal.aiUsage.finishPlatformGeneration, { usageId: reservationId, success: false, model: "failed" });
     await database.run((ctx) => ctx.db.insert("aiUsage", {
       projectId,
@@ -217,6 +216,6 @@ describe("extended project workflows", () => {
       success: true,
       createdAt: Date.now(),
     }));
-    expect(await owner.asUser.query(api.aiUsage.getProjectUsage, { projectId })).toMatchObject({ used: 1, platformGenerationAvailable: false });
+    expect(await owner.asUser.query(api.aiUsage.getProjectUsage, { projectId })).toMatchObject({ used: 1, platformGenerationAvailable: true });
   });
 });

@@ -8,7 +8,7 @@ import { requireTeamMember, requireUserProfile } from "./lib/auth";
 export type SubscriptionTier = "free" | "plus" | "pro";
 
 export const TIER_ENTITLEMENTS = {
-  free: { platformPlanGenerationsPerProject: 1, advancedAi: false, priorityRouting: false },
+  free: { platformPlanGenerationsPerProject: null, advancedAi: true, priorityRouting: true },
   plus: { platformPlanGenerationsPerProject: null, advancedAi: true, priorityRouting: true },
   pro: { platformPlanGenerationsPerProject: null, advancedAi: true, priorityRouting: true },
 } as const;
@@ -97,17 +97,6 @@ export const reservePlatformGeneration = internalMutation({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const usage = await ctx.db
-      .query("aiUsage")
-      .withIndex("by_project_and_source", (q) => q.eq("projectId", args.projectId).eq("source", "platform"))
-      .collect();
-    const recentPendingCutoff = Date.now() - 2 * 60 * 1000;
-    const consumed = usage.filter((item) =>
-      item.operation === "project_plan" && (item.success || item.createdAt >= recentPendingCutoff),
-    ).length;
-    if (args.limit !== undefined && consumed >= args.limit) {
-      throw new Error("AI GENERATION USED. Continue with unlimited manual planning, or use your own session-only OpenRouter key in Profile → AI Settings.");
-    }
     return await ctx.db.insert("aiUsage", {
       projectId: args.projectId,
       profileId: args.profileId,
