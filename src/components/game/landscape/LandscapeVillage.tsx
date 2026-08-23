@@ -36,7 +36,7 @@ export function LandscapeVillage({
         style={{
           position: "absolute",
           left: `calc(135px + ${villageHpBarPos.x}px)`,
-          top: `calc(105px + ${villageHpBarPos.y}px)`,
+          top: `calc(95px + ${villageHpBarPos.y}px)`,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -153,45 +153,40 @@ export function LandscapeVillage({
           </g>
         </defs>
 
-        {/* --- 3D ISOMETRIC WALLED MEDIEVAL COURTYARD VILLAGE (x = 20px to 260px) --- */}
+        {/* --- 3D ISOMETRIC WALLED MEDIEVAL VILLAGE (Shorter Compact Walls & Grass Floor) --- */}
         <g transform="translate(15, 0)">
 
-          {/* 1. COURTYARD STONE/COBBLESTONE FOUNDATION FLOOR (Perspective Looking Down) */}
-          <polygon points="18,190 236,190 252,315 2,315" fill="#334155" />
-          <polygon points="22,192 232,192 246,310 8,310" fill="#475569" opacity="0.45" />
+          {/* 1. COURTYARD GRASS FLOOR (Seamless Natural Grass with Subtle Pathway Accent) */}
+          <polygon points="20,200 234,200 244,265 10,265" fill="#17a738" />
+          <polygon points="24,202 230,202 238,260 16,260" fill="#1fb843" opacity="0.25" />
 
-          {/* Courtyard Flagstone Pattern Lines */}
-          <line x1="20" y1="225" x2="238" y2="225" stroke="#1e293b" strokeWidth="1" opacity="0.4" />
-          <line x1="15" y1="255" x2="242" y2="255" stroke="#1e293b" strokeWidth="1" opacity="0.4" />
-          <line x1="10" y1="285" x2="246" y2="285" stroke="#1e293b" strokeWidth="1" opacity="0.4" />
-
-          {/* 2. TOP BACK PALISADE WALL */}
+          {/* 2. TOP BACK PALISADE WALL (Shorter, y = 200) */}
           {Array.from({ length: 20 }).map((_, i) => (
-            <use key={`back-wall-${i}`} href="#palisade-log" x={24 + i * 10} y="185" />
+            <use key={`back-wall-${i}`} href="#palisade-log" x={24 + i * 10} y="195" />
           ))}
 
-          {/* CORNER WATCHTOWER 1: Top-Left (Upper Horizon) */}
-          <use href="#medieval-watchtower" x="0" y="155" />
+          {/* CORNER WATCHTOWER 1: Top-Left */}
+          <use href="#medieval-watchtower" x="0" y="170" />
 
-          {/* CORNER WATCHTOWER 2: Top-Right (Upper Horizon) */}
-          <use href="#medieval-watchtower" x="220" y="155" />
+          {/* CORNER WATCHTOWER 2: Top-Right */}
+          <use href="#medieval-watchtower" x="220" y="170" />
 
-          {/* 3. LEFT PALISADE SIDE WALL (Connecting Back to Front) */}
-          {Array.from({ length: 9 }).map((_, i) => (
-            <use key={`left-wall-${i}`} href="#palisade-log" x={16 - i * 1.5} y={195 + i * 11} />
+          {/* 3. LEFT PALISADE SIDE WALL (Shorter, y = 205 to 245) */}
+          {Array.from({ length: 5 }).map((_, i) => (
+            <use key={`left-wall-${i}`} href="#palisade-log" x={15 - i * 1.2} y={205 + i * 9} />
           ))}
 
-          {/* 4. RIGHT PALISADE SIDE WALL (Connecting Back to Front) */}
-          {Array.from({ length: 9 }).map((_, i) => (
-            <use key={`right-wall-${i}`} href="#palisade-log" x={232 + i * 1.5} y={195 + i * 11} />
+          {/* 4. RIGHT PALISADE SIDE WALL (Shorter, y = 205 to 245) */}
+          {Array.from({ length: 5 }).map((_, i) => (
+            <use key={`right-wall-${i}`} href="#palisade-log" x={233 + i * 1.2} y={205 + i * 9} />
           ))}
 
-          {/* 5. MEDIEVAL BUILDINGS (Inside the Enclosed Courtyard, Fully Visible) */}
+          {/* 5. MEDIEVAL BUILDINGS (Inside Courtyard, Sitting on Green Grass) */}
 
           {/* Building 1: Left Medieval Cottage */}
-          <g transform="translate(36, 175)">
+          <g transform="translate(36, 170)">
             {/* Stone Ground Floor */}
-            <rect x="0" y="32" width="46" height="36" fill="#64748b" />
+            <rect x="0" y="32" width="46" height="34" fill="#64748b" />
             {/* Timber Framing Half-Timbered Upper Gable */}
             <polygon points="-4,34 23,8 50,34" fill="#fef3c7" />
             {/* Timber Diagonal Cross Beams */}
@@ -201,16 +196,16 @@ export function LandscapeVillage({
             <polygon points="-6,34 23,6 52,34" fill="#feaa01" />
             <polygon points="23,6 52,34 23,34" fill="#ea580c" opacity="0.35" />
             {/* Wooden Door */}
-            <rect x="17" y="44" width="12" height="24" rx="2" fill="#78350f" />
-            <circle cx="26" cy="56" r="1.5" fill="#facc15" />
+            <rect x="17" y="44" width="12" height="22" rx="2" fill="#78350f" />
+            <circle cx="26" cy="54" r="1.5" fill="#facc15" />
             {/* Lantern Window */}
             <rect x="6" y="42" width="8" height="8" rx="1" fill="#fde047" />
           </g>
 
           {/* Building 2: Center Medieval Town Hall / Great Hall (Grand & Tall) */}
-          <g transform="translate(94, 140)">
+          <g transform="translate(94, 135)">
             {/* Stone Base */}
-            <rect x="0" y="40" width="68" height="56" fill="#475569" />
+            <rect x="0" y="40" width="68" height="54" fill="#475569" />
             {/* Stone Seam Lines */}
             <line x1="0" y1="65" x2="68" y2="65" stroke="#334155" strokeWidth="1" />
             {/* Half Timbered Upper Level */}
@@ -224,15 +219,15 @@ export function LandscapeVillage({
             <polygon points="-6,18 34,-12 74,18" fill="#feaa01" />
             <polygon points="34,-12 74,18 34,18" fill="#ea580c" opacity="0.35" />
             {/* Arched Double Timber Door */}
-            <path d="M 26 96 V 68 A 8 8 0 0 1 42 68 V 96 Z" fill="#78350f" />
-            <line x1="34" y1="62" x2="34" y2="96" stroke="#5c2406" strokeWidth="1" />
+            <path d="M 26 94 V 68 A 8 8 0 0 1 42 68 V 94 Z" fill="#78350f" />
+            <line x1="34" y1="62" x2="34" y2="94" stroke="#5c2406" strokeWidth="1" />
             {/* Upper Lead Windows */}
             <rect x="24" y="22" width="8" height="10" rx="1" fill="#fde047" />
             <rect x="36" y="22" width="8" height="10" rx="1" fill="#fde047" />
           </g>
 
           {/* Building 3: Right Medieval Blacksmith & Forge */}
-          <g transform="translate(166, 178)">
+          <g transform="translate(166, 172)">
             {/* Stone Chimney */}
             <rect x="26" y="2" width="11" height="28" fill="#475569" />
             {/* Gentle Smoke from Chimney */}
@@ -244,91 +239,89 @@ export function LandscapeVillage({
               </g>
             ) : null}
             {/* Forge Body */}
-            <rect x="0" y="28" width="44" height="38" fill="#64748b" />
+            <rect x="0" y="28" width="44" height="36" fill="#64748b" />
             {/* All-Orange Forge Roof */}
             <polygon points="-4,30 22,8 48,30" fill="#feaa01" />
             <polygon points="22,8 48,30 22,30" fill="#ea580c" opacity="0.35" />
             {/* Open Forge Hearth Glow */}
-            <rect x="14" y="44" width="16" height="22" rx="2" fill="#78350f" />
-            <circle cx="22" cy="55" r="5" fill="#f97316" />
-            <circle cx="22" cy="55" r="3" fill="#fde047" />
+            <rect x="14" y="44" width="16" height="20" rx="2" fill="#78350f" />
+            <circle cx="22" cy="54" r="5" fill="#f97316" />
+            <circle cx="22" cy="54" r="3" fill="#fde047" />
           </g>
 
-          {/* 6. FRONT PALISADE WALL & LOWER FRONT GATE (y = 280 to 320) */}
+          {/* 6. FRONT PALISADE WALL & LOWER FRONT GATE (Shorter, y = 245 to 280) */}
           
           {/* Front Left Fence */}
-          <use href="#palisade-log" x="20" y="295" />
-          <use href="#palisade-log" x="30" y="295" />
-          <use href="#palisade-log" x="40" y="295" />
-          <use href="#palisade-log" x="50" y="295" />
-          <use href="#palisade-log" x="60" y="295" />
-          <use href="#palisade-log" x="70" y="295" />
+          <use href="#palisade-log" x="20" y="248" />
+          <use href="#palisade-log" x="30" y="248" />
+          <use href="#palisade-log" x="40" y="248" />
+          <use href="#palisade-log" x="50" y="248" />
+          <use href="#palisade-log" x="60" y="248" />
+          <use href="#palisade-log" x="70" y="248" />
 
           {/* Front Right Fence */}
-          <use href="#palisade-log" x="160" y="295" />
-          <use href="#palisade-log" x="170" y="295" />
-          <use href="#palisade-log" x="180" y="295" />
-          <use href="#palisade-log" x="190" y="295" />
-          <use href="#palisade-log" x="200" y="295" />
-          <use href="#palisade-log" x="210" y="295" />
-          <use href="#palisade-log" x="220" y="295" />
+          <use href="#palisade-log" x="160" y="248" />
+          <use href="#palisade-log" x="170" y="248" />
+          <use href="#palisade-log" x="180" y="248" />
+          <use href="#palisade-log" x="190" y="248" />
+          <use href="#palisade-log" x="200" y="248" />
+          <use href="#palisade-log" x="210" y="248" />
+          <use href="#palisade-log" x="220" y="248" />
 
           {/* Horizontal Fence Cross Support */}
-          <rect x="18" y="310" width="65" height="5" fill="#451a03" />
-          <rect x="158" y="310" width="65" height="5" fill="#451a03" />
+          <rect x="18" y="260" width="65" height="4" fill="#451a03" />
+          <rect x="158" y="260" width="65" height="4" fill="#451a03" />
 
-          {/* --- MEDIEVAL GREY BRICK TEXTURED GATE (x = 85 to 160, y = 275 to 335) --- */}
-          <g transform="translate(85, 275)">
+          {/* --- MEDIEVAL GREY BRICK TEXTURED GATE (Shorter Gate, y = 230 to 280) --- */}
+          <g transform="translate(85, 230)">
             {/* Left Brick Gate Post */}
-            <rect x="0" y="0" width="22" height="66" fill="#475569" />
+            <rect x="0" y="0" width="22" height="52" fill="#475569" />
             {/* Left Brick Seams */}
-            <line x1="0" y1="12" x2="22" y2="12" stroke="#334155" strokeWidth="1" />
-            <line x1="0" y1="24" x2="22" y2="24" stroke="#334155" strokeWidth="1" />
-            <line x1="0" y1="36" x2="22" y2="36" stroke="#334155" strokeWidth="1" />
-            <line x1="0" y1="48" x2="22" y2="48" stroke="#334155" strokeWidth="1" />
-            <line x1="0" y1="60" x2="22" y2="60" stroke="#334155" strokeWidth="1" />
-            <line x1="11" y1="0" x2="11" y2="12" stroke="#334155" strokeWidth="1" />
-            <line x1="11" y1="24" x2="11" y2="36" stroke="#334155" strokeWidth="1" />
-            <line x1="11" y1="48" x2="11" y2="60" stroke="#334155" strokeWidth="1" />
+            <line x1="0" y1="10" x2="22" y2="10" stroke="#334155" strokeWidth="1" />
+            <line x1="0" y1="20" x2="22" y2="20" stroke="#334155" strokeWidth="1" />
+            <line x1="0" y1="30" x2="22" y2="30" stroke="#334155" strokeWidth="1" />
+            <line x1="0" y1="40" x2="22" y2="40" stroke="#334155" strokeWidth="1" />
+            <line x1="11" y1="0" x2="11" y2="10" stroke="#334155" strokeWidth="1" />
+            <line x1="11" y1="20" x2="11" y2="30" stroke="#334155" strokeWidth="1" />
+            <line x1="11" y1="40" x2="11" y2="50" stroke="#334155" strokeWidth="1" />
 
             {/* Right Brick Gate Post */}
-            <rect x="52" y="0" width="22" height="66" fill="#475569" />
+            <rect x="52" y="0" width="22" height="52" fill="#475569" />
             {/* Right Brick Seams */}
-            <line x1="52" y1="12" x2="74" y2="12" stroke="#334155" strokeWidth="1" />
-            <line x1="52" y1="24" x2="74" y2="24" stroke="#334155" strokeWidth="1" />
-            <line x1="52" y1="36" x2="74" y2="36" stroke="#334155" strokeWidth="1" />
-            <line x1="52" y1="48" x2="74" y2="48" stroke="#334155" strokeWidth="1" />
-            <line x1="52" y1="60" x2="74" y2="60" stroke="#334155" strokeWidth="1" />
-            <line x1="63" y1="0" x2="63" y2="12" stroke="#334155" strokeWidth="1" />
-            <line x1="63" y1="24" x2="63" y2="36" stroke="#334155" strokeWidth="1" />
-            <line x1="63" y1="48" x2="63" y2="60" stroke="#334155" strokeWidth="1" />
+            <line x1="52" y1="10" x2="74" y2="10" stroke="#334155" strokeWidth="1" />
+            <line x1="52" y1="20" x2="74" y2="20" stroke="#334155" strokeWidth="1" />
+            <line x1="52" y1="30" x2="74" y2="30" stroke="#334155" strokeWidth="1" />
+            <line x1="52" y1="40" x2="74" y2="40" stroke="#334155" strokeWidth="1" />
+            <line x1="63" y1="0" x2="63" y2="10" stroke="#334155" strokeWidth="1" />
+            <line x1="63" y1="20" x2="63" y2="30" stroke="#334155" strokeWidth="1" />
+            <line x1="63" y1="40" x2="63" y2="50" stroke="#334155" strokeWidth="1" />
 
             {/* Arched Stone Header Beam */}
-            <path d="M 0 10 Q 37 -10 74 10 L 74 0 Q 37 -18 0 0 Z" fill="#64748b" />
+            <path d="M 0 8 Q 37 -8 74 8 L 74 0 Q 37 -14 0 0 Z" fill="#64748b" />
 
             {/* Timber Portcullis Gate In Center */}
-            <rect x="22" y="8" width="30" height="58" fill="#1e293b" />
-            <line x1="28" y1="8" x2="28" y2="66" stroke="#78350f" strokeWidth="2" />
-            <line x1="37" y1="8" x2="37" y2="66" stroke="#78350f" strokeWidth="2" />
-            <line x1="46" y1="8" x2="46" y2="66" stroke="#78350f" strokeWidth="2" />
-            <line x1="22" y1="20" x2="52" y2="20" stroke="#78350f" strokeWidth="2" />
-            <line x1="22" y1="35" x2="52" y2="35" stroke="#78350f" strokeWidth="2" />
-            <line x1="22" y1="50" x2="52" y2="50" stroke="#78350f" strokeWidth="2" />
+            <rect x="22" y="6" width="30" height="46" fill="#1e293b" />
+            <line x1="28" y1="6" x2="28" y2="52" stroke="#78350f" strokeWidth="2" />
+            <line x1="37" y1="6" x2="37" y2="52" stroke="#78350f" strokeWidth="2" />
+            <line x1="46" y1="6" x2="46" y2="52" stroke="#78350f" strokeWidth="2" />
+            <line x1="22" y1="16" x2="52" y2="16" stroke="#78350f" strokeWidth="2" />
+            <line x1="22" y1="28" x2="52" y2="28" stroke="#78350f" strokeWidth="2" />
+            <line x1="22" y1="40" x2="52" y2="40" stroke="#78350f" strokeWidth="2" />
 
             {/* Climbing Green Vine Leaves on Brick Posts & Arch */}
-            <use href="#vine-cluster" x="-1" y="16" />
-            <use href="#vine-cluster" x="2" y="40" transform="scale(0.8)" />
+            <use href="#vine-cluster" x="-1" y="10" />
+            <use href="#vine-cluster" x="2" y="30" transform="scale(0.8)" />
             <use href="#vine-cluster" x="8" y="2" transform="scale(0.85)" />
             <use href="#vine-cluster" x="50" y="2" transform="scale(0.85)" />
-            <use href="#vine-cluster" x="53" y="18" />
-            <use href="#vine-cluster" x="55" y="44" transform="scale(0.85)" />
+            <use href="#vine-cluster" x="53" y="12" />
+            <use href="#vine-cluster" x="55" y="32" transform="scale(0.85)" />
           </g>
 
           {/* CORNER WATCHTOWER 3: Bottom-Left (Foreground) */}
-          <use href="#medieval-watchtower" x="-6" y="265" />
+          <use href="#medieval-watchtower" x="-6" y="225" />
 
           {/* CORNER WATCHTOWER 4: Bottom-Right (Foreground) */}
-          <use href="#medieval-watchtower" x="226" y="265" />
+          <use href="#medieval-watchtower" x="226" y="225" />
 
         </g>
       </svg>
