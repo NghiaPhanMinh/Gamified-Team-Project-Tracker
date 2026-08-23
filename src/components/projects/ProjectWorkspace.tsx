@@ -149,7 +149,9 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
   const releaseOverdueTask = useMutation(api.tasks.releaseOverdueTask);
   const battleState = useQuery(api.battle.getState, { projectId: workspace.project._id });
 
-  const [activeTab, setActiveTab] = useState<ProjectTab>(initialTab);
+  const [activeTab, setActiveTab] = useState<ProjectTab>(() =>
+    workspace.tasks.length === 0 ? "plan" : initialTab
+  );
 
   const overdueTasks = useMemo(() => {
     return workspace.tasks.filter((t) => {
@@ -527,12 +529,25 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
         </aside>
       ) : null}
       {error ? <p className="form-error" role="alert">{error}</p> : null}
-      {isSaving ? <p className="workspace-saving" role="status">Saving changes…</p> : null}
-
       {activeTab === "plan" ? (
         <div className="project-overview-flow project-plan-view">
+          {workspace.tasks.length === 0 ? (
+            <div className="new-project-ai-notice" style={{ margin: "0.5rem 0 1rem", padding: "1rem 1.25rem", borderRadius: "16px", background: "color-mix(in srgb, var(--color-yellow) 15%, var(--color-surface))", border: "2px solid var(--color-yellow)", color: "var(--color-text)" }}>
+              <strong style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "1.05rem", marginBottom: "0.25rem" }}>
+                <span>🚀</span> Welcome to your new project room!
+              </strong>
+              <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.9 }}>
+                AI is automatically generating a project plan from your description. Review the generated tasks, make any adjustments, and click <strong>Confirm &amp; Save Plan</strong> to officially start your project!
+              </p>
+            </div>
+          ) : null}
+
           {workspace.canManageProject ? (
-            <AIPlanningAssistant workspace={workspace} onUseTask={useAiTask} />
+            <AIPlanningAssistant
+              workspace={workspace}
+              onUseTask={useAiTask}
+              autoStart={workspace.tasks.length === 0}
+            />
           ) : null}
 
           <section className="project-plan-breakdown" aria-labelledby="project-plan-title">

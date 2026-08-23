@@ -16,17 +16,19 @@ export type AiTaskSuggestion = AiPlan["tasks"][number];
 type AIPlanningAssistantProps = {
   workspace: Workspace;
   onUseTask: (task: AiTaskSuggestion) => void;
+  autoStart?: boolean;
 };
 
 export function AIPlanningAssistant({
   workspace,
   onUseTask,
+  autoStart = false,
 }: AIPlanningAssistantProps) {
   const generateProjectPlan = useAction(api.ai.generateProjectPlan);
   const generateProjectPlanWithKey = useAction(api.ai.generateProjectPlanWithKey);
   const savePlan = useMutation(api.aiDrafts.savePlan);
   const usage = useQuery(api.aiUsage.getProjectUsage, { projectId: workspace.project._id });
-  const [brief, setBrief] = useState(workspace.project.description);
+  const [brief, setBrief] = useState(workspace.project.description || workspace.project.title);
   const [draft, setDraft] = useState<AiPlan | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +36,7 @@ export function AIPlanningAssistant({
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [retryNotice, setRetryNotice] = useState<string | null>(null);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasAutoStartedRef = useRef(false);
   const byokActive = getByokSession() !== null;
 
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -93,22 +96,21 @@ export function AIPlanningAssistant({
     }
   }
 
-  async function handleGenerate(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function runGeneration(briefText: string) {
     setError(null);
     setRetryNotice(null);
     setIsGenerating(true);
 
     trackEvent("brief_submitted", {
-      brief_length: brief.length,
+      brief_length: briefText.length,
     });
     trackEvent("ai_prompt_submitted", {
       prompt_type: "initial_brief",
-      prompt_length: brief.length,
+      prompt_length: briefText.length,
     });
 
     try {
-      const result = await generateDraft(brief);
+      const result = await generateDraft(briefText);
       trackEvent("ai_plan_generated", {
         task_count: result.tasks.length,
         risk_count: result.risks.length,
@@ -122,6 +124,21 @@ export function AIPlanningAssistant({
       setIsGenerating(false);
     }
   }
+
+  async function handleGenerate(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await runGeneration(brief);
+  }
+
+  useEffect(() => {
+    if (autoStart && !hasAutoStartedRef.current && !draft && !isGenerating) {
+      hasAutoStartedRef.current = true;
+      const briefToUse = brief.trim() || workspace.project.title;
+      if (briefToUse.length >= 3) {
+        void runGeneration(briefToUse);
+      }
+    }
+  }, [autoStart, brief, draft, isGenerating, workspace.project.title]);
 
   async function handleAdjustment() {
     if (!adjustment.trim()) return;
