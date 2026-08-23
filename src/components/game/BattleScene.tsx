@@ -27,6 +27,7 @@ import { LandscapeGoblins, getGoblinCoordinates } from "./landscape/LandscapeGob
 import { LandscapePlayers, getMageTheme } from "./landscape/LandscapePlayers";
 import { LandscapeDragon, DRAGON_ORIGINAL_SHAPES, parseCoordinates } from "./landscape/LandscapeDragon";
 import { LandscapeFX } from "./landscape/LandscapeFX";
+import { LandscapeQuestBoard, type QuestTask } from "./landscape/LandscapeQuestBoard";
 import { CharacterAvatar } from "../common/CharacterAvatar";
 
 const BOSS_FUNNY_NAMES = [
@@ -912,6 +913,23 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const chooseReviewer = useMutation(api.tasks.chooseReviewer);
   const submitForReview = useMutation(api.evidence.submitForReview);
   const deleteProjectPermanently = useMutation(api.projects.deletePermanently);
+  const claimTaskMutation = useMutation(api.tasks.claimTask);
+  const createTaskMutation = useMutation(api.tasks.createTask);
+
+  // Quest Board States
+  const [selectedQuestTask, setSelectedQuestTask] = useState<QuestTask | null>(null);
+  const [showCreateQuestModal, setShowCreateQuestModal] = useState(false);
+  const [isClaimingQuest, setIsClaimingQuest] = useState(false);
+  const [claimQuestError, setClaimQuestError] = useState<string | null>(null);
+
+  const [newQuestTitle, setNewQuestTitle] = useState("");
+  const [newQuestDesc, setNewQuestDesc] = useState("");
+  const [newQuestPhaseId, setNewQuestPhaseId] = useState<string>("");
+  const [newQuestDueDate, setNewQuestDueDate] = useState(() => new Date(Date.now() + 86400000 * 3).toISOString().split("T")[0]);
+  const [newQuestWeight, setNewQuestWeight] = useState<number>(3);
+  const [newQuestAssignee, setNewQuestAssignee] = useState<string>("");
+  const [isCreatingQuest, setIsCreatingQuest] = useState(false);
+  const [createQuestError, setCreateQuestError] = useState<string | null>(null);
 
   const [selectedTaskId, setSelectedTaskId] = useState<Id<"tasks"> | null>(null);
   const [evidenceType, setEvidenceType] = useState<"note" | "link" | "image" | "pdf">("note");
@@ -1930,6 +1948,81 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     }));
   }, [state, activeEvent, combinedActiveEvent]);
 
+  // Active Project Tasks for In-Canvas Quest Board
+  const questTasks: QuestTask[] = useMemo(() => {
+    if (!workspace?.tasks) return [];
+    return workspace.tasks
+      .filter((t) => t.status !== "verified" && t.status !== "completed")
+      .map((t) => {
+        const assignee = workspace.members.find((m) => m?.profileId === t.primaryOwnerProfileId);
+        const isOpen = Boolean(t.isOpenForClaiming || !t.primaryOwnerProfileId);
+        return {
+          ...t,
+          assigneeName: isOpen ? "No one" : (assignee?.displayName ?? "No one"),
+          isMine: t.primaryOwnerProfileId === state?.currentProfileId,
+          isOpen,
+        };
+      });
+  }, [workspace?.tasks, workspace?.members, state?.currentProfileId]);
+
+  async function handleClaimQuest(task: QuestTask) {
+    setIsClaimingQuest(true);
+    setClaimQuestError(null);
+    try {
+      await claimTaskMutation({ taskId: task._id });
+      setSelectedQuestTask(null);
+    } catch (err) {
+      setClaimQuestError(getErrorMessage(err, "Failed to claim quest."));
+    } finally {
+      setIsClaimingQuest(false);
+    }
+  }
+
+  async function handleCreateQuestSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newQuestTitle.trim()) {
+      setCreateQuestError("Please provide a quest title.");
+      return;
+    }
+    const defaultPhase = workspace?.phases?.[0];
+    const targetPhaseId = (newQuestPhaseId ? newQuestPhaseId : defaultPhase?._id) as Id<"phases">;
+    if (!targetPhaseId) {
+      setCreateQuestError("A project phase is required.");
+      return;
+    }
+    setIsCreatingQuest(true);
+    setCreateQuestError(null);
+    try {
+      const nowStr = new Date().toISOString().split("T")[0];
+      const assignedId = newQuestAssignee ? (newQuestAssignee as Id<"userProfiles">) : (state?.currentProfileId as Id<"userProfiles">);
+      const isOpen = !newQuestAssignee;
+
+      await createTaskMutation({
+        projectId,
+        phaseId: targetPhaseId,
+        title: newQuestTitle.trim(),
+        description: newQuestDesc.trim() || "Complete tasks to defend the village.",
+        primaryOwnerProfileId: assignedId,
+        collaboratorProfileIds: [],
+        weight: newQuestWeight || 3,
+        required: true,
+        startDate: nowStr,
+        dueDate: newQuestDueDate || nowStr,
+        requiresReview: true,
+        isOpenForClaiming: isOpen,
+        assignmentState: isOpen ? "open" : "assigned",
+      });
+
+      setShowCreateQuestModal(false);
+      setNewQuestTitle("");
+      setNewQuestDesc("");
+    } catch (err) {
+      setCreateQuestError(getErrorMessage(err, "Failed to create quest."));
+    } finally {
+      setIsCreatingQuest(false);
+    }
+  }
+
   const startStr = workspace?.project?.startDate || (state?.project?.launchedAt ? new Date(state.project.launchedAt).toISOString().split("T")[0] : "");
   const deadlineStr = workspace?.project?.deadline || state?.project?.deadline || "";
 
@@ -2281,6 +2374,19 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           <LandscapePlayers members={players} />
         </div>
 
+        {/* Layer: In-Canvas Interactive Sticky Note Quest Board ("Task need to do") */}
+        <LandscapeQuestBoard
+          tasks={questTasks}
+          onSelectTask={(task) => {
+            setClaimQuestError(null);
+            setSelectedQuestTask(task);
+          }}
+          onCreateTask={() => {
+            setCreateQuestError(null);
+            setShowCreateQuestModal(true);
+          }}
+        />
+
         {/* Layer 8: Section 1 - Medieval Dragon Visuals & Wings */}
         <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "auto", zIndex: 8, transform: `translate(${layerTransforms.dragon?.x || 0}px, ${layerTransforms.dragon?.y || 0}px) scale(${layerTransforms.dragon?.scale || 1})`, display: layerTransforms.dragon?.visible !== false ? "block" : "none" }}>
           <LandscapeDragon
@@ -2510,131 +2616,164 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       )}
 
       {/* =========================================================================
-          ATTACK TARGET SELECTION CHOICE MODAL
+          ATTACK TARGET SELECTION CHOICE MODAL (Modern Neo-Brutalist)
          ========================================================================= */}
       {showAttackChoiceModal && (
         <div className="rpg-modal-backdrop" onClick={() => setShowAttackChoiceModal(false)}>
-          <div className="rpg-wood-board" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "420px" }}>
-            <div className="rpg-wood-board-bottom-caps" />
-            <h3 className="rpg-board-title">Choose Target</h3>
-            <div className="rpg-grid-options">
+          <div className="rpg-modern-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "420px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 className="rpg-modern-title">⚔️ Choose Target</h3>
               <button
-                className="rpg-plaque-btn"
                 type="button"
+                onClick={() => setShowAttackChoiceModal(false)}
+                style={{ background: "#ef4444", color: "#fff", border: "2px solid #101517", borderRadius: "8px", width: "28px", height: "28px", display: "grid", placeItems: "center", cursor: "pointer", fontWeight: 900 }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p style={{ margin: 0, fontSize: "0.86rem", color: "inherit", opacity: 0.9 }}>
+              Select a combat target to record work proof and defend your project.
+            </p>
+
+            <div className="rpg-modern-grid">
+              <button
+                className="rpg-modern-btn is-goblin"
+                type="button"
+                style={{ padding: "16px 12px", flexDirection: "column", gap: "6px" }}
                 onClick={() => {
                   setShowAttackChoiceModal(false);
                   setShowGoblinModal(true);
                 }}
               >
-                <span className="label">Daily Goblin</span>
+                <span style={{ fontSize: "1.35rem" }}>👺</span>
+                <span style={{ fontSize: "0.95rem" }}>Daily Goblin</span>
+                <span style={{ fontSize: "0.68rem", opacity: 0.85, fontWeight: 700 }}>Log daily effort</span>
               </button>
               <button
-                className="rpg-plaque-btn"
+                className="rpg-modern-btn is-boss"
                 type="button"
+                style={{ padding: "16px 12px", flexDirection: "column", gap: "6px" }}
                 onClick={() => {
                   setShowAttackChoiceModal(false);
                   setShowBossModal(true);
                 }}
               >
-                <span className="label">The Dragon</span>
+                <span style={{ fontSize: "1.35rem" }}>🐉</span>
+                <span style={{ fontSize: "0.95rem" }}>The Dragon</span>
+                <span style={{ fontSize: "0.68rem", opacity: 0.85, fontWeight: 700 }}>Submit task evidence</span>
               </button>
             </div>
-            <button className="rpg-btn-close" type="button" onClick={() => setShowAttackChoiceModal(false)}>
-              Back
+
+            <button className="rpg-modern-btn is-secondary" type="button" onClick={() => setShowAttackChoiceModal(false)}>
+              Cancel
             </button>
           </div>
         </div>
       )}
 
       {/* =========================================================================
-          SLAY GOBLIN EVIDENCE FLOW MODAL
+          SLAY GOBLIN EVIDENCE FLOW MODAL (Modern Neo-Brutalist)
          ========================================================================= */}
       {showGoblinModal && (
         <div className="rpg-modal-backdrop" onClick={() => setShowGoblinModal(false)}>
-          <div className="rpg-wood-board" onClick={(e) => e.stopPropagation()}>
-            <div className="rpg-wood-board-bottom-caps" />
-            <h3 className="rpg-board-title">Slay Daily Goblin</h3>
+          <div className="rpg-modern-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "480px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 className="rpg-modern-title">👺 Slay Daily Goblin</h3>
+              <button
+                type="button"
+                onClick={() => setShowGoblinModal(false)}
+                style={{ background: "#ef4444", color: "#fff", border: "2px solid #101517", borderRadius: "8px", width: "28px", height: "28px", display: "grid", placeItems: "center", cursor: "pointer", fontWeight: 900 }}
+              >
+                ✕
+              </button>
+            </div>
 
-            <form onSubmit={handleGoblinSubmit} className="rpg-goblin-form">
-              <div className="rpg-parchment-sheet" style={{ marginBottom: 0 }}>
-                {goblinError && <p className="form-error" role="alert" style={{ color: "#b91c1c", fontWeight: 800 }}>{goblinError}</p>}
-
-                {state?.members.find((m) => m.profileId === state.currentProfileId)?.hasSubmittedToday && (
-                  <div style={{ padding: "8px 10px", background: "#f0fdf4", border: "1.5px solid #86efac", borderRadius: "6px", color: "#166534", fontSize: "0.78rem", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span><strong>Your daily goblin is already slayed for today!</strong> Extra logs can still be recorded, but only 1 goblin kill is awarded per day.</span>
-                  </div>
-                )}
-
-                <p style={{ margin: "0 0 12px 0", fontSize: "0.85rem", lineHeight: "1.4" }}>
-                  Provide proof of today's work to defeat your daily goblin threat.
-                  Requirement: <strong>at least 10 words of notes OR 2 image links</strong>.
-                </p>
-
-                <label className="rpg-field-label">
-                  <span>Work Accomplishment Details</span>
-                  <textarea
-                    className="rpg-input-textarea"
-                    rows={4}
-                    value={goblinText}
-                    onChange={(e) => setGoblinText(e.target.value)}
-                    placeholder="Enter details of your work today..."
-                    required={goblinImageUrls.length === 0}
-                  />
-                </label>
-
-                {/* Validation Info */}
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "10px", marginBottom: "14px" }}>
-                  <span className={`rpg-val-tag ${goblinWordCount >= 10 ? "is-valid" : "is-invalid"}`}>
-                    {goblinWordCount}/10 words {goblinWordCount >= 10 ? "(Passed)" : ""}
-                  </span>
-                  <span className={`rpg-val-tag ${goblinImageCount >= 2 ? "is-valid" : "is-invalid"}`}>
-                    {goblinImageCount}/2 images {goblinImageCount >= 2 ? "(Passed)" : ""}
-                  </span>
+            <form onSubmit={handleGoblinSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {goblinError && (
+                <div style={{ padding: "8px 12px", background: "#fee2e2", border: "2px solid #ef4444", borderRadius: "8px", color: "#b91c1c", fontSize: "0.82rem", fontWeight: 800 }}>
+                  {goblinError}
                 </div>
+              )}
 
-                <label className="rpg-field-label">
-                  <span>Attach Image Url</span>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <input
-                      type="url"
-                      className="rpg-input-text"
-                      style={{ flex: 1 }}
-                      value={goblinImageInput}
-                      onChange={(e) => setGoblinImageInput(e.target.value)}
-                      placeholder="Paste image link..."
-                    />
-                    <button
-                      className="rpg-btn-submit-action"
-                      style={{ width: "auto", padding: "0 16px", background: "#8b5a2b" }}
-                      type="button"
-                      onClick={handleAddGoblinImage}
-                    >
-                      Attach
-                    </button>
-                  </div>
+              {state?.members.find((m) => m.profileId === state.currentProfileId)?.hasSubmittedToday && (
+                <div style={{ padding: "8px 12px", background: "#f0fdf4", border: "2px solid #22c55e", borderRadius: "8px", color: "#166534", fontSize: "0.8rem", fontWeight: 700 }}>
+                  Your daily goblin is already slayed for today! Extra logs can still be recorded, but only 1 goblin kill is awarded per day.
+                </div>
+              )}
+
+              <p style={{ margin: 0, fontSize: "0.85rem", opacity: 0.9 }}>
+                Provide proof of today's work to defeat your daily goblin. Requirement: <strong>at least 10 words of notes OR 2 image links</strong>.
+              </p>
+
+              <div>
+                <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                  Work Accomplishment Details
                 </label>
-
-                {goblinImageUrls.length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "10px" }}>
-                    {goblinImageUrls.map((url, idx) => (
-                      <div key={idx} style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#eeddbb", padding: "3px 8px", borderRadius: "4px", fontSize: "0.75rem", fontWeight: 700 }}>
-                        <span>Image {idx + 1}</span>
-                        <button type="button" style={{ border: "none", background: "transparent", cursor: "pointer", fontWeight: "bold" }} onClick={() => handleRemoveGoblinImage(idx)}>×</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <textarea
+                  className="rpg-modern-textarea"
+                  rows={4}
+                  value={goblinText}
+                  onChange={(e) => setGoblinText(e.target.value)}
+                  placeholder="Enter details of your work today..."
+                  required={goblinImageUrls.length === 0}
+                />
               </div>
 
+              {/* Validation Badges */}
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                <span style={{ padding: "3px 8px", borderRadius: "6px", fontSize: "0.74rem", fontWeight: 800, border: "1.5px solid #101517", background: goblinWordCount >= 10 ? "#86efac" : "#f1f5f9", color: "#101517" }}>
+                  📝 {goblinWordCount}/10 words {goblinWordCount >= 10 ? "✓" : ""}
+                </span>
+                <span style={{ padding: "3px 8px", borderRadius: "6px", fontSize: "0.74rem", fontWeight: 800, border: "1.5px solid #101517", background: goblinImageCount >= 2 ? "#86efac" : "#f1f5f9", color: "#101517" }}>
+                  🖼️ {goblinImageCount}/2 images {goblinImageCount >= 2 ? "✓" : ""}
+                </span>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                  Attach Image Link
+                </label>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <input
+                    type="url"
+                    className="rpg-modern-input"
+                    value={goblinImageInput}
+                    onChange={(e) => setGoblinImageInput(e.target.value)}
+                    placeholder="Paste image URL..."
+                  />
+                  <button
+                    className="rpg-modern-btn is-accent"
+                    style={{ whiteSpace: "nowrap", padding: "6px 14px", fontSize: "0.8rem" }}
+                    type="button"
+                    onClick={handleAddGoblinImage}
+                  >
+                    Attach
+                  </button>
+                </div>
+              </div>
+
+              {goblinImageUrls.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                  {goblinImageUrls.map((url, idx) => (
+                    <div key={idx} style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#bae6fd", border: "1.5px solid #101517", padding: "2px 8px", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 800 }}>
+                      <span>Image {idx + 1}</span>
+                      <button type="button" style={{ border: "none", background: "transparent", cursor: "pointer", fontWeight: 900 }} onClick={() => handleRemoveGoblinImage(idx)}>✕</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <button
-                className="rpg-btn-submit-action"
+                className="rpg-modern-btn is-goblin"
                 type="submit"
                 disabled={isSlaying || (!goblinText && goblinImageUrls.length === 0)}
+                style={{ marginTop: "4px" }}
               >
-                {isSlaying ? "Slaying..." : isGoblinValid ? "Slay Goblin!" : "Log Evidence (Requires 10 words or 2 images)"}
+                {isSlaying ? "Slaying..." : isGoblinValid ? "⚡ Slay Goblin!" : "Log Evidence (Needs 10 words or 2 images)"}
               </button>
 
-              <button className="rpg-btn-close" type="button" onClick={() => setShowGoblinModal(false)}>
+              <button className="rpg-modern-btn is-secondary" type="button" onClick={() => setShowGoblinModal(false)}>
                 Cancel
               </button>
             </form>
@@ -2643,223 +2782,495 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       )}
 
       {/* =========================================================================
-          BOSS ATTACK QUEST PINNED BOARD MODAL
+          BOSS ATTACK QUEST PINNED BOARD MODAL (Modern Neo-Brutalist)
          ========================================================================= */}
       {showBossModal && (
         <div className="rpg-modal-backdrop" onClick={() => setShowBossModal(false)}>
-          <div className="rpg-wood-board" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "640px" }}>
-            <div className="rpg-wood-board-bottom-caps" />
-            <h3 className="rpg-board-title">Attack The Dragon (Submit Quests)</h3>
+          <div className="rpg-modern-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "580px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 className="rpg-modern-title">🐉 Attack The Dragon</h3>
+              <button
+                type="button"
+                onClick={() => setShowBossModal(false)}
+                style={{ background: "#ef4444", color: "#fff", border: "2px solid #101517", borderRadius: "8px", width: "28px", height: "28px", display: "grid", placeItems: "center", cursor: "pointer", fontWeight: 900 }}
+              >
+                ✕
+              </button>
+            </div>
 
-            {bossError && <p className="form-error" role="alert" style={{ color: "#ef4444", fontWeight: 800, textAlign: "center", marginBottom: "12px" }}>{bossError}</p>}
+            {bossError && (
+              <div style={{ padding: "8px 12px", background: "#fee2e2", border: "2px solid #ef4444", borderRadius: "8px", color: "#b91c1c", fontSize: "0.82rem", fontWeight: 800 }}>
+                {bossError}
+              </div>
+            )}
 
-            <div className="rpg-boss-board">
-              {myAssignableTasks.length === 0 ? (
-                <div className="rpg-no-tasks-alert">
-                  You do not have any active quests assigned to you!
-                  <p style={{ fontWeight: "normal", fontSize: "0.85rem", marginTop: "6px" }}>Go to the project task board below to claim or assign a quest first.</p>
-                </div>
-              ) : !selectedTaskId ? (
-                <>
-                  <p style={{ margin: "0 0 10px 0", fontSize: "0.85rem", textAlign: "center" }}>Select one of your active quests below to submit evidence and deal combat damage to the dragon.</p>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                    {myAssignableTasks.map((task) => {
-                      const creatorName = workspace?.members.find((m) => m?.profileId === task.createdByProfileId)?.displayName ?? "Creator";
-                      return (
-                        <div
-                          key={task._id}
-                          className="rpg-parchment-sheet"
-                          style={{ cursor: "pointer", transition: "transform 0.15s ease" }}
-                          onClick={() => {
-                            setSelectedTaskId(task._id);
-                            if (task.reviewerProfileId) {
-                              setSelectedReviewerId(task.reviewerProfileId);
-                            }
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-2px)"}
-                          onMouseLeave={(e) => e.currentTarget.style.transform = "none"}
-                        >
-                          <h4 className="rpg-note-title">{task.title}</h4>
-                          <div className="rpg-note-meta">
-                            <span>Due: {task.dueDate}</span>
-                            <span>By: {creatorName}</span>
-                          </div>
-                          <span style={{ fontSize: "0.72rem", background: "#8b5a2b", color: "#fff", padding: "2px 6px", borderRadius: "4px", fontWeight: 700 }}>
-                            Select Quest
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>
-              ) : (
-                <form onSubmit={handleBossSubmit} className="rpg-goblin-form">
-                  {(() => {
-                    const task = myAssignableTasks.find((t) => t._id === selectedTaskId);
-                    if (!task) return null;
+            {myAssignableTasks.length === 0 ? (
+              <div style={{ background: "#f8fafc", border: "2px dashed #94a3b8", borderRadius: "12px", padding: "20px", textAlign: "center", color: "#64748b" }}>
+                <p style={{ margin: 0, fontWeight: 800, color: "#101517", fontSize: "0.95rem" }}>You do not have any active quests assigned!</p>
+                <p style={{ margin: "6px 0 14px 0", fontSize: "0.82rem" }}>Claim an open quest from the in-game Quest Board or create a new task to attack the dragon.</p>
+                <button
+                  className="rpg-modern-btn is-primary"
+                  type="button"
+                  onClick={() => {
+                    setShowBossModal(false);
+                    setShowCreateQuestModal(true);
+                  }}
+                >
+                  + Create New Quest
+                </button>
+              </div>
+            ) : !selectedTaskId ? (
+              <>
+                <p style={{ margin: 0, fontSize: "0.85rem", opacity: 0.9 }}>
+                  Select one of your assigned quests below to submit proof and deal combat damage to the dragon.
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", maxHeight: "240px", overflowY: "auto", padding: "2px" }}>
+                  {myAssignableTasks.map((task) => {
                     const creatorName = workspace?.members.find((m) => m?.profileId === task.createdByProfileId)?.displayName ?? "Creator";
                     return (
-                      <div className="rpg-parchment-sheet">
-                        <button
-                          type="button"
-                          style={{ position: "absolute", top: "10px", right: "10px", border: "none", background: "transparent", cursor: "pointer", fontWeight: 700, fontSize: "0.9rem" }}
-                          onClick={() => setSelectedTaskId(null)}
-                        >
-                          Change Quest
-                        </button>
-                        <h4 className="rpg-note-title">{task.title}</h4>
-                        <div className="rpg-note-meta" style={{ marginBottom: 0 }}>
-                          <span>Due Date: {task.dueDate}</span>
-                          <span>Assigned By: {creatorName}</span>
+                      <div
+                        key={task._id}
+                        style={{
+                          background: "#ffffff",
+                          border: "2px solid #101517",
+                          borderRadius: "10px",
+                          padding: "10px",
+                          cursor: "pointer",
+                          boxShadow: "3px 3px 0 #101517",
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "space-between",
+                          gap: "8px",
+                          transition: "transform 0.15s ease",
+                        }}
+                        onClick={() => {
+                          setSelectedTaskId(task._id);
+                          if (task.reviewerProfileId) {
+                            setSelectedReviewerId(task.reviewerProfileId);
+                          }
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.transform = "none")}
+                      >
+                        <h4 style={{ margin: 0, fontSize: "0.85rem", fontWeight: 900, color: "#101517" }}>{task.title}</h4>
+                        <div style={{ fontSize: "0.72rem", color: "#64748b", display: "flex", justifyContent: "space-between" }}>
+                          <span>📅 {task.dueDate}</span>
+                          <span>👤 {creatorName}</span>
                         </div>
+                        <button
+                          className="rpg-modern-btn is-boss"
+                          type="button"
+                          style={{ padding: "4px 8px", fontSize: "0.72rem", width: "100%" }}
+                        >
+                          Select Quest
+                        </button>
                       </div>
                     );
-                  })()}
-
-                  <div className="rpg-parchment-sheet">
-                    <label className="rpg-field-label" style={{ marginBottom: "10px" }}>
-                      <span>Select Evidence Type</span>
-                      <div className="rpg-evidence-tabs">
-                        {(["note", "link", "image", "pdf"] as const).map((tab) => (
-                          <button
-                            key={tab}
-                            type="button"
-                            className={`rpg-evidence-tab ${evidenceType === tab ? "is-active" : ""}`}
-                            onClick={() => {
-                              setEvidenceType(tab);
-                              setEvidenceFile(null);
-                            }}
-                          >
-                            {tab === "note" ? "Short Note" : tab === "link" ? "External Link" : tab === "image" ? "Image File" : "PDF File"}
-                          </button>
-                        ))}
+                  })}
+                </div>
+              </>
+            ) : (
+              <form onSubmit={handleBossSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {(() => {
+                  const task = myAssignableTasks.find((t) => t._id === selectedTaskId);
+                  if (!task) return null;
+                  const creatorName = workspace?.members.find((m) => m?.profileId === task.createdByProfileId)?.displayName ?? "Creator";
+                  return (
+                    <div style={{ background: "#bae6fd", border: "2px solid #101517", borderRadius: "10px", padding: "10px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <span style={{ fontSize: "0.68rem", fontWeight: 900, textTransform: "uppercase", color: "#0369a1" }}>Selected Quest</span>
+                        <h4 style={{ margin: "2px 0 0 0", fontSize: "0.92rem", fontWeight: 900, color: "#101517" }}>{task.title}</h4>
+                        <span style={{ fontSize: "0.74rem", color: "#0c4a6e" }}>📅 Due {task.dueDate} | Assigned by {creatorName}</span>
                       </div>
-                    </label>
-
-                    <div className="rpg-evidence-form-container">
-                      {evidenceType === "note" && (
-                        <label className="rpg-field-label">
-                          <span>Progress Note</span>
-                          <textarea
-                            className="rpg-input-textarea"
-                            rows={3}
-                            value={evidenceNote}
-                            onChange={(e) => setEvidenceNote(e.target.value)}
-                            placeholder="Write a short summary of the work..."
-                            required
-                          />
-                        </label>
-                      )}
-
-                      {evidenceType === "link" && (
-                        <>
-                          <label className="rpg-field-label">
-                            <span>Link URL</span>
-                            <input
-                              type="url"
-                              className="rpg-input-text"
-                              value={evidenceUrl}
-                              onChange={(e) => setEvidenceUrl(e.target.value)}
-                              placeholder="https://example.com/project-link"
-                              required
-                            />
-                          </label>
-                          <label className="rpg-field-label">
-                            <span>Optional Progress Note</span>
-                            <textarea
-                              className="rpg-input-textarea"
-                              rows={2}
-                              value={evidenceNote}
-                              onChange={(e) => setEvidenceNote(e.target.value)}
-                              placeholder="Add details about the link..."
-                            />
-                          </label>
-                        </>
-                      )}
-
-                      {(evidenceType === "image" || evidenceType === "pdf") && (
-                        <>
-                          <label className="rpg-field-label">
-                            <span>Upload {evidenceType === "image" ? "Image File (Max 5MB)" : "PDF File (Max 10MB)"}</span>
-                            <input
-                              type="file"
-                              accept={evidenceType === "image" ? "image/*" : "application/pdf"}
-                              onChange={(e) => setEvidenceFile(e.target.files?.[0] ?? null)}
-                              required
-                            />
-                          </label>
-                          {uploadProgress > 0 && (
-                            <div style={{ background: "#eeddbb", height: "14px", borderRadius: "4px", overflow: "hidden", marginTop: "6px" }}>
-                              <div style={{ background: "#166534", height: "100%", width: `${uploadProgress}%`, transition: "width 0.2s ease" }} />
-                            </div>
-                          )}
-                          <label className="rpg-field-label" style={{ marginTop: "8px" }}>
-                            <span>Optional Progress Note</span>
-                            <textarea
-                              className="rpg-input-textarea"
-                              rows={2}
-                              value={evidenceNote}
-                              onChange={(e) => setEvidenceNote(e.target.value)}
-                              placeholder="Describe the uploaded file..."
-                            />
-                          </label>
-                        </>
-                      )}
+                      <button
+                        className="rpg-modern-btn is-secondary"
+                        type="button"
+                        style={{ padding: "4px 10px", fontSize: "0.74rem" }}
+                        onClick={() => setSelectedTaskId(null)}
+                      >
+                        Change
+                      </button>
                     </div>
+                  );
+                })()}
 
-                    {(() => {
-                      const task = myAssignableTasks.find((t) => t._id === selectedTaskId);
-                      if (task && !task.reviewerProfileId) {
-                        return (
-                          <label className="rpg-field-label" style={{ marginTop: "14px" }}>
-                            <span>Select Teammate to Review Your Quest</span>
-                            <select
-                              className="rpg-select"
-                              value={selectedReviewerId}
-                              onChange={(e) => setSelectedReviewerId(e.target.value)}
-                              required
-                            >
-                              <option value="">-- Select Reviewer --</option>
-                              {eligibleReviewers.map((m) => (
-                                <option key={m.profileId} value={m.profileId}>
-                                  {m.displayName}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                        );
-                      }
-                      return null;
-                    })()}
+                <div>
+                  <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "6px" }}>
+                    Select Evidence Type
+                  </label>
+                  <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                    {(["note", "link", "image", "pdf"] as const).map((tab) => (
+                      <button
+                        key={tab}
+                        type="button"
+                        className={`rpg-modern-btn ${evidenceType === tab ? "is-primary" : "is-secondary"}`}
+                        style={{ padding: "6px 12px", fontSize: "0.78rem" }}
+                        onClick={() => {
+                          setEvidenceType(tab);
+                          setEvidenceFile(null);
+                        }}
+                      >
+                        {tab === "note" ? "📝 Short Note" : tab === "link" ? "🔗 External Link" : tab === "image" ? "🖼️ Image File" : "📄 PDF File"}
+                      </button>
+                    ))}
                   </div>
+                </div>
 
-                  <button
-                    className="rpg-btn-submit-action"
-                    type="submit"
-                    disabled={isSubmittingTask}
-                  >
-                    {isSubmittingTask ? "Submitting Evidence..." : "Submit Quest & Attack!"}
-                  </button>
+                <div>
+                  {evidenceType === "note" && (
+                    <div>
+                      <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                        Progress Note
+                      </label>
+                      <textarea
+                        className="rpg-modern-textarea"
+                        rows={3}
+                        value={evidenceNote}
+                        onChange={(e) => setEvidenceNote(e.target.value)}
+                        placeholder="Write a short summary of the completed work..."
+                        required
+                      />
+                    </div>
+                  )}
 
-                  <button
-                    className="rpg-btn-close"
-                    type="button"
-                    onClick={() => {
-                      setSelectedTaskId(null);
-                      setEvidenceNote("");
-                      setEvidenceUrl("");
-                      setEvidenceFile(null);
-                      setSelectedReviewerId("");
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </form>
-              )}
-            </div>
-            <button className="rpg-btn-close" type="button" onClick={() => setShowBossModal(false)}>
-              Close Board
+                  {evidenceType === "link" && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                          Link URL
+                        </label>
+                        <input
+                          type="url"
+                          className="rpg-modern-input"
+                          value={evidenceUrl}
+                          onChange={(e) => setEvidenceUrl(e.target.value)}
+                          placeholder="https://github.com/..."
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                          Optional Progress Note
+                        </label>
+                        <textarea
+                          className="rpg-modern-textarea"
+                          rows={2}
+                          value={evidenceNote}
+                          onChange={(e) => setEvidenceNote(e.target.value)}
+                          placeholder="Add extra context about the link..."
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {(evidenceType === "image" || evidenceType === "pdf") && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                          Upload {evidenceType === "image" ? "Image File (Max 5MB)" : "PDF File (Max 10MB)"}
+                        </label>
+                        <input
+                          type="file"
+                          className="rpg-modern-input"
+                          accept={evidenceType === "image" ? "image/*" : "application/pdf"}
+                          onChange={(e) => setEvidenceFile(e.target.files?.[0] ?? null)}
+                          required
+                        />
+                      </div>
+                      {uploadProgress > 0 && (
+                        <div style={{ background: "#e2e8f0", border: "1.5px solid #101517", height: "12px", borderRadius: "4px", overflow: "hidden" }}>
+                          <div style={{ background: "#22c55e", height: "100%", width: `${uploadProgress}%`, transition: "width 0.2s ease" }} />
+                        </div>
+                      )}
+                      <div>
+                        <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                          Optional Note
+                        </label>
+                        <textarea
+                          className="rpg-modern-textarea"
+                          rows={2}
+                          value={evidenceNote}
+                          onChange={(e) => setEvidenceNote(e.target.value)}
+                          placeholder="Describe the uploaded file..."
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {(() => {
+                  const task = myAssignableTasks.find((t) => t._id === selectedTaskId);
+                  if (task && !task.reviewerProfileId) {
+                    return (
+                      <div>
+                        <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                          Select Teammate to Review Your Quest
+                        </label>
+                        <select
+                          className="rpg-modern-select"
+                          value={selectedReviewerId}
+                          onChange={(e) => setSelectedReviewerId(e.target.value)}
+                          required
+                        >
+                          <option value="">-- Select Reviewer --</option>
+                          {eligibleReviewers.map((m) => (
+                            <option key={m.profileId} value={m.profileId}>
+                              {m.displayName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+
+                <button
+                  className="rpg-modern-btn is-boss"
+                  type="submit"
+                  disabled={isSubmittingTask}
+                  style={{ marginTop: "4px" }}
+                >
+                  {isSubmittingTask ? "Submitting Evidence..." : "⚔️ Submit Quest & Attack Dragon!"}
+                </button>
+
+                <button
+                  className="rpg-modern-btn is-secondary"
+                  type="button"
+                  onClick={() => {
+                    setSelectedTaskId(null);
+                    setEvidenceNote("");
+                    setEvidenceUrl("");
+                    setEvidenceFile(null);
+                    setSelectedReviewerId("");
+                  }}
+                >
+                  Back to Quest List
+                </button>
+              </form>
+            )}
+
+            <button className="rpg-modern-btn is-secondary" type="button" onClick={() => setShowBossModal(false)}>
+              Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          IN-CANVAS QUEST DETAILS MODAL (Condensed & Informative)
+         ========================================================================= */}
+      {selectedQuestTask && (
+        <div className="rpg-modal-backdrop" onClick={() => setSelectedQuestTask(null)}>
+          <div className="rpg-modern-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "480px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
+              <div>
+                <span style={{ display: "inline-block", padding: "2px 8px", background: "#fff73f", color: "#101517", border: "1.5px solid #101517", borderRadius: "6px", fontSize: "0.7rem", fontWeight: 900, marginBottom: "6px" }}>
+                  ⭐ Quest Details
+                </span>
+                <h3 className="rpg-modern-title" style={{ fontSize: "1.15rem" }}>{selectedQuestTask.title}</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedQuestTask(null)}
+                style={{ background: "#ef4444", color: "#fff", border: "2px solid #101517", borderRadius: "8px", width: "28px", height: "28px", display: "grid", placeItems: "center", cursor: "pointer", fontWeight: 900 }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {claimQuestError && (
+              <div style={{ padding: "8px 12px", background: "#fee2e2", border: "2px solid #ef4444", borderRadius: "8px", color: "#b91c1c", fontSize: "0.82rem", fontWeight: 800 }}>
+                {claimQuestError}
+              </div>
+            )}
+
+            {/* Description */}
+            <div style={{ background: "rgba(16,21,23,0.05)", border: "2px solid #101517", borderRadius: "10px", padding: "12px", fontSize: "0.85rem", lineHeight: "1.5" }}>
+              {selectedQuestTask.description || "No description provided for this quest."}
+            </div>
+
+            {/* Quest Metadata */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+              <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "8px", padding: "8px 10px" }}>
+                <span style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, opacity: 0.7, textTransform: "uppercase" }}>Due Date</span>
+                <span style={{ fontSize: "0.84rem", fontWeight: 800 }}>📅 {selectedQuestTask.dueDate || "No deadline"}</span>
+              </div>
+              <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "8px", padding: "8px 10px" }}>
+                <span style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, opacity: 0.7, textTransform: "uppercase" }}>Assigned Hero</span>
+                <span style={{ fontSize: "0.84rem", fontWeight: 800, color: selectedQuestTask.isOpen ? "#dc2626" : "#101517" }}>
+                  👤 {selectedQuestTask.assigneeName}
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
+              {selectedQuestTask.isOpen ? (
+                <button
+                  className="rpg-modern-btn is-primary"
+                  type="button"
+                  disabled={isClaimingQuest}
+                  onClick={() => handleClaimQuest(selectedQuestTask)}
+                >
+                  {isClaimingQuest ? "Claiming Quest..." : "✋ Claim This Quest"}
+                </button>
+              ) : selectedQuestTask.isMine ? (
+                <button
+                  className="rpg-modern-btn is-boss"
+                  type="button"
+                  onClick={() => {
+                    setSelectedTaskId(selectedQuestTask._id);
+                    setSelectedQuestTask(null);
+                    setShowBossModal(true);
+                  }}
+                >
+                  ⚔️ Submit Proof & Attack Dragon
+                </button>
+              ) : (
+                <div style={{ textAlign: "center", fontSize: "0.78rem", fontWeight: 700, opacity: 0.8, padding: "4px" }}>
+                  Currently assigned to {selectedQuestTask.assigneeName}
+                </div>
+              )}
+
+              <button className="rpg-modern-btn is-secondary" type="button" onClick={() => setSelectedQuestTask(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          IN-CANVAS CREATE TASK MODAL
+         ========================================================================= */}
+      {showCreateQuestModal && (
+        <div className="rpg-modal-backdrop" onClick={() => setShowCreateQuestModal(false)}>
+          <div className="rpg-modern-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "520px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 className="rpg-modern-title">📜 Post New Quest</h3>
+              <button
+                type="button"
+                onClick={() => setShowCreateQuestModal(false)}
+                style={{ background: "#ef4444", color: "#fff", border: "2px solid #101517", borderRadius: "8px", width: "28px", height: "28px", display: "grid", placeItems: "center", cursor: "pointer", fontWeight: 900 }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateQuestSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              {createQuestError && (
+                <div style={{ padding: "8px 12px", background: "#fee2e2", border: "2px solid #ef4444", borderRadius: "8px", color: "#b91c1c", fontSize: "0.82rem", fontWeight: 800 }}>
+                  {createQuestError}
+                </div>
+              )}
+
+              <div>
+                <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                  Quest Title *
+                </label>
+                <input
+                  type="text"
+                  className="rpg-modern-input"
+                  value={newQuestTitle}
+                  onChange={(e) => setNewQuestTitle(e.target.value)}
+                  placeholder="e.g., Build navigation header, Fix auth bug..."
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                  Description
+                </label>
+                <textarea
+                  className="rpg-modern-textarea"
+                  rows={3}
+                  value={newQuestDesc}
+                  onChange={(e) => setNewQuestDesc(e.target.value)}
+                  placeholder="Provide details about what needs to be done..."
+                />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                    Project Phase
+                  </label>
+                  <select
+                    className="rpg-modern-select"
+                    value={newQuestPhaseId}
+                    onChange={(e) => setNewQuestPhaseId(e.target.value)}
+                  >
+                    {(workspace?.phases ?? []).map((p) => (
+                      <option key={p._id} value={p._id}>
+                        {p.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                    Due Date
+                  </label>
+                  <input
+                    type="date"
+                    className="rpg-modern-input"
+                    value={newQuestDueDate}
+                    onChange={(e) => setNewQuestDueDate(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                    Assignee (Hero)
+                  </label>
+                  <select
+                    className="rpg-modern-select"
+                    value={newQuestAssignee}
+                    onChange={(e) => setNewQuestAssignee(e.target.value)}
+                  >
+                    <option value="">-- Open for Anyone to Claim --</option>
+                    {(workspace?.members ?? []).map((m) => (
+                      <option key={m.profileId} value={m.profileId}>
+                        {m.displayName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                    Difficulty / Weight (1-5)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={5}
+                    className="rpg-modern-input"
+                    value={newQuestWeight}
+                    onChange={(e) => setNewQuestWeight(Number(e.target.value))}
+                  />
+                </div>
+              </div>
+
+              <button
+                className="rpg-modern-btn is-primary"
+                type="submit"
+                disabled={isCreatingQuest}
+                style={{ marginTop: "6px" }}
+              >
+                {isCreatingQuest ? "Posting Quest..." : "📜 Post Quest to Board"}
+              </button>
+
+              <button className="rpg-modern-btn is-secondary" type="button" onClick={() => setShowCreateQuestModal(false)}>
+                Cancel
+              </button>
+            </form>
           </div>
         </div>
       )}

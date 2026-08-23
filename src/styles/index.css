@@ -7710,4 +7710,119 @@ button.maylamdi-button:active {
   }
 }
 
+/* Neo-brutalist modern game canvas modals */
+.rpg-modern-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  background: #fffdec;
+  color: #101517;
+  border: 3px solid #101517;
+  border-radius: 16px;
+  box-shadow: 6px 6px 0 #101517;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+:root[data-theme="dark"] .rpg-modern-modal-card {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: #38bdf8;
+  box-shadow: 6px 6px 0 #0f172a;
+}
+
+.rpg-modern-title {
+  margin: 0;
+  font-family: var(--font-heading), sans-serif;
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rpg-modern-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.rpg-modern-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 2.5px solid #101517;
+  border-radius: 12px;
+  font-family: var(--font-heading), sans-serif;
+  font-size: 0.88rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #101517;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rpg-modern-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 5px 5px 0 #101517;
+}
+
+.rpg-modern-btn:active {
+  transform: translateY(1px);
+  box-shadow: 1px 1px 0 #101517;
+}
+
+.rpg-modern-btn.is-goblin {
+  background: #4ade80;
+  color: #101517;
+}
+
+.rpg-modern-btn.is-boss {
+  background: #f87171;
+  color: #101517;
+}
+
+.rpg-modern-btn.is-primary {
+  background: #fff73f;
+  color: #101517;
+}
+
+.rpg-modern-btn.is-secondary {
+  background: #e2e8f0;
+  color: #101517;
+}
+
+.rpg-modern-btn.is-accent {
+  background: #38bdf8;
+  color: #101517;
+}
+
+.rpg-modern-input,
+.rpg-modern-textarea,
+.rpg-modern-select {
+  width: 100%;
+  border: 2px solid #101517;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #101517;
+  font-family: inherit;
+  font-size: 0.85rem;
+  box-sizing: border-box;
+}
+
+:root[data-theme="dark"] .rpg-modern-input,
+:root[data-theme="dark"] .rpg-modern-textarea,
+:root[data-theme="dark"] .rpg-modern-select {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: #475569;
+}
+
 

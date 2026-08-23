@@ -36,7 +36,7 @@ export function LandscapeVillage({
         style={{
           position: "absolute",
           left: `calc(135px + ${villageHpBarPos.x}px)`,
-          top: `calc(165px + ${villageHpBarPos.y}px)`,
+          top: `calc(105px + ${villageHpBarPos.y}px)`,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -153,24 +153,43 @@ export function LandscapeVillage({
           </g>
         </defs>
 
-        {/* --- SQUARE MEDIEVAL FORTIFIED VILLAGE (x = 20px to 250px) --- */}
-        <g transform="translate(20, 0)">
+        {/* --- 3D ISOMETRIC WALLED MEDIEVAL COURTYARD VILLAGE (x = 20px to 260px) --- */}
+        <g transform="translate(15, 0)">
 
-          {/* --- TOP BACK PALISADE WALL --- */}
-          {Array.from({ length: 18 }).map((_, i) => (
-            <use key={`back-wall-${i}`} href="#palisade-log" x={30 + i * 10} y="220" />
+          {/* 1. COURTYARD STONE/COBBLESTONE FOUNDATION FLOOR (Perspective Looking Down) */}
+          <polygon points="18,190 236,190 252,315 2,315" fill="#334155" />
+          <polygon points="22,192 232,192 246,310 8,310" fill="#475569" opacity="0.45" />
+
+          {/* Courtyard Flagstone Pattern Lines */}
+          <line x1="20" y1="225" x2="238" y2="225" stroke="#1e293b" strokeWidth="1" opacity="0.4" />
+          <line x1="15" y1="255" x2="242" y2="255" stroke="#1e293b" strokeWidth="1" opacity="0.4" />
+          <line x1="10" y1="285" x2="246" y2="285" stroke="#1e293b" strokeWidth="1" opacity="0.4" />
+
+          {/* 2. TOP BACK PALISADE WALL */}
+          {Array.from({ length: 20 }).map((_, i) => (
+            <use key={`back-wall-${i}`} href="#palisade-log" x={24 + i * 10} y="185" />
           ))}
 
-          {/* CORNER WATCHTOWER 1: Top-Left */}
-          <use href="#medieval-watchtower" x="5" y="195" />
+          {/* CORNER WATCHTOWER 1: Top-Left (Upper Horizon) */}
+          <use href="#medieval-watchtower" x="0" y="155" />
 
-          {/* CORNER WATCHTOWER 2: Top-Right */}
-          <use href="#medieval-watchtower" x="210" y="195" />
+          {/* CORNER WATCHTOWER 2: Top-Right (Upper Horizon) */}
+          <use href="#medieval-watchtower" x="220" y="155" />
 
-          {/* --- MEDIEVAL HOUSES (Cobble + Half-Timber + All Orange Roofs, Standing Tall Above Gate) --- */}
+          {/* 3. LEFT PALISADE SIDE WALL (Connecting Back to Front) */}
+          {Array.from({ length: 9 }).map((_, i) => (
+            <use key={`left-wall-${i}`} href="#palisade-log" x={16 - i * 1.5} y={195 + i * 11} />
+          ))}
 
-          {/* House 1: Left Medieval Cottage */}
-          <g transform="translate(46, 162)">
+          {/* 4. RIGHT PALISADE SIDE WALL (Connecting Back to Front) */}
+          {Array.from({ length: 9 }).map((_, i) => (
+            <use key={`right-wall-${i}`} href="#palisade-log" x={232 + i * 1.5} y={195 + i * 11} />
+          ))}
+
+          {/* 5. MEDIEVAL BUILDINGS (Inside the Enclosed Courtyard, Fully Visible) */}
+
+          {/* Building 1: Left Medieval Cottage */}
+          <g transform="translate(36, 175)">
             {/* Stone Ground Floor */}
             <rect x="0" y="32" width="46" height="36" fill="#64748b" />
             {/* Timber Framing Half-Timbered Upper Gable */}
@@ -188,32 +207,32 @@ export function LandscapeVillage({
             <rect x="6" y="42" width="8" height="8" rx="1" fill="#fde047" />
           </g>
 
-          {/* House 2: Center Medieval Town Hall / Great Hall (Tall & Prominent) */}
-          <g transform="translate(102, 130)">
+          {/* Building 2: Center Medieval Town Hall / Great Hall (Grand & Tall) */}
+          <g transform="translate(94, 140)">
             {/* Stone Base */}
-            <rect x="0" y="40" width="64" height="52" fill="#475569" />
+            <rect x="0" y="40" width="68" height="56" fill="#475569" />
             {/* Stone Seam Lines */}
-            <line x1="0" y1="65" x2="64" y2="65" stroke="#334155" strokeWidth="1" />
+            <line x1="0" y1="65" x2="68" y2="65" stroke="#334155" strokeWidth="1" />
             {/* Half Timbered Upper Level */}
-            <rect x="2" y="18" width="60" height="24" fill="#fef3c7" />
-            <line x1="16" y1="18" x2="16" y2="42" stroke="#78350f" strokeWidth="2" />
-            <line x1="32" y1="18" x2="32" y2="42" stroke="#78350f" strokeWidth="2" />
-            <line x1="48" y1="18" x2="48" y2="42" stroke="#78350f" strokeWidth="2" />
-            <line x1="2" y1="18" x2="32" y2="42" stroke="#78350f" strokeWidth="1.5" />
-            <line x1="32" y1="18" x2="62" y2="42" stroke="#78350f" strokeWidth="1.5" />
+            <rect x="2" y="16" width="64" height="26" fill="#fef3c7" />
+            <line x1="18" y1="16" x2="18" y2="42" stroke="#78350f" strokeWidth="2" />
+            <line x1="34" y1="16" x2="34" y2="42" stroke="#78350f" strokeWidth="2" />
+            <line x1="50" y1="16" x2="50" y2="42" stroke="#78350f" strokeWidth="2" />
+            <line x1="2" y1="16" x2="34" y2="42" stroke="#78350f" strokeWidth="1.5" />
+            <line x1="34" y1="16" x2="66" y2="42" stroke="#78350f" strokeWidth="1.5" />
             {/* All-Orange Steep Medieval Roof */}
-            <polygon points="-6,20 32,-8 70,20" fill="#feaa01" />
-            <polygon points="32,-8 70,20 32,20" fill="#ea580c" opacity="0.35" />
+            <polygon points="-6,18 34,-12 74,18" fill="#feaa01" />
+            <polygon points="34,-12 74,18 34,18" fill="#ea580c" opacity="0.35" />
             {/* Arched Double Timber Door */}
-            <path d="M 24 92 V 66 A 8 8 0 0 1 40 66 V 92 Z" fill="#78350f" />
-            <line x1="32" y1="60" x2="32" y2="92" stroke="#5c2406" strokeWidth="1" />
+            <path d="M 26 96 V 68 A 8 8 0 0 1 42 68 V 96 Z" fill="#78350f" />
+            <line x1="34" y1="62" x2="34" y2="96" stroke="#5c2406" strokeWidth="1" />
             {/* Upper Lead Windows */}
-            <rect x="22" y="24" width="8" height="10" rx="1" fill="#fde047" />
-            <rect x="34" y="24" width="8" height="10" rx="1" fill="#fde047" />
+            <rect x="24" y="22" width="8" height="10" rx="1" fill="#fde047" />
+            <rect x="36" y="22" width="8" height="10" rx="1" fill="#fde047" />
           </g>
 
-          {/* House 3: Right Medieval Blacksmith & Forge */}
-          <g transform="translate(174, 165)">
+          {/* Building 3: Right Medieval Blacksmith & Forge */}
+          <g transform="translate(166, 178)">
             {/* Stone Chimney */}
             <rect x="26" y="2" width="11" height="28" fill="#475569" />
             {/* Gentle Smoke from Chimney */}
@@ -235,28 +254,31 @@ export function LandscapeVillage({
             <circle cx="22" cy="55" r="3" fill="#fde047" />
           </g>
 
-          {/* --- FRONT PALISADE WALL & GREY BRICK ARCHED GATE WITH VINES --- */}
+          {/* 6. FRONT PALISADE WALL & LOWER FRONT GATE (y = 280 to 320) */}
           
           {/* Front Left Fence */}
-          <use href="#palisade-log" x="30" y="252" />
-          <use href="#palisade-log" x="40" y="252" />
-          <use href="#palisade-log" x="50" y="252" />
-          <use href="#palisade-log" x="60" y="252" />
-          <use href="#palisade-log" x="70" y="252" />
+          <use href="#palisade-log" x="20" y="295" />
+          <use href="#palisade-log" x="30" y="295" />
+          <use href="#palisade-log" x="40" y="295" />
+          <use href="#palisade-log" x="50" y="295" />
+          <use href="#palisade-log" x="60" y="295" />
+          <use href="#palisade-log" x="70" y="295" />
 
           {/* Front Right Fence */}
-          <use href="#palisade-log" x="160" y="252" />
-          <use href="#palisade-log" x="170" y="252" />
-          <use href="#palisade-log" x="180" y="252" />
-          <use href="#palisade-log" x="190" y="252" />
-          <use href="#palisade-log" x="200" y="252" />
+          <use href="#palisade-log" x="160" y="295" />
+          <use href="#palisade-log" x="170" y="295" />
+          <use href="#palisade-log" x="180" y="295" />
+          <use href="#palisade-log" x="190" y="295" />
+          <use href="#palisade-log" x="200" y="295" />
+          <use href="#palisade-log" x="210" y="295" />
+          <use href="#palisade-log" x="220" y="295" />
 
           {/* Horizontal Fence Cross Support */}
-          <rect x="28" y="268" width="55" height="5" fill="#451a03" />
-          <rect x="158" y="268" width="55" height="5" fill="#451a03" />
+          <rect x="18" y="310" width="65" height="5" fill="#451a03" />
+          <rect x="158" y="310" width="65" height="5" fill="#451a03" />
 
-          {/* --- MEDIEVAL GREY BRICK TEXTURED GATE WITH VINES (x = 80 to 160) --- */}
-          <g transform="translate(85, 230)">
+          {/* --- MEDIEVAL GREY BRICK TEXTURED GATE (x = 85 to 160, y = 275 to 335) --- */}
+          <g transform="translate(85, 275)">
             {/* Left Brick Gate Post */}
             <rect x="0" y="0" width="22" height="66" fill="#475569" />
             {/* Left Brick Seams */}
@@ -293,7 +315,7 @@ export function LandscapeVillage({
             <line x1="22" y1="35" x2="52" y2="35" stroke="#78350f" strokeWidth="2" />
             <line x1="22" y1="50" x2="52" y2="50" stroke="#78350f" strokeWidth="2" />
 
-            {/* Climbing Green Vine Leaves STRICTLY on Stone/Brick Gate Posts & Arch */}
+            {/* Climbing Green Vine Leaves on Brick Posts & Arch */}
             <use href="#vine-cluster" x="-1" y="16" />
             <use href="#vine-cluster" x="2" y="40" transform="scale(0.8)" />
             <use href="#vine-cluster" x="8" y="2" transform="scale(0.85)" />
@@ -302,11 +324,11 @@ export function LandscapeVillage({
             <use href="#vine-cluster" x="55" y="44" transform="scale(0.85)" />
           </g>
 
-          {/* CORNER WATCHTOWER 3: Bottom-Left */}
-          <use href="#medieval-watchtower" x="5" y="235" />
+          {/* CORNER WATCHTOWER 3: Bottom-Left (Foreground) */}
+          <use href="#medieval-watchtower" x="-6" y="265" />
 
-          {/* CORNER WATCHTOWER 4: Bottom-Right */}
-          <use href="#medieval-watchtower" x="210" y="235" />
+          {/* CORNER WATCHTOWER 4: Bottom-Right (Foreground) */}
+          <use href="#medieval-watchtower" x="226" y="265" />
 
         </g>
       </svg>
