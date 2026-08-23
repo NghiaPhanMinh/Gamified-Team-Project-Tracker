@@ -270,6 +270,7 @@ export function CustomFrameworkBuilder({
                 </button>
                 <button
                   type="button"
+                  className="remove-phase-button"
                   aria-label={`Remove ${phase.name || `phase ${index + 1}`}`}
                   onClick={() => removePhase(index)}
                 >

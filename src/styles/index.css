@@ -1900,16 +1900,28 @@ select:focus-visible {
 
 .custom-framework-empty {
   margin-top: 1.5rem;
-  padding: 1.25rem;
-  border: 3px dashed var(--color-navy);
-  border-radius: 1.2rem;
-  background: color-mix(in srgb, var(--color-cream) 78%, transparent);
+  padding: 2.25rem 1.5rem;
+  border: 3px dashed #101517;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  color: #101517 !important;
   text-align: center;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.12);
 }
 
 .custom-framework-empty strong {
   font-family: var(--font-heading);
-  font-size: 1.7rem;
+  font-size: 1.8rem;
+  color: #101517 !important;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.custom-framework-empty p {
+  color: #101517 !important;
+  font-weight: 600;
+  margin: 0;
+  opacity: 0.9;
 }
 
 .custom-framework-grid {
@@ -1973,14 +1985,28 @@ select:focus-visible {
 }
 
 .custom-framework-builder > header {
+  display: flex;
   align-items: flex-start;
+  justify-content: space-between;
   margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.custom-framework-builder > header .card-eyebrow {
+  margin: 0 0 0.35rem 0;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text);
+  display: block;
 }
 
 .custom-framework-builder h3 {
-  max-width: 15ch;
+  max-width: 100%;
   margin: 0;
-  font-size: clamp(2.2rem, 4vw, 4rem);
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  line-height: 1.25;
 }
 
 .custom-framework-builder .quiet-button {
@@ -2000,8 +2026,27 @@ select:focus-visible {
   display: grid;
   align-content: start;
   gap: 0.45rem;
-  font-size: 0.84rem;
-  font-weight: 900;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--color-text) !important;
+}
+
+.framework-basics input,
+.framework-basics textarea,
+.custom-phase-fields input,
+.custom-phase-fields textarea {
+  background: var(--color-surface, #ffffff) !important;
+  color: var(--color-text, #101517) !important;
+  border: 2px solid #101517 !important;
+  border-radius: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+}
+
+.framework-basics input::placeholder,
+.custom-phase-fields input::placeholder {
+  color: var(--color-muted, #666666);
+  opacity: 0.75;
 }
 
 .framework-basics label:last-child {
@@ -2010,27 +2055,38 @@ select:focus-visible {
 
 .custom-phase-editor-list {
   display: grid;
-  gap: 1rem;
+  gap: 1.25rem;
   margin: 1.5rem 0;
   padding: 0;
   list-style: none;
 }
 
 .custom-phase-editor {
-  padding: 1rem;
-  border: 3px solid var(--color-navy);
-  border-radius: 1rem;
-  background: var(--color-pink);
+  padding: 1.25rem;
+  border: 3px solid #101517;
+  border-radius: 1.25rem;
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #101517);
+  box-shadow: 4px 4px 0 #101517;
 }
 
 .custom-phase-toolbar {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .custom-phase-toolbar > span {
   font-family: var(--font-heading);
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 900;
+  color: #101517;
+  background: var(--color-pink);
+  padding: 0.3rem 0.85rem;
+  border: 2px solid #101517;
+  border-radius: 999px;
+  box-shadow: 2px 2px 0 #101517;
 }
 
 .custom-phase-toolbar > div {
@@ -2040,30 +2096,65 @@ select:focus-visible {
 
 .custom-phase-toolbar button,
 .add-phase-button {
-  min-height: 2.45rem;
-  padding: 0.4rem 0.65rem;
-  border: 2px solid var(--color-navy);
+  min-height: 2.2rem;
+  padding: 0.35rem 0.75rem;
+  border: 2px solid #101517;
   border-radius: 0.65rem;
   background: var(--color-yellow);
-  color: var(--color-navy);
+  color: #101517 !important;
   font-weight: 900;
   cursor: pointer;
+  box-shadow: 2px 2px 0 #101517;
+  transition: transform 0.1s ease;
+}
+
+.custom-phase-toolbar button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.custom-phase-toolbar button.remove-phase-button {
+  background: #ff4d4d !important;
+  color: #ffffff !important;
 }
 
 .custom-phase-toolbar button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
+  box-shadow: none;
 }
 
 .custom-phase-fields small {
   font-weight: 700;
+  opacity: 0.85;
+  color: var(--color-text);
 }
 
 .phase-option-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.7rem;
-  margin-top: 1rem;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.phase-option-grid label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.6rem 0.85rem;
+  border: 2px solid #101517;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--color-yellow) 15%, var(--color-surface));
+  color: var(--color-text) !important;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.phase-option-grid input[type="checkbox"] {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--color-pink);
+  cursor: pointer;
 }
 
 .phase-option-grid label,
