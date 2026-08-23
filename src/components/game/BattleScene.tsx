@@ -1511,13 +1511,14 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           onClick={() => setShowLeaderboardModal(true)}
           type="button"
         >
-          🏆 Leaderboard
+          <span className="rpg-control-icon rpg-rank-icon" aria-hidden="true"><i /><i /><i /></span>
+          Leaderboard
         </button>
 
         {/* Admin Edit Dragon Layout Overlay Button */}
         <button
-          className="rpg-btn-leaderboard"
-          style={{ right: "185px", background: "#475569", borderColor: "#94a3b8" }}
+          className="rpg-btn-leaderboard rpg-btn-layout-admin"
+          style={{ right: "185px" }}
           onClick={() => {
             setShowDragonEditor((prev) => !prev);
             if (!selectedDragonPart) {
@@ -1526,7 +1527,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           }}
           type="button"
         >
-          🛠️ Layout Admin
+          <span className="rpg-control-icon rpg-layout-icon" aria-hidden="true"><i /><i /><i /><i /></span>
+          Layout Admin
         </button>
 
         {/* Attack Circular Action Button */}
@@ -1535,12 +1537,17 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           onClick={() => setShowAttackChoiceModal(true)}
           type="button"
         >
-          ⚔️<br />Attack
+          Attack
         </button>
 
         {/* Floating Mob-Style Boss HP Bar (Intimidating flame outline + moveable position) */}
         <div
           className="boss-hp-mob-style"
+          role="progressbar"
+          aria-label="Boss health"
+          aria-valuemin={0}
+          aria-valuemax={state.maximumHp}
+          aria-valuenow={state.remainingHp}
           style={{
             left: `calc(${Math.min(92, Math.max(8, (dragonX / 10) - 2.5))}% + ${dragonHpBarPos.x}px)`,
             top: `calc(85px + ${dragonHpBarPos.y}px)`,
@@ -1740,11 +1747,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           LEADERBOARD MODAL
          ========================================================================= */}
       {showLeaderboardModal && (
-        <div className="rpg-modal-backdrop" onClick={() => setShowLeaderboardModal(false)}>
-          <div className="rpg-wood-board" onClick={(e) => e.stopPropagation()}>
+        <div className="rpg-modal-backdrop rpg-leaderboard-backdrop" onClick={() => setShowLeaderboardModal(false)}>
+          <div className="rpg-wood-board rpg-leaderboard-board" onClick={(e) => e.stopPropagation()}>
             <div className="rpg-wood-board-bottom-caps" />
-            <h3 className="rpg-board-title">📜 Quest Leaderboard</h3>
-            <div className="rpg-parchment-sheet">
+            <h3 className="rpg-board-title rpg-leaderboard-title">Quest Leaderboard</h3>
+            <div className="rpg-parchment-sheet rpg-leaderboard-sheet">
               {leaderboardData === undefined ? (
                 <p style={{ textAlign: "center" }}>Gathering scrolls...</p>
               ) : leaderboardData.length === 0 ? (
@@ -1763,13 +1770,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     {leaderboardData.map((item, idx) => (
                       <tr key={item.profileId}>
                         <td className="rank">
-                          {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`}
+                          <span>{String(idx + 1).padStart(2, "0")}</span>
                         </td>
                         <td style={{ fontWeight: 700 }}>{item.displayName}</td>
-                        <td style={{ textAlign: "center", fontWeight: 800, color: "#c2410c" }}>
+                        <td className="rpg-leaderboard-stat is-goblins">
                           {item.goblinsKilled}
                         </td>
-                        <td style={{ textAlign: "center", fontWeight: 800, color: "#166534" }}>
+                        <td className="rpg-leaderboard-stat is-quests">
                           {item.tasksCompleted}
                         </td>
                       </tr>
@@ -1779,26 +1786,15 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               )}
 
               {/* Dedicated Scrollable Combat & Kill Log Box */}
-              <div style={{ marginTop: "14px", borderTop: "2px dashed #b45309", paddingTop: "10px" }}>
-                <h4 style={{ margin: "0 0 6px 0", fontSize: "0.85rem", color: "#78350f", fontFamily: "var(--font-heading), serif", display: "flex", alignItems: "center", gap: "6px" }}>
-                  ⚔️ Combat & Kill Activity Log
+              <div className="rpg-leaderboard-log">
+                <h4 className="rpg-leaderboard-log-title">
+                  Combat &amp; Kill Activity Log
                 </h4>
                 <div
-                  style={{
-                    maxHeight: "140px",
-                    overflowY: "auto",
-                    background: "rgba(0, 0, 0, 0.05)",
-                    border: "1.5px solid #d97706",
-                    borderRadius: "6px",
-                    padding: "6px 8px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "5px",
-                    fontSize: "0.72rem",
-                  }}
+                  className="rpg-leaderboard-events"
                 >
                   {!state?.events || state.events.length === 0 ? (
-                    <p style={{ margin: 0, textAlign: "center", color: "#78350f", fontStyle: "italic", padding: "8px 0" }}>
+                    <p className="rpg-leaderboard-empty">
                       No registered attacks yet. Slay goblins or strike the dragon to log damage!
                     </p>
                   ) : (
@@ -1808,27 +1804,19 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                       return (
                         <div
                           key={ev._id}
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            padding: "4px 8px",
-                            background: "#fffbeb",
-                            border: "1px solid #fef3c7",
-                            borderRadius: "4px",
-                          }}
+                          className="rpg-leaderboard-event"
                         >
-                          <div>
-                            <strong style={{ color: "#92400e" }}>{ev.attackerName}</strong>
-                            <span style={{ color: "#475569", marginLeft: "4px" }}>
+                          <div className="rpg-leaderboard-event-copy">
+                            <strong>{ev.attackerName}</strong>
+                            <span>
                               cast {spellIcon} on <strong>{isGoblin ? "👹 Goblin" : "🐲 Dragon"}</strong> ({ev.taskTitle})
                             </span>
                           </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                            <span style={{ fontWeight: 800, color: "#dc2626" }}>
+                          <div className="rpg-leaderboard-event-meta">
+                            <span className="rpg-leaderboard-damage">
                               -{ev.damage} HP
                             </span>
-                            <span style={{ fontSize: "0.62rem", color: "#64748b" }}>
+                            <span className="rpg-leaderboard-time">
                               {new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "numeric", month: "short", day: "numeric" }).format(ev.createdAt)}
                             </span>
                           </div>
@@ -1839,7 +1827,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 </div>
               </div>
             </div>
-            <button className="rpg-btn-close" type="button" onClick={() => setShowLeaderboardModal(false)}>
+            <button className="rpg-btn-close rpg-leaderboard-close" type="button" onClick={() => setShowLeaderboardModal(false)}>
               Close Board
             </button>
           </div>
