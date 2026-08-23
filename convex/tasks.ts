@@ -1056,8 +1056,8 @@ export const claimTask = mutation({
     if (task === null) throw new Error("This task no longer exists.");
     const { project, profile } = await requireProjectWriteAccess(ctx, task.projectId);
 
-    // If current user is already the assigned owner, return idempotently
-    if (task.primaryOwnerProfileId === profile._id && task.assignmentState === "assigned") {
+    // If current user is already the assigned owner and not open for claiming, return idempotently
+    if (task.primaryOwnerProfileId === profile._id && !task.isOpenForClaiming && task.assignmentState === "assigned") {
       return task._id;
     }
 
@@ -1067,15 +1067,29 @@ export const claimTask = mutation({
     }
 
     const now = Date.now();
+    let reviewerId = task.reviewerProfileId === profile._id ? undefined : task.reviewerProfileId;
+
+    // If reviewer is unassigned or invalid (owner == reviewer), pick a balanced reviewer if team members > 1
+    const projectMembers = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (q) => q.eq("projectId", project._id))
+      .collect();
+
+    const eligibleReviewers = projectMembers.filter((m) => m.profileId !== profile._id);
+    if (!reviewerId && eligibleReviewers.length > 0) {
+      reviewerId = eligibleReviewers[0].profileId;
+    }
+
     await ctx.db.patch(task._id, {
       primaryOwnerProfileId: profile._id,
       isOpenForClaiming: false,
       acceptanceStatus: "accepted",
       assignmentState: "assigned",
-      reviewerProfileId:
-        task.reviewerProfileId === profile._id ? undefined : task.reviewerProfileId,
+      reviewerProfileId: reviewerId,
+      status: task.status === "todo" ? "in_progress" : task.status,
       updatedAt: now,
     });
+
     await ctx.db.insert("activityLogs", {
       teamId: project.teamId,
       projectId: project._id,

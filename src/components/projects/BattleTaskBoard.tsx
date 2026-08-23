@@ -93,7 +93,7 @@ function BattleTaskNote({
 
       <div className="battle-task-actions">
         {action === "claim" ? (
-          <button className="primary-button" type="button" disabled={disabled} onClick={() => onClaim(task.id)}>MayLamDi</button>
+          <button className="primary-button" type="button" disabled={disabled} onClick={() => onClaim(task.id)}>Nhận Task</button>
         ) : null}
         {action === "accept_or_decline" ? (
           <>
