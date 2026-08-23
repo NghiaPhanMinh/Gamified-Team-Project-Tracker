@@ -119,6 +119,115 @@ function ProjectShareButton({ teamId }: { teamId: Id<"teams"> }) {
   );
 }
 
+function RoomAssemblyLobby({
+  teamId,
+  members,
+  onStartPlanning,
+}: {
+  teamId: Id<"teams">;
+  members: Workspace["members"];
+  onStartPlanning: () => void;
+}) {
+  const teamWorkspace = useQuery(api.teams.getWorkspace, { teamId });
+  const [copied, setCopied] = useState(false);
+
+  const joinCode = teamWorkspace?.team?.joinCode || "";
+
+  async function copyCode() {
+    if (!joinCode) return;
+    try {
+      await navigator.clipboard.writeText(joinCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 4000);
+    } catch {
+      setCopied(true);
+    }
+  }
+
+  return (
+    <div className="room-assembly-lobby" style={{
+      margin: "0.5rem 0 1.5rem",
+      padding: "1.5rem",
+      borderRadius: "20px",
+      background: "var(--color-surface, #ffffff)",
+      border: "3px solid #101517",
+      boxShadow: "6px 6px 0 #101517",
+      color: "var(--color-text)",
+    }}>
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "1rem", marginBottom: "1rem" }}>
+        <div>
+          <span className="card-eyebrow" style={{ display: "inline-block", background: "var(--color-yellow, #fff73f)", color: "#101517", padding: "0.25rem 0.65rem", borderRadius: "999px", fontWeight: "900", border: "1.5px solid #101517", fontSize: "0.8rem", marginBottom: "0.4rem" }}>
+            🔑 ROOM CODE LOBBY
+          </span>
+          <h3 style={{ margin: "0.2rem 0", fontSize: "1.6rem", fontWeight: "900" }}>
+            Share Room Code &amp; Assemble Your Team
+          </h3>
+        </div>
+
+        {joinCode ? (
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", background: "color-mix(in srgb, var(--color-yellow) 20%, var(--color-surface))", padding: "0.5rem 0.85rem", borderRadius: "12px", border: "2px solid #101517" }}>
+            <span style={{ fontSize: "1.1rem", fontWeight: "900", letterSpacing: "0.08em" }}>
+              CODE: <strong style={{ color: "var(--color-pink, #ff8ae7)" }}>{joinCode}</strong>
+            </span>
+            <button
+              className="primary-button"
+              type="button"
+              style={{ padding: "0.35rem 0.75rem", fontSize: "0.85rem" }}
+              onClick={() => void copyCode()}
+            >
+              {copied ? "Copied! ✓" : "Copy Code"}
+            </button>
+          </div>
+        ) : null}
+      </div>
+
+      <div style={{ padding: "1rem", borderRadius: "14px", background: "color-mix(in srgb, var(--color-blue) 12%, var(--color-surface))", border: "2px solid var(--color-blue)", marginBottom: "1.25rem" }}>
+        <p style={{ margin: 0, fontSize: "0.93rem", lineHeight: "1.5", fontWeight: "600" }}>
+          <span>📢</span> Share room code <strong>{joinCode || "..."}</strong> with your teammates! As soon as team members join your room, <strong>AI Assistant will automatically activate and analyze your project brief</strong> to build and distribute tasks across your assembled team!
+        </p>
+      </div>
+
+      <div style={{ marginBottom: "1.25rem" }}>
+        <strong style={{ display: "block", fontSize: "0.95rem", marginBottom: "0.5rem" }}>
+          👥 Assembled Team Members ({members.length} Joined):
+        </strong>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+          {members.map((m, idx) => (
+            <span key={m.profileId} style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              padding: "0.4rem 0.75rem",
+              borderRadius: "999px",
+              background: idx === 0 ? "var(--color-pink, #ff8ae7)" : "var(--color-yellow, #fff73f)",
+              color: "#101517",
+              border: "1.5px solid #101517",
+              fontWeight: "800",
+              fontSize: "0.85rem",
+            }}>
+              <span>{idx === 0 ? "👑" : "👤"}</span> {m.displayName} {idx === 0 ? "(Leader)" : ""}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "1rem", paddingTop: "0.75rem", borderTop: "2px dashed color-mix(in srgb, var(--color-text) 20%, transparent)" }}>
+        <span style={{ fontSize: "0.85rem", opacity: 0.85, fontWeight: "600" }}>
+          ⏳ Waiting for teammates to join via room code...
+        </span>
+        <button
+          className="secondary-button"
+          type="button"
+          onClick={onStartPlanning}
+          style={{ fontSize: "0.88rem" }}
+        >
+          Start AI Brief Analysis Now ({members.length} Member)
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function ProjectWorkspace({ projectId, initialTab = "progress" }: ProjectWorkspaceProps) {
   const workspace = useQuery(api.tasks.getWorkspace, { projectId });
   if (workspace === undefined) {
@@ -166,6 +275,8 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
     return battleState.members.filter((m) => m.isInactive7Days);
   }, [battleState?.members]);
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const [manualAiStart, setManualAiStart] = useState(false);
+  const shouldRunAi = workspace.members.length > 1 || manualAiStart;
   const [editingTaskId, setEditingTaskId] = useState<Id<"tasks"> | null>(null);
   const [openBattleTaskId, setOpenBattleTaskId] = useState<Id<"tasks"> | null>(null);
   const [taskTitle, setTaskTitle] = useState("");
@@ -531,24 +642,32 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
       {error ? <p className="form-error" role="alert">{error}</p> : null}
       {activeTab === "plan" ? (
         <div className="project-overview-flow project-plan-view">
-          {workspace.tasks.length === 0 ? (
+          {workspace.tasks.length === 0 && !shouldRunAi && (
+            <RoomAssemblyLobby
+              teamId={workspace.project.teamId}
+              members={workspace.members}
+              onStartPlanning={() => setManualAiStart(true)}
+            />
+          )}
+
+          {workspace.tasks.length === 0 && shouldRunAi && (
             <div className="new-project-ai-notice" style={{ margin: "0.5rem 0 1rem", padding: "1rem 1.25rem", borderRadius: "16px", background: "color-mix(in srgb, var(--color-yellow) 15%, var(--color-surface))", border: "2px solid var(--color-yellow)", color: "var(--color-text)" }}>
               <strong style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "1.05rem", marginBottom: "0.25rem" }}>
-                <span>🚀</span> Welcome to your new project room!
+                <span>⚡</span> Team Assembled! AI Brief Analysis Activated ({workspace.members.length} Members)
               </strong>
               <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.9 }}>
-                AI is automatically generating a project plan from your description. Review the generated tasks, make any adjustments, and click <strong>Confirm &amp; Save Plan</strong> to officially start your project!
+                AI is analyzing your project brief and automatically generating task allocations for your assembled team members. Review the generated plan and click <strong>Confirm &amp; Save Plan</strong> to officially start your project!
               </p>
             </div>
-          ) : null}
+          )}
 
-          {workspace.canManageProject ? (
+          {(workspace.tasks.length > 0 || shouldRunAi) && (
             <AIPlanningAssistant
               workspace={workspace}
               onUseTask={useAiTask}
-              autoStart={workspace.tasks.length === 0}
+              autoStart={workspace.tasks.length === 0 && shouldRunAi}
             />
-          ) : null}
+          )}
 
           <section className="project-plan-breakdown" aria-labelledby="project-plan-title">
             <div className="project-section-heading">
