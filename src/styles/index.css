@@ -2093,10 +2093,16 @@ select:focus-visible {
   box-shadow: 0 0 0 3px rgba(255, 247, 63, 0.4) !important;
 }
 
+.custom-framework-builder input::placeholder,
+.custom-framework-builder textarea::placeholder,
 .framework-basics input::placeholder,
-.custom-phase-fields input::placeholder {
-  color: #666666 !important;
+.framework-basics textarea::placeholder,
+.custom-phase-fields input::placeholder,
+.custom-phase-fields textarea::placeholder {
+  color: #778088 !important;
   opacity: 0.85 !important;
+  font-weight: 500 !important;
+  font-style: italic !important;
 }
 
 .framework-basics label:last-child {

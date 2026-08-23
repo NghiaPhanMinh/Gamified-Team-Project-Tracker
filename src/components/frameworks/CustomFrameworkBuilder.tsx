@@ -231,6 +231,7 @@ export function CustomFrameworkBuilder({
             minLength={2}
             maxLength={80}
             required
+            placeholder="e.g. 3D Character Pipeline, Mobile App Redesign..."
             value={name}
             onChange={(event) => setName(event.target.value)}
           />
@@ -240,6 +241,7 @@ export function CustomFrameworkBuilder({
           <textarea
             rows={3}
             maxLength={500}
+            placeholder="e.g. Standard team workflow for research, prototyping, testing, and final asset delivery..."
             value={description}
             onChange={(event) => setDescription(event.target.value)}
           />
@@ -286,6 +288,7 @@ export function CustomFrameworkBuilder({
                   type="text"
                   maxLength={80}
                   required
+                  placeholder="e.g. Discovery & Research"
                   value={phase.name}
                   onChange={(event) =>
                     updatePhase(index, { name: event.target.value })
@@ -297,6 +300,7 @@ export function CustomFrameworkBuilder({
                 <textarea
                   rows={2}
                   maxLength={500}
+                  placeholder="e.g. Define user requirements, gather references, and set up project scope..."
                   value={phase.description}
                   onChange={(event) =>
                     updatePhase(index, { description: event.target.value })
@@ -307,7 +311,7 @@ export function CustomFrameworkBuilder({
                 Suggested deliverables
                 <input
                   type="text"
-                  placeholder="Research summary, prototype, presentation"
+                  placeholder="e.g. Moodboard, User Journey, Prototype"
                   value={phase.deliverables}
                   onChange={(event) =>
                     updatePhase(index, { deliverables: event.target.value })
@@ -319,7 +323,7 @@ export function CustomFrameworkBuilder({
                 Common skills
                 <input
                   type="text"
-                  placeholder="Research, writing, facilitation"
+                  placeholder="e.g. Figma, Blender 3D, UI Research"
                   value={phase.skills}
                   onChange={(event) =>
                     updatePhase(index, { skills: event.target.value })
