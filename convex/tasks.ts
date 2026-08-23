@@ -57,6 +57,38 @@ async function ensureProjectMember(
   return (await ctx.db.get(id))!;
 }
 
+const DEFAULT_CHARACTER_FILL = "#FFD54F";
+const DEFAULT_CHARACTER_OUTLINE = "#1A1A1A";
+
+async function ensureTeamMember(
+  ctx: MutationCtx,
+  teamId: Id<"teams">,
+  profileId: Id<"userProfiles">,
+) {
+  const existing = await ctx.db
+    .query("teamMembers")
+    .withIndex("by_team_and_user", (query) =>
+      query.eq("teamId", teamId).eq("profileId", profileId),
+    )
+    .unique();
+
+  if (existing !== null) {
+    return existing;
+  }
+
+  const now = Date.now();
+  const id = await ctx.db.insert("teamMembers", {
+    teamId,
+    profileId,
+    role: "member",
+    joinedAt: now,
+    characterFill: DEFAULT_CHARACTER_FILL,
+    characterOutline: DEFAULT_CHARACTER_OUTLINE,
+  });
+
+  return (await ctx.db.get(id))!;
+}
+
 async function requireProjectWriteAccess(
   ctx: MutationCtx,
   projectId: Id<"projects">,
@@ -1061,16 +1093,9 @@ export const claimTask = mutation({
       return task._id;
     }
 
-    const isClaimable = Boolean(
-      task.isOpenForClaiming ||
-      task.assignmentState === "open" ||
-      task.assignmentState === "unassigned" ||
-      task.primaryOwnerProfileId === profile._id ||
-      (task.status === "todo" && task.acceptanceStatus !== "accepted")
-    );
-
-    if (!isClaimable) {
-      throw new Error("This task is not open for claiming or is already assigned.");
+    // If task is not open for claiming and already assigned to another member, throw clean error
+    if (!task.isOpenForClaiming && task.assignmentState === "assigned" && task.primaryOwnerProfileId !== profile._id) {
+      throw new Error("This task is not open for claiming or has already been claimed by another team member.");
     }
 
     const now = Date.now();
