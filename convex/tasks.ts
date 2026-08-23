@@ -1061,8 +1061,15 @@ export const claimTask = mutation({
       return task._id;
     }
 
-    // Allow claiming tasks that are open for claiming, unassigned, or open
-    if (!task.isOpenForClaiming && task.assignmentState !== "unassigned" && task.assignmentState !== "open") {
+    const isClaimable = Boolean(
+      task.isOpenForClaiming ||
+      task.assignmentState === "open" ||
+      task.assignmentState === "unassigned" ||
+      task.primaryOwnerProfileId === profile._id ||
+      (task.status === "todo" && task.acceptanceStatus !== "accepted")
+    );
+
+    if (!isClaimable) {
       throw new Error("This task is not open for claiming or is already assigned.");
     }
 

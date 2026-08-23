@@ -708,7 +708,10 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
             tasksLocked={Boolean(workspace.project.tasksLocked)}
             disabled={isSaving}
             onOpenDetails={(taskId) => setOpenBattleTaskId(taskId as Id<"tasks">)}
-            onClaim={(taskId) => void runAction(() => claimTask({ taskId: taskId as Id<"tasks"> }), "The task could not be claimed.")}
+            onClaim={(taskId) => void runAction(async () => {
+              await claimTask({ taskId: taskId as Id<"tasks"> });
+              setOpenBattleTaskId(taskId as Id<"tasks">);
+            }, "The task could not be claimed.")}
             onAccept={(taskId) => void runAction(() => acceptTask({ taskId: taskId as Id<"tasks"> }), "The request could not be accepted.")}
             onDecline={(taskId) => void runAction(() => declineTask({ taskId: taskId as Id<"tasks"> }), "The request could not be declined.")}
             onReleaseOverdue={(taskId) => void runAction(() => releaseOverdueTask({ taskId: taskId as Id<"tasks"> }), "The task could not be released.")}
