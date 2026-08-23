@@ -189,26 +189,27 @@ type GeneratedAiPlan = ValidatedAiPlan & {
 
 function planningPrompts(brief: string, context: AiPlanningContext) {
   const systemPrompt = [
-    "You are MayLamDi's cautious project planning assistant for university teams.",
-    "Return only the requested structured JSON.",
-    "Treat skills, availability, workload, preferences, and capacity as self-reported planning signals, never as objective fairness or performance scores.",
-    "Recommend the best methodology framework and explain why it fits the brief.",
-    "Use only the supplied phase IDs and member profile IDs. Every task needs one valid owner.",
-    "Recommend 2 to 4 key project milestones linked to supplied phase IDs with valid due dates within project bounds. Connect tasks to milestone tempIds when applicable.",
-    "Avoid overloading one member, explain each owner suggestion, use valid project dates, and create no circular dependencies.",
-    "For tasks spanning more than 14 days, include a supportive breakdown suggestion; otherwise use an empty string.",
-    "AI output is a draft for human review and confirmation, not a final uneditable decision.",
-    "Every task is required and needs peer review. A reviewer may be null so the task owner can choose an eligible reviewer later.",
+    "You are MayLamDi's expert AI Project Architect for team projects.",
+    "CRITICAL REQUIREMENT: Analyze the user's project brief deeply and generate CONCRETE, HIGHLY SPECIFIC, DOMAIN-TAILORED deliverables.",
+    "ABSOLUTELY BAN GENERIC TASK TITLES. Do NOT output generic titles like 'Research requirements', 'UI Design', 'Backend setup', 'Testing', 'Project Overview', 'Implementation', or 'Task 1'.",
+    "EVERY task title MUST specify the exact technical asset, deliverable, or component (e.g. 'Figma Component Tokens & Responsive Dashboard Layout', 'Convex Realtime Schema & Team Member Mutations', 'Vitest Unit Suite for Project Lobby & Allocation Flow').",
+    "DEEP BRIEF PARSING: Extract explicit technologies, frameworks, features, design specifications, and deliverables mentioned or implied in the user's brief.",
+    "TASK DESCRIPTIONS: Every task description MUST include 3 concrete sub-items: (1) Deliverable Specs, (2) Acceptance Criteria, and (3) Risk / Edge Case to verify.",
+    "SKILL-BASED ALLOCATION: Match tasks to member profile skills precisely. Explain the allocation rationale in 'allocationExplanation'.",
+    "MILESTONES: Generate 2-4 key project milestones connected to phase IDs and project due dates.",
+    "BOUNDS & FORMAT: Use supplied phase IDs and member profile IDs. Ensure non-overlapping task dates within project bounds.",
+    "Return ONLY the requested structured JSON matching the plan schema.",
   ].join(" ");
+
   const userPrompt = JSON.stringify({
-    request: "Interpret the brief, recommend the optimal framework, milestones, and phase-based tasks with member allocations.",
+    request: "Analyze the project brief deeply, extract domain deliverables, and generate specific, non-generic tasks allocated to assembled team members.",
     brief,
     project: context.project,
     currentFramework: context.project.frameworkName,
     phases: context.phases,
     members: context.members,
     existingTasks: context.existingTasks,
-    limits: { milestones: 4, tasks: 12 },
+    limits: { milestones: 4, tasks: 10 },
   });
   return { systemPrompt, userPrompt };
 }

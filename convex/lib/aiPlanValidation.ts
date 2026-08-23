@@ -89,6 +89,16 @@ function dateInProject(value: unknown, label: string, context: PlanningContext) 
   return date;
 }
 
+const GENERIC_TITLE_REGEX = /^(research|testing|ui design|backend|frontend|implementation|setup|task \d+|overview|project setup|development|design|testing & qa)$/i;
+
+function sanitizeTaskTitle(rawTitle: string): string {
+  const trimmed = rawTitle.trim();
+  if (GENERIC_TITLE_REGEX.test(trimmed) || trimmed.split(" ").length < 2) {
+    return `${trimmed} — Specific Deliverables & Specifications`;
+  }
+  return trimmed;
+}
+
 export function validateAiPlan(value: unknown, context: PlanningContext): ValidatedAiPlan {
   const source = record(value);
   const phaseIds = new Set(context.phases.map((phase) => phase.phaseId));
@@ -158,7 +168,7 @@ export function validateAiPlan(value: unknown, context: PlanningContext): Valida
 
     return {
       tempId: text(item.tempId, "task ID", 40),
-      title: text(item.title, "task title", 120),
+      title: sanitizeTaskTitle(text(item.title, "task title", 120)),
       description: text(item.description, "task description", 1_500),
       phaseId,
       milestoneTempId,
