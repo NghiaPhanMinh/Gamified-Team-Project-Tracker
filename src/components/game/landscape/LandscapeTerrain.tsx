@@ -39,18 +39,15 @@ export function LandscapeTerrain() {
             </g>
           </defs>
 
-          {/* Horizon Base Ground (Darkest Forest Green) */}
-          <rect x="0" y="95" width="1000" height="305" fill="#073312" />
+          {/* Far Horizon Base Band (Shade 2) */}
+          <rect x="0" y="95" width="1000" height="305" fill="#0d571e" />
 
-          {/* Band 2: Far Distance Horizon Band */}
-          <path d="M0,120 Q260,110 520,122 T1000,116 L1000,400 L0,400 Z" fill="#0d571e" />
+          {/* Mid Distance Horizon Band (Shade 1) */}
+          <path d="M0,128 Q280,118 560,132 T1000,124 L1000,400 L0,400 Z" fill="#127b2a" />
 
-          {/* Band 1: Mid Distance Horizon Band */}
-          <path d="M0,148 Q280,138 560,152 T1000,144 L1000,400 L0,400 Z" fill="#127b2a" />
-
-          {/* Main Primary Foreground Grass (70% of the grass terrain in vibrant #17a738) */}
-          <path d="M0,185 Q300,172 600,190 T1000,180 L1000,400 L0,400 Z" fill="#17a738" />
-          <rect x="0" y="195" width="1000" height="205" fill="#17a738" />
+          {/* Main Primary Foreground Grass (80% of the grass terrain in vibrant #17a738) */}
+          <path d="M0,158 Q300,146 600,162 T1000,154 L1000,400 L0,400 Z" fill="#17a738" />
+          <rect x="0" y="165" width="1000" height="235" fill="#17a738" />
 
           {/* --- Curvy Winding Dirt / Cobblestone Pathway --- */}
           <path

@@ -16,9 +16,10 @@ type LandscapeFXProps = {
 export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
   // Elemental spell type resolution
   const spell = activeEvent?.spellType || "lightning";
-  const isLightning = spell === "lightning" || spell === "spark";
-  const isFire = spell === "fire";
-  const isIce = !isLightning && !isFire; // ice / water / default
+  const isAll = spell === "all";
+  const isLightning = isAll || spell === "lightning" || spell === "spark";
+  const isFire = isAll || spell === "fire";
+  const isIce = isAll || spell === "ice" || spell === "water" || (!isLightning && !isFire);
 
   const isGoblinTarget = activeEvent?.target === "goblin";
   const targetX = activeEvent?.targetX ?? (isGoblinTarget ? 525 : 750);

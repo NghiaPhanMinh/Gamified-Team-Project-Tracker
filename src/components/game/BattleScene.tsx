@@ -290,7 +290,7 @@ const DEFAULT_DRAGON_OFFSETS: Record<string, { x: number; y: number; rotate: num
   "spine_head1": { "x": 0, "y": 0, "rotate": 0 },
   "spine_head2": { "x": -54, "y": 27, "rotate": 0 },
   "spine_head3": { "x": -81, "y": 13, "rotate": 0 },
-  "eye_base": { "x": -3, "y": 3, "rotate": 0 },
+  "eye_base": { "x": 5, "y": 5, "rotate": 0, "scale": 0.75 },
   "eye_pupil": { "x": -5, "y": 3, "rotate": 0 },
   "eye_specular": { "x": -5, "y": 4, "rotate": 0 },
   "eye_brow": { "x": 0, "y": 0, "rotate": 0 },
@@ -936,7 +936,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [testVillageHpOverride, setTestVillageHpOverride] = useState<number | null>(null);
   const [testDragonHpOverride, setTestDragonHpOverride] = useState<number | null>(null);
   const [testDeadGoblins, setTestDeadGoblins] = useState<Record<string, boolean>>({});
-  const [testActiveSpell, setTestActiveSpell] = useState<"lightning" | "fire" | "ice" | null>(null);
+  const [testActiveSpell, setTestActiveSpell] = useState<"lightning" | "fire" | "ice" | "all" | null>(null);
   const [testOverdueOverride, setTestOverdueOverride] = useState<boolean | null>(null);
 
   // Canvas Layer Transforms (All 10 layers customizable in Layout Admin)
@@ -946,13 +946,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       if (saved) return JSON.parse(saved);
     } catch {}
     return {
-      sky: { x: 0, y: 0, scale: 1, visible: true },
-      terrain: { x: 0, y: 0, scale: 1, visible: true },
+      sky: { x: 0, y: 0, scale: 1.05, visible: true },
+      terrain: { x: 0, y: -4, scale: 1.05, visible: true },
       village: { x: 0, y: 0, scale: 1, visible: true },
-      goblins: { x: 0, y: 0, scale: 1, visible: true },
+      goblins: { x: 50, y: 0, scale: 1, visible: true },
       players: { x: 0, y: 0, scale: 1, visible: true },
       dragon: { x: 0, y: 0, scale: 1, visible: true },
-      fx: { x: 0, y: 0, scale: 1, visible: true },
+      fx: { x: 0, y: 0, scale: 1.15, visible: true },
     };
   });
 
@@ -961,7 +961,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       const saved = localStorage.getItem("pvz_bar_config");
       if (saved) return JSON.parse(saved);
     } catch {}
-    return { x: 0, y: 0, width: 380, scale: 1, visible: true };
+    return { x: 0, y: 0, width: 380, scale: 1.05, visible: true };
   });
 
   useEffect(() => {
@@ -1161,7 +1161,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         if (parsed.dragonHpBarPos) return parsed.dragonHpBarPos;
       }
     } catch {}
-    return { x: 0, y: 0 };
+    return { x: -14, y: 46 };
   });
 
   const [dragonHpBarWidth, setDragonHpBarWidth] = useState<number>(() => {
@@ -1172,7 +1172,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         if (parsed.dragonHpBarWidth) return parsed.dragonHpBarWidth;
       }
     } catch {}
-    return 180;
+    return 243;
   });
 
   const [dragonHpBarHeight, setDragonHpBarHeight] = useState<number>(() => {
@@ -1183,7 +1183,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         if (parsed.dragonHpBarHeight) return parsed.dragonHpBarHeight;
       }
     } catch {}
-    return 14;
+    return 17;
   });
 
   const [dragonHpBarScale, setDragonHpBarScale] = useState<number>(() => {
@@ -1194,7 +1194,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         if (parsed.dragonHpBarScale) return parsed.dragonHpBarScale;
       }
     } catch {}
-    return 1;
+    return 1.1;
   });
 
   const [villageHpBarPos, setVillageHpBarPos] = useState<{ x: number; y: number }>(() => {
@@ -1205,7 +1205,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         if (parsed.villageHpBarPos) return parsed.villageHpBarPos;
       }
     } catch {}
-    return { x: 0, y: 0 };
+    return { x: -63, y: 8 };
   });
 
   const [villageHpBarWidth, setVillageHpBarWidth] = useState<number>(() => {
@@ -1227,7 +1227,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         if (parsed.villageHpBarHeight) return parsed.villageHpBarHeight;
       }
     } catch {}
-    return 12;
+    return 14;
   });
 
   const [villageHpBarScale, setVillageHpBarScale] = useState<number>(() => {
@@ -1238,7 +1238,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         if (parsed.villageHpBarScale) return parsed.villageHpBarScale;
       }
     } catch {}
-    return 1;
+    return 1.15;
   });
 
   // Direct Shape Drag and Drop
@@ -1877,6 +1877,17 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   );
 
   const combinedActiveEvent = useMemo(() => {
+    if (testActiveSpell) {
+      return {
+        id: "test-spell-" + testActiveSpell + "-" + (state?.events?.length ?? 0),
+        attackerName: "Layout Admin",
+        damage: 999,
+        spellType: testActiveSpell,
+        target: "dragon" as const,
+        targetX: 750,
+        targetY: 175,
+      };
+    }
     if (localAttack) return localAttack;
     if (activeEvent) {
       return {
@@ -1890,7 +1901,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       };
     }
     return null;
-  }, [localAttack, activeEvent]);
+  }, [testActiveSpell, localAttack, activeEvent, state?.events?.length]);
 
   const goblins = useMemo(() => {
     if (!state) return [];
@@ -2200,6 +2211,9 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               position: "relative",
               background: "#1e293b",
               borderRadius: "3px",
+              border: "none",
+              outline: "none",
+              boxShadow: "none",
               overflow: "hidden",
               display: "flex",
               alignItems: "center",
@@ -3002,7 +3016,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               <div style={{ display: "grid", gap: "10px" }}>
                 {/* Attack VFX trigger */}
                 <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155" }}>
-                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#38bdf8", textTransform: "uppercase" }}>Combat Attack Effects</h5>
+                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#38bdf8", textTransform: "uppercase" }}>Combat Attack Effects (Debug All Monsters & Boss)</h5>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
                     <button type="button" style={{ padding: "6px", background: "#0284c7", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("lightning")}>
                       Lightning Spell
@@ -3013,7 +3027,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     <button type="button" style={{ padding: "6px", background: "#0d9488", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("ice")}>
                       Ice Spell
                     </button>
-                    <button type="button" style={{ padding: "6px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell(null)}>
+                    <button type="button" style={{ padding: "6px", background: "#7c3aed", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("all")}>
+                      ⚡🔥❄️ All Spells at Once
+                    </button>
+                    <button type="button" style={{ gridColumn: "1 / span 2", padding: "6px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell(null)}>
                       Clear Attack FX
                     </button>
                   </div>

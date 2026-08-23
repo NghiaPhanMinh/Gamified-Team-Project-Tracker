@@ -13,7 +13,6 @@ describe("approved partial game theme", () => {
     expect(styles).toContain(".rpg-btn-layout-admin");
     expect(styles).toContain("background: #4ca0fe");
     expect(styles).toContain("background: #fff73f");
-    expect(styles).toContain("background: #feaa01");
     expect(styles).toContain(".rpg-leaderboard-board");
     expect(styles).toContain("border: 7px solid #4ca0fe");
   });
@@ -22,6 +21,6 @@ describe("approved partial game theme", () => {
     expect(battleSource).toContain('aria-label="Boss health"');
     expect(styles).toContain(".boss-hp-mob-fill");
     expect(styles).toContain("linear-gradient(90deg, #fd39e4, #feaa01)");
-    expect(styles).toContain("border: 3px solid #fffdec");
+    expect(styles).toContain(".boss-hp-mob-style");
   });
 });

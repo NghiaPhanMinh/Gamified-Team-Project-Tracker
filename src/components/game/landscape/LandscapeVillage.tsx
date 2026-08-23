@@ -167,10 +167,10 @@ export function LandscapeVillage({
           {/* CORNER WATCHTOWER 2: Top-Right */}
           <use href="#medieval-watchtower" x="210" y="195" />
 
-          {/* --- MEDIEVAL HOUSES (Cobble + Half-Timber + All Orange Roofs, No Outlines) --- */}
+          {/* --- MEDIEVAL HOUSES (Cobble + Half-Timber + All Orange Roofs, Standing Tall Above Gate) --- */}
 
           {/* House 1: Left Medieval Cottage */}
-          <g transform="translate(46, 215)">
+          <g transform="translate(46, 162)">
             {/* Stone Ground Floor */}
             <rect x="0" y="32" width="46" height="36" fill="#64748b" />
             {/* Timber Framing Half-Timbered Upper Gable */}
@@ -188,8 +188,8 @@ export function LandscapeVillage({
             <rect x="6" y="42" width="8" height="8" rx="1" fill="#fde047" />
           </g>
 
-          {/* House 2: Center Medieval Town Hall / Great Hall */}
-          <g transform="translate(102, 185)">
+          {/* House 2: Center Medieval Town Hall / Great Hall (Tall & Prominent) */}
+          <g transform="translate(102, 130)">
             {/* Stone Base */}
             <rect x="0" y="40" width="64" height="52" fill="#475569" />
             {/* Stone Seam Lines */}
@@ -213,7 +213,7 @@ export function LandscapeVillage({
           </g>
 
           {/* House 3: Right Medieval Blacksmith & Forge */}
-          <g transform="translate(174, 218)">
+          <g transform="translate(174, 165)">
             {/* Stone Chimney */}
             <rect x="26" y="2" width="11" height="28" fill="#475569" />
             {/* Gentle Smoke from Chimney */}
@@ -293,13 +293,13 @@ export function LandscapeVillage({
             <line x1="22" y1="35" x2="52" y2="35" stroke="#78350f" strokeWidth="2" />
             <line x1="22" y1="50" x2="52" y2="50" stroke="#78350f" strokeWidth="2" />
 
-            {/* Climbing Green Vine Leaves on Brick Gate Posts & Arch */}
-            <use href="#vine-cluster" x="-3" y="18" />
-            <use href="#vine-cluster" x="2" y="42" transform="scale(0.8)" />
-            <use href="#vine-cluster" x="18" y="-6" transform="rotate(25)" />
-            <use href="#vine-cluster" x="48" y="-4" transform="rotate(-20)" />
-            <use href="#vine-cluster" x="62" y="28" />
-            <use href="#vine-cluster" x="55" y="50" transform="scale(0.85)" />
+            {/* Climbing Green Vine Leaves STRICTLY on Stone/Brick Gate Posts & Arch */}
+            <use href="#vine-cluster" x="-1" y="16" />
+            <use href="#vine-cluster" x="2" y="40" transform="scale(0.8)" />
+            <use href="#vine-cluster" x="8" y="2" transform="scale(0.85)" />
+            <use href="#vine-cluster" x="50" y="2" transform="scale(0.85)" />
+            <use href="#vine-cluster" x="53" y="18" />
+            <use href="#vine-cluster" x="55" y="44" transform="scale(0.85)" />
           </g>
 
           {/* CORNER WATCHTOWER 3: Bottom-Left */}
