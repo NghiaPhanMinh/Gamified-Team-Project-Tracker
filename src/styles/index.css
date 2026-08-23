@@ -6649,6 +6649,47 @@ footer {
   color: #0f172a;
 }
 
+/* Guided Form Action Spacing & No Overlap Layout */
+.guided-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.guided-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--color-text) 25%, transparent);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.guided-back-link:hover {
+  border-color: var(--color-yellow);
+  background: color-mix(in srgb, var(--color-yellow) 20%, var(--color-surface));
+}
+
+.guided-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px dashed color-mix(in srgb, var(--color-text) 20%, transparent);
+}
+
+
 
 
 
