@@ -6658,25 +6658,35 @@ select option,
 }
 
 .attached-image-chip button {
+  background: none;
+  border: none;
+  color: var(--color-muted);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
 
 /* Hero Save Plan & Allocations Action Card */
 .ai-save-actions-hero {
-  margin-top: 2rem;
-  padding: 1.75rem;
-  border: 3px solid #101517;
+  margin-top: 2.25rem;
+  padding: 1.85rem 2rem;
+  border: 3.5px solid #101517;
   border-radius: 1.5rem;
-  background: color-mix(in srgb, var(--color-yellow) 25%, var(--color-surface));
+  background: color-mix(in srgb, var(--color-pink) 15%, var(--color-surface));
   box-shadow: 6px 6px 0 #101517;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
 .ai-save-notice strong {
-  display: block;
-  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.3rem;
   font-weight: 900;
   margin-bottom: 0.35rem;
   color: var(--color-text);
@@ -6684,50 +6694,41 @@ select option,
 
 .ai-save-notice p {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
   opacity: 0.9;
   max-width: 55ch;
 }
 
 .hero-save-plan-button,
-button.hero-save-plan-button {
-  min-height: 3.4rem !important;
-  padding: 0.85rem 2.25rem !important;
-  font-size: 1.15rem !important;
+button.hero-save-plan-button,
+.primary-button.hero-save-plan-button {
+  min-height: 3.8rem !important;
+  padding: 1rem 2.75rem !important;
+  font-size: 1.25rem !important;
   font-weight: 900 !important;
-  letter-spacing: 0.03em !important;
+  letter-spacing: 0.04em !important;
+  background: var(--color-pink, #ff8ae7) !important;
   background-color: var(--color-pink, #ff8ae7) !important;
   color: #101517 !important;
-  border: 3px solid #101517 !important;
+  border: 3.5px solid #101517 !important;
   border-radius: 999px !important;
-  box-shadow: 4px 4px 0 #101517 !important;
-  cursor: pointer !important;
-  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
-}
-
-.hero-save-plan-button:hover:not(:disabled) {
-  transform: translateY(-2px) scale(1.03) !important;
   box-shadow: 6px 6px 0 #101517 !important;
+  cursor: pointer !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease !important;
 }
 
-.hero-save-plan-button:active:not(:disabled) {
+.hero-save-plan-button:hover:not(:disabled),
+button.hero-save-plan-button:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.04) !important;
+  box-shadow: 8px 8px 0 #101517 !important;
+  background-color: #ff6fe0 !important;
+}
+
+.hero-save-plan-button:active:not(:disabled),
+button.hero-save-plan-button:active:not(:disabled) {
   transform: translateY(1px) scale(0.98) !important;
   box-shadow: 2px 2px 0 #101517 !important;
-}
-
-/* Locked Project Tabs */
-.project-tabs button.is-locked {
-  opacity: 0.55 !important;
-  cursor: not-allowed !important;
-  border-style: dashed !important;
-}
-  background: none;
-  border: none;
-  color: var(--color-muted);
-  cursor: pointer;
-  font-size: 1rem;
-  line-height: 1;
-  padding: 0 0.2rem;
 }
 
 .attached-image-chip button:hover {
