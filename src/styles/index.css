@@ -2949,9 +2949,17 @@ footer {
 
 .ai-explanation {
   padding: 0.75rem;
-  border: 2px dashed var(--color-navy);
+  border: 2px dashed #101517;
   border-radius: 0.75rem;
   background: var(--color-yellow);
+  color: #101517 !important;
+}
+
+.ai-explanation,
+.ai-explanation *,
+:root[data-theme="dark"] .ai-explanation,
+:root[data-theme="dark"] .ai-explanation * {
+  color: #101517 !important;
 }
 
 .ai-explanation p {
@@ -2959,8 +2967,9 @@ footer {
   line-height: 1.45;
 }
 
+.ai-explanation strong,
 .ai-explanation small {
-  font-weight: 800;
+  font-weight: 800 !important;
 }
 
 .ai-notes-grid ul {
