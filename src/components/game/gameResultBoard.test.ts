@@ -42,4 +42,13 @@ describe("shared end-of-game result board", () => {
     expect(styles).toContain(".battle-result-stats,");
     expect(styles).toContain("grid-template-columns: 1fr;");
   });
+
+  it("keeps dark-mode result text readable on state-tinted light surfaces", () => {
+    expect(styles).toContain("--result-board-bg: color-mix(in srgb, var(--green) 22%, #fffdec)");
+    expect(styles).toContain("--result-board-bg: color-mix(in srgb, var(--orange) 28%, #fffdec)");
+    expect(styles).toContain("--result-board-text: #101517");
+    expect(styles).toContain("background: var(--result-board-bg)");
+    expect(styles).toContain("color: var(--result-board-text)");
+    expect(styles).toContain(':root[data-theme="dark"] .battle-result-stat');
+  });
 });
