@@ -153,83 +153,89 @@ export function LandscapeVillage({
           </g>
         </defs>
 
-        {/* --- 3D ISOMETRIC WALLED MEDIEVAL VILLAGE (Shorter Compact Walls & Grass Floor) --- */}
+        {/* --- 3D ISOMETRIC WALLED MEDIEVAL VILLAGE (Compact Grounded Medieval Houses) --- */}
         <g transform="translate(15, 0)">
 
-          {/* 1. COURTYARD GRASS FLOOR (Seamless Natural Grass with Subtle Pathway Accent) */}
-          <polygon points="20,200 234,200 244,265 10,265" fill="#17a738" />
-          <polygon points="24,202 230,202 238,260 16,260" fill="#1fb843" opacity="0.25" />
+          {/* 1. COURTYARD GRASS FLOOR (Seamless Natural Grass) */}
+          <polygon points="18,185 236,185 244,256 10,256" fill="#17a738" />
 
-          {/* 2. TOP BACK PALISADE WALL (Shorter, y = 200) */}
+          {/* 2. TOP BACK PALISADE WALL (y = 185) */}
           {Array.from({ length: 20 }).map((_, i) => (
-            <use key={`back-wall-${i}`} href="#palisade-log" x={24 + i * 10} y="195" />
+            <use key={`back-wall-${i}`} href="#palisade-log" x={24 + i * 10} y="185" />
           ))}
 
           {/* CORNER WATCHTOWER 1: Top-Left */}
-          <use href="#medieval-watchtower" x="0" y="170" />
+          <use href="#medieval-watchtower" x="0" y="160" />
 
           {/* CORNER WATCHTOWER 2: Top-Right */}
-          <use href="#medieval-watchtower" x="220" y="170" />
+          <use href="#medieval-watchtower" x="220" y="160" />
 
-          {/* 3. LEFT PALISADE SIDE WALL (Shorter, y = 205 to 245) */}
+          {/* 3. LEFT PALISADE SIDE WALL (y = 195 to 240) */}
           {Array.from({ length: 5 }).map((_, i) => (
-            <use key={`left-wall-${i}`} href="#palisade-log" x={15 - i * 1.2} y={205 + i * 9} />
+            <use key={`left-wall-${i}`} href="#palisade-log" x={15 - i * 1.2} y={195 + i * 9} />
           ))}
 
-          {/* 4. RIGHT PALISADE SIDE WALL (Shorter, y = 205 to 245) */}
+          {/* 4. RIGHT PALISADE SIDE WALL (y = 195 to 240) */}
           {Array.from({ length: 5 }).map((_, i) => (
-            <use key={`right-wall-${i}`} href="#palisade-log" x={233 + i * 1.2} y={205 + i * 9} />
+            <use key={`right-wall-${i}`} href="#palisade-log" x={233 + i * 1.2} y={195 + i * 9} />
           ))}
 
-          {/* 5. MEDIEVAL BUILDINGS (Inside Courtyard, Sitting on Green Grass) */}
+          {/* 5. MEDIEVAL HALF-TIMBERED HOUSES (Firmly Grounded on Grass at y = 248) */}
 
-          {/* Building 1: Left Medieval Cottage */}
-          <g transform="translate(36, 170)">
-            {/* Stone Ground Floor */}
-            <rect x="0" y="32" width="46" height="34" fill="#64748b" />
-            {/* Timber Framing Half-Timbered Upper Gable */}
-            <polygon points="-4,34 23,8 50,34" fill="#fef3c7" />
+          {/* Building 1: Left Medieval Half-Timbered Cottage */}
+          <g transform="translate(36, 178)">
+            {/* Medieval Cream/Plaster Lower Ground Floor */}
+            <rect x="0" y="28" width="46" height="42" fill="#fef3c7" />
+            {/* Dark Brown Timber Corner Beams */}
+            <rect x="0" y="28" width="4" height="42" fill="#78350f" />
+            <rect x="42" y="28" width="4" height="42" fill="#78350f" />
+            <line x1="0" y1="48" x2="46" y2="48" stroke="#78350f" strokeWidth="2" />
             {/* Timber Diagonal Cross Beams */}
-            <line x1="3" y1="34" x2="23" y2="12" stroke="#78350f" strokeWidth="2" />
-            <line x1="43" y1="34" x2="23" y2="12" stroke="#78350f" strokeWidth="2" />
-            {/* All-Orange Overhanging Roof */}
-            <polygon points="-6,34 23,6 52,34" fill="#feaa01" />
-            <polygon points="23,6 52,34 23,34" fill="#ea580c" opacity="0.35" />
-            {/* Wooden Door */}
-            <rect x="17" y="44" width="12" height="22" rx="2" fill="#78350f" />
-            <circle cx="26" cy="54" r="1.5" fill="#facc15" />
-            {/* Lantern Window */}
-            <rect x="6" y="42" width="8" height="8" rx="1" fill="#fde047" />
+            <line x1="2" y1="28" x2="23" y2="48" stroke="#78350f" strokeWidth="1.8" />
+            <line x1="44" y1="28" x2="23" y2="48" stroke="#78350f" strokeWidth="1.8" />
+            <line x1="2" y1="68" x2="23" y2="48" stroke="#78350f" strokeWidth="1.8" />
+            <line x1="44" y1="68" x2="23" y2="48" stroke="#78350f" strokeWidth="1.8" />
+            {/* All-Orange Medieval Overhanging Roof */}
+            <polygon points="-6,28 23,2 52,28" fill="#feaa01" />
+            <polygon points="23,2 52,28 23,28" fill="#ea580c" opacity="0.35" />
+            {/* Timber Plank Door */}
+            <rect x="17" y="48" width="12" height="22" rx="2" fill="#5c2406" />
+            <circle cx="26" cy="58" r="1.5" fill="#facc15" />
+            {/* Glowing Medieval Leaded Window */}
+            <rect x="6" y="34" width="8" height="8" rx="1" fill="#fde047" stroke="#78350f" strokeWidth="1" />
           </g>
 
-          {/* Building 2: Center Medieval Town Hall / Great Hall (Grand & Tall) */}
-          <g transform="translate(94, 135)">
-            {/* Stone Base */}
-            <rect x="0" y="40" width="68" height="54" fill="#475569" />
-            {/* Stone Seam Lines */}
-            <line x1="0" y1="65" x2="68" y2="65" stroke="#334155" strokeWidth="1" />
-            {/* Half Timbered Upper Level */}
-            <rect x="2" y="16" width="64" height="26" fill="#fef3c7" />
-            <line x1="18" y1="16" x2="18" y2="42" stroke="#78350f" strokeWidth="2" />
-            <line x1="34" y1="16" x2="34" y2="42" stroke="#78350f" strokeWidth="2" />
-            <line x1="50" y1="16" x2="50" y2="42" stroke="#78350f" strokeWidth="2" />
-            <line x1="2" y1="16" x2="34" y2="42" stroke="#78350f" strokeWidth="1.5" />
-            <line x1="34" y1="16" x2="66" y2="42" stroke="#78350f" strokeWidth="1.5" />
+          {/* Building 2: Center Medieval Great Hall / Town Hall (Grounded at y = 248) */}
+          <g transform="translate(94, 142)">
+            {/* Half-Timbered Plaster Base */}
+            <rect x="0" y="38" width="68" height="68" fill="#fef3c7" />
+            {/* Timber Framing Vertical & Horizontal Grid */}
+            <rect x="0" y="38" width="4" height="68" fill="#78350f" />
+            <rect x="64" y="38" width="4" height="68" fill="#78350f" />
+            <line x1="0" y1="68" x2="68" y2="68" stroke="#78350f" strokeWidth="2.5" />
+            <line x1="18" y1="38" x2="18" y2="106" stroke="#78350f" strokeWidth="2" />
+            <line x1="34" y1="38" x2="34" y2="106" stroke="#78350f" strokeWidth="2" />
+            <line x1="50" y1="38" x2="50" y2="106" stroke="#78350f" strokeWidth="2" />
+            {/* Timber Cross Braces */}
+            <line x1="2" y1="38" x2="34" y2="68" stroke="#78350f" strokeWidth="1.5" />
+            <line x1="34" y1="38" x2="66" y2="68" stroke="#78350f" strokeWidth="1.5" />
+            <line x1="2" y1="104" x2="18" y2="68" stroke="#78350f" strokeWidth="1.5" />
+            <line x1="50" y1="68" x2="66" y2="104" stroke="#78350f" strokeWidth="1.5" />
             {/* All-Orange Steep Medieval Roof */}
-            <polygon points="-6,18 34,-12 74,18" fill="#feaa01" />
-            <polygon points="34,-12 74,18 34,18" fill="#ea580c" opacity="0.35" />
+            <polygon points="-6,40 34,10 74,40" fill="#feaa01" />
+            <polygon points="34,10 74,40 34,40" fill="#ea580c" opacity="0.35" />
             {/* Arched Double Timber Door */}
-            <path d="M 26 94 V 68 A 8 8 0 0 1 42 68 V 94 Z" fill="#78350f" />
-            <line x1="34" y1="62" x2="34" y2="94" stroke="#5c2406" strokeWidth="1" />
-            {/* Upper Lead Windows */}
-            <rect x="24" y="22" width="8" height="10" rx="1" fill="#fde047" />
-            <rect x="36" y="22" width="8" height="10" rx="1" fill="#fde047" />
+            <path d="M 26 106 V 78 A 8 8 0 0 1 42 78 V 106 Z" fill="#5c2406" />
+            <line x1="34" y1="72" x2="34" y2="106" stroke="#3b1402" strokeWidth="1.2" />
+            {/* Upper Windows */}
+            <rect x="23" y="46" width="8" height="10" rx="1" fill="#fde047" stroke="#78350f" strokeWidth="1" />
+            <rect x="37" y="46" width="8" height="10" rx="1" fill="#fde047" stroke="#78350f" strokeWidth="1" />
           </g>
 
-          {/* Building 3: Right Medieval Blacksmith & Forge */}
-          <g transform="translate(166, 172)">
+          {/* Building 3: Right Medieval Half-Timbered Forge / House */}
+          <g transform="translate(166, 178)">
             {/* Stone Chimney */}
-            <rect x="26" y="2" width="11" height="28" fill="#475569" />
+            <rect x="26" y="2" width="11" height="26" fill="#475569" />
             {/* Gentle Smoke from Chimney */}
             {isHealthy ? (
               <g transform="translate(31, -8)">
@@ -238,18 +244,24 @@ export function LandscapeVillage({
                 <circle cx="2" cy="-15" r="7" fill="#cbd5e1" opacity="0.3" />
               </g>
             ) : null}
-            {/* Forge Body */}
-            <rect x="0" y="28" width="44" height="36" fill="#64748b" />
+            {/* Half-Timbered Plaster Lower Body */}
+            <rect x="0" y="28" width="46" height="42" fill="#fef3c7" />
+            {/* Timber Frame Beams */}
+            <rect x="0" y="28" width="4" height="42" fill="#78350f" />
+            <rect x="42" y="28" width="4" height="42" fill="#78350f" />
+            <line x1="0" y1="48" x2="46" y2="48" stroke="#78350f" strokeWidth="2" />
+            <line x1="2" y1="28" x2="23" y2="48" stroke="#78350f" strokeWidth="1.8" />
+            <line x1="44" y1="28" x2="23" y2="48" stroke="#78350f" strokeWidth="1.8" />
             {/* All-Orange Forge Roof */}
-            <polygon points="-4,30 22,8 48,30" fill="#feaa01" />
-            <polygon points="22,8 48,30 22,30" fill="#ea580c" opacity="0.35" />
-            {/* Open Forge Hearth Glow */}
-            <rect x="14" y="44" width="16" height="20" rx="2" fill="#78350f" />
-            <circle cx="22" cy="54" r="5" fill="#f97316" />
-            <circle cx="22" cy="54" r="3" fill="#fde047" />
+            <polygon points="-4,28 23,2 50,28" fill="#feaa01" />
+            <polygon points="23,2 50,28 23,28" fill="#ea580c" opacity="0.35" />
+            {/* Open Hearth Glow */}
+            <rect x="14" y="48" width="18" height="22" rx="2" fill="#5c2406" />
+            <circle cx="23" cy="59" r="5" fill="#f97316" />
+            <circle cx="23" cy="59" r="3" fill="#fde047" />
           </g>
 
-          {/* 6. FRONT PALISADE WALL & LOWER FRONT GATE (Shorter, y = 245 to 280) */}
+          {/* 6. FRONT PALISADE WALL & LOWER FRONT GATE (Grounded at y = 248 to 280) */}
           
           {/* Front Left Fence */}
           <use href="#palisade-log" x="20" y="248" />
@@ -272,7 +284,7 @@ export function LandscapeVillage({
           <rect x="18" y="260" width="65" height="4" fill="#451a03" />
           <rect x="158" y="260" width="65" height="4" fill="#451a03" />
 
-          {/* --- MEDIEVAL GREY BRICK TEXTURED GATE (Shorter Gate, y = 230 to 280) --- */}
+          {/* --- MEDIEVAL GREY BRICK TEXTURED GATE (y = 230 to 280) --- */}
           <g transform="translate(85, 230)">
             {/* Left Brick Gate Post */}
             <rect x="0" y="0" width="22" height="52" fill="#475569" />

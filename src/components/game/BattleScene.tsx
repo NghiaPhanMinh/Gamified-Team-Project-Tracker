@@ -884,6 +884,192 @@ function BattleResultBoard({
   );
 }
 
+type QuestCardHoverItemProps = {
+  task: QuestTask;
+  palette: { bg: string; border: string; pin: string };
+  isClaimingQuest: boolean;
+  onClaim: (task: QuestTask) => void;
+  onAttack: (task: QuestTask) => void;
+  onDetails: (task: QuestTask) => void;
+};
+
+function QuestCardHoverItem({
+  task,
+  palette,
+  isClaimingQuest,
+  onClaim,
+  onAttack,
+  onDetails,
+}: QuestCardHoverItemProps) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={() => onDetails(task)}
+      style={{
+        position: "relative",
+        background: hovered ? palette.bg : "#ffffff",
+        color: "#101517",
+        border: "2px solid #101517",
+        borderRadius: "10px",
+        padding: hovered ? "14px 12px 12px 12px" : "12px 14px",
+        boxShadow: hovered ? "4px 4px 0 #101517" : "2px 2px 0 #101517",
+        cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        minHeight: hovered ? "145px" : "60px",
+        transition: "all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        transform: hovered ? "translateY(-3px) scale(1.02)" : "none",
+      }}
+    >
+      {/* Pushpin Marker (Only on hover) */}
+      {hovered && (
+        <div
+          style={{
+            position: "absolute",
+            top: "-6px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "12px",
+            height: "12px",
+            borderRadius: "50%",
+            background: palette.pin,
+            border: "2px solid #101517",
+            boxShadow: "0 2px 3px rgba(0,0,0,0.25)",
+          }}
+        />
+      )}
+
+      {/* Task Name (Always visible) */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px" }}>
+        <h4
+          style={{
+            margin: 0,
+            fontSize: "0.95rem",
+            fontWeight: 900,
+            color: "#101517",
+            lineHeight: "1.25",
+          }}
+        >
+          {task.title}
+        </h4>
+        {!hovered && (
+          <span
+            style={{
+              fontSize: "0.72rem",
+              fontWeight: 800,
+              background: task.isOpen ? "#fee2e2" : "rgba(16,21,23,0.08)",
+              color: task.isOpen ? "#b91c1c" : "#101517",
+              border: "1px solid " + (task.isOpen ? "#ef4444" : "#101517"),
+              padding: "1px 6px",
+              borderRadius: "4px",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}
+          >
+            {task.isOpen ? "Open" : task.assigneeName}
+          </span>
+        )}
+      </div>
+
+      {/* Details Revealed on Hover */}
+      {hovered && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "8px" }}>
+          {task.description && (
+            <p
+              style={{
+                margin: 0,
+                fontSize: "0.78rem",
+                color: "#334155",
+                lineHeight: "1.35",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {task.description}
+            </p>
+          )}
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.72rem", fontWeight: 800 }}>
+            <span style={{ background: "rgba(16,21,23,0.08)", padding: "2px 6px", borderRadius: "4px" }}>
+              📅 Due: {task.dueDate || "None"}
+            </span>
+            <span
+              style={{
+                background: task.isOpen ? "#fee2e2" : "rgba(16,21,23,0.08)",
+                color: task.isOpen ? "#b91c1c" : "#101517",
+                border: "1px solid " + (task.isOpen ? "#ef4444" : "#101517"),
+                padding: "2px 6px",
+                borderRadius: "4px",
+              }}
+            >
+              👤 {task.assigneeName}
+            </span>
+          </div>
+
+          <div style={{ display: "flex", gap: "6px", marginTop: "2px" }}>
+            {task.isOpen ? (
+              <button
+                className="rpg-modern-btn is-primary"
+                type="button"
+                style={{ flex: 1, padding: "5px 8px", fontSize: "0.75rem" }}
+                disabled={isClaimingQuest}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClaim(task);
+                }}
+              >
+                {isClaimingQuest ? "Claiming..." : "✋ Claim Task"}
+              </button>
+            ) : task.isMine ? (
+              <button
+                className="rpg-modern-btn is-boss"
+                type="button"
+                style={{ flex: 1, padding: "5px 8px", fontSize: "0.75rem" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAttack(task);
+                }}
+              >
+                ⚔️ Attack Dragon
+              </button>
+            ) : (
+              <button
+                className="rpg-modern-btn is-secondary"
+                type="button"
+                style={{ flex: 1, padding: "5px 8px", fontSize: "0.75rem" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDetails(task);
+                }}
+              >
+                View Details
+              </button>
+            )}
+            <button
+              className="rpg-modern-btn is-secondary"
+              type="button"
+              style={{ padding: "5px 8px", fontSize: "0.75rem" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDetails(task);
+              }}
+              title="Open Quest Details"
+            >
+              ℹ️
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function BattleScene({ projectId, currentPhase, tasksLocked = true }: BattleSceneProps) {
   const state = useQuery(api.battle.getState, { projectId });
 
@@ -918,7 +1104,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
   // Quest Board States
   const [showQuestBoardModal, setShowQuestBoardModal] = useState(false);
-  const [questBoardFilter, setQuestBoardFilter] = useState<"all" | "mine" | "open">("all");
+  const [questBoardFilter, setQuestBoardFilter] = useState<"all" | "mine">("all");
   const [selectedQuestTask, setSelectedQuestTask] = useState<QuestTask | null>(null);
   const [showCreateQuestModal, setShowCreateQuestModal] = useState(false);
   const [isClaimingQuest, setIsClaimingQuest] = useState(false);
@@ -2354,6 +2540,15 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           <LandscapeTerrain />
         </div>
 
+        {/* Layer 4.5: In-Canvas Medieval Quest Board (Behind Village, Players, Dragon & FX) */}
+        <LandscapeQuestBoard
+          tasksCount={questTasks.length}
+          onOpenBoard={() => {
+            setQuestBoardFilter("all");
+            setShowQuestBoardModal(true);
+          }}
+        />
+
         {/* Layer 5: Section 3 & 5 - Grounded Village & Anchored Village HP Bar with Humorous Town Name */}
         <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "auto", zIndex: 5, transform: `translate(${layerTransforms.village?.x || 0}px, ${layerTransforms.village?.y || 0}px) scale(${layerTransforms.village?.scale || 1})`, display: layerTransforms.village?.visible !== false ? "block" : "none" }}>
           <LandscapeVillage
@@ -2375,15 +2570,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 7, transform: `translate(${layerTransforms.players?.x || 0}px, ${layerTransforms.players?.y || 0}px) scale(${layerTransforms.players?.scale || 1})`, display: layerTransforms.players?.visible !== false ? "block" : "none" }}>
           <LandscapePlayers members={players} />
         </div>
-
-        {/* Layer: In-Canvas Vector Notice Board ("Task need to do") */}
-        <LandscapeQuestBoard
-          tasksCount={questTasks.length}
-          onOpenBoard={() => {
-            setQuestBoardFilter("all");
-            setShowQuestBoardModal(true);
-          }}
-        />
 
         {/* Layer 8: Section 1 - Medieval Dragon Visuals & Wings */}
         <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "auto", zIndex: 8, transform: `translate(${layerTransforms.dragon?.x || 0}px, ${layerTransforms.dragon?.y || 0}px) scale(${layerTransforms.dragon?.scale || 1})`, display: layerTransforms.dragon?.visible !== false ? "block" : "none" }}>
@@ -3056,20 +3242,20 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       )}
 
       {/* =========================================================================
-          FULL IN-CANVAS QUEST BOARD OVERLAY PANEL ("Task need to do")
+          FULL IN-CANVAS QUEST BOARD OVERLAY PANEL
          ========================================================================= */}
       {showQuestBoardModal && (
         <div className="rpg-modal-backdrop" onClick={() => setShowQuestBoardModal(false)}>
           <div
             className="rpg-modern-modal-card"
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: "680px", maxHeight: "88vh" }}
+            style={{ maxWidth: "660px", maxHeight: "88vh" }}
           >
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #101517", paddingBottom: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <h3 className="rpg-modern-title" style={{ fontSize: "1.28rem" }}>
-                  📜 Task need to do
+                  📜 Quests & Tasks
                 </h3>
                 <span
                   style={{
@@ -3113,24 +3299,24 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     cursor: "pointer",
                     fontWeight: 900,
                   }}
+                  title="Close"
                 >
                   ✕
                 </button>
               </div>
             </div>
 
-            {/* Filter Tabs */}
+            {/* Filter Tabs (Only All Tasks and My Tasks) */}
             <div style={{ display: "flex", gap: "8px" }}>
               {[
                 { id: "all", label: `All Tasks (${questTasks.length})` },
                 { id: "mine", label: `My Tasks (${questTasks.filter((t) => t.isMine).length})` },
-                { id: "open", label: `Open to Claim (${questTasks.filter((t) => t.isOpen).length})` },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   type="button"
                   className={`rpg-modern-btn ${questBoardFilter === tab.id ? "is-primary" : "is-secondary"}`}
-                  style={{ padding: "5px 12px", fontSize: "0.78rem" }}
+                  style={{ padding: "5px 14px", fontSize: "0.8rem" }}
                   onClick={() => setQuestBoardFilter(tab.id as any)}
                 >
                   {tab.label}
@@ -3138,21 +3324,20 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               ))}
             </div>
 
-            {/* Sticky Notes Grid Area */}
+            {/* Clean Non-Crowded Cards Grid with Hover Details */}
             <div
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-                gap: "14px",
+                gap: "12px",
                 overflowY: "auto",
-                maxHeight: "52vh",
+                maxHeight: "56vh",
                 padding: "6px 2px",
               }}
             >
               {(() => {
                 const filtered = questTasks.filter((t) => {
                   if (questBoardFilter === "mine") return t.isMine;
-                  if (questBoardFilter === "open") return t.isOpen;
                   return true;
                 });
 
@@ -3200,156 +3385,29 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 return filtered.map((task, idx) => {
                   const palette = NOTE_PALETTES[idx % NOTE_PALETTES.length];
                   return (
-                    <div
+                    <QuestCardHoverItem
                       key={task._id}
-                      style={{
-                        position: "relative",
-                        background: palette.bg,
-                        border: "2.5px solid #101517",
-                        borderRadius: "10px",
-                        padding: "14px 12px 12px 12px",
-                        boxShadow: "4px 4px 0 #101517",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        gap: "10px",
-                        transition: "transform 0.15s ease",
+                      task={task}
+                      palette={palette}
+                      isClaimingQuest={isClaimingQuest}
+                      onClaim={handleClaimQuest}
+                      onAttack={(t) => {
+                        setShowQuestBoardModal(false);
+                        setSelectedTaskId(t._id);
+                        setShowBossModal(true);
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-3px)")}
-                      onMouseLeave={(e) => (e.currentTarget.style.transform = "none")}
-                    >
-                      {/* Pushpin Marker */}
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "-6px",
-                          left: "50%",
-                          transform: "translateX(-50%)",
-                          width: "12px",
-                          height: "12px",
-                          borderRadius: "50%",
-                          background: palette.pin,
-                          border: "2px solid #101517",
-                          boxShadow: "0 2px 3px rgba(0,0,0,0.25)",
-                        }}
-                      />
-
-                      {/* Header Title & Description */}
-                      <div>
-                        <h4
-                          style={{
-                            margin: "0 0 6px 0",
-                            fontSize: "0.96rem",
-                            fontWeight: 900,
-                            color: "#101517",
-                            lineHeight: "1.25",
-                          }}
-                        >
-                          {task.title}
-                        </h4>
-                        {task.description && (
-                          <p
-                            style={{
-                              margin: 0,
-                              fontSize: "0.78rem",
-                              color: "#334155",
-                              lineHeight: "1.35",
-                              display: "-webkit-box",
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                            }}
-                          >
-                            {task.description}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Metadata Row */}
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.72rem", fontWeight: 800 }}>
-                        <span style={{ background: "rgba(16,21,23,0.08)", padding: "2px 6px", borderRadius: "4px" }}>
-                          📅 Due: {task.dueDate || "None"}
-                        </span>
-                        <span
-                          style={{
-                            background: task.isOpen ? "#fee2e2" : "rgba(16,21,23,0.08)",
-                            color: task.isOpen ? "#b91c1c" : "#101517",
-                            border: "1px solid " + (task.isOpen ? "#ef4444" : "#101517"),
-                            padding: "2px 6px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          👤 {task.assigneeName}
-                        </span>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div style={{ display: "flex", gap: "6px", marginTop: "2px" }}>
-                        {task.isOpen ? (
-                          <button
-                            className="rpg-modern-btn is-primary"
-                            type="button"
-                            style={{ flex: 1, padding: "5px 8px", fontSize: "0.75rem" }}
-                            disabled={isClaimingQuest}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleClaimQuest(task);
-                            }}
-                          >
-                            {isClaimingQuest ? "Claiming..." : "✋ Claim Task"}
-                          </button>
-                        ) : task.isMine ? (
-                          <button
-                            className="rpg-modern-btn is-boss"
-                            type="button"
-                            style={{ flex: 1, padding: "5px 8px", fontSize: "0.75rem" }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowQuestBoardModal(false);
-                              setSelectedTaskId(task._id);
-                              setShowBossModal(true);
-                            }}
-                          >
-                            ⚔️ Attack Dragon
-                          </button>
-                        ) : (
-                          <button
-                            className="rpg-modern-btn is-secondary"
-                            type="button"
-                            style={{ flex: 1, padding: "5px 8px", fontSize: "0.75rem" }}
-                            onClick={() => setSelectedQuestTask(task)}
-                          >
-                            View Details
-                          </button>
-                        )}
-                        <button
-                          className="rpg-modern-btn is-secondary"
-                          type="button"
-                          style={{ padding: "5px 8px", fontSize: "0.75rem" }}
-                          onClick={() => setSelectedQuestTask(task)}
-                          title="Open Quest Details"
-                        >
-                          ℹ️
-                        </button>
-                      </div>
-                    </div>
+                      onDetails={(t) => setSelectedQuestTask(t)}
+                    />
                   );
                 });
               })()}
             </div>
 
-            {/* Footer */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "2px solid #101517", paddingTop: "12px" }}>
-              <span style={{ fontSize: "0.78rem", fontWeight: 700, opacity: 0.75 }}>
-                Click any quest to inspect details, claim open work, or attack the dragon.
+            {/* Minimal Subtext (No Close Board button) */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "2px solid #101517", paddingTop: "10px" }}>
+              <span style={{ fontSize: "0.76rem", fontWeight: 700, opacity: 0.75 }}>
+                💡 Hover over any task to reveal details, claim open quests, or attack the dragon.
               </span>
-              <button
-                className="rpg-modern-btn is-secondary"
-                type="button"
-                onClick={() => setShowQuestBoardModal(false)}
-              >
-                Close Board
-              </button>
             </div>
           </div>
         </div>

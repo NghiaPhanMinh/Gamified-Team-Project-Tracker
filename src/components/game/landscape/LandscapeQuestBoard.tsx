@@ -24,163 +24,141 @@ export function LandscapeQuestBoard({
       onClick={onOpenBoard}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      title="Click to open Quest Board (Task need to do)"
+      title="Click to open Quest Board"
       style={{
         position: "absolute",
-        left: "385px",
-        top: "148px",
-        width: "115px",
-        height: "140px",
-        zIndex: 14,
+        left: "440px",
+        top: "122px",
+        width: "90px",
+        height: "105px",
+        zIndex: 5,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         pointerEvents: "auto",
         cursor: "pointer",
         userSelect: "none",
-        transform: isHovered ? "scale(1.06) translateY(-2px)" : "scale(1)",
-        transition: "transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        transform: isHovered ? "scale(1.08) translateY(-3px)" : "scale(1)",
+        transition: "transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        filter: isHovered ? "drop-shadow(0 4px 8px rgba(0,0,0,0.45))" : "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
       }}
     >
-      {/* SVG Vector Quest Board */}
+      {/* Medieval Rustic Wooden Notice Board SVG (No harsh black outline) */}
       <svg
-        viewBox="0 0 115 110"
-        width="115"
-        height="110"
-        style={{ overflow: "visible", filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.35))" }}
+        viewBox="0 0 90 95"
+        width="90"
+        height="95"
+        style={{ overflow: "visible" }}
       >
-        {/* Support Timber Posts Standing in Earth */}
-        <rect x="22" y="45" width="8" height="60" rx="2" fill="#451a03" stroke="#101517" strokeWidth="2" />
-        <rect x="85" y="45" width="8" height="60" rx="2" fill="#451a03" stroke="#101517" strokeWidth="2" />
+        {/* Support Timber Posts Planted in Earth */}
+        <rect x="18" y="36" width="7" height="54" rx="1.5" fill="#3b1402" />
+        <rect x="65" y="36" width="7" height="54" rx="1.5" fill="#3b1402" />
+        {/* Post Highlights */}
+        <rect x="20" y="36" width="2" height="54" fill="#5c2406" opacity="0.6" />
+        <rect x="67" y="36" width="2" height="54" fill="#5c2406" opacity="0.6" />
 
         {/* Diagonal Cross Braces */}
-        <line x1="26" y1="80" x2="45" y2="60" stroke="#2e1002" strokeWidth="3" strokeLinecap="round" />
-        <line x1="89" y1="80" x2="70" y2="60" stroke="#2e1002" strokeWidth="3" strokeLinecap="round" />
+        <line x1="21" y1="68" x2="38" y2="48" stroke="#260c01" strokeWidth="2.5" strokeLinecap="round" />
+        <line x1="69" y1="68" x2="52" y2="48" stroke="#260c01" strokeWidth="2.5" strokeLinecap="round" />
 
-        {/* Main Cork/Wood Notice Board Backing */}
+        {/* Main Weathered Medieval Wooden Board Frame */}
         <rect
-          x="12"
-          y="18"
-          width="91"
-          height="62"
-          rx="6"
-          fill="#92400e"
-          stroke="#101517"
-          strokeWidth="2.5"
+          x="10"
+          y="16"
+          width="70"
+          height="48"
+          rx="3"
+          fill="#5c2406"
         />
-        {/* Inner Notice Board Cork Area */}
+        {/* Inner Wooden Notice Planks */}
         <rect
-          x="16"
-          y="22"
-          width="83"
-          height="54"
-          rx="4"
-          fill="#d97706"
-          stroke="#78350f"
-          strokeWidth="1.5"
+          x="13"
+          y="19"
+          width="64"
+          height="42"
+          rx="2"
+          fill="#78350f"
         />
+        {/* Horizontal Plank Seams */}
+        <line x1="13" y1="33" x2="77" y2="33" stroke="#451a03" strokeWidth="1" />
+        <line x1="13" y1="47" x2="77" y2="47" stroke="#451a03" strokeWidth="1" />
 
-        {/* Pinned Vector Sticky Notes */}
-        {/* Note 1: Top-Left (Pastel Yellow) */}
-        <g transform="translate(20, 26) rotate(-4)">
-          <rect x="0" y="0" width="34" height="22" rx="2" fill="#fef08a" stroke="#101517" strokeWidth="1.2" />
-          <circle cx="17" cy="2.5" r="2" fill="#ef4444" stroke="#101517" strokeWidth="0.8" />
-          <line x1="4" y1="9" x2="30" y2="9" stroke="#713f12" strokeWidth="1.2" strokeLinecap="round" />
-          <line x1="4" y1="14" x2="24" y2="14" stroke="#713f12" strokeWidth="1.2" strokeLinecap="round" />
-          <line x1="4" y1="18" x2="18" y2="18" stroke="#713f12" strokeWidth="1" strokeLinecap="round" />
+        {/* Pinned Parchment Scroll / Sticky Notes */}
+        {/* Note 1: Top-Left Parchment */}
+        <g transform="translate(16, 22) rotate(-3)">
+          <rect x="0" y="0" width="26" height="18" rx="1" fill="#fef3c7" />
+          <circle cx="13" cy="2" r="1.5" fill="#b91c1c" />
+          <line x1="3" y1="7" x2="23" y2="7" stroke="#92400e" strokeWidth="1" strokeLinecap="round" />
+          <line x1="3" y1="11" x2="19" y2="11" stroke="#92400e" strokeWidth="1" strokeLinecap="round" />
+          <line x1="3" y1="15" x2="14" y2="15" stroke="#92400e" strokeWidth="1" strokeLinecap="round" />
         </g>
 
-        {/* Note 2: Top-Right (Pastel Cyan) */}
-        <g transform="translate(61, 27) rotate(5)">
-          <rect x="0" y="0" width="33" height="21" rx="2" fill="#bae6fd" stroke="#101517" strokeWidth="1.2" />
-          <circle cx="16.5" cy="2.5" r="2" fill="#0284c7" stroke="#101517" strokeWidth="0.8" />
-          <line x1="4" y1="9" x2="29" y2="9" stroke="#0369a1" strokeWidth="1.2" strokeLinecap="round" />
-          <line x1="4" y1="14" x2="22" y2="14" stroke="#0369a1" strokeWidth="1.2" strokeLinecap="round" />
+        {/* Note 2: Top-Right Parchment */}
+        <g transform="translate(48, 23) rotate(4)">
+          <rect x="0" y="0" width="25" height="17" rx="1" fill="#fed7aa" />
+          <circle cx="12.5" cy="2" r="1.5" fill="#0369a1" />
+          <line x1="3" y1="7" x2="22" y2="7" stroke="#9a3412" strokeWidth="1" strokeLinecap="round" />
+          <line x1="3" y1="11" x2="17" y2="11" stroke="#9a3412" strokeWidth="1" strokeLinecap="round" />
         </g>
 
-        {/* Note 3: Bottom-Left (Pastel Pink) */}
-        <g transform="translate(21, 51) rotate(3)">
-          <rect x="0" y="0" width="32" height="21" rx="2" fill="#fbcfe8" stroke="#101517" strokeWidth="1.2" />
-          <circle cx="16" cy="2.5" r="2" fill="#db2777" stroke="#101517" strokeWidth="0.8" />
-          <line x1="4" y1="9" x2="28" y2="9" stroke="#9d174d" strokeWidth="1.2" strokeLinecap="round" />
-          <line x1="4" y1="14" x2="20" y2="14" stroke="#9d174d" strokeWidth="1.2" strokeLinecap="round" />
+        {/* Note 3: Bottom Pinned Sheet */}
+        <g transform="translate(28, 41) rotate(1)">
+          <rect x="0" y="0" width="34" height="17" rx="1" fill="#fef08a" />
+          <circle cx="17" cy="2" r="1.5" fill="#15803d" />
+          <line x1="4" y1="7" x2="30" y2="7" stroke="#854d0e" strokeWidth="1" strokeLinecap="round" />
+          <line x1="4" y1="11" x2="24" y2="11" stroke="#854d0e" strokeWidth="1" strokeLinecap="round" />
         </g>
 
-        {/* Note 4: Bottom-Right (Pastel Green) */}
-        <g transform="translate(59, 50) rotate(-3)">
-          <rect x="0" y="0" width="35" height="22" rx="2" fill="#bbf7d0" stroke="#101517" strokeWidth="1.2" />
-          <circle cx="17.5" cy="2.5" r="2" fill="#16a34a" stroke="#101517" strokeWidth="0.8" />
-          <line x1="4" y1="9" x2="31" y2="9" stroke="#14532d" strokeWidth="1.2" strokeLinecap="round" />
-          <line x1="4" y1="14" x2="24" y2="14" stroke="#14532d" strokeWidth="1.2" strokeLinecap="round" />
-        </g>
-
-        {/* Wooden Pitched Roof / Shingle Canopy */}
+        {/* Medieval Timber Shingle Roof Canopy */}
         <polygon
-          points="6,18 57.5,2 109,18"
+          points="4,16 45,2 86,16"
+          fill="#451a03"
+        />
+        <polygon
+          points="6,15 45,3 84,15"
           fill="#feaa01"
-          stroke="#101517"
-          strokeWidth="2.5"
-          strokeLinejoin="round"
         />
         <polygon
-          points="57.5,2 109,18 57.5,18"
+          points="45,3 84,15 45,15"
           fill="#ea580c"
-          opacity="0.35"
+          opacity="0.4"
         />
-        {/* Shingle Trim Beam */}
-        <rect x="8" y="16" width="99" height="4" rx="1.5" fill="#78350f" stroke="#101517" strokeWidth="1.5" />
+        {/* Shingle Eaves Beam */}
+        <rect x="6" y="14" width="78" height="3" rx="1" fill="#2e1002" />
 
-        {/* Roof Crest Plaque: QUESTS */}
-        <rect x="36" y="5" width="43" height="12" rx="3" fill="#78350f" stroke="#101517" strokeWidth="1.5" />
+        {/* Small Notice Badge */}
+        <rect x="30" y="5" width="30" height="9" rx="2" fill="#2e1002" />
         <text
-          x="57.5"
-          y="13.5"
+          x="45"
+          y="11.5"
           textAnchor="middle"
-          fill="#fef08a"
-          fontSize="7.5"
-          fontWeight="900"
-          fontFamily="sans-serif"
-          letterSpacing="0.5"
+          fill="#fde047"
+          fontSize="5.5"
+          fontWeight="bold"
+          fontFamily="serif"
+          letterSpacing="0.4"
         >
           📜 QUESTS
         </text>
-      </svg>
 
-      {/* High-Contrast Neo-Brutalist Plaque Label Underneath ("Task need to do") */}
-      <div
-        style={{
-          marginTop: "-4px",
-          background: "#fff73f",
-          color: "#101517",
-          border: "2px solid #101517",
-          borderRadius: "6px",
-          padding: "2px 8px",
-          fontSize: "0.62rem",
-          fontWeight: 900,
-          fontFamily: "var(--font-heading), sans-serif",
-          letterSpacing: "0.02em",
-          boxShadow: isHovered ? "3px 3px 0 #101517" : "2px 2px 0 #101517",
-          whiteSpace: "nowrap",
-          display: "flex",
-          alignItems: "center",
-          gap: "4px",
-          transition: "box-shadow 0.15s ease",
-        }}
-      >
-        <span>Task need to do</span>
-        <span
-          style={{
-            background: "#101517",
-            color: "#fff",
-            borderRadius: "10px",
-            padding: "0 4px",
-            fontSize: "0.55rem",
-            fontWeight: 800,
-          }}
-        >
-          {tasksCount}
-        </span>
-      </div>
+        {/* Small Task Count Pill on Wood Post */}
+        {tasksCount > 0 && (
+          <g transform="translate(68, 6)">
+            <circle cx="6" cy="6" r="6" fill="#ef4444" />
+            <text
+              x="6"
+              y="8.5"
+              textAnchor="middle"
+              fill="#ffffff"
+              fontSize="6.5"
+              fontWeight="900"
+              fontFamily="sans-serif"
+            >
+              {tasksCount}
+            </text>
+          </g>
+        )}
+      </svg>
     </div>
   );
 }
