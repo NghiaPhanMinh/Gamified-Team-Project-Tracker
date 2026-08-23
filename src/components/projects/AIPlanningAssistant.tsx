@@ -172,8 +172,6 @@ export function AIPlanningAssistant({
       <p className="ai-safety-note">
         AI creates a reviewable draft. Nothing is saved or assigned until a person checks the plan and confirms it.
       </p>
-      {usage && !usage.platformGenerationAvailable && !byokActive ? <div className="feature-gate-card" role="status"><strong>AI GENERATION USED</strong><p>This Free project has used its platform AI draft. Editing and unlimited manual planning remain available, or activate a session-only key in Profile → AI Settings.</p></div> : null}
-
       <form className="ai-brief-form" onSubmit={handleGenerate}>
         <label>
           <span>Project or assignment brief</span>
@@ -191,9 +189,9 @@ export function AIPlanningAssistant({
           <button
             className="primary-button"
             type="submit"
-            disabled={isGenerating || workspace.project.status === "archived" || (usage !== undefined && !usage.platformGenerationAvailable && !byokActive)}
+            disabled={isGenerating || workspace.project.status === "archived"}
           >
-            {isGenerating ? "Building a draft…" : draft ? "Generate a fresh draft" : "Generate AI Project Plan"}
+            {isGenerating ? "Building a draft…" : draft ? "Regenerate Plan" : "⚡ Generate AI Plan"}
           </button>
         </div>
       </form>

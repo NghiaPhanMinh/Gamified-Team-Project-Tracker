@@ -13,6 +13,7 @@ import {
   runFreeModelFallback,
   type AiResponseMode,
 } from "./lib/openRouterFallback";
+import { generateSmartFallbackPlan } from "./lib/smartFallbackPlanner";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
@@ -183,6 +184,7 @@ type AiPlanningContext = {
 
 type GeneratedAiPlan = ValidatedAiPlan & {
   generatedAt: number;
+  source?: "ai" | "smart_template";
 };
 
 function planningPrompts(brief: string, context: AiPlanningContext) {
@@ -362,20 +364,19 @@ export const generateProjectPlan = action({
   },
   handler: async (ctx, args): Promise<GeneratedAiPlan> => {
     const access = await ctx.runQuery(internal.aiUsage.getProjectAccess, { projectId: args.projectId });
-    const generationLimit = access.entitlement.platformPlanGenerationsPerProject;
-    if (generationLimit !== null && access.successfulPlatformPlanGenerations >= generationLimit) {
-      throw new ConvexError("AI GENERATION USED. Continue with unlimited manual planning, or use your own session-only OpenRouter key in Profile → AI Settings.");
-    }
-    const tierKey = environmentValue(`OPENROUTER_API_KEY_${access.tier.toUpperCase()}`);
-    const apiKey = tierKey ?? environmentValue("OPENROUTER_API_KEY");
-    if (!apiKey) {
-      throw new Error("AI planning is not connected on this deployment. Manual planning remains available.");
-    }
-
     const brief = cleanBrief(args.brief);
     const context: AiPlanningContext = await ctx.runQuery(internal.aiContext.getProjectPlanningContext, {
       projectId: args.projectId,
     });
+
+    const tierKey = environmentValue(`OPENROUTER_API_KEY_${access.tier.toUpperCase()}`);
+    const apiKey = tierKey ?? environmentValue("OPENROUTER_API_KEY") ?? environmentValue("GEMINI_API_KEY");
+    if (!apiKey) {
+      console.info("No AI API key connected on platform. Utilizing Smart Fallback Planner.");
+      const fallbackPlan = generateSmartFallbackPlan(context, brief);
+      return { ...fallbackPlan, source: "smart_template", generatedAt: Date.now() };
+    }
+
     const { systemPrompt, userPrompt } = planningPrompts(brief, context);
     const configuredTierModel = access.tier === "free"
       ? environmentValue("OPENROUTER_MODEL_FREE")
@@ -388,6 +389,8 @@ export const generateProjectPlan = action({
     const models = access.tier !== "free" && configuredTierModel
       ? [configuredTierModel, ...freeModels.filter((model) => model !== configuredTierModel)]
       : freeModels;
+
+    const generationLimit = access.entitlement.platformPlanGenerationsPerProject;
     const usageId = await ctx.runMutation(internal.aiUsage.reservePlatformGeneration, {
       projectId: args.projectId,
       profileId: access.profileId,
@@ -414,6 +417,7 @@ export const generateProjectPlan = action({
       });
       return {
         ...result.value,
+        source: "ai",
         generatedAt: Date.now(),
       };
     } catch (error) {
@@ -422,16 +426,13 @@ export const generateProjectPlan = action({
         model: "failed",
         success: false,
       });
-      if (error instanceof AiRouteFailure && error.kind === "key_rejected") {
-        throw new ConvexError(
-          "The OpenRouter key was rejected. Update the private Convex environment variable.",
-        );
-      }
-      if (error instanceof FreeAiRoutesExhausted) {
-        console.error("Free AI routes exhausted", JSON.stringify({ failures: error.failures }));
-        throw new ConvexError(error.message);
-      }
-      throw error;
+      console.warn("AI generation encountered error, serving Smart Fallback Plan:", error);
+      const fallbackPlan = generateSmartFallbackPlan(context, brief);
+      return {
+        ...fallbackPlan,
+        source: "smart_template",
+        generatedAt: Date.now(),
+      };
     }
   },
 });
