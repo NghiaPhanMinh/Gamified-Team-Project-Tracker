@@ -2236,17 +2236,17 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         </div>
 
         {/* Layer 0, 1, 2: Sky & Parallax Clouds */}
-        <div style={{ transform: `translate(${layerTransforms.sky?.x || 0}px, ${layerTransforms.sky?.y || 0}px) scale(${layerTransforms.sky?.scale || 1})`, display: layerTransforms.sky?.visible !== false ? "block" : "none" }}>
+        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0, transform: `translate(${layerTransforms.sky?.x || 0}px, ${layerTransforms.sky?.y || 0}px) scale(${layerTransforms.sky?.scale || 1})`, display: layerTransforms.sky?.visible !== false ? "block" : "none" }}>
           <LandscapeSky />
         </div>
 
         {/* Layer 3, 4: Section 4 - Top-Down 3/4 Perspective Grassland */}
-        <div style={{ transform: `translate(${layerTransforms.terrain?.x || 0}px, ${layerTransforms.terrain?.y || 0}px) scale(${layerTransforms.terrain?.scale || 1})`, display: layerTransforms.terrain?.visible !== false ? "block" : "none" }}>
+        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 4, transform: `translate(${layerTransforms.terrain?.x || 0}px, ${layerTransforms.terrain?.y || 0}px) scale(${layerTransforms.terrain?.scale || 1})`, display: layerTransforms.terrain?.visible !== false ? "block" : "none" }}>
           <LandscapeTerrain />
         </div>
 
         {/* Layer 5: Section 3 & 5 - Grounded Village & Anchored Village HP Bar with Humorous Town Name */}
-        <div style={{ transform: `translate(${layerTransforms.village?.x || 0}px, ${layerTransforms.village?.y || 0}px) scale(${layerTransforms.village?.scale || 1})`, display: layerTransforms.village?.visible !== false ? "block" : "none" }}>
+        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "auto", zIndex: 5, transform: `translate(${layerTransforms.village?.x || 0}px, ${layerTransforms.village?.y || 0}px) scale(${layerTransforms.village?.scale || 1})`, display: layerTransforms.village?.visible !== false ? "block" : "none" }}>
           <LandscapeVillage
             villageHpPercent={effectiveVillageHp}
             villageName={funnyVillageName}
@@ -2258,17 +2258,17 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         </div>
 
         {/* Layer 6: Section 8 - Daily Goblins Wave System (1 per active player) */}
-        <div style={{ transform: `translate(${layerTransforms.goblins?.x || 0}px, ${layerTransforms.goblins?.y || 0}px) scale(${layerTransforms.goblins?.scale || 1})`, display: layerTransforms.goblins?.visible !== false ? "block" : "none" }}>
+        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "auto", zIndex: 6, transform: `translate(${layerTransforms.goblins?.x || 0}px, ${layerTransforms.goblins?.y || 0}px) scale(${layerTransforms.goblins?.scale || 1})`, display: layerTransforms.goblins?.visible !== false ? "block" : "none" }}>
           <LandscapeGoblins goblins={goblins} />
         </div>
 
         {/* Layer 7: Section 6 - Party Members & Deterministic Game ID Tags */}
-        <div style={{ transform: `translate(${layerTransforms.players?.x || 0}px, ${layerTransforms.players?.y || 0}px) scale(${layerTransforms.players?.scale || 1})`, display: layerTransforms.players?.visible !== false ? "block" : "none" }}>
+        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 7, transform: `translate(${layerTransforms.players?.x || 0}px, ${layerTransforms.players?.y || 0}px) scale(${layerTransforms.players?.scale || 1})`, display: layerTransforms.players?.visible !== false ? "block" : "none" }}>
           <LandscapePlayers members={players} />
         </div>
 
         {/* Layer 8: Section 1 - Medieval Dragon Visuals & Wings */}
-        <div style={{ transform: `translate(${layerTransforms.dragon?.x || 0}px, ${layerTransforms.dragon?.y || 0}px) scale(${layerTransforms.dragon?.scale || 1})`, display: layerTransforms.dragon?.visible !== false ? "block" : "none" }}>
+        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "auto", zIndex: 8, transform: `translate(${layerTransforms.dragon?.x || 0}px, ${layerTransforms.dragon?.y || 0}px) scale(${layerTransforms.dragon?.scale || 1})`, display: layerTransforms.dragon?.visible !== false ? "block" : "none" }}>
           <LandscapeDragon
             bossHpPercent={hpPercent}
             isDefeated={defeated}
@@ -2287,7 +2287,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         </div>
 
         {/* Layer 9: Section 2 - Cosmetic Combat Exchange & Elemental Attacks */}
-        <div style={{ transform: `translate(${layerTransforms.fx?.x || 0}px, ${layerTransforms.fx?.y || 0}px) scale(${layerTransforms.fx?.scale || 1})`, display: layerTransforms.fx?.visible !== false ? "block" : "none" }}>
+        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 9, transform: `translate(${layerTransforms.fx?.x || 0}px, ${layerTransforms.fx?.y || 0}px) scale(${layerTransforms.fx?.scale || 1})`, display: layerTransforms.fx?.visible !== false ? "block" : "none" }}>
           <LandscapeFX
             activeEvent={combinedActiveEvent}
             isVictory={defeated}
