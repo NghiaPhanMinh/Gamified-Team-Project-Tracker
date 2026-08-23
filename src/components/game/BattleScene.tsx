@@ -1116,7 +1116,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [isDraggingPanel, setIsDraggingPanel] = useState(false);
   const dragStartOffset = useRef({ x: 0, y: 0 });
 
-  // Moveable Dragon HP Bar Position
+  // Moveable Dragon & Village HP Bar Positions & Sizes
   const [dragonHpBarPos, setDragonHpBarPos] = useState<{ x: number; y: number }>(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -1126,6 +1126,83 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       }
     } catch {}
     return { x: 0, y: 0 };
+  });
+
+  const [dragonHpBarWidth, setDragonHpBarWidth] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.dragonHpBarWidth) return parsed.dragonHpBarWidth;
+      }
+    } catch {}
+    return 180;
+  });
+
+  const [dragonHpBarHeight, setDragonHpBarHeight] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.dragonHpBarHeight) return parsed.dragonHpBarHeight;
+      }
+    } catch {}
+    return 14;
+  });
+
+  const [dragonHpBarScale, setDragonHpBarScale] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.dragonHpBarScale) return parsed.dragonHpBarScale;
+      }
+    } catch {}
+    return 1;
+  });
+
+  const [villageHpBarPos, setVillageHpBarPos] = useState<{ x: number; y: number }>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.villageHpBarPos) return parsed.villageHpBarPos;
+      }
+    } catch {}
+    return { x: 0, y: 0 };
+  });
+
+  const [villageHpBarWidth, setVillageHpBarWidth] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.villageHpBarWidth) return parsed.villageHpBarWidth;
+      }
+    } catch {}
+    return 140;
+  });
+
+  const [villageHpBarHeight, setVillageHpBarHeight] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.villageHpBarHeight) return parsed.villageHpBarHeight;
+      }
+    } catch {}
+    return 12;
+  });
+
+  const [villageHpBarScale, setVillageHpBarScale] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.villageHpBarScale) return parsed.villageHpBarScale;
+      }
+    } catch {}
+    return 1;
   });
 
   // Direct Shape Drag and Drop
@@ -1146,9 +1223,31 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       dragonGeometries,
       layerOrder,
       dragonHpBarPos,
+      dragonHpBarWidth,
+      dragonHpBarHeight,
+      dragonHpBarScale,
+      villageHpBarPos,
+      villageHpBarWidth,
+      villageHpBarHeight,
+      villageHpBarScale,
     };
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(config));
-  }, [dragonOffsets, dragonFills, deletedShapes, customShapes, dragonGeometries, layerOrder, dragonHpBarPos]);
+  }, [
+    dragonOffsets,
+    dragonFills,
+    deletedShapes,
+    customShapes,
+    dragonGeometries,
+    layerOrder,
+    dragonHpBarPos,
+    dragonHpBarWidth,
+    dragonHpBarHeight,
+    dragonHpBarScale,
+    villageHpBarPos,
+    villageHpBarWidth,
+    villageHpBarHeight,
+    villageHpBarScale,
+  ]);
 
   // Scroll selected layer stack row into view automatically
   useEffect(() => {
@@ -1369,7 +1468,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   // Goblin verification counters
   const goblinWordCount = goblinText.trim().length > 0 ? goblinText.trim().split(/\s+/).filter(Boolean).length : 0;
   const goblinImageCount = goblinImageUrls.length;
-  const isGoblinValid = goblinWordCount >= 20 || goblinImageCount >= 2;
+  const isGoblinValid = goblinWordCount >= 10 || goblinImageCount >= 2;
 
   function handleAddGoblinImage() {
     const trimmed = goblinImageInput.trim();
@@ -2019,45 +2118,74 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           Attack
         </button>
 
-        {/* Floating Mob-Style Boss HP Bar (With Humorous Boss Name & Moveable Position) */}
+        {/* Floating Mob-Style Boss HP Bar (With Humorous Boss Name & Moveable Position & Adjustable Size) */}
         <div
-          className="boss-hp-mob-style"
-          role="progressbar"
-          aria-label="Boss health"
-          aria-valuemin={0}
-          aria-valuemax={state.maximumHp}
-          aria-valuenow={state.remainingHp}
+          className="boss-hp-container"
           style={{
-            left: `calc(${Math.min(92, Math.max(8, (dragonX / 10) - 2.5))}% + ${dragonHpBarPos.x}px)`,
-            top: `calc(85px + ${dragonHpBarPos.y}px)`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            overflow: "hidden",
             position: "absolute",
+            left: `calc(${Math.min(92, Math.max(8, (dragonX / 10) - 2.5))}% + ${dragonHpBarPos.x}px)`,
+            top: `calc(65px + ${dragonHpBarPos.y}px)`,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            zIndex: 35,
+            transform: `scale(${dragonHpBarScale})`,
+            transformOrigin: "center center",
+            pointerEvents: "none",
           }}
         >
+          {/* Name & HP Float ABOVE Boss Health Bar */}
           <div
-            className="boss-hp-mob-fill"
-            style={{ width: `${hpPercent}%` }}
-          />
-          <span
             style={{
-              position: "absolute",
-              zIndex: 2,
-              fontSize: "0.68rem",
+              fontSize: "0.72rem",
               fontWeight: 900,
               fontFamily: "var(--font-heading), serif",
-              color: "#ffffff",
-              textShadow: "0 1px 3px #000, 0 0 4px #000",
+              color: "#f87171",
+              textShadow: "0 1px 3px #000, 0 0 4px #000, 0 0 6px #000",
               letterSpacing: "0.03em",
               whiteSpace: "nowrap",
-              pointerEvents: "none",
-              padding: "0 6px",
+              marginBottom: "3px",
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
             }}
           >
-            🐲 {funnyBossName} ({hpPercent}%)
-          </span>
+            <span>🐲 {funnyBossName}</span>
+            <span style={{ color: "#fef08a", fontSize: "0.68rem", fontWeight: 800 }}>
+              {rawRemainingHp}/{state.maximumHp} HP ({hpPercent}%)
+            </span>
+          </div>
+
+          {/* Flat Boss Health Bar with Bold Outline */}
+          <div
+            className="boss-hp-mob-style"
+            role="progressbar"
+            aria-label="Boss health"
+            aria-valuemin={0}
+            aria-valuemax={state.maximumHp}
+            aria-valuenow={state.remainingHp}
+            style={{
+              width: `${dragonHpBarWidth}px`,
+              height: `${dragonHpBarHeight}px`,
+              position: "relative",
+              background: "#1c1917",
+              border: "2px solid #000000",
+              borderRadius: "4px",
+              overflow: "hidden",
+              boxShadow: "0 2px 5px rgba(0,0,0,0.6)",
+            }}
+          >
+            <div
+              className="boss-hp-mob-fill"
+              style={{
+                width: `${hpPercent}%`,
+                height: "100%",
+                background: hpPercent > 50 ? "#ef4444" : hpPercent > 25 ? "#f97316" : "#dc2626",
+                borderRadius: "2px",
+                transition: "width 0.3s ease",
+              }}
+            />
+          </div>
         </div>
 
         {/* Layer 0, 1, 2: Sky & Parallax Clouds */}
@@ -2070,6 +2198,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         <LandscapeVillage
           villageHpPercent={effectiveVillageHp}
           villageName={funnyVillageName}
+          villageHpBarPos={villageHpBarPos}
+          villageHpBarWidth={villageHpBarWidth}
+          villageHpBarHeight={villageHpBarHeight}
+          villageHpBarScale={villageHpBarScale}
         />
 
         {/* Layer 6: Section 8 - Daily Goblins Wave System (1 per active player) */}
@@ -2101,7 +2233,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           isVictory={defeated}
         />
 
-        {/* Layer 10: Bottom-Middle Plant vs Zombies Style Deadline Progress Bar */}
+        {/* Layer 10: Bottom-Middle Plant vs Zombies Style Deadline Progress Bar (Flat RPG Style) */}
         <div
           className="pvz-deadline-progress-container"
           style={{
@@ -2110,11 +2242,12 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 25,
-            width: "min(480px, 52%)",
-            background: "rgba(18, 14, 10, 0.88)",
-            border: "2.5px solid #78350f",
-            borderRadius: "16px",
-            padding: "5px 12px 6px 12px",
+            width: "clamp(260px, 46vw, 440px)",
+            background: "#fffded",
+            border: "3px solid #101517",
+            borderRadius: "12px",
+            padding: "6px 12px 8px 12px",
+            boxShadow: "4px 4px 0 #101517",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -2135,16 +2268,15 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              fontSize: "0.68rem",
-              fontWeight: 800,
+              fontSize: "0.72rem",
+              fontWeight: 900,
               fontFamily: "var(--font-heading), serif",
               letterSpacing: "0.04em",
-              color: "#fef08a",
-              textShadow: "0 1px 2px #000",
+              color: "#101517",
             }}
           >
-            <span>⏳ Day {daysPassed} / {totalDays}</span>
-            <span style={{ color: daysRemaining <= 3 ? "#f87171" : "#86efac" }}>
+            <span>⏳ DAY {daysPassed} / {totalDays}</span>
+            <span style={{ color: daysRemaining <= 3 ? "#dc2626" : "#15803d", fontWeight: 900 }}>
               {daysRemaining === 0 ? "⚠️ DEADLINE TODAY!" : `${daysRemaining} DAYS REMAINING`}
             </span>
           </div>
@@ -2155,19 +2287,20 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               position: "relative",
               width: "100%",
               height: "12px",
-              background: "#1c1917",
-              border: "1.5px solid #92400e",
+              background: "#e2e8f0",
+              border: "2px solid #101517",
               borderRadius: "6px",
               overflow: "visible",
             }}
           >
-            {/* Green Progress Fill */}
+            {/* Solid Flat Green Progress Fill (No Gradients) */}
             <div
               style={{
                 width: `${progressPercent}%`,
                 height: "100%",
-                background: "linear-gradient(to right, #15803d, #22c55e)",
-                borderRadius: "4px",
+                background: "#1dd851",
+                borderRight: progressPercent > 0 && progressPercent < 100 ? "2px solid #101517" : "none",
+                borderRadius: "4px 0 0 4px",
                 transition: "width 0.4s ease",
               }}
             />
@@ -2399,7 +2532,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
                 <p style={{ margin: "0 0 12px 0", fontSize: "0.85rem", lineHeight: "1.4" }}>
                   Provide proof of today's work to defeat your daily goblin threat.
-                  Requirement: <strong>at least 20 words of notes OR 2 image links</strong>.
+                  Requirement: <strong>at least 10 words of notes OR 2 image links</strong>.
                 </p>
 
                 <label className="rpg-field-label">
@@ -2416,8 +2549,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
                 {/* Validation Info */}
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "10px", marginBottom: "14px" }}>
-                  <span className={`rpg-val-tag ${goblinWordCount >= 20 ? "is-valid" : "is-invalid"}`}>
-                    📝 {goblinWordCount}/20 words {goblinWordCount >= 20 ? "✓" : ""}
+                  <span className={`rpg-val-tag ${goblinWordCount >= 10 ? "is-valid" : "is-invalid"}`}>
+                    📝 {goblinWordCount}/10 words {goblinWordCount >= 10 ? "✓" : ""}
                   </span>
                   <span className={`rpg-val-tag ${goblinImageCount >= 2 ? "is-valid" : "is-invalid"}`}>
                     🖼️ {goblinImageCount}/2 images {goblinImageCount >= 2 ? "✓" : ""}
@@ -2463,7 +2596,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 type="submit"
                 disabled={isSlaying || (!goblinText && goblinImageUrls.length === 0)}
               >
-                {isSlaying ? "Slaying..." : isGoblinValid ? "⚔️ Slay Goblin!" : "Log Evidence (Requires 20 words or 2 images)"}
+                {isSlaying ? "Slaying..." : isGoblinValid ? "⚔️ Slay Goblin!" : "Log Evidence (Requires 10 words or 2 images)"}
               </button>
 
               <button className="rpg-btn-close" type="button" onClick={() => setShowGoblinModal(false)}>
@@ -2696,55 +2829,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         </div>
       )}
 
-      {/* Boss HP remains visible in the shared encounter. Task locking is contextual in task details. */}
-      <div className="boss-hp-panel">
-        {tasksLocked ? (
-          <>
-            <div><strong>Boss HP</strong><span>{state.remainingHp} / {state.maximumHp} ({hpPercent}%)</span></div>
-            <div className="boss-hp-track" role="progressbar" aria-valuemin={0} aria-valuemax={state.maximumHp} aria-valuenow={state.remainingHp}>
-              <span style={{ width: `${hpPercent}%` }} />
-            </div>
-          </>
-        ) : (
-          <div><strong>Boss HP</strong><span>Undetermined · lock from a task’s allocation details</span></div>
-        )}
 
-        {state.members && state.members.length > 0 ? (
-          <div className="member-hp-shares" style={{ marginTop: "0.85rem", paddingTop: "0.75rem", borderTop: "1px solid rgba(0, 0, 0, 0.1)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" }}>
-              <span style={{ fontWeight: 700, fontSize: "0.85rem" }}>Player Contribution Target</span>
-              <span style={{ fontSize: "0.8rem", opacity: 0.8 }}>Target share: {state.hpSharePerPlayer} HP per player</span>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.5rem" }}>
-              {state.members.map((member) => {
-                const sharePercent = member.targetHpShare > 0 ? Math.min(100, Math.round((member.damageDealt / member.targetHpShare) * 100)) : 0;
-                return (
-                  <div key={member.profileId} style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(255, 255, 255, 0.7)", padding: "0.4rem 0.6rem", borderRadius: "6px", fontSize: "0.8rem", border: "1px solid rgba(0,0,0,0.08)" }}>
-                    <CharacterAvatar
-                      fill={member.characterFill}
-                      outline={member.characterOutline}
-                      spellType={member.spellType as any}
-                      name={member.displayName}
-                      size="xs"
-                    />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
-                        <strong style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{member.displayName}</strong>
-                        <span style={{ fontWeight: 600, color: member.isShareComplete ? "#15803d" : "#334155", marginLeft: "4px" }}>
-                          {member.damageDealt}/{member.targetHpShare} HP ({sharePercent}%)
-                        </span>
-                      </div>
-                      <div style={{ height: "6px", background: "rgba(0,0,0,0.1)", borderRadius: "3px", overflow: "hidden" }}>
-                        <div style={{ width: `${sharePercent}%`, height: "100%", background: member.isShareComplete ? "#22c55e" : "#2563eb", borderRadius: "3px", transition: "width 0.3s ease" }} />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ) : null}
-      </div>
 
       {optionalMetrics.isVillageDestroyed ? (
         <section className="failure-panel" style={{ background: "#fef2f2", border: "2px solid #ef4444", padding: "1.5rem", borderRadius: "12px", margin: "1rem 0" }}>
@@ -3119,10 +3204,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               })()}
             </div>
 
-            {/* Dragon Boss HP Bar Position Controls */}
+            {/* Dragon Boss HP Bar Position & Size Controls */}
             <div style={{ padding: "8px 12px", background: "#0f172a", borderTop: "1px solid #334155", display: "grid", gap: "6px" }}>
               <div style={{ fontSize: "0.72rem", fontWeight: "bold", color: "#f97316", display: "flex", alignItems: "center", gap: "4px" }}>
-                🔥 Dragon Boss HP Bar Position
+                🔥 Dragon Boss HP Bar Position &amp; Size
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
                 <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
@@ -3143,6 +3228,101 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     onChange={(e) => setDragonHpBarPos((prev) => ({ ...prev, y: parseInt(e.target.value) || 0 }))}
                   />
                 </label>
+                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                  Width (px):
+                  <input
+                    type="number"
+                    min="80"
+                    max="400"
+                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                    value={dragonHpBarWidth}
+                    onChange={(e) => setDragonHpBarWidth(parseInt(e.target.value) || 180)}
+                  />
+                </label>
+                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                  Height (px):
+                  <input
+                    type="number"
+                    min="6"
+                    max="30"
+                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                    value={dragonHpBarHeight}
+                    onChange={(e) => setDragonHpBarHeight(parseInt(e.target.value) || 14)}
+                  />
+                </label>
+                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px", gridColumn: "span 2" }}>
+                  <span>Scale: {dragonHpBarScale.toFixed(2)}x</span>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2.5"
+                    step="0.05"
+                    style={{ accentColor: "#f97316" }}
+                    value={dragonHpBarScale}
+                    onChange={(e) => setDragonHpBarScale(parseFloat(e.target.value) || 1)}
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Village HP Bar Position & Size Controls */}
+            <div style={{ padding: "8px 12px", background: "#0f172a", borderTop: "1px solid #334155", display: "grid", gap: "6px" }}>
+              <div style={{ fontSize: "0.72rem", fontWeight: "bold", color: "#86efac", display: "flex", alignItems: "center", gap: "4px" }}>
+                🏰 Village HP Bar Position &amp; Size
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                  Offset X (px):
+                  <input
+                    type="number"
+                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                    value={villageHpBarPos.x}
+                    onChange={(e) => setVillageHpBarPos((prev) => ({ ...prev, x: parseInt(e.target.value) || 0 }))}
+                  />
+                </label>
+                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                  Offset Y (px):
+                  <input
+                    type="number"
+                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                    value={villageHpBarPos.y}
+                    onChange={(e) => setVillageHpBarPos((prev) => ({ ...prev, y: parseInt(e.target.value) || 0 }))}
+                  />
+                </label>
+                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                  Width (px):
+                  <input
+                    type="number"
+                    min="80"
+                    max="350"
+                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                    value={villageHpBarWidth}
+                    onChange={(e) => setVillageHpBarWidth(parseInt(e.target.value) || 140)}
+                  />
+                </label>
+                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                  Height (px):
+                  <input
+                    type="number"
+                    min="6"
+                    max="30"
+                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                    value={villageHpBarHeight}
+                    onChange={(e) => setVillageHpBarHeight(parseInt(e.target.value) || 12)}
+                  />
+                </label>
+                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px", gridColumn: "span 2" }}>
+                  <span>Scale: {villageHpBarScale.toFixed(2)}x</span>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2.5"
+                    step="0.05"
+                    style={{ accentColor: "#86efac" }}
+                    value={villageHpBarScale}
+                    onChange={(e) => setVillageHpBarScale(parseFloat(e.target.value) || 1)}
+                  />
+                </label>
               </div>
             </div>
 
@@ -3160,6 +3340,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     dragonGeometries,
                     layerOrder,
                     dragonHpBarPos,
+                    dragonHpBarWidth,
+                    dragonHpBarHeight,
+                    dragonHpBarScale,
+                    villageHpBarPos,
+                    villageHpBarWidth,
+                    villageHpBarHeight,
+                    villageHpBarScale,
                   };
                   const codeStr = JSON.stringify(exportData, null, 2);
                   navigator.clipboard.writeText(codeStr);
@@ -3180,6 +3367,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     setDragonGeometries(DEFAULT_DRAGON_GEOMETRIES);
                     setLayerOrder(DEFAULT_LAYER_ORDER);
                     setDragonHpBarPos({ x: 0, y: 0 });
+                    setDragonHpBarWidth(180);
+                    setDragonHpBarHeight(14);
+                    setDragonHpBarScale(1);
+                    setVillageHpBarPos({ x: 0, y: 0 });
+                    setVillageHpBarWidth(140);
+                    setVillageHpBarHeight(12);
+                    setVillageHpBarScale(1);
                     setSelectedDragonPart(null);
                     pushHistoryState(
                       DEFAULT_DRAGON_OFFSETS,
@@ -3195,6 +3389,67 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 🔄 Reset Config
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          ADMIN PASSWORD GATE MODAL ("taolamadmin")
+         ========================================================================= */}
+      {showAdminPasswordModal && (
+        <div className="rpg-modal-overlay" style={{ zIndex: 99999 }} onClick={() => setShowAdminPasswordModal(false)}>
+          <div className="rpg-parchment-modal" style={{ maxWidth: "380px" }} onClick={(e) => e.stopPropagation()}>
+            <div className="rpg-modal-header">
+              <h2>🔒 Admin Password Access</h2>
+              <button type="button" className="rpg-btn-close" onClick={() => setShowAdminPasswordModal(false)}>✕</button>
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (adminPasswordInput.trim() === "taolamadmin") {
+                  sessionStorage.setItem("taolamadmin_auth", "true");
+                  setAdminAuthenticated(true);
+                  setShowAdminPasswordModal(false);
+                  setShowDragonEditor(true);
+                  if (!selectedDragonPart) {
+                    setSelectedDragonPart("headNeck");
+                  }
+                  setAdminPasswordError("");
+                  setAdminPasswordInput("");
+                } else {
+                  setAdminPasswordError("Incorrect password. Access denied.");
+                }
+              }}
+              className="rpg-modal-body"
+            >
+              <p style={{ margin: "0 0 12px 0", fontSize: "0.88rem", color: "#334155" }}>
+                Enter the developer password to access Layout Admin vector tools and testing cheats:
+              </p>
+              <input
+                type="password"
+                value={adminPasswordInput}
+                onChange={(e) => {
+                  setAdminPasswordInput(e.target.value);
+                  setAdminPasswordError("");
+                }}
+                placeholder="Enter password..."
+                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "2px solid #334155", background: "#ffffff", color: "#0f172a", fontSize: "0.95rem", fontWeight: "bold" }}
+                autoFocus
+              />
+              {adminPasswordError && (
+                <p style={{ color: "#ef4444", fontSize: "0.82rem", margin: "6px 0 0 0", fontWeight: "bold" }}>
+                  {adminPasswordError}
+                </p>
+              )}
+              <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "16px" }}>
+                <button type="button" onClick={() => setShowAdminPasswordModal(false)} style={{ padding: "8px 14px", borderRadius: "6px", background: "#64748b", color: "#fff", border: "none", cursor: "pointer" }}>
+                  Cancel
+                </button>
+                <button type="submit" style={{ padding: "8px 16px", borderRadius: "6px", background: "#2563eb", color: "#fff", border: "none", fontWeight: "bold", cursor: "pointer" }}>
+                  Unlock Admin
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -820,22 +820,6 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
             )}
           </section>
 
-          <details className="battle-more-tools">
-            <summary><span>More Tools</span><span className="battle-tools-alerts">{needsMyReviewCount > 0 ? `${needsMyReviewCount} to review` : null}{requestTasks.length > 0 ? `${requestTasks.length} task request${requestTasks.length === 1 ? "" : "s"}` : null}{workspace.canManageProject && completionRequests.length > 0 ? `${completionRequests.length} approval${completionRequests.length === 1 ? "" : "s"}` : null}</span></summary>
-            <div className="battle-tool-links">
-              <button className="quiet-button" type="button" onClick={() => { const task = workspace.tasks.find((item) => item.reviewerProfileId === workspace.currentProfileId && ["submitted", "review"].includes(item.status)); if (task) setOpenBattleTaskId(task._id); else { setActiveTab("tasks"); setNeedsMyReview(true); } }}>Review Queue{needsMyReviewCount > 0 ? ` (${needsMyReviewCount})` : ""}</button>
-              <button className="quiet-button" type="button" onClick={() => { if (requestTasks[0]) setOpenBattleTaskId(requestTasks[0]._id); else setActiveTab("tasks"); }}>Task Requests{requestTasks.length > 0 ? ` (${requestTasks.length})` : ""}</button>
-              {workspace.canManageProject && completionRequests.length > 0 ? <button className="quiet-button" type="button" onClick={() => setOpenBattleTaskId(completionRequests[0]._id)}>Completion Requests ({completionRequests.length})</button> : null}
-              <button className="quiet-button" type="button" onClick={() => setActiveTab("team")}>Team</button>
-              {workspace.canManageProject ? <button className="quiet-button" type="button" onClick={() => { setActiveTab("tasks"); setShowTaskForm(true); }}>Adjust Plan</button> : null}
-              <button className="quiet-button" type="button" onClick={() => setBriefOpen(true)}>Project Brief</button>
-              <button className="quiet-button" type="button" onClick={() => window.print()}>Project Report</button>
-            </div>
-            <TaskTradePanel projectId={workspace.project._id} />
-            <details className="planning-workload-details"><summary>Workload</summary><AllocationWorkbench workspace={workspace} /></details>
-          </details>
-
-          <details className="project-context-settings"><summary>Project settings and report</summary><p>{completedTaskCount} of {workspace.tasks.length} tasks complete.</p><button className="quiet-button" type="button" onClick={() => window.print()}>Export / print report</button>{workspace.canManageProject ? <button className="quiet-button" type="button" onClick={() => void runAction(() => setProjectArchived({ projectId: workspace.project._id, archived: workspace.project.status !== "archived" }), "The project status could not be changed.")}>{workspace.project.status === "archived" ? "Restore project" : "Archive project"}</button> : null}</details>
         </div>
       ) : null}
 
