@@ -1,7 +1,7 @@
 export function LandscapeTerrain() {
   return (
     <>
-      {/* Layer 3: Top 1/4 Sky Horizon & Slate Blue Mountain Ridges */}
+      {/* Layer 3: Top Sky Horizon & Slate Blue Mountain Ridges */}
       <div className="landscape-layer layer-3-hills" aria-hidden="true">
         <svg viewBox="0 0 1000 400" preserveAspectRatio="none" width="100%" height="100%">
           <polygon
@@ -17,39 +17,48 @@ export function LandscapeTerrain() {
       </div>
 
       {/* Layer 4: Multi-Layered Meadow & Curvy Winding Path */}
+      {/* Starts at #17a738 in the foreground and progressively gets darker further away towards the horizon */}
       <div className="landscape-layer layer-4-ground" aria-hidden="true">
         <svg viewBox="0 0 1000 400" preserveAspectRatio="none" width="100%" height="100%">
           <defs>
-            {/* Subtle 3-blade Grass Tuft Template */}
+            {/* Subtle Grass Tuft Templates */}
             <g id="grass-tuft-dark">
-              <polygon points="0,0 -2,-9 0,-6" fill="#14532d" />
-              <polygon points="0,0 1,-12 3,-8" fill="#166534" />
-              <polygon points="0,0 4,-7 5,-3" fill="#14532d" />
+              <polygon points="0,0 -2,-9 0,-6" fill="#083a12" />
+              <polygon points="0,0 1,-12 3,-8" fill="#0c511b" />
+              <polygon points="0,0 4,-7 5,-3" fill="#083a12" />
             </g>
             <g id="grass-tuft-light">
-              <polygon points="0,0 -2,-9 0,-6" fill="#4ade80" />
-              <polygon points="0,0 1,-12 3,-8" fill="#86efac" />
-              <polygon points="0,0 4,-7 5,-3" fill="#4ade80" />
+              <polygon points="0,0 -2,-9 0,-6" fill="#127b2a" />
+              <polygon points="0,0 1,-12 3,-8" fill="#17a738" />
+              <polygon points="0,0 4,-7 5,-3" fill="#127b2a" />
             </g>
             {/* Slate Pebble Template */}
             <g id="slate-pebble">
               <ellipse cx="0" cy="0" rx="4" ry="2.2" fill="#334155" />
-              <ellipse cx="-1" cy="-0.6" rx="2.5" ry="1.2" fill="#64748b" />
+              <ellipse cx="-1" cy="-0.6" rx="2.5" ry="1.2" fill="#475569" />
             </g>
           </defs>
 
-          {/* 10% Horizon Dark Forest Green Band (y = 100 to 130) */}
-          <rect x="0" y="100" width="1000" height="300" fill="#17a738" />
+          {/* Band 0: Deepest Far Distance / Horizon (Darkest Forest Green) */}
+          <rect x="0" y="100" width="1000" height="300" fill="#083a12" />
 
-          {/* 10% Horizon Mid Meadow Green Band (y = 128 to 160) */}
-          <path d="M0,130 Q260,120 520,135 T1000,128 L1000,400 L0,400 Z" fill="#17a738" opacity="0.9" />
+          {/* Band 1: Far Distance Ground Plain */}
+          <path d="M0,125 Q250,115 500,128 T1000,122 L1000,400 L0,400 Z" fill="#0c511b" />
 
-          {/* 80% Main Bright Lush Meadow (y = 155 to 400) */}
-          <path d="M0,158 Q280,148 580,165 T1000,155 L1000,400 L0,400 Z" fill="#1dd851" />
-          <rect x="0" y="165" width="1000" height="235" fill="#1dd851" />
+          {/* Band 2: Mid-Distance Plain */}
+          <path d="M0,160 Q270,148 540,165 T1000,155 L1000,400 L0,400 Z" fill="#0f6622" />
+
+          {/* Band 3: Center Meadow Plane */}
+          <path d="M0,205 Q280,192 560,210 T1000,200 L1000,400 L0,400 Z" fill="#127b2a" />
+
+          {/* Band 4: Near Foreground Meadow */}
+          <path d="M0,255 Q290,240 580,260 T1000,250 L1000,400 L0,400 Z" fill="#159132" />
+
+          {/* Band 5: Closest Foreground Grass (Base #17a738) */}
+          <path d="M0,310 Q300,295 600,315 T1000,305 L1000,400 L0,400 Z" fill="#17a738" />
+          <rect x="0" y="325" width="1000" height="75" fill="#17a738" />
 
           {/* --- Curvy Winding Dirt / Cobblestone Pathway --- */}
-          {/* Pathway Outer Dirt Foundation */}
           <path
             d="M960,335 Q740,345 550,305 Q430,282 340,290 Q210,295 125,265"
             stroke="#78350f"
@@ -58,7 +67,6 @@ export function LandscapeTerrain() {
             fill="none"
             opacity="0.75"
           />
-          {/* Pathway Middle Track */}
           <path
             d="M960,335 Q740,345 550,305 Q430,282 340,290 Q210,295 125,265"
             stroke="#92400e"
@@ -67,7 +75,6 @@ export function LandscapeTerrain() {
             fill="none"
             opacity="0.65"
           />
-          {/* Pathway Worn Center Path */}
           <path
             d="M960,335 Q740,345 550,305 Q430,282 340,290 Q210,295 125,265"
             stroke="#b45309"
@@ -88,7 +95,7 @@ export function LandscapeTerrain() {
           <use href="#slate-pebble" x="720" y="325" />
           <use href="#slate-pebble" x="870" y="355" />
 
-          {/* Decorative Grass Tufts (Subtle, Keeping Visual Hierarchy on Characters) */}
+          {/* Decorative Grass Tufts */}
           <use href="#grass-tuft-dark" x="80" y="160" />
           <use href="#grass-tuft-dark" x="220" y="185" />
           <use href="#grass-tuft-dark" x="440" y="170" />

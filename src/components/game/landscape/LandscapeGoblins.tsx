@@ -105,8 +105,8 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
                     <polygon points="28,30 34,25 36,32" fill="#38bdf8" opacity="0.75" stroke="none" />
 
                     {/* Ghost Text */}
-                    <text x="15" y="-4" textAnchor="middle" fill="#93c5fd" fontSize="9" fontWeight="900">
-                      👻 Slayed
+                    <text x="15" y="-4" textAnchor="middle" fill="#93c5fd" fontSize="9" fontWeight="800">
+                      Slayed
                     </text>
                   </g>
                 ) : (

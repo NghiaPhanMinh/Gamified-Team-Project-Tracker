@@ -207,15 +207,13 @@ export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
                     <ellipse cx="-12" cy="0" rx="16" ry="8" fill="#e0f2fe" opacity="0.8" />
                     <ellipse cx="12" cy="-2" rx="14" ry="7" fill="#bae6fd" opacity="0.85" />
                     <circle cx="0" cy="-5" r="12" fill="#ffffff" opacity="0.9" />
-                    {/* Snowflakes */}
-                    <text x="-8" y="14" fill="#38bdf8" fontSize="8">
+                    {/* Ice Shards falling */}
+                    <polygon points="-8,10 -6,14 -8,18 -10,14" fill="#38bdf8">
                       <animate attributeName="opacity" values="0.3; 1; 0.3" dur="0.6s" repeatCount="indefinite" />
-                      ❄
-                    </text>
-                    <text x="6" y="18" fill="#7dd3fc" fontSize="7">
+                    </polygon>
+                    <polygon points="6,14 8,18 6,22 4,18" fill="#7dd3fc">
                       <animate attributeName="opacity" values="1; 0.3; 1" dur="0.5s" repeatCount="indefinite" />
-                      ❄
-                    </text>
+                    </polygon>
                   </g>
 
                   {/* Giant Freezing Glacial Ice Spikes */}

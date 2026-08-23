@@ -46,29 +46,23 @@ export function LandscapeVillage({
           pointerEvents: "none",
         }}
       >
-        {/* Name & HP Text Float ABOVE Health Bar */}
+        {/* Name Text Float ABOVE Health Bar (No Emoji, No Shadow) */}
         <div
           style={{
-            fontSize: "0.7rem",
-            fontWeight: 900,
-            fontFamily: "var(--font-heading), serif",
-            color: "#86efac",
-            textShadow: "0 1px 3px #000, 0 0 4px #000, 0 0 6px #000",
-            letterSpacing: "0.03em",
+            fontSize: "0.68rem",
+            fontWeight: 800,
+            fontFamily: "var(--font-heading), sans-serif",
+            color: "#ffffff",
+            letterSpacing: "0.02em",
             whiteSpace: "nowrap",
-            marginBottom: "3px",
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
+            marginBottom: "2px",
+            textAlign: "center",
           }}
         >
-          <span>🏰 {villageName ?? "Town of Last-Minute Hope"}</span>
-          <span style={{ color: "#fef08a", fontSize: "0.68rem", fontWeight: 800 }}>
-            {villageHpPercent}% HP
-          </span>
+          {villageName ?? "Town of Last-Minute Hope"}
         </div>
 
-        {/* Flat Health Bar with Bold Outline */}
+        {/* Flat Health Bar with HP % INSIDE (No Shadow, No Outline) */}
         <div
           className="village-hp-mob-style"
           role="progressbar"
@@ -79,21 +73,38 @@ export function LandscapeVillage({
             width: `${villageHpBarWidth}px`,
             height: `${villageHpBarHeight}px`,
             position: "relative",
-            background: "#1c1917",
-            border: "2px solid #000000",
-            borderRadius: "4px",
+            background: "#1e293b",
+            borderRadius: "3px",
             overflow: "hidden",
-            boxShadow: "0 2px 5px rgba(0,0,0,0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <div
             className={`village-hp-mob-fill fill-${tier}`}
             style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
               width: `${villageHpPercent}%`,
               height: "100%",
               transition: "width 0.3s ease",
             }}
           />
+          <span
+            style={{
+              position: "relative",
+              zIndex: 2,
+              fontSize: "0.6rem",
+              fontWeight: 800,
+              color: "#ffffff",
+              whiteSpace: "nowrap",
+              pointerEvents: "none",
+            }}
+          >
+            {villageHpPercent}%
+          </span>
         </div>
       </div>
 

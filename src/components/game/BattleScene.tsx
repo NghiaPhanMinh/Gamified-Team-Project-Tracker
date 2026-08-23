@@ -101,102 +101,102 @@ function uploadFile(
 }
 
 const SHAPE_LABELS: Record<string, string> = {
-  backWing_membrane1: "🦅 Back Wing Membrane 1",
-  backWing_membrane2: "🦅 Back Wing Membrane 2",
-  backWing_membrane3: "🦅 Back Wing Membrane 3",
-  backWing_strut1: "🦴 Back Wing Bone Strut 1",
-  backWing_strut2: "🦴 Back Wing Bone Strut 2",
-  backWing_joint: "🟢 Back Wing Joint",
-  backWing_claw: "💅 Back Wing Claw",
-  frontWing_membrane1: "🦅 Front Wing Membrane 1",
-  frontWing_membrane2: "🦅 Front Wing Membrane 2",
-  frontWing_membrane3: "🦅 Front Wing Membrane 3",
-  frontWing_strut1: "🦴 Front Wing Bone Strut 1",
-  frontWing_strut2: "🦴 Front Wing Bone Strut 2",
-  frontWing_joint: "🟢 Front Wing Joint",
-  frontWing_claw: "💅 Front Wing Claw",
-  tail_seg1: "🐍 Tail Segment 1",
-  tail_seg2: "🐍 Tail Segment 2",
-  tail_seg3: "🐍 Tail Segment 3",
-  tail_shadow: "🐍 Tail Shadow Overlay",
-  tail_barb1: "⚔️ Tail Barb Tip 1",
-  tail_barb2: "⚔️ Tail Barb Tip 2",
-  tail_barb3: "⚔️ Tail Barb Tip 3",
-  tail_spine1: "🔺 Tail Spine 1",
-  tail_spine2: "🔺 Tail Spine 2",
-  tail_spine3: "🔺 Tail Spine 3",
-  spine1: "🔺 Dorsal Spine 1",
-  spine2: "🔺 Dorsal Spine 2",
-  spine3: "🔺 Dorsal Spine 3",
-  spine4: "🔺 Dorsal Spine 4",
-  spine5: "🔺 Dorsal Spine 5",
-  spine6: "🔺 Dorsal Spine 6",
-  spine7: "🔺 Dorsal Spine 7",
-  backLeg_thigh: "🦵 Back Leg Thigh",
-  backLeg_knee: "🟢 Back Leg Knee Joint",
-  backLeg_calf: "🦵 Back Leg Calf",
-  backLeg_ankle: "🟢 Back Leg Ankle Joint",
-  backLeg_foot: "🦶 Back Leg Foot",
-  backLeg_claw1: "💅 Back Leg Talon 1",
-  backLeg_claw2: "💅 Back Leg Talon 2",
-  backLeg_claw3: "💅 Back Leg Talon 3",
-  torso_base: "🛡️ Torso Main Frame",
-  torso_plate1: "🛡️ Torso Muscle Overlay 1",
-  torso_plate2: "🛡️ Torso Muscle Overlay 2",
-  torso_chest1: "🛡️ Chest Segment Plate 1",
-  torso_chest2: "🛡️ Chest Segment Plate 2",
-  torso_chest3: "🛡️ Chest Segment Plate 3",
-  torso_chest4: "🛡️ Chest Segment Plate 4",
-  torso_chest5: "🛡️ Chest Segment Plate 5",
-  frontLeg_thigh: "🦵 Front Leg Thigh",
-  frontLeg_knee: "🟢 Front Leg Knee Joint",
-  frontLeg_calf: "🦵 Front Leg Calf",
-  frontLeg_ankle: "🟢 Front Leg Ankle Joint",
-  frontLeg_foot: "🦶 Front Leg Foot",
-  frontLeg_claw1: "💅 Front Leg Talon 1",
-  frontLeg_claw2: "💅 Front Leg Talon 2",
-  frontLeg_claw3: "💅 Front Leg Talon 3",
-  frontArm_shoulder: "🟢 Shoulder Joint",
-  frontArm_bicep: "💪 Muscular Bicep",
-  frontArm_elbow: "🟢 Elbow Joint",
-  frontArm_forearm: "💪 Forearm Frame",
-  frontArm_wrist: "🟢 Wrist Joint",
-  frontArm_claw1: "💅 Arm Talon 1",
-  frontArm_claw2: "💅 Arm Talon 2",
-  neck_base1: "🦒 Neck Segment 1",
-  neck_base2: "🦒 Neck Segment 2",
-  neck_plate1: "🦒 Neck Plate 1",
-  neck_plate2: "🦒 Neck Plate 2",
-  neck_plate3: "🦒 Neck Plate 3",
-  mouth_cavity: "🕳️ Throat Cavity Backfill",
-  skull_base: "💀 Skull Core base",
-  mouth_webbing: "🕸️ Mouth Flap Webbing",
-  snout_base: "👃 Snout structure",
-  snout_nostril: "🕳️ Nostril Cavity",
-  lower_jaw: "💀 Lower Jawbone",
-  upper_fang1: "🦷 Upper Fang 1",
-  upper_fang2: "🦷 Upper Fang 2",
-  upper_fang3: "🦷 Upper Fang 3",
-  upper_fang4: "🦷 Upper Fang 4",
-  upper_fang5: "🦷 Upper Fang 5",
-  upper_fang6: "🦷 Upper Fang 6",
-  lower_fang1: "🦷 Lower Fang 1",
-  lower_fang2: "🦷 Lower Fang 2",
-  lower_fang3: "🦷 Lower Fang 3",
-  lower_fang4: "🦷 Lower Fang 4",
-  horn1: "⚡ Main Lightning Horn (Left)",
-  horn2: "⚡ Under Lightning Horn (Right)",
-  spine_head1: "🔺 Crest Horn Plate 1",
-  spine_head2: "🔺 Crest Horn Plate 2",
-  spine_head3: "🔺 Crest Horn Plate 3",
-  eye_base: "🟡 Eye Iris",
-  eye_pupil: "⚫ Eye Slit Pupil",
-  eye_specular: "⚪ Eye Light Specular",
-  eye_brow: "😠 Angry Eyebrow Plate",
-  frontClaw_arm: "💪 Rigged Claw Arm",
-  frontClaw_claw1: "💅 Claw Talon 1",
-  frontClaw_claw2: "💅 Claw Talon 2",
-  frontClaw_claw3: "💅 Claw Talon 3",
+  backWing_membrane1: "Back Wing Membrane 1",
+  backWing_membrane2: "Back Wing Membrane 2",
+  backWing_membrane3: "Back Wing Membrane 3",
+  backWing_strut1: "Back Wing Bone Strut 1",
+  backWing_strut2: "Back Wing Bone Strut 2",
+  backWing_joint: "Back Wing Joint",
+  backWing_claw: "Back Wing Claw",
+  frontWing_membrane1: "Front Wing Membrane 1",
+  frontWing_membrane2: "Front Wing Membrane 2",
+  frontWing_membrane3: "Front Wing Membrane 3",
+  frontWing_strut1: "Front Wing Bone Strut 1",
+  frontWing_strut2: "Front Wing Bone Strut 2",
+  frontWing_joint: "Front Wing Joint",
+  frontWing_claw: "Front Wing Claw",
+  tail_seg1: "Tail Segment 1",
+  tail_seg2: "Tail Segment 2",
+  tail_seg3: "Tail Segment 3",
+  tail_shadow: "Tail Shadow Overlay",
+  tail_barb1: "Tail Barb Tip 1",
+  tail_barb2: "Tail Barb Tip 2",
+  tail_barb3: "Tail Barb Tip 3",
+  tail_spine1: "Tail Spine 1",
+  tail_spine2: "Tail Spine 2",
+  tail_spine3: "Tail Spine 3",
+  spine1: "Dorsal Spine 1",
+  spine2: "Dorsal Spine 2",
+  spine3: "Dorsal Spine 3",
+  spine4: "Dorsal Spine 4",
+  spine5: "Dorsal Spine 5",
+  spine6: "Dorsal Spine 6",
+  spine7: "Dorsal Spine 7",
+  backLeg_thigh: "Back Leg Thigh",
+  backLeg_knee: "Back Leg Knee Joint",
+  backLeg_calf: "Back Leg Calf",
+  backLeg_ankle: "Back Leg Ankle Joint",
+  backLeg_foot: "Back Leg Foot",
+  backLeg_claw1: "Back Leg Talon 1",
+  backLeg_claw2: "Back Leg Talon 2",
+  backLeg_claw3: "Back Leg Talon 3",
+  torso_base: "Torso Main Frame",
+  torso_plate1: "Torso Muscle Overlay 1",
+  torso_plate2: "Torso Muscle Overlay 2",
+  torso_chest1: "Chest Segment Plate 1",
+  torso_chest2: "Chest Segment Plate 2",
+  torso_chest3: "Chest Segment Plate 3",
+  torso_chest4: "Chest Segment Plate 4",
+  torso_chest5: "Chest Segment Plate 5",
+  frontLeg_thigh: "Front Leg Thigh",
+  frontLeg_knee: "Front Leg Knee Joint",
+  frontLeg_calf: "Front Leg Calf",
+  frontLeg_ankle: "Front Leg Ankle Joint",
+  frontLeg_foot: "Front Leg Foot",
+  frontLeg_claw1: "Front Leg Talon 1",
+  frontLeg_claw2: "Front Leg Talon 2",
+  frontLeg_claw3: "Front Leg Talon 3",
+  frontArm_shoulder: "Shoulder Joint",
+  frontArm_bicep: "Muscular Bicep",
+  frontArm_elbow: "Elbow Joint",
+  frontArm_forearm: "Forearm Frame",
+  frontArm_wrist: "Wrist Joint",
+  frontArm_claw1: "Arm Talon 1",
+  frontArm_claw2: "Arm Talon 2",
+  neck_base1: "Neck Segment 1",
+  neck_base2: "Neck Segment 2",
+  neck_plate1: "Neck Plate 1",
+  neck_plate2: "Neck Plate 2",
+  neck_plate3: "Neck Plate 3",
+  mouth_cavity: "Throat Cavity Backfill",
+  skull_base: "Skull Core base",
+  mouth_webbing: "Mouth Flap Webbing",
+  snout_base: "Snout structure",
+  snout_nostril: "Nostril Cavity",
+  lower_jaw: "Lower Jawbone",
+  upper_fang1: "Upper Fang 1",
+  upper_fang2: "Upper Fang 2",
+  upper_fang3: "Upper Fang 3",
+  upper_fang4: "Upper Fang 4",
+  upper_fang5: "Upper Fang 5",
+  upper_fang6: "Upper Fang 6",
+  lower_fang1: "Lower Fang 1",
+  lower_fang2: "Lower Fang 2",
+  lower_fang3: "Lower Fang 3",
+  lower_fang4: "Lower Fang 4",
+  horn1: "Main Lightning Horn (Left)",
+  horn2: "Under Lightning Horn (Right)",
+  spine_head1: "Crest Horn Plate 1",
+  spine_head2: "Crest Horn Plate 2",
+  spine_head3: "Crest Horn Plate 3",
+  eye_base: "Eye Iris",
+  eye_pupil: "Eye Slit Pupil",
+  eye_specular: "Eye Light Specular",
+  eye_brow: "Eyebrow Plate",
+  frontClaw_arm: "Rigged Claw Arm",
+  frontClaw_claw1: "Claw Talon 1",
+  frontClaw_claw2: "Claw Talon 2",
+  frontClaw_claw3: "Claw Talon 3",
 };
 
 const LOCAL_STORAGE_KEY = "dragon_editor_config_v4";
@@ -352,7 +352,7 @@ const DEFAULT_DELETED_SHAPES: Record<string, boolean> = {
 const DEFAULT_CUSTOM_SHAPES = [
   {
     "id": "custom_1786873091485",
-    "name": "✨ Custom POLYGON (2)",
+    "name": "Custom POLYGON (2)",
     "type": "polygon" as const,
     "fill": "#9c1111",
     "x": 150,
@@ -367,7 +367,7 @@ const DEFAULT_CUSTOM_SHAPES = [
   },
   {
     "id": "custom_1786873263651",
-    "name": "✨ Custom POLYGON (3)",
+    "name": "Custom POLYGON (3)",
     "type": "polygon" as const,
     "fill": "#b91c1c",
     "x": 150,
@@ -382,7 +382,7 @@ const DEFAULT_CUSTOM_SHAPES = [
   },
   {
     "id": "custom_1786873460613",
-    "name": "✨ Custom POLYGON (4)",
+    "name": "Custom POLYGON (4)",
     "type": "polygon" as const,
     "fill": "#e6ac2d",
     "x": 150,
@@ -397,7 +397,7 @@ const DEFAULT_CUSTOM_SHAPES = [
   },
   {
     "id": "custom_1786978550424",
-    "name": "✨ Custom CIRCLE (4)",
+    "name": "Custom CIRCLE (4)",
     "type": "circle" as const,
     "fill": "#b91c1c",
     "x": 150,
@@ -412,7 +412,7 @@ const DEFAULT_CUSTOM_SHAPES = [
   },
   {
     "id": "custom_1786978881829",
-    "name": "✨ Custom PATH (6)",
+    "name": "Custom PATH (6)",
     "type": "path" as const,
     "fill": "#b91c1c",
     "x": 150,
@@ -427,7 +427,7 @@ const DEFAULT_CUSTOM_SHAPES = [
   },
   {
     "id": "custom_1786979572697",
-    "name": "✨ Duplicate of ✨ Custom POLYGON (4)",
+    "name": "Duplicate of Custom POLYGON (4)",
     "type": "polygon" as const,
     "fill": "#e6ac2d",
     "x": 150,
@@ -442,7 +442,7 @@ const DEFAULT_CUSTOM_SHAPES = [
   },
   {
     "id": "custom_1786979651336",
-    "name": "✨ Custom POLYGON (7)",
+    "name": "Custom POLYGON (7)",
     "type": "polygon" as const,
     "fill": "#811212",
     "x": 150,
@@ -457,7 +457,7 @@ const DEFAULT_CUSTOM_SHAPES = [
   },
   {
     "id": "custom_1786980038964",
-    "name": "✨ Duplicate of ✨ Custom POLYGON (7)",
+    "name": "Duplicate of Custom POLYGON (7)",
     "type": "polygon" as const,
     "fill": "#4e0909",
     "x": 150,
@@ -472,7 +472,7 @@ const DEFAULT_CUSTOM_SHAPES = [
   },
   {
     "id": "custom_1786980109541",
-    "name": "✨ Duplicate of ✨ Duplicate of ✨ Custom POLYGON (7)",
+    "name": "Duplicate of Duplicate of Custom POLYGON (7)",
     "type": "polygon" as const,
     "fill": "#a0771c",
     "x": 150,
@@ -487,7 +487,7 @@ const DEFAULT_CUSTOM_SHAPES = [
   },
   {
     "id": "custom_1786980127871",
-    "name": "✨ Duplicate of ✨ Duplicate of ✨ Duplicate of ✨ Custom POLYGON (7)",
+    "name": "Duplicate of Duplicate of Duplicate of Custom POLYGON (7)",
     "type": "polygon" as const,
     "fill": "#a0771c",
     "x": 150,
@@ -502,7 +502,7 @@ const DEFAULT_CUSTOM_SHAPES = [
   },
   {
     "id": "custom_1786980243010",
-    "name": "✨ Duplicate of 💅 Back Leg Talon 1",
+    "name": "Duplicate of Back Leg Talon 1",
     "type": "polygon" as const,
     "fill": "#a8a8a8",
     "x": 150,
@@ -517,7 +517,7 @@ const DEFAULT_CUSTOM_SHAPES = [
   },
   {
     "id": "custom_1786980264091",
-    "name": "✨ Duplicate of ✨ Duplicate of 💅 Back Leg Talon 1",
+    "name": "Duplicate of Duplicate of Back Leg Talon 1",
     "type": "polygon" as const,
     "fill": "#a8a8a8",
     "x": 150,
@@ -532,7 +532,7 @@ const DEFAULT_CUSTOM_SHAPES = [
   },
   {
     "id": "custom_1786980270419",
-    "name": "✨ Duplicate of ✨ Duplicate of ✨ Duplicate of 💅 Back Leg Talon 1",
+    "name": "Duplicate of Duplicate of Duplicate of Back Leg Talon 1",
     "type": "polygon" as const,
     "fill": "#b0b0b0",
     "x": 150,
@@ -928,13 +928,49 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [showAdminPasswordModal, setShowAdminPasswordModal] = useState(false);
   const [adminPasswordInput, setAdminPasswordInput] = useState("");
   const [adminPasswordError, setAdminPasswordError] = useState("");
-  const [adminPanelWidth, setAdminPanelWidth] = useState(480);
+  const [adminPanelWidth, setAdminPanelWidth] = useState(540);
+  const [adminTab, setAdminTab] = useState<"cheats" | "layers" | "dragon" | "sizing">("cheats");
   const [showLayerManagerModal, setShowLayerManagerModal] = useState(false);
 
-  // Gameplay Testing Cheats (Show attack VFX, kill goblin, 50% village HP, kill dragon)
+  // Gameplay Testing Cheats (Show attack VFX, kill goblin, 50% village HP, kill dragon, test overdue)
   const [testVillageHpOverride, setTestVillageHpOverride] = useState<number | null>(null);
   const [testDragonHpOverride, setTestDragonHpOverride] = useState<number | null>(null);
   const [testDeadGoblins, setTestDeadGoblins] = useState<Record<string, boolean>>({});
+  const [testActiveSpell, setTestActiveSpell] = useState<"lightning" | "fire" | "ice" | null>(null);
+  const [testOverdueOverride, setTestOverdueOverride] = useState<boolean | null>(null);
+
+  // Canvas Layer Transforms (All 10 layers customizable in Layout Admin)
+  const [layerTransforms, setLayerTransforms] = useState<Record<string, { x: number; y: number; scale: number; visible: boolean }>>(() => {
+    try {
+      const saved = localStorage.getItem("layer_transforms_config");
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      sky: { x: 0, y: 0, scale: 1, visible: true },
+      terrain: { x: 0, y: 0, scale: 1, visible: true },
+      village: { x: 0, y: 0, scale: 1, visible: true },
+      goblins: { x: 0, y: 0, scale: 1, visible: true },
+      players: { x: 0, y: 0, scale: 1, visible: true },
+      dragon: { x: 0, y: 0, scale: 1, visible: true },
+      fx: { x: 0, y: 0, scale: 1, visible: true },
+    };
+  });
+
+  const [pvzBarOffset, setPvzBarOffset] = useState<{ x: number; y: number; width: number; scale: number; visible: boolean }>(() => {
+    try {
+      const saved = localStorage.getItem("pvz_bar_config");
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return { x: 0, y: 0, width: 380, scale: 1, visible: true };
+  });
+
+  useEffect(() => {
+    localStorage.setItem("layer_transforms_config", JSON.stringify(layerTransforms));
+  }, [layerTransforms]);
+
+  useEffect(() => {
+    localStorage.setItem("pvz_bar_config", JSON.stringify(pvzBarOffset));
+  }, [pvzBarOffset]);
 
   // Room Deletion & End Game states
   const [showDeleteRoomModal, setShowDeleteRoomModal] = useState(false);
@@ -1059,7 +1095,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     
     const dupShape = {
       id,
-      name: `✨ Duplicate of ${isCustom ? custShape!.name : origShape!.name}`,
+      name: `Duplicate of ${isCustom ? custShape!.name : origShape!.name}`,
       type: baseType,
       fill: baseFill,
       x: isCustom ? custShape!.x : 150,
@@ -1415,7 +1451,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     const id = `custom_${Date.now()}`;
     const newShape = {
       id,
-      name: `✨ Custom ${spawnerType.toUpperCase()} (${customShapes.length + 1})`,
+      name: `Custom ${spawnerType.toUpperCase()} (${customShapes.length + 1})`,
       type: spawnerType,
       fill: spawnerColor,
       x: 150,
@@ -1938,7 +1974,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const dragonX = 730 + damageClearedFraction * 60;
 
   // Post-Deadline End-Game Screen (Overrides active game scene when deadline is reached)
-  if (state.isOverdue && !viewBattleSceneOverride) {
+  if ((testOverdueOverride !== null ? testOverdueOverride : state.isOverdue) && !viewBattleSceneOverride) {
     const isVillageDefended = effectiveVillageHp >= 50;
     const resultVariant = isVillageDefended ? "success" : "failed";
     const resultTitle = isVillageDefended
@@ -1972,7 +2008,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           <div className="rpg-modal-overlay" onClick={() => setShowLeaderboardModal(false)}>
             <div className="rpg-parchment-modal" onClick={(e) => e.stopPropagation()}>
               <div className="rpg-modal-header">
-                <h2>🏆 Hall of Fame & Combat Log</h2>
+                <h2>Hall of Fame & Combat Log</h2>
                 <button type="button" className="rpg-btn-close" onClick={() => setShowLeaderboardModal(false)}>✕</button>
               </div>
               <div className="rpg-modal-body">
@@ -1994,11 +2030,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                           const mage = getMageTheme(currentMember?.spellType, currentMember?.profileId, idx);
                           return (
                             <tr key={m.profileId || m.userId || idx}>
-                              <td>{idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`}</td>
+                              <td>{idx === 0 ? "1st" : idx === 1 ? "2nd" : idx === 2 ? "3rd" : `#${idx + 1}`}</td>
                               <td><strong>{m.displayName || m.userName}</strong></td>
                               <td><span style={{ fontSize: "0.75rem", padding: "2px 6px", borderRadius: "4px", background: "rgba(255,255,255,0.1)" }}>{mage.name}</span></td>
                               <td><strong>{m.damageDealt ?? 0} HP</strong></td>
-                              <td>{m.hasSubmittedToday ? "✅ Defeated" : "❌ Pending"}</td>
+                              <td>{m.hasSubmittedToday ? "Defeated" : "Pending"}</td>
                             </tr>
                           );
                         })}
@@ -2007,7 +2043,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   </div>
 
                   <div className="combat-log-box" style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", padding: "12px", maxHeight: "200px", overflowY: "auto" }}>
-                    <h4 style={{ margin: "0 0 8px 0", fontSize: "0.9rem", color: "#facc15" }}>📜 Verified Combat Activity Log</h4>
+                    <h4 style={{ margin: "0 0 8px 0", fontSize: "0.9rem", color: "#facc15" }}>Verified Combat Activity Log</h4>
                     {state.events.length === 0 ? (
                       <p style={{ margin: 0, fontSize: "0.8rem", color: "#94a3b8" }}>No combat attacks registered.</p>
                     ) : (
@@ -2032,12 +2068,12 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           <div className="rpg-modal-overlay" onClick={() => setShowDeleteRoomModal(false)}>
             <div className="rpg-parchment-modal" style={{ maxWidth: "460px" }} onClick={(e) => e.stopPropagation()}>
               <div className="rpg-modal-header">
-                <h2>🗑️ Delete Party Room</h2>
+                <h2>Delete Party Room</h2>
                 <button type="button" className="rpg-btn-close" onClick={() => setShowDeleteRoomModal(false)}>✕</button>
               </div>
               <div className="rpg-modal-body">
                 <p style={{ margin: "0 0 12px 0", fontSize: "0.9rem", color: "#fca5a5" }}>
-                  ⚠️ <strong>Warning:</strong> This will permanently delete this room, all tasks, milestones, evidence artifacts, and combat history.
+                  <strong>Warning:</strong> This will permanently delete this room, all tasks, milestones, evidence artifacts, and combat history.
                 </p>
                 <label style={{ display: "grid", gap: "6px", fontSize: "0.85rem", color: "#e2e8f0" }}>
                   <span>Type <strong>{state.project.title}</strong> to confirm:</span>
@@ -2118,7 +2154,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           Attack
         </button>
 
-        {/* Floating Mob-Style Boss HP Bar (With Humorous Boss Name & Moveable Position & Adjustable Size) */}
+        {/* Floating Mob-Style Boss HP Bar (With Humorous Boss Name Above, HP % Inside, Adjustable Size) */}
         <div
           className="boss-hp-container"
           style={{
@@ -2134,29 +2170,23 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             pointerEvents: "none",
           }}
         >
-          {/* Name & HP Float ABOVE Boss Health Bar */}
+          {/* Name Text Float ABOVE Boss Health Bar (No Emoji, No Shadow) */}
           <div
             style={{
-              fontSize: "0.72rem",
-              fontWeight: 900,
-              fontFamily: "var(--font-heading), serif",
-              color: "#f87171",
-              textShadow: "0 1px 3px #000, 0 0 4px #000, 0 0 6px #000",
-              letterSpacing: "0.03em",
+              fontSize: "0.68rem",
+              fontWeight: 800,
+              fontFamily: "var(--font-heading), sans-serif",
+              color: "#ffffff",
+              letterSpacing: "0.02em",
               whiteSpace: "nowrap",
-              marginBottom: "3px",
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
+              marginBottom: "2px",
+              textAlign: "center",
             }}
           >
-            <span>🐲 {funnyBossName}</span>
-            <span style={{ color: "#fef08a", fontSize: "0.68rem", fontWeight: 800 }}>
-              {rawRemainingHp}/{state.maximumHp} HP ({hpPercent}%)
-            </span>
+            {funnyBossName}
           </div>
 
-          {/* Flat Boss Health Bar with Bold Outline */}
+          {/* Flat Boss Health Bar with HP % INSIDE (No Shadow, No Outline) */}
           <div
             className="boss-hp-mob-style"
             role="progressbar"
@@ -2168,16 +2198,20 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               width: `${dragonHpBarWidth}px`,
               height: `${dragonHpBarHeight}px`,
               position: "relative",
-              background: "#1c1917",
-              border: "2px solid #000000",
-              borderRadius: "4px",
+              background: "#1e293b",
+              borderRadius: "3px",
               overflow: "hidden",
-              boxShadow: "0 2px 5px rgba(0,0,0,0.6)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             <div
               className="boss-hp-mob-fill"
               style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
                 width: `${hpPercent}%`,
                 height: "100%",
                 background: hpPercent > 50 ? "#ef4444" : hpPercent > 25 ? "#f97316" : "#dc2626",
@@ -2185,70 +2219,95 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 transition: "width 0.3s ease",
               }}
             />
+            <span
+              style={{
+                position: "relative",
+                zIndex: 2,
+                fontSize: "0.6rem",
+                fontWeight: 800,
+                color: "#ffffff",
+                whiteSpace: "nowrap",
+                pointerEvents: "none",
+              }}
+            >
+              {rawRemainingHp} / {state.maximumHp} HP ({hpPercent}%)
+            </span>
           </div>
         </div>
 
         {/* Layer 0, 1, 2: Sky & Parallax Clouds */}
-        <LandscapeSky />
+        <div style={{ transform: `translate(${layerTransforms.sky?.x || 0}px, ${layerTransforms.sky?.y || 0}px) scale(${layerTransforms.sky?.scale || 1})`, display: layerTransforms.sky?.visible !== false ? "block" : "none" }}>
+          <LandscapeSky />
+        </div>
 
         {/* Layer 3, 4: Section 4 - Top-Down 3/4 Perspective Grassland */}
-        <LandscapeTerrain />
+        <div style={{ transform: `translate(${layerTransforms.terrain?.x || 0}px, ${layerTransforms.terrain?.y || 0}px) scale(${layerTransforms.terrain?.scale || 1})`, display: layerTransforms.terrain?.visible !== false ? "block" : "none" }}>
+          <LandscapeTerrain />
+        </div>
 
         {/* Layer 5: Section 3 & 5 - Grounded Village & Anchored Village HP Bar with Humorous Town Name */}
-        <LandscapeVillage
-          villageHpPercent={effectiveVillageHp}
-          villageName={funnyVillageName}
-          villageHpBarPos={villageHpBarPos}
-          villageHpBarWidth={villageHpBarWidth}
-          villageHpBarHeight={villageHpBarHeight}
-          villageHpBarScale={villageHpBarScale}
-        />
+        <div style={{ transform: `translate(${layerTransforms.village?.x || 0}px, ${layerTransforms.village?.y || 0}px) scale(${layerTransforms.village?.scale || 1})`, display: layerTransforms.village?.visible !== false ? "block" : "none" }}>
+          <LandscapeVillage
+            villageHpPercent={effectiveVillageHp}
+            villageName={funnyVillageName}
+            villageHpBarPos={villageHpBarPos}
+            villageHpBarWidth={villageHpBarWidth}
+            villageHpBarHeight={villageHpBarHeight}
+            villageHpBarScale={villageHpBarScale}
+          />
+        </div>
 
         {/* Layer 6: Section 8 - Daily Goblins Wave System (1 per active player) */}
-        <LandscapeGoblins goblins={goblins} />
+        <div style={{ transform: `translate(${layerTransforms.goblins?.x || 0}px, ${layerTransforms.goblins?.y || 0}px) scale(${layerTransforms.goblins?.scale || 1})`, display: layerTransforms.goblins?.visible !== false ? "block" : "none" }}>
+          <LandscapeGoblins goblins={goblins} />
+        </div>
 
         {/* Layer 7: Section 6 - Party Members & Deterministic Game ID Tags */}
-        <LandscapePlayers members={players} />
+        <div style={{ transform: `translate(${layerTransforms.players?.x || 0}px, ${layerTransforms.players?.y || 0}px) scale(${layerTransforms.players?.scale || 1})`, display: layerTransforms.players?.visible !== false ? "block" : "none" }}>
+          <LandscapePlayers members={players} />
+        </div>
 
         {/* Layer 8: Section 1 - Medieval Dragon Visuals & Wings */}
-        <LandscapeDragon
-          bossHpPercent={hpPercent}
-          isDefeated={defeated}
-          offsets={dragonOffsets as any}
-          onSelectPart={setSelectedDragonPart as any}
-          selectedPart={selectedDragonPart as any}
-          animationsEnabled={animationsEnabled}
-          customShapes={customShapes}
-          fills={dragonFills}
-          deletedShapes={deletedShapes}
-          onStartDragShape={handleStartDragShape}
-          geometries={dragonGeometries}
-          onStartDragNode={handleStartDragNode}
-          layerOrder={layerOrder}
-        />
+        <div style={{ transform: `translate(${layerTransforms.dragon?.x || 0}px, ${layerTransforms.dragon?.y || 0}px) scale(${layerTransforms.dragon?.scale || 1})`, display: layerTransforms.dragon?.visible !== false ? "block" : "none" }}>
+          <LandscapeDragon
+            bossHpPercent={hpPercent}
+            isDefeated={defeated}
+            offsets={dragonOffsets as any}
+            onSelectPart={setSelectedDragonPart as any}
+            selectedPart={selectedDragonPart as any}
+            animationsEnabled={animationsEnabled}
+            customShapes={customShapes}
+            fills={dragonFills}
+            deletedShapes={deletedShapes}
+            onStartDragShape={handleStartDragShape}
+            geometries={dragonGeometries}
+            onStartDragNode={handleStartDragNode}
+            layerOrder={layerOrder}
+          />
+        </div>
 
         {/* Layer 9: Section 2 - Cosmetic Combat Exchange & Elemental Attacks */}
-        <LandscapeFX
-          activeEvent={combinedActiveEvent}
-          isVictory={defeated}
-        />
+        <div style={{ transform: `translate(${layerTransforms.fx?.x || 0}px, ${layerTransforms.fx?.y || 0}px) scale(${layerTransforms.fx?.scale || 1})`, display: layerTransforms.fx?.visible !== false ? "block" : "none" }}>
+          <LandscapeFX
+            activeEvent={combinedActiveEvent}
+            isVictory={defeated}
+          />
+        </div>
 
-        {/* Layer 10: Bottom-Middle Plant vs Zombies Style Deadline Progress Bar (Flat RPG Style) */}
+        {/* Layer 10: Bottom-Middle Plant vs Zombies Style Deadline Progress Bar (Flat Style, No Shadow, No Outline) */}
         <div
           className="pvz-deadline-progress-container"
           style={{
             position: "absolute",
             bottom: "12px",
-            left: "50%",
-            transform: "translateX(-50%)",
+            left: `calc(50% + ${pvzBarOffset.x}px)`,
+            transform: `translateX(-50%) scale(${pvzBarOffset.scale})`,
             zIndex: 25,
-            width: "clamp(260px, 46vw, 440px)",
+            width: `clamp(240px, ${pvzBarOffset.width}px, 600px)`,
             background: "#fffded",
-            border: "3px solid #101517",
-            borderRadius: "12px",
-            padding: "6px 12px 8px 12px",
-            boxShadow: "4px 4px 0 #101517",
-            display: "flex",
+            borderRadius: "8px",
+            padding: "5px 12px 6px 12px",
+            display: pvzBarOffset.visible ? "flex" : "none",
             flexDirection: "column",
             alignItems: "center",
             gap: "3px",
@@ -2261,23 +2320,23 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           aria-valuemax={100}
           aria-label={`Project timeline: ${daysRemaining} days remaining`}
         >
-          {/* Top Info Header */}
+          {/* Top Info Header (No Emoji, No Shadow) */}
           <div
             style={{
               width: "100%",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              fontSize: "0.72rem",
-              fontWeight: 900,
-              fontFamily: "var(--font-heading), serif",
-              letterSpacing: "0.04em",
+              fontSize: "0.68rem",
+              fontWeight: 800,
+              fontFamily: "var(--font-heading), sans-serif",
+              letterSpacing: "0.02em",
               color: "#101517",
             }}
           >
-            <span>⏳ DAY {daysPassed} / {totalDays}</span>
-            <span style={{ color: daysRemaining <= 3 ? "#dc2626" : "#15803d", fontWeight: 900 }}>
-              {daysRemaining === 0 ? "⚠️ DEADLINE TODAY!" : `${daysRemaining} DAYS REMAINING`}
+            <span>DAY {daysPassed} / {totalDays}</span>
+            <span style={{ color: daysRemaining <= 3 ? "#dc2626" : "#17a738", fontWeight: 800 }}>
+              {daysRemaining === 0 ? "DEADLINE TODAY" : `${daysRemaining} DAYS REMAINING`}
             </span>
           </div>
 
@@ -2286,21 +2345,19 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             style={{
               position: "relative",
               width: "100%",
-              height: "12px",
+              height: "10px",
               background: "#e2e8f0",
-              border: "2px solid #101517",
-              borderRadius: "6px",
+              borderRadius: "4px",
               overflow: "visible",
             }}
           >
-            {/* Solid Flat Green Progress Fill (No Gradients) */}
+            {/* Flat Solid Green Fill (No Gradient, No Shadow) */}
             <div
               style={{
                 width: `${progressPercent}%`,
                 height: "100%",
-                background: "#1dd851",
-                borderRight: progressPercent > 0 && progressPercent < 100 ? "2px solid #101517" : "none",
-                borderRadius: "4px 0 0 4px",
+                background: "#17a738",
+                borderRadius: "4px",
                 transition: "width 0.4s ease",
               }}
             />
@@ -2314,17 +2371,17 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   style={{
                     position: "absolute",
                     left: `${dayPct}%`,
-                    top: "2px",
-                    width: "1.5px",
-                    height: "8px",
-                    background: "rgba(255, 255, 255, 0.25)",
+                    top: "0px",
+                    width: "1px",
+                    height: "100%",
+                    background: "rgba(0, 0, 0, 0.2)",
                     pointerEvents: "none",
                   }}
                 />
               );
             })}
 
-            {/* Milestone Waves Checkpoints (Red Flag Indicators) */}
+            {/* Milestone Waves Checkpoints */}
             {milestoneCheckpoints.map((mc) => (
               <div
                 key={mc.id}
@@ -2332,50 +2389,17 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 style={{
                   position: "absolute",
                   left: `${mc.percent}%`,
-                  top: "-15px",
+                  top: "-4px",
+                  width: "4px",
+                  height: "18px",
+                  background: "#dc2626",
+                  borderRadius: "2px",
                   transform: "translateX(-50%)",
-                  fontSize: "12px",
                   cursor: "help",
-                  filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
                   zIndex: 2,
                 }}
-              >
-                🚩
-              </div>
+              />
             ))}
-
-            {/* Final Target Destination Crown / Trophy */}
-            <div
-              title={`Final Project Goal: ${deadlineStr}`}
-              style={{
-                position: "absolute",
-                right: "-6px",
-                top: "-15px",
-                fontSize: "12px",
-                cursor: "help",
-                filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
-                zIndex: 2,
-              }}
-            >
-              🏆
-            </div>
-
-            {/* Moving Sword Indicator Head */}
-            <div
-              style={{
-                position: "absolute",
-                left: `${progressPercent}%`,
-                top: "-7px",
-                transform: "translateX(-50%)",
-                fontSize: "14px",
-                pointerEvents: "none",
-                filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.9))",
-                transition: "left 0.4s ease",
-                zIndex: 3,
-              }}
-            >
-              ⚔️
-            </div>
           </div>
         </div>
       </div>
@@ -2437,7 +2461,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   ) : (
                     [...state.events].reverse().map((ev) => {
                       const isGoblin = (ev.damage ?? 0) >= 100 || ev.taskTitle.toLowerCase().includes("goblin") || ev.taskTitle.toLowerCase().includes("daily");
-                      const spellIcon = ev.spellType === "fire" ? "🔥" : ev.spellType === "lightning" || ev.spellType === "spark" ? "⚡" : "❄️";
+                      const spellName = ev.spellType === "fire" ? "Fire" : ev.spellType === "lightning" || ev.spellType === "spark" ? "Lightning" : "Ice";
                       return (
                         <div
                           key={ev._id}
@@ -2446,7 +2470,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                           <div className="rpg-leaderboard-event-copy">
                             <strong>{ev.attackerName}</strong>
                             <span>
-                              cast {spellIcon} on <strong>{isGoblin ? "👹 Goblin" : "🐲 Dragon"}</strong> ({ev.taskTitle})
+                              cast {spellName} on <strong>{isGoblin ? "Goblin" : "Dragon"}</strong> ({ev.taskTitle})
                             </span>
                           </div>
                           <div className="rpg-leaderboard-event-meta">
@@ -2478,7 +2502,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         <div className="rpg-modal-backdrop" onClick={() => setShowAttackChoiceModal(false)}>
           <div className="rpg-wood-board" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "420px" }}>
             <div className="rpg-wood-board-bottom-caps" />
-            <h3 className="rpg-board-title">⚔️ Choose Target</h3>
+            <h3 className="rpg-board-title">Choose Target</h3>
             <div className="rpg-grid-options">
               <button
                 className="rpg-plaque-btn"
@@ -2488,7 +2512,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   setShowGoblinModal(true);
                 }}
               >
-                <span className="emoji">👹</span>
                 <span className="label">Daily Goblin</span>
               </button>
               <button
@@ -2499,7 +2522,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   setShowBossModal(true);
                 }}
               >
-                <span className="emoji">🐉</span>
                 <span className="label">The Dragon</span>
               </button>
             </div>
@@ -2517,7 +2539,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         <div className="rpg-modal-backdrop" onClick={() => setShowGoblinModal(false)}>
           <div className="rpg-wood-board" onClick={(e) => e.stopPropagation()}>
             <div className="rpg-wood-board-bottom-caps" />
-            <h3 className="rpg-board-title">👹 Slay Daily Goblin</h3>
+            <h3 className="rpg-board-title">Slay Daily Goblin</h3>
 
             <form onSubmit={handleGoblinSubmit} className="rpg-goblin-form">
               <div className="rpg-parchment-sheet" style={{ marginBottom: 0 }}>
@@ -2525,7 +2547,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
                 {state?.members.find((m) => m.profileId === state.currentProfileId)?.hasSubmittedToday && (
                   <div style={{ padding: "8px 10px", background: "#f0fdf4", border: "1.5px solid #86efac", borderRadius: "6px", color: "#166534", fontSize: "0.78rem", marginBottom: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
-                    <span>✅</span>
                     <span><strong>Your daily goblin is already slayed for today!</strong> Extra logs can still be recorded, but only 1 goblin kill is awarded per day.</span>
                   </div>
                 )}
@@ -2550,10 +2571,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 {/* Validation Info */}
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "10px", marginBottom: "14px" }}>
                   <span className={`rpg-val-tag ${goblinWordCount >= 10 ? "is-valid" : "is-invalid"}`}>
-                    📝 {goblinWordCount}/10 words {goblinWordCount >= 10 ? "✓" : ""}
+                    {goblinWordCount}/10 words {goblinWordCount >= 10 ? "(Passed)" : ""}
                   </span>
                   <span className={`rpg-val-tag ${goblinImageCount >= 2 ? "is-valid" : "is-invalid"}`}>
-                    🖼️ {goblinImageCount}/2 images {goblinImageCount >= 2 ? "✓" : ""}
+                    {goblinImageCount}/2 images {goblinImageCount >= 2 ? "(Passed)" : ""}
                   </span>
                 </div>
 
@@ -2596,7 +2617,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 type="submit"
                 disabled={isSlaying || (!goblinText && goblinImageUrls.length === 0)}
               >
-                {isSlaying ? "Slaying..." : isGoblinValid ? "⚔️ Slay Goblin!" : "Log Evidence (Requires 10 words or 2 images)"}
+                {isSlaying ? "Slaying..." : isGoblinValid ? "Slay Goblin!" : "Log Evidence (Requires 10 words or 2 images)"}
               </button>
 
               <button className="rpg-btn-close" type="button" onClick={() => setShowGoblinModal(false)}>
@@ -2614,14 +2635,14 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         <div className="rpg-modal-backdrop" onClick={() => setShowBossModal(false)}>
           <div className="rpg-wood-board" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "640px" }}>
             <div className="rpg-wood-board-bottom-caps" />
-            <h3 className="rpg-board-title">🐉 Attack The Dragon (Submit Quests)</h3>
+            <h3 className="rpg-board-title">Attack The Dragon (Submit Quests)</h3>
 
             {bossError && <p className="form-error" role="alert" style={{ color: "#ef4444", fontWeight: 800, textAlign: "center", marginBottom: "12px" }}>{bossError}</p>}
 
             <div className="rpg-boss-board">
               {myAssignableTasks.length === 0 ? (
                 <div className="rpg-no-tasks-alert">
-                  🛡️ You do not have any active quests assigned to you!
+                  You do not have any active quests assigned to you!
                   <p style={{ fontWeight: "normal", fontSize: "0.85rem", marginTop: "6px" }}>Go to the project task board below to claim or assign a quest first.</p>
                 </div>
               ) : !selectedTaskId ? (
@@ -2646,8 +2667,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                         >
                           <h4 className="rpg-note-title">{task.title}</h4>
                           <div className="rpg-note-meta">
-                            <span>📅 Due: {task.dueDate}</span>
-                            <span>👤 By: {creatorName}</span>
+                            <span>Due: {task.dueDate}</span>
+                            <span>By: {creatorName}</span>
                           </div>
                           <span style={{ fontSize: "0.72rem", background: "#8b5a2b", color: "#fff", padding: "2px 6px", borderRadius: "4px", fontWeight: 700 }}>
                             Select Quest
@@ -2674,8 +2695,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                         </button>
                         <h4 className="rpg-note-title">{task.title}</h4>
                         <div className="rpg-note-meta" style={{ marginBottom: 0 }}>
-                          <span>📅 Due Date: {task.dueDate}</span>
-                          <span>👤 Assigned By: {creatorName}</span>
+                          <span>Due Date: {task.dueDate}</span>
+                          <span>Assigned By: {creatorName}</span>
                         </div>
                       </div>
                     );
@@ -2803,7 +2824,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     type="submit"
                     disabled={isSubmittingTask}
                   >
-                    {isSubmittingTask ? "Submitting Evidence..." : "⚔️ Submit Quest & Attack!"}
+                    {isSubmittingTask ? "Submitting Evidence..." : "Submit Quest & Attack!"}
                   </button>
 
                   <button
@@ -2831,6 +2852,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
 
 
+
+
       {optionalMetrics.isVillageDestroyed ? (
         <section className="failure-panel" style={{ background: "#fef2f2", border: "2px solid #ef4444", padding: "1.5rem", borderRadius: "12px", margin: "1rem 0" }}>
           <p className="card-eyebrow" style={{ color: "#dc2626" }}>Project Failed</p>
@@ -2848,7 +2871,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       ) : null}
 
       {/* =========================================================================
-          DRAGON LAYOUT ADMIN VECTOR EDITOR PANEL (DRAGGABLE & PHOTOSHOP LAYERS)
+          LAYOUT ADMIN VECTOR & GAMEPLAY TESTING PANEL (RESIZABLE & TABBED)
          ========================================================================= */}
       {showDragonEditor && (
         <div
@@ -2856,539 +2879,771 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           style={{
             left: `${panelPos.x}px`,
             top: `${panelPos.y}px`,
+            width: `${adminPanelWidth}px`,
+            maxHeight: "88vh",
+            display: "flex",
+            flexDirection: "column",
             position: "fixed",
+            zIndex: 9000,
+            background: "#0b1329",
+            borderRadius: "10px",
+            border: "1px solid #334155",
+            overflow: "hidden",
           }}
           onClick={(e) => e.stopPropagation()}
         >
+          {/* Header with drag handle and width resizer */}
           <div
             className="rpg-admin-header"
             onMouseDown={handlePanelDragStart}
-            style={{ cursor: "move", userSelect: "none" }}
+            style={{ cursor: "move", userSelect: "none", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "#0f172a", borderBottom: "1px solid #334155" }}
           >
-            <h4>🛠️ Dragon Vector Editor</h4>
-            <button className="rpg-admin-close-btn" type="button" onClick={() => setShowDragonEditor(false)}>×</button>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ fontSize: "0.82rem", fontWeight: "bold", color: "#f8fafc" }}>Layout Admin</span>
+              <span style={{ fontSize: "0.65rem", color: "#64748b" }}>({adminPanelWidth}px)</span>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <label style={{ fontSize: "0.62rem", color: "#94a3b8", display: "flex", alignItems: "center", gap: "4px" }}>
+                Width:
+                <input
+                  type="range"
+                  min="360"
+                  max="860"
+                  step="20"
+                  style={{ width: "70px", accentColor: "#38bdf8" }}
+                  value={adminPanelWidth}
+                  onChange={(e) => setAdminPanelWidth(parseInt(e.target.value) || 540)}
+                />
+              </label>
+              <button className="rpg-admin-close-btn" type="button" onClick={() => setShowDragonEditor(false)}>×</button>
+            </div>
+          </div>
+
+          {/* Sub-Navigation Tabs */}
+          <div style={{ display: "flex", gap: "4px", background: "#0f172a", padding: "6px 8px", borderBottom: "1px solid #334155" }}>
+            <button
+              type="button"
+              onClick={() => setAdminTab("cheats")}
+              style={{
+                flex: 1,
+                padding: "6px 4px",
+                fontSize: "0.68rem",
+                fontWeight: "bold",
+                background: adminTab === "cheats" ? "#2563eb" : "#1e293b",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                transition: "background 0.2s ease",
+              }}
+            >
+              Testing Cheats
+            </button>
+            <button
+              type="button"
+              onClick={() => setAdminTab("layers")}
+              style={{
+                flex: 1,
+                padding: "6px 4px",
+                fontSize: "0.68rem",
+                fontWeight: "bold",
+                background: adminTab === "layers" ? "#2563eb" : "#1e293b",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                transition: "background 0.2s ease",
+              }}
+            >
+              Canvas Layers
+            </button>
+            <button
+              type="button"
+              onClick={() => setAdminTab("dragon")}
+              style={{
+                flex: 1,
+                padding: "6px 4px",
+                fontSize: "0.68rem",
+                fontWeight: "bold",
+                background: adminTab === "dragon" ? "#2563eb" : "#1e293b",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                transition: "background 0.2s ease",
+              }}
+            >
+              Dragon Shapes
+            </button>
+            <button
+              type="button"
+              onClick={() => setAdminTab("sizing")}
+              style={{
+                flex: 1,
+                padding: "6px 4px",
+                fontSize: "0.68rem",
+                fontWeight: "bold",
+                background: adminTab === "sizing" ? "#2563eb" : "#1e293b",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                transition: "background 0.2s ease",
+              }}
+            >
+              UI Sizing
+            </button>
           </div>
           
-          <div className="rpg-admin-body">
-            {/* Toggle Animation & History controls */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginBottom: "10px", background: "#0f172a", padding: "8px", borderRadius: "4px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <input
-                  id="toggle-anim"
-                  type="checkbox"
-                  checked={animationsEnabled}
-                  onChange={(e) => setAnimationsEnabled(e.target.checked)}
-                />
-                <label htmlFor="toggle-anim" style={{ fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer", color: "#38bdf8" }}>
-                  Flapping
-                </label>
-              </div>
-              <div style={{ display: "flex", gap: "6px" }}>
-                <button
-                  type="button"
-                  className="rpg-dpad-btn"
-                  style={{ padding: "2px 8px", fontSize: "0.7rem", opacity: historyIndex > 0 ? 1 : 0.4, cursor: historyIndex > 0 ? "pointer" : "not-allowed" }}
-                  onClick={handleUndo}
-                  disabled={historyIndex <= 0}
-                  title="Undo last change"
-                >
-                  ↩️ Undo
-                </button>
-                <button
-                  type="button"
-                  className="rpg-dpad-btn"
-                  style={{ padding: "2px 8px", fontSize: "0.7rem", opacity: historyIndex < history.length - 1 ? 1 : 0.4, cursor: historyIndex < history.length - 1 ? "pointer" : "not-allowed" }}
-                  onClick={handleRedo}
-                  disabled={historyIndex >= history.length - 1}
-                  title="Redo next change"
-                >
-                  ↪️ Redo
-                </button>
-              </div>
-            </div>
+          <div className="rpg-admin-body" style={{ flex: 1, overflowY: "auto", padding: "10px", maxHeight: "calc(88vh - 120px)" }}>
+            {/* 1. TESTING CHEATS TAB */}
+            {adminTab === "cheats" && (
+              <div style={{ display: "grid", gap: "10px" }}>
+                {/* Attack VFX trigger */}
+                <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155" }}>
+                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#38bdf8", textTransform: "uppercase" }}>Combat Attack Effects</h5>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                    <button type="button" style={{ padding: "6px", background: "#0284c7", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("lightning")}>
+                      Lightning Spell
+                    </button>
+                    <button type="button" style={{ padding: "6px", background: "#ea580c", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("fire")}>
+                      Fire Spell
+                    </button>
+                    <button type="button" style={{ padding: "6px", background: "#0d9488", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("ice")}>
+                      Ice Spell
+                    </button>
+                    <button type="button" style={{ padding: "6px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell(null)}>
+                      Clear Attack FX
+                    </button>
+                  </div>
+                </div>
 
-            {/* Custom Shape Spawner */}
-            <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", marginBottom: "10px", border: "1px solid #334155" }}>
-              <h5 style={{ margin: "0 0 6px 0", fontSize: "0.72rem", textTransform: "uppercase", color: "#94a3b8" }}>➕ Spawn Vector Shape</h5>
-              <div style={{ display: "flex", gap: "6px", marginBottom: "6px" }}>
-                <select
-                  value={spawnerType}
-                  onChange={(e: any) => setSpawnerType(e.target.value)}
-                  style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "4px", fontSize: "0.7rem", flex: 1 }}
-                >
-                  <option value="circle">Circle</option>
-                  <option value="ellipse">Ellipse</option>
-                  <option value="rect">Rectangle</option>
-                  <option value="polygon">Polygon</option>
-                  <option value="path">Path</option>
-                </select>
-                <input
-                  type="color"
-                  value={spawnerColor}
-                  onChange={(e) => setSpawnerColor(e.target.value)}
-                  style={{ width: "32px", height: "24px", border: "none", background: "transparent", cursor: "pointer" }}
-                />
-              </div>
-              <button
-                type="button"
-                className="rpg-admin-action-btn"
-                style={{ background: "#16a34a", padding: "6px", fontSize: "0.7rem" }}
-                onClick={handleAddCustomShape}
-              >
-                Spawn Shape
-              </button>
-            </div>
-
-            <p style={{ fontSize: "0.72rem", margin: "0 0 8px 0", color: "#94a3b8" }}>
-              Click/drag shapes directly on screen (hold Shift), or drag blue vertex points to edit shape nodes!
-            </p>
-
-            {/* Photoshop-style Layer Stack */}
-            <div className="rpg-layers-stack" style={{ maxHeight: "250px" }}>
-              {(() => {
-                const activeLayers = [...layerOrder]
-                  .reverse()
-                  .filter((id) => !deletedShapes[id]);
-
-                return activeLayers.map((layerId) => {
-                  const isSelected = selectedDragonPart === layerId;
-                  const offset = dragonOffsets[layerId] || { x: 0, y: 0, rotate: 0, scale: 1 };
-                  const friendlyName = SHAPE_LABELS[layerId] || customShapes.find(s => s.id === layerId)?.name || `✨ Custom Shape (${layerId.slice(-4)})`;
-                  
-                  return (
-                    <div
-                      key={layerId}
-                      id={`layer-row-${layerId}`}
-                      className={`rpg-layer-row ${isSelected ? "is-selected" : ""}`}
-                      onClick={() => setSelectedDragonPart(layerId)}
+                {/* Goblin Slaying */}
+                <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155" }}>
+                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#4ade80", textTransform: "uppercase" }}>Goblins Simulation</h5>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                    <button
+                      type="button"
+                      style={{ padding: "6px", background: "#16a34a", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }}
+                      onClick={() => {
+                        const map: Record<string, boolean> = {};
+                        state.members.forEach(m => { map[m.profileId] = true; });
+                        setTestDeadGoblins(map);
+                      }}
                     >
-                      <div className="rpg-layer-info">
-                        <span className="rpg-layer-name">{friendlyName}</span>
-                        <span className="rpg-layer-coords">X:{offset.x} Y:{offset.y} R:{offset.rotate}° S:{(offset.scale ?? 1).toFixed(2)}x</span>
+                      Slay All Goblins
+                    </button>
+                    <button type="button" style={{ padding: "6px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestDeadGoblins({})}>
+                      Revive All Goblins
+                    </button>
+                  </div>
+                </div>
+
+                {/* Village Health */}
+                <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155" }}>
+                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#facc15", textTransform: "uppercase" }}>Village HP Override</h5>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "6px" }}>
+                    <button type="button" style={{ padding: "6px", background: "#16a34a", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestVillageHpOverride(100)}>
+                      100%
+                    </button>
+                    <button type="button" style={{ padding: "6px", background: "#ca8a04", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestVillageHpOverride(50)}>
+                      50%
+                    </button>
+                    <button type="button" style={{ padding: "6px", background: "#ea580c", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestVillageHpOverride(20)}>
+                      20%
+                    </button>
+                    <button type="button" style={{ padding: "6px", background: "#dc2626", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestVillageHpOverride(0)}>
+                      0%
+                    </button>
+                  </div>
+                </div>
+
+                {/* Dragon Boss HP */}
+                <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155" }}>
+                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#f87171", textTransform: "uppercase" }}>Dragon Boss HP Override</h5>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px" }}>
+                    <button type="button" style={{ padding: "6px", background: "#dc2626", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestDragonHpOverride(0)}>
+                      Slay Boss (0 HP)
+                    </button>
+                    <button type="button" style={{ padding: "6px", background: "#f97316", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestDragonHpOverride(Math.round(state.maximumHp * 0.5))}>
+                      50% HP
+                    </button>
+                    <button type="button" style={{ padding: "6px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestDragonHpOverride(null)}>
+                      Reset Full
+                    </button>
+                  </div>
+                </div>
+
+                {/* Deadline Simulation */}
+                <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155" }}>
+                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#a855f7", textTransform: "uppercase" }}>Deadline &amp; End Game Screen</h5>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                    <button
+                      type="button"
+                      style={{ padding: "6px", background: testOverdueOverride ? "#9333ea" : "#6b21a8", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }}
+                      onClick={() => setTestOverdueOverride((prev) => !prev)}
+                    >
+                      {testOverdueOverride ? "Return to Battle" : "Trigger End Game"}
+                    </button>
+                    <button
+                      type="button"
+                      style={{ padding: "6px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }}
+                      onClick={() => {
+                        setTestVillageHpOverride(null);
+                        setTestDragonHpOverride(null);
+                        setTestDeadGoblins({});
+                        setTestActiveSpell(null);
+                        setTestOverdueOverride(null);
+                      }}
+                    >
+                      Reset All Cheats
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 2. CANVAS LAYERS TAB */}
+            {adminTab === "layers" && (
+              <div style={{ display: "grid", gap: "8px" }}>
+                <p style={{ margin: "0 0 6px 0", fontSize: "0.68rem", color: "#94a3b8" }}>
+                  Adjust position, scaling, and visibility for every layer on the game canvas:
+                </p>
+                {[
+                  { key: "sky", label: "Layer 0-2: Sky & Clouds" },
+                  { key: "terrain", label: "Layer 3-4: Hills & Grass Meadow" },
+                  { key: "village", label: "Layer 5: Village & Palisade" },
+                  { key: "goblins", label: "Layer 6: Goblins Horde" },
+                  { key: "players", label: "Layer 7: Party Mages" },
+                  { key: "dragon", label: "Layer 8: Dragon Boss" },
+                  { key: "fx", label: "Layer 9: Combat FX & Spells" },
+                ].map(({ key, label }) => {
+                  const transform = layerTransforms[key] || { x: 0, y: 0, scale: 1, visible: true };
+                  return (
+                    <div key={key} style={{ background: "#0f172a", padding: "8px 10px", borderRadius: "6px", border: "1px solid #334155", display: "grid", gap: "6px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: "0.72rem", fontWeight: "bold", color: "#f1f5f9" }}>{label}</span>
+                        <label style={{ fontSize: "0.65rem", color: "#38bdf8", display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}>
+                          <input
+                            type="checkbox"
+                            checked={transform.visible !== false}
+                            onChange={(e) => setLayerTransforms(prev => ({ ...prev, [key]: { ...prev[key], visible: e.target.checked } }))}
+                          />
+                          Visible
+                        </label>
                       </div>
-
-                      {isSelected && (
-                        <div className="rpg-layer-controls" onClick={(e) => e.stopPropagation()}>
-                          <p style={{ fontSize: "0.62rem", color: "#64748b", margin: "0 0 6px 0" }}>
-                            💡 Drag any blue vertex handles directly on the dragon to shape manually!
-                          </p>
-
-                          {/* Position Coordinates */}
-                          <div className="rpg-coords-inputs">
-                            <label>
-                              X:
-                              <input
-                                type="number"
-                                value={offset.x}
-                                onChange={(e) => {
-                                  const val = parseInt(e.target.value) || 0;
-                                  setDragonOffsets((prev) => ({
-                                    ...prev,
-                                    [layerId]: { ...prev[layerId], x: val }
-                                  }));
-                                }}
-                              />
-                            </label>
-                            <label>
-                              Y:
-                              <input
-                                type="number"
-                                value={offset.y}
-                                onChange={(e) => {
-                                  const val = parseInt(e.target.value) || 0;
-                                  setDragonOffsets((prev) => ({
-                                    ...prev,
-                                    [layerId]: { ...prev[layerId], y: val }
-                                  }));
-                                }}
-                              />
-                            </label>
-                          </div>
-
-                          {/* Rotation Input Row */}
-                          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
-                            <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "flex", alignItems: "center", gap: "3px", flex: 1 }}>
-                              Rot:
-                              <input
-                                type="number"
-                                style={{ width: "100%", padding: "2px 4px", background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", fontSize: "0.7rem" }}
-                                value={offset.rotate ?? 0}
-                                onChange={(e) => {
-                                  const val = parseInt(e.target.value) || 0;
-                                  setDragonOffsets((prev) => ({
-                                    ...prev,
-                                    [layerId]: { ...prev[layerId], rotate: val }
-                                  }));
-                                }}
-                              />
-                            </label>
-                            <button
-                              type="button"
-                              className="rpg-dpad-btn"
-                              style={{ width: "24px", padding: "2px 0" }}
-                              onClick={() => {
-                                const nextVal = ((offset.rotate ?? 0) - 5) % 360;
-                                const nextOffsets = {
-                                  ...dragonOffsets,
-                                  [layerId]: { ...offset, rotate: nextVal }
-                                };
-                                setDragonOffsets(nextOffsets);
-                                pushHistoryState(nextOffsets, dragonFills, deletedShapes, customShapes, dragonGeometries, layerOrder);
-                              }}
-                              title="Rotate CCW 5°"
-                            >
-                              ↺
-                            </button>
-                            <button
-                              type="button"
-                              className="rpg-dpad-btn"
-                              style={{ width: "24px", padding: "2px 0" }}
-                              onClick={() => {
-                                const nextVal = ((offset.rotate ?? 0) + 5) % 360;
-                                const nextOffsets = {
-                                  ...dragonOffsets,
-                                  [layerId]: { ...offset, rotate: nextVal }
-                                };
-                                setDragonOffsets(nextOffsets);
-                                pushHistoryState(nextOffsets, dragonFills, deletedShapes, customShapes, dragonGeometries, layerOrder);
-                              }}
-                              title="Rotate CW 5°"
-                            >
-                              ↻
-                            </button>
-                          </div>
-
-                          {/* Scale Controls */}
-                          <div style={{ display: "grid", gap: "2px", marginTop: "8px" }}>
-                            <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "flex", justifyContent: "space-between" }}>
-                              <span>Scale:</span>
-                              <span>{(offset.scale ?? 1).toFixed(2)}x</span>
-                            </label>
-                            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                              <input
-                                type="range"
-                                min="0.2"
-                                max="3.0"
-                                step="0.05"
-                                style={{ flex: 1, accentColor: "#38bdf8" }}
-                                value={offset.scale ?? 1}
-                                onChange={(e) => {
-                                  const val = parseFloat(e.target.value);
-                                  setDragonOffsets((prev) => ({
-                                    ...prev,
-                                    [layerId]: { ...prev[layerId], scale: val }
-                                  }));
-                                }}
-                              />
-                              <input
-                                type="number"
-                                min="0.2"
-                                max="3.0"
-                                step="0.05"
-                                style={{ width: "50px", padding: "2px 4px", background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", fontSize: "0.65rem" }}
-                                value={offset.scale ?? 1}
-                                onChange={(e) => {
-                                  const val = parseFloat(e.target.value) || 1;
-                                  setDragonOffsets((prev) => ({
-                                    ...prev,
-                                    [layerId]: { ...prev[layerId], scale: val }
-                                  }));
-                                }}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Layer Depth Reordering */}
-                          <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "8px" }}>
-                            <span style={{ fontSize: "0.65rem", color: "#94a3b8" }}>Order:</span>
-                            <button
-                              type="button"
-                              className="rpg-dpad-btn"
-                              style={{ padding: "2px 6px", fontSize: "0.65rem" }}
-                              onClick={() => handleMoveLayerUp(layerId)}
-                              title="Bring Forward"
-                            >
-                              ▲ Up
-                            </button>
-                            <button
-                              type="button"
-                              className="rpg-dpad-btn"
-                              style={{ padding: "2px 6px", fontSize: "0.65rem" }}
-                              onClick={() => handleMoveLayerDown(layerId)}
-                              title="Send Backward"
-                            >
-                              ▼ Down
-                            </button>
-                            <input
-                              type="number"
-                              min="1"
-                              max={layerOrder.length}
-                              style={{ width: "45px", padding: "2px 4px", background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", fontSize: "0.65rem" }}
-                              value={layerOrder.indexOf(layerId) + 1}
-                              onChange={(e) => {
-                                const val = parseInt(e.target.value);
-                                if (!isNaN(val)) {
-                                  handleSetLayerIndex(layerId, val - 1);
-                                }
-                              }}
-                            />
-                            <span style={{ fontSize: "0.65rem", color: "#64748b" }}>/ {layerOrder.length}</span>
-                          </div>
-
-                          {/* Color Fill Selector */}
-                          <div style={{ marginTop: "8px" }}>
-                            <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                              Shape Fill Color:
-                              <input
-                                type="color"
-                                style={{ width: "100%", height: "24px", padding: "0", border: "none", background: "transparent", cursor: "pointer" }}
-                                value={dragonFills[layerId] || (layerId.startsWith("custom_") ? (customShapes.find(s => s.id === layerId)?.fill || "#b91c1c") : (DRAGON_ORIGINAL_SHAPES.find(s => s.id === layerId)?.defaultFill || "#7f1d1d"))}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  if (layerId.startsWith("custom_")) {
-                                    setCustomShapes((prev) => prev.map((s) => s.id === layerId ? { ...s, fill: val } : s));
-                                  } else {
-                                    setDragonFills((prev) => ({
-                                      ...prev,
-                                      [layerId]: val,
-                                    }));
-                                  }
-                                }}
-                              />
-                            </label>
-                          </div>
-
-                          {/* Duplicate Element Action */}
-                          <button
-                            type="button"
-                            className="rpg-admin-action-btn"
-                            style={{ background: "#4f46e5", padding: "4px", fontSize: "0.65rem", marginTop: "8px", width: "100%" }}
-                            onClick={() => handleDuplicateShape(layerId)}
-                          >
-                            👯 Duplicate Object
-                          </button>
-
-                          {/* Delete Element Action */}
-                          <button
-                            type="button"
-                            className="rpg-admin-action-btn reset"
-                            style={{ background: "#b91c1c", padding: "4px", fontSize: "0.65rem", marginTop: "8px", width: "100%" }}
-                            onClick={() => {
-                              let nextCustoms = customShapes;
-                              let nextOrder = layerOrder;
-                              let nextDeleted = deletedShapes;
-
-                              if (layerId.startsWith("custom_")) {
-                                nextCustoms = customShapes.filter((s) => s.id !== layerId);
-                                nextOrder = layerOrder.filter((id) => id !== layerId);
-                                setCustomShapes(nextCustoms);
-                                setLayerOrder(nextOrder);
-                              } else {
-                                nextDeleted = {
-                                  ...deletedShapes,
-                                  [layerId]: true,
-                                };
-                                setDeletedShapes(nextDeleted);
-                              }
-                              setSelectedDragonPart(null);
-                              pushHistoryState(dragonOffsets, dragonFills, nextDeleted, nextCustoms, dragonGeometries, nextOrder);
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px", alignItems: "center" }}>
+                        <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                          X:
+                          <input
+                            type="number"
+                            style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                            value={transform.x}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value) || 0;
+                              setLayerTransforms(prev => ({ ...prev, [key]: { ...prev[key], x: val } }));
                             }}
-                          >
-                            🗑️ Delete Object
-                          </button>
-                        </div>
-                      )}
+                          />
+                        </label>
+                        <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                          Y:
+                          <input
+                            type="number"
+                            style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
+                            value={transform.y}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value) || 0;
+                              setLayerTransforms(prev => ({ ...prev, [key]: { ...prev[key], y: val } }));
+                            }}
+                          />
+                        </label>
+                        <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                          Scale ({transform.scale.toFixed(2)}x):
+                          <input
+                            type="range"
+                            min="0.2"
+                            max="3"
+                            step="0.05"
+                            value={transform.scale}
+                            style={{ accentColor: "#38bdf8" }}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value) || 1;
+                              setLayerTransforms(prev => ({ ...prev, [key]: { ...prev[key], scale: val } }));
+                            }}
+                          />
+                        </label>
+                      </div>
                     </div>
                   );
-                });
-              })()}
-            </div>
+                })}
+              </div>
+            )}
 
-            {/* Dragon Boss HP Bar Position & Size Controls */}
-            <div style={{ padding: "8px 12px", background: "#0f172a", borderTop: "1px solid #334155", display: "grid", gap: "6px" }}>
-              <div style={{ fontSize: "0.72rem", fontWeight: "bold", color: "#f97316", display: "flex", alignItems: "center", gap: "4px" }}>
-                🔥 Dragon Boss HP Bar Position &amp; Size
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
-                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                  Offset X (px):
-                  <input
-                    type="number"
-                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                    value={dragonHpBarPos.x}
-                    onChange={(e) => setDragonHpBarPos((prev) => ({ ...prev, x: parseInt(e.target.value) || 0 }))}
-                  />
-                </label>
-                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                  Offset Y (px):
-                  <input
-                    type="number"
-                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                    value={dragonHpBarPos.y}
-                    onChange={(e) => setDragonHpBarPos((prev) => ({ ...prev, y: parseInt(e.target.value) || 0 }))}
-                  />
-                </label>
-                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                  Width (px):
-                  <input
-                    type="number"
-                    min="80"
-                    max="400"
-                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                    value={dragonHpBarWidth}
-                    onChange={(e) => setDragonHpBarWidth(parseInt(e.target.value) || 180)}
-                  />
-                </label>
-                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                  Height (px):
-                  <input
-                    type="number"
-                    min="6"
-                    max="30"
-                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                    value={dragonHpBarHeight}
-                    onChange={(e) => setDragonHpBarHeight(parseInt(e.target.value) || 14)}
-                  />
-                </label>
-                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px", gridColumn: "span 2" }}>
-                  <span>Scale: {dragonHpBarScale.toFixed(2)}x</span>
-                  <input
-                    type="range"
-                    min="0.5"
-                    max="2.5"
-                    step="0.05"
-                    style={{ accentColor: "#f97316" }}
-                    value={dragonHpBarScale}
-                    onChange={(e) => setDragonHpBarScale(parseFloat(e.target.value) || 1)}
-                  />
-                </label>
-              </div>
-            </div>
+            {/* 3. DRAGON SHAPES VECTOR TAB */}
+            {adminTab === "dragon" && (
+              <div style={{ display: "grid", gap: "8px" }}>
+                {/* Toggle Animation & History controls */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", background: "#0f172a", padding: "8px", borderRadius: "4px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <input
+                      id="toggle-anim"
+                      type="checkbox"
+                      checked={animationsEnabled}
+                      onChange={(e) => setAnimationsEnabled(e.target.checked)}
+                    />
+                    <label htmlFor="toggle-anim" style={{ fontSize: "0.75rem", fontWeight: "bold", cursor: "pointer", color: "#38bdf8" }}>
+                      Flapping
+                    </label>
+                  </div>
+                  <div style={{ display: "flex", gap: "6px" }}>
+                    <button
+                      type="button"
+                      className="rpg-dpad-btn"
+                      style={{ padding: "2px 8px", fontSize: "0.7rem", opacity: historyIndex > 0 ? 1 : 0.4, cursor: historyIndex > 0 ? "pointer" : "not-allowed" }}
+                      onClick={handleUndo}
+                      disabled={historyIndex <= 0}
+                      title="Undo last change"
+                    >
+                      Undo
+                    </button>
+                    <button
+                      type="button"
+                      className="rpg-dpad-btn"
+                      style={{ padding: "2px 8px", fontSize: "0.7rem", opacity: historyIndex < history.length - 1 ? 1 : 0.4, cursor: historyIndex < history.length - 1 ? "pointer" : "not-allowed" }}
+                      onClick={handleRedo}
+                      disabled={historyIndex >= history.length - 1}
+                      title="Redo next change"
+                    >
+                      Redo
+                    </button>
+                  </div>
+                </div>
 
-            {/* Village HP Bar Position & Size Controls */}
-            <div style={{ padding: "8px 12px", background: "#0f172a", borderTop: "1px solid #334155", display: "grid", gap: "6px" }}>
-              <div style={{ fontSize: "0.72rem", fontWeight: "bold", color: "#86efac", display: "flex", alignItems: "center", gap: "4px" }}>
-                🏰 Village HP Bar Position &amp; Size
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
-                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                  Offset X (px):
-                  <input
-                    type="number"
-                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                    value={villageHpBarPos.x}
-                    onChange={(e) => setVillageHpBarPos((prev) => ({ ...prev, x: parseInt(e.target.value) || 0 }))}
-                  />
-                </label>
-                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                  Offset Y (px):
-                  <input
-                    type="number"
-                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                    value={villageHpBarPos.y}
-                    onChange={(e) => setVillageHpBarPos((prev) => ({ ...prev, y: parseInt(e.target.value) || 0 }))}
-                  />
-                </label>
-                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                  Width (px):
-                  <input
-                    type="number"
-                    min="80"
-                    max="350"
-                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                    value={villageHpBarWidth}
-                    onChange={(e) => setVillageHpBarWidth(parseInt(e.target.value) || 140)}
-                  />
-                </label>
-                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
-                  Height (px):
-                  <input
-                    type="number"
-                    min="6"
-                    max="30"
-                    style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }}
-                    value={villageHpBarHeight}
-                    onChange={(e) => setVillageHpBarHeight(parseInt(e.target.value) || 12)}
-                  />
-                </label>
-                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px", gridColumn: "span 2" }}>
-                  <span>Scale: {villageHpBarScale.toFixed(2)}x</span>
-                  <input
-                    type="range"
-                    min="0.5"
-                    max="2.5"
-                    step="0.05"
-                    style={{ accentColor: "#86efac" }}
-                    value={villageHpBarScale}
-                    onChange={(e) => setVillageHpBarScale(parseFloat(e.target.value) || 1)}
-                  />
-                </label>
-              </div>
-            </div>
+                {/* Custom Shape Spawner */}
+                <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155" }}>
+                  <h5 style={{ margin: "0 0 6px 0", fontSize: "0.72rem", textTransform: "uppercase", color: "#94a3b8" }}>Spawn Vector Shape</h5>
+                  <div style={{ display: "flex", gap: "6px", marginBottom: "6px" }}>
+                    <select
+                      value={spawnerType}
+                      onChange={(e: any) => setSpawnerType(e.target.value)}
+                      style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "4px", fontSize: "0.7rem", flex: 1 }}
+                    >
+                      <option value="circle">Circle</option>
+                      <option value="ellipse">Ellipse</option>
+                      <option value="rect">Rectangle</option>
+                      <option value="polygon">Polygon</option>
+                      <option value="path">Path</option>
+                    </select>
+                    <input
+                      type="color"
+                      value={spawnerColor}
+                      onChange={(e) => setSpawnerColor(e.target.value)}
+                      style={{ width: "32px", height: "24px", border: "none", background: "transparent", cursor: "pointer" }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="rpg-admin-action-btn"
+                    style={{ background: "#16a34a", padding: "6px", fontSize: "0.7rem" }}
+                    onClick={handleAddCustomShape}
+                  >
+                    Spawn Shape
+                  </button>
+                </div>
 
-            {/* Code exporter and helper actions */}
-            <div className="rpg-admin-actions">
-              <button
-                type="button"
-                className="rpg-admin-action-btn"
-                onClick={() => {
-                  const exportData = {
-                    dragonOffsets,
-                    dragonFills,
-                    deletedShapes,
-                    customShapes,
-                    dragonGeometries,
-                    layerOrder,
-                    dragonHpBarPos,
-                    dragonHpBarWidth,
-                    dragonHpBarHeight,
-                    dragonHpBarScale,
-                    villageHpBarPos,
-                    villageHpBarWidth,
-                    villageHpBarHeight,
-                    villageHpBarScale,
-                  };
-                  const codeStr = JSON.stringify(exportData, null, 2);
-                  navigator.clipboard.writeText(codeStr);
-                  alert("Copied full layout, geometries, fills, HP bar pos & custom shapes config to clipboard!");
-                }}
-              >
-                📋 Copy Layout & Shapes Config
-              </button>
-              <button
-                type="button"
-                className="rpg-admin-action-btn reset"
-                onClick={() => {
-                  if (confirm("Reset all customizations, colors, and coordinates to default?")) {
-                    setDragonOffsets(DEFAULT_DRAGON_OFFSETS);
-                    setDragonFills(DEFAULT_DRAGON_FILLS);
-                    setDeletedShapes(DEFAULT_DELETED_SHAPES);
-                    setCustomShapes(DEFAULT_CUSTOM_SHAPES);
-                    setDragonGeometries(DEFAULT_DRAGON_GEOMETRIES);
-                    setLayerOrder(DEFAULT_LAYER_ORDER);
-                    setDragonHpBarPos({ x: 0, y: 0 });
-                    setDragonHpBarWidth(180);
-                    setDragonHpBarHeight(14);
-                    setDragonHpBarScale(1);
-                    setVillageHpBarPos({ x: 0, y: 0 });
-                    setVillageHpBarWidth(140);
-                    setVillageHpBarHeight(12);
-                    setVillageHpBarScale(1);
-                    setSelectedDragonPart(null);
-                    pushHistoryState(
-                      DEFAULT_DRAGON_OFFSETS,
-                      DEFAULT_DRAGON_FILLS,
-                      DEFAULT_DELETED_SHAPES,
-                      DEFAULT_CUSTOM_SHAPES,
-                      DEFAULT_DRAGON_GEOMETRIES,
-                      DEFAULT_LAYER_ORDER
-                    );
-                  }
-                }}
-              >
-                🔄 Reset Config
-              </button>
-            </div>
+                <p style={{ fontSize: "0.68rem", margin: "0 0 6px 0", color: "#94a3b8" }}>
+                  Click/drag shapes directly on screen (hold Shift), or drag blue vertex points to edit shape nodes!
+                </p>
+
+                {/* Layer Stack */}
+                <div className="rpg-layers-stack" style={{ maxHeight: "260px", overflowY: "auto" }}>
+                  {(() => {
+                    const activeLayers = [...layerOrder]
+                      .reverse()
+                      .filter((id) => !deletedShapes[id]);
+
+                    return activeLayers.map((layerId) => {
+                      const isSelected = selectedDragonPart === layerId;
+                      const offset = dragonOffsets[layerId] || { x: 0, y: 0, rotate: 0, scale: 1 };
+                      const friendlyName = SHAPE_LABELS[layerId] || customShapes.find(s => s.id === layerId)?.name || `Custom Shape (${layerId.slice(-4)})`;
+                      
+                      return (
+                        <div
+                          key={layerId}
+                          id={`layer-row-${layerId}`}
+                          className={`rpg-layer-row ${isSelected ? "is-selected" : ""}`}
+                          onClick={() => setSelectedDragonPart(layerId)}
+                        >
+                          <div className="rpg-layer-info">
+                            <span className="rpg-layer-name">{friendlyName}</span>
+                            <span className="rpg-layer-coords">X:{offset.x} Y:{offset.y} R:{offset.rotate}° S:{(offset.scale ?? 1).toFixed(2)}x</span>
+                          </div>
+
+                          {isSelected && (
+                            <div className="rpg-layer-controls" onClick={(e) => e.stopPropagation()}>
+                              {/* Position Coordinates */}
+                              <div className="rpg-coords-inputs">
+                                <label>
+                                  X:
+                                  <input
+                                    type="number"
+                                    value={offset.x}
+                                    onChange={(e) => {
+                                      const val = parseInt(e.target.value) || 0;
+                                      setDragonOffsets((prev) => ({
+                                        ...prev,
+                                        [layerId]: { ...prev[layerId], x: val }
+                                      }));
+                                    }}
+                                  />
+                                </label>
+                                <label>
+                                  Y:
+                                  <input
+                                    type="number"
+                                    value={offset.y}
+                                    onChange={(e) => {
+                                      const val = parseInt(e.target.value) || 0;
+                                      setDragonOffsets((prev) => ({
+                                        ...prev,
+                                        [layerId]: { ...prev[layerId], y: val }
+                                      }));
+                                    }}
+                                  />
+                                </label>
+                              </div>
+
+                              {/* Rotation Input Row */}
+                              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "4px" }}>
+                                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "flex", alignItems: "center", gap: "3px", flex: 1 }}>
+                                  Rot:
+                                  <input
+                                    type="number"
+                                    style={{ width: "100%", padding: "2px 4px", background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", fontSize: "0.7rem" }}
+                                    value={offset.rotate ?? 0}
+                                    onChange={(e) => {
+                                      const val = parseInt(e.target.value) || 0;
+                                      setDragonOffsets((prev) => ({
+                                        ...prev,
+                                        [layerId]: { ...prev[layerId], rotate: val }
+                                      }));
+                                    }}
+                                  />
+                                </label>
+                                <button
+                                  type="button"
+                                  className="rpg-dpad-btn"
+                                  style={{ width: "24px", padding: "2px 0" }}
+                                  onClick={() => {
+                                    const nextVal = ((offset.rotate ?? 0) - 5) % 360;
+                                    const nextOffsets = {
+                                      ...dragonOffsets,
+                                      [layerId]: { ...offset, rotate: nextVal }
+                                    };
+                                    setDragonOffsets(nextOffsets);
+                                    pushHistoryState(nextOffsets, dragonFills, deletedShapes, customShapes, dragonGeometries, layerOrder);
+                                  }}
+                                  title="Rotate CCW 5°"
+                                >
+                                  ↺
+                                </button>
+                                <button
+                                  type="button"
+                                  className="rpg-dpad-btn"
+                                  style={{ width: "24px", padding: "2px 0" }}
+                                  onClick={() => {
+                                    const nextVal = ((offset.rotate ?? 0) + 5) % 360;
+                                    const nextOffsets = {
+                                      ...dragonOffsets,
+                                      [layerId]: { ...offset, rotate: nextVal }
+                                    };
+                                    setDragonOffsets(nextOffsets);
+                                    pushHistoryState(nextOffsets, dragonFills, deletedShapes, customShapes, dragonGeometries, layerOrder);
+                                  }}
+                                  title="Rotate CW 5°"
+                                >
+                                  ↻
+                                </button>
+                              </div>
+
+                              {/* Scale Controls */}
+                              <div style={{ display: "grid", gap: "2px", marginTop: "8px" }}>
+                                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "flex", justifyContent: "space-between" }}>
+                                  <span>Scale:</span>
+                                  <span>{(offset.scale ?? 1).toFixed(2)}x</span>
+                                </label>
+                                <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                  <input
+                                    type="range"
+                                    min="0.2"
+                                    max="3.0"
+                                    step="0.05"
+                                    style={{ flex: 1, accentColor: "#38bdf8" }}
+                                    value={offset.scale ?? 1}
+                                    onChange={(e) => {
+                                      const val = parseFloat(e.target.value);
+                                      setDragonOffsets((prev) => ({
+                                        ...prev,
+                                        [layerId]: { ...prev[layerId], scale: val }
+                                      }));
+                                    }}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Layer Depth Reordering */}
+                              <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "8px" }}>
+                                <span style={{ fontSize: "0.65rem", color: "#94a3b8" }}>Order:</span>
+                                <button
+                                  type="button"
+                                  className="rpg-dpad-btn"
+                                  style={{ padding: "2px 6px", fontSize: "0.65rem" }}
+                                  onClick={() => handleMoveLayerUp(layerId)}
+                                  title="Bring Forward"
+                                >
+                                  ▲ Up
+                                </button>
+                                <button
+                                  type="button"
+                                  className="rpg-dpad-btn"
+                                  style={{ padding: "2px 6px", fontSize: "0.65rem" }}
+                                  onClick={() => handleMoveLayerDown(layerId)}
+                                  title="Send Backward"
+                                >
+                                  ▼ Down
+                                </button>
+                                <span style={{ fontSize: "0.65rem", color: "#64748b" }}>{layerOrder.indexOf(layerId) + 1} / {layerOrder.length}</span>
+                              </div>
+
+                              {/* Color Fill Selector */}
+                              <div style={{ marginTop: "8px" }}>
+                                <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                                  Shape Fill Color:
+                                  <input
+                                    type="color"
+                                    style={{ width: "100%", height: "24px", padding: "0", border: "none", background: "transparent", cursor: "pointer" }}
+                                    value={dragonFills[layerId] || (layerId.startsWith("custom_") ? (customShapes.find(s => s.id === layerId)?.fill || "#b91c1c") : (DRAGON_ORIGINAL_SHAPES.find(s => s.id === layerId)?.defaultFill || "#7f1d1d"))}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      if (layerId.startsWith("custom_")) {
+                                        setCustomShapes((prev) => prev.map((s) => s.id === layerId ? { ...s, fill: val } : s));
+                                      } else {
+                                        setDragonFills((prev) => ({
+                                          ...prev,
+                                          [layerId]: val,
+                                        }));
+                                      }
+                                    }}
+                                  />
+                                </label>
+                              </div>
+
+                              {/* Duplicate Element Action */}
+                              <button
+                                type="button"
+                                className="rpg-admin-action-btn"
+                                style={{ background: "#4f46e5", padding: "4px", fontSize: "0.65rem", marginTop: "8px", width: "100%" }}
+                                onClick={() => handleDuplicateShape(layerId)}
+                              >
+                                Duplicate Object
+                              </button>
+
+                              {/* Delete Element Action */}
+                              <button
+                                type="button"
+                                className="rpg-admin-action-btn reset"
+                                style={{ background: "#b91c1c", padding: "4px", fontSize: "0.65rem", marginTop: "8px", width: "100%" }}
+                                onClick={() => {
+                                  let nextCustoms = customShapes;
+                                  let nextOrder = layerOrder;
+                                  let nextDeleted = deletedShapes;
+
+                                  if (layerId.startsWith("custom_")) {
+                                    nextCustoms = customShapes.filter((s) => s.id !== layerId);
+                                    nextOrder = layerOrder.filter((id) => id !== layerId);
+                                    setCustomShapes(nextCustoms);
+                                    setLayerOrder(nextOrder);
+                                  } else {
+                                    nextDeleted = {
+                                      ...deletedShapes,
+                                      [layerId]: true,
+                                    };
+                                    setDeletedShapes(nextDeleted);
+                                  }
+                                  setSelectedDragonPart(null);
+                                  pushHistoryState(dragonOffsets, dragonFills, nextDeleted, nextCustoms, dragonGeometries, nextOrder);
+                                }}
+                              >
+                                Delete Object
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+            )}
+
+            {/* 4. UI SIZING TAB */}
+            {adminTab === "sizing" && (
+              <div style={{ display: "grid", gap: "10px" }}>
+                {/* Dragon Boss HP Bar */}
+                <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155", display: "grid", gap: "6px" }}>
+                  <div style={{ fontSize: "0.72rem", fontWeight: "bold", color: "#f87171" }}>Dragon Boss HP Bar</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                      Offset X (px):
+                      <input type="number" style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }} value={dragonHpBarPos.x} onChange={(e) => setDragonHpBarPos(p => ({ ...p, x: parseInt(e.target.value) || 0 }))} />
+                    </label>
+                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                      Offset Y (px):
+                      <input type="number" style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }} value={dragonHpBarPos.y} onChange={(e) => setDragonHpBarPos(p => ({ ...p, y: parseInt(e.target.value) || 0 }))} />
+                    </label>
+                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                      Width (px):
+                      <input type="number" min="80" max="400" style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }} value={dragonHpBarWidth} onChange={(e) => setDragonHpBarWidth(parseInt(e.target.value) || 180)} />
+                    </label>
+                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                      Height (px):
+                      <input type="number" min="6" max="30" style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }} value={dragonHpBarHeight} onChange={(e) => setDragonHpBarHeight(parseInt(e.target.value) || 14)} />
+                    </label>
+                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px", gridColumn: "span 2" }}>
+                      <span>Scale: {dragonHpBarScale.toFixed(2)}x</span>
+                      <input type="range" min="0.5" max="2.5" step="0.05" style={{ accentColor: "#f87171" }} value={dragonHpBarScale} onChange={(e) => setDragonHpBarScale(parseFloat(e.target.value) || 1)} />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Village HP Bar */}
+                <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155", display: "grid", gap: "6px" }}>
+                  <div style={{ fontSize: "0.72rem", fontWeight: "bold", color: "#86efac" }}>Village HP Bar</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                      Offset X (px):
+                      <input type="number" style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }} value={villageHpBarPos.x} onChange={(e) => setVillageHpBarPos(p => ({ ...p, x: parseInt(e.target.value) || 0 }))} />
+                    </label>
+                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                      Offset Y (px):
+                      <input type="number" style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }} value={villageHpBarPos.y} onChange={(e) => setVillageHpBarPos(p => ({ ...p, y: parseInt(e.target.value) || 0 }))} />
+                    </label>
+                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                      Width (px):
+                      <input type="number" min="80" max="350" style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }} value={villageHpBarWidth} onChange={(e) => setVillageHpBarWidth(parseInt(e.target.value) || 140)} />
+                    </label>
+                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                      Height (px):
+                      <input type="number" min="6" max="30" style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }} value={villageHpBarHeight} onChange={(e) => setVillageHpBarHeight(parseInt(e.target.value) || 12)} />
+                    </label>
+                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px", gridColumn: "span 2" }}>
+                      <span>Scale: {villageHpBarScale.toFixed(2)}x</span>
+                      <input type="range" min="0.5" max="2.5" step="0.05" style={{ accentColor: "#86efac" }} value={villageHpBarScale} onChange={(e) => setVillageHpBarScale(parseFloat(e.target.value) || 1)} />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Deadline Progress Bar */}
+                <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155", display: "grid", gap: "6px" }}>
+                  <div style={{ fontSize: "0.72rem", fontWeight: "bold", color: "#facc15" }}>Deadline Progress Bar</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                      Offset X (px):
+                      <input type="number" style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }} value={pvzBarOffset.x} onChange={(e) => setPvzBarOffset(p => ({ ...p, x: parseInt(e.target.value) || 0 }))} />
+                    </label>
+                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                      Offset Y (px):
+                      <input type="number" style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }} value={pvzBarOffset.y} onChange={(e) => setPvzBarOffset(p => ({ ...p, y: parseInt(e.target.value) || 0 }))} />
+                    </label>
+                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                      Width (px):
+                      <input type="number" min="200" max="600" style={{ background: "#1e293b", color: "#fff", border: "1px solid #475569", borderRadius: "3px", padding: "2px 4px", fontSize: "0.65rem" }} value={pvzBarOffset.width} onChange={(e) => setPvzBarOffset(p => ({ ...p, width: parseInt(e.target.value) || 380 }))} />
+                    </label>
+                    <label style={{ fontSize: "0.65rem", color: "#94a3b8", display: "grid", gap: "2px" }}>
+                      Scale ({pvzBarOffset.scale.toFixed(2)}x):
+                      <input type="range" min="0.5" max="2.0" step="0.05" style={{ accentColor: "#facc15" }} value={pvzBarOffset.scale} onChange={(e) => setPvzBarOffset(p => ({ ...p, scale: parseFloat(e.target.value) || 1 }))} />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Action Footer */}
+          <div className="rpg-admin-actions" style={{ padding: "8px 12px", background: "#0f172a", borderTop: "1px solid #334155" }}>
+            <button
+              type="button"
+              className="rpg-admin-action-btn"
+              onClick={() => {
+                const exportData = {
+                  dragonOffsets,
+                  dragonFills,
+                  deletedShapes,
+                  customShapes,
+                  dragonGeometries,
+                  layerOrder,
+                  dragonHpBarPos,
+                  dragonHpBarWidth,
+                  dragonHpBarHeight,
+                  dragonHpBarScale,
+                  villageHpBarPos,
+                  villageHpBarWidth,
+                  villageHpBarHeight,
+                  villageHpBarScale,
+                  layerTransforms,
+                  pvzBarOffset,
+                };
+                const codeStr = JSON.stringify(exportData, null, 2);
+                navigator.clipboard.writeText(codeStr);
+                alert("Copied full layout, layers, geometries, fills, HP bar pos & custom shapes config to clipboard!");
+              }}
+            >
+              Copy Layout Config
+            </button>
+            <button
+              type="button"
+              className="rpg-admin-action-btn reset"
+              onClick={() => {
+                if (confirm("Reset all customizations, colors, and coordinates to default?")) {
+                  setDragonOffsets(DEFAULT_DRAGON_OFFSETS);
+                  setDragonFills(DEFAULT_DRAGON_FILLS);
+                  setDeletedShapes(DEFAULT_DELETED_SHAPES);
+                  setCustomShapes(DEFAULT_CUSTOM_SHAPES);
+                  setDragonGeometries(DEFAULT_DRAGON_GEOMETRIES);
+                  setLayerOrder(DEFAULT_LAYER_ORDER);
+                  setDragonHpBarPos({ x: 0, y: 0 });
+                  setDragonHpBarWidth(180);
+                  setDragonHpBarHeight(14);
+                  setDragonHpBarScale(1);
+                  setVillageHpBarPos({ x: 0, y: 0 });
+                  setVillageHpBarWidth(140);
+                  setVillageHpBarHeight(12);
+                  setVillageHpBarScale(1);
+                  setLayerTransforms({
+                    sky: { x: 0, y: 0, scale: 1, visible: true },
+                    terrain: { x: 0, y: 0, scale: 1, visible: true },
+                    village: { x: 0, y: 0, scale: 1, visible: true },
+                    goblins: { x: 0, y: 0, scale: 1, visible: true },
+                    players: { x: 0, y: 0, scale: 1, visible: true },
+                    dragon: { x: 0, y: 0, scale: 1, visible: true },
+                    fx: { x: 0, y: 0, scale: 1, visible: true },
+                  });
+                  setPvzBarOffset({ x: 0, y: 0, width: 380, scale: 1, visible: true });
+                  setSelectedDragonPart(null);
+                  pushHistoryState(
+                    DEFAULT_DRAGON_OFFSETS,
+                    DEFAULT_DRAGON_FILLS,
+                    DEFAULT_DELETED_SHAPES,
+                    DEFAULT_CUSTOM_SHAPES,
+                    DEFAULT_DRAGON_GEOMETRIES,
+                    DEFAULT_LAYER_ORDER
+                  );
+                }
+              }}
+            >
+              Reset Config
+            </button>
           </div>
         </div>
       )}
@@ -3400,7 +3655,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         <div className="rpg-modal-overlay" style={{ zIndex: 99999 }} onClick={() => setShowAdminPasswordModal(false)}>
           <div className="rpg-parchment-modal" style={{ maxWidth: "380px" }} onClick={(e) => e.stopPropagation()}>
             <div className="rpg-modal-header">
-              <h2>🔒 Admin Password Access</h2>
+              <h2>Admin Password Access</h2>
               <button type="button" className="rpg-btn-close" onClick={() => setShowAdminPasswordModal(false)}>✕</button>
             </div>
             <form
