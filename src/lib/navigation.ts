@@ -1,7 +1,8 @@
 export type MainSection =
   | "home"
   | "projects"
-  | "profile";
+  | "profile"
+  | "subscription";
 
 export type ProjectsView = "index" | "create" | "join" | "room" | "personal-tasks";
 
@@ -14,6 +15,7 @@ export const MAIN_NAV_ITEMS: { id: MainSection; label: string; icon: string; pat
 export function getPathForSection(section: MainSection, view?: ProjectsView, roomId?: string): string {
   if (section === "home") return "/home";
   if (section === "profile") return "/profile";
+  if (section === "subscription") return "/subscription";
   if (section === "projects") {
     if (view === "create") return "/projects/create";
     if (view === "join") return "/projects/join";

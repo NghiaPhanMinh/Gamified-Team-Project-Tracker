@@ -374,6 +374,49 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   color: var(--mld-text);
 }
 
+.subscription-nav-item {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  gap: var(--mld-space-2);
+  padding: 5px 6px 5px 14px;
+  border: 1px solid var(--mld-border-strong);
+  border-radius: var(--mld-radius-pill);
+  background: var(--mld-surface-01);
+  color: var(--mld-text);
+  font-size: var(--mld-body-small-size);
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.subscription-nav-item[aria-current="page"] {
+  border-color: var(--mld-info);
+  box-shadow: inset 0 0 0 1px var(--mld-info);
+}
+
+.subscription-nav-item.is-plus {
+  background: var(--mld-soft-pink);
+}
+
+.subscription-nav-plan {
+  display: inline-grid;
+  place-items: center;
+  min-height: 30px;
+  padding: 0 var(--mld-space-3);
+  border: 1px solid #101517;
+  border-radius: var(--mld-radius-pill);
+  background: var(--mld-info);
+  color: #101517;
+  font-size: var(--mld-caption-size);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.subscription-nav-item.is-plus .subscription-nav-plan {
+  background: var(--mld-team);
+}
+
 .app-shell {
   --app-header-height: 72px;
   --app-sidebar-width: 232px;
@@ -1060,6 +1103,265 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   box-shadow: none;
 }
 
+.profile-subscription-link-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mld-space-5);
+  padding: var(--mld-space-5);
+  border: 1px solid var(--mld-border-strong);
+  border-radius: var(--mld-radius-card);
+  background: var(--mld-soft-blue);
+  color: var(--mld-text);
+}
+
+.profile-subscription-link-card h2,
+.profile-subscription-link-card p {
+  margin: 0;
+}
+
+.profile-subscription-link-card h2 {
+  margin-top: var(--mld-space-1);
+}
+
+.profile-subscription-link-card p:last-child {
+  margin-top: var(--mld-space-2);
+  color: var(--mld-muted);
+}
+
+.profile-subscription-link-card > a {
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  border: 1px solid #101517;
+  border-radius: var(--mld-radius-pill);
+  background: var(--mld-info);
+  color: #101517;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.subscription-page-v2 {
+  display: grid;
+  gap: var(--mld-space-6);
+  width: min(100%, 1120px);
+  margin: 0 auto;
+}
+
+.subscription-page-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+  align-items: end;
+  gap: var(--mld-space-6);
+}
+
+.subscription-page-heading h1,
+.subscription-page-heading p {
+  margin: 0;
+}
+
+.subscription-page-heading > div > p:last-child {
+  max-width: 720px;
+  margin-top: var(--mld-space-3);
+  color: var(--mld-muted);
+  font-size: var(--mld-body-large-size);
+  line-height: var(--mld-body-large-leading);
+}
+
+.subscription-current-plan {
+  display: grid;
+  gap: var(--mld-space-1);
+  padding: var(--mld-space-5);
+  border: 2px solid #101517;
+  border-radius: var(--mld-radius-card);
+  background: var(--mld-primary);
+  color: #101517;
+  box-shadow: 6px 6px 0 var(--mld-info);
+}
+
+.subscription-current-plan.is-plus {
+  background: var(--mld-team);
+  box-shadow-color: var(--mld-xp);
+}
+
+.subscription-current-plan > span {
+  font-size: var(--mld-label-size);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.subscription-current-plan > strong {
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  line-height: 1;
+}
+
+.subscription-current-plan > small {
+  margin-top: var(--mld-space-2);
+  font-weight: 700;
+}
+
+.subscription-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: var(--mld-space-6);
+}
+
+.subscription-plan-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--mld-space-5);
+  min-width: 0;
+  padding: clamp(24px, 4vw, 40px);
+  border: 2px solid #101517;
+  border-radius: var(--mld-radius-lg);
+  color: #101517;
+}
+
+.subscription-plan-card.is-free {
+  background: color-mix(in srgb, var(--mld-info) 16%, #fffdec);
+  box-shadow: 8px 8px 0 var(--mld-info);
+}
+
+.subscription-plan-card.is-plus {
+  background: var(--mld-team);
+  box-shadow: 8px 8px 0 var(--mld-xp);
+}
+
+.subscription-plan-card.is-plus > header {
+  padding-top: var(--mld-space-6);
+}
+
+.subscription-plan-card.is-current {
+  outline: 4px solid var(--mld-success);
+  outline-offset: 4px;
+}
+
+.subscription-plan-card header,
+.subscription-plan-card header > * {
+  margin: 0;
+}
+
+.subscription-plan-card h2,
+.subscription-plan-card p,
+.subscription-plan-card li {
+  color: #101517;
+}
+
+.subscription-plan-name {
+  margin-bottom: var(--mld-space-2) !important;
+  font-size: var(--mld-label-size);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.subscription-plan-card h2 {
+  font-size: clamp(1.75rem, 3vw, 2.45rem);
+  line-height: 1.05;
+}
+
+.subscription-price {
+  display: flex;
+  align-items: baseline;
+  gap: var(--mld-space-2);
+  margin-top: var(--mld-space-4) !important;
+}
+
+.subscription-price strong {
+  font-size: clamp(2.5rem, 6vw, 4.6rem);
+  line-height: 0.95;
+}
+
+.subscription-price span,
+.subscription-semester-price {
+  font-weight: 700;
+}
+
+.subscription-semester-price {
+  margin-top: var(--mld-space-2) !important;
+}
+
+.subscription-flexible-badge {
+  position: absolute;
+  top: var(--mld-space-4);
+  right: var(--mld-space-4);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mld-space-1);
+  padding: 6px 9px;
+  border: 1px solid #101517;
+  border-radius: var(--mld-radius-pill);
+  background: var(--mld-primary);
+  color: #101517;
+  font-size: var(--mld-caption-size);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.subscription-feature-list {
+  display: grid;
+  align-content: start;
+  gap: var(--mld-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.subscription-feature-list li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: start;
+  gap: var(--mld-space-2);
+  font-weight: 650;
+}
+
+.subscription-feature-list svg {
+  margin-top: 1px;
+  color: var(--mld-success-deep);
+}
+
+.subscription-plan-card footer button {
+  width: 100%;
+  min-height: 48px;
+  border: 2px solid #101517;
+  border-radius: var(--mld-radius-control);
+  background: #101517;
+  color: #fffdec;
+  font-weight: 800;
+}
+
+.subscription-plan-card footer button:disabled {
+  border-color: color-mix(in srgb, #101517 32%, transparent);
+  background: color-mix(in srgb, #fffdec 72%, transparent);
+  color: #101517;
+  cursor: default;
+}
+
+.subscription-upgrade-note,
+.subscription-core-note {
+  margin: 0;
+  padding: var(--mld-space-4) var(--mld-space-5);
+  border: 1px solid var(--mld-border-strong);
+  border-radius: var(--mld-radius-card);
+}
+
+.subscription-upgrade-note {
+  background: var(--mld-soft-pink);
+  color: var(--mld-text);
+}
+
+.subscription-core-note {
+  background: var(--mld-surface-01);
+  color: var(--mld-muted);
+  text-align: center;
+}
+
+.subscription-core-note strong {
+  color: var(--mld-text);
+}
+
 .guided-stepper li span,
 .setup-progress li span {
   width: 28px;
@@ -1508,6 +1810,20 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
     gap: var(--mld-space-1);
   }
 
+  .subscription-nav-item {
+    min-height: 40px;
+    padding: 4px;
+  }
+
+  .subscription-nav-label {
+    display: none;
+  }
+
+  .subscription-nav-plan {
+    min-height: 30px;
+    padding-inline: 9px;
+  }
+
   .app-header .nav-actions > .quiet-button,
   .app-header .theme-toggle,
   .app-header .activity-center-toggle {
@@ -1516,6 +1832,24 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
     min-height: 40px;
     padding: 0;
     border-radius: 50%;
+  }
+
+  .subscription-page-heading,
+  .subscription-plan-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .subscription-current-plan {
+    width: 100%;
+  }
+
+  .profile-subscription-link-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .profile-subscription-link-card > a {
+    text-align: center;
   }
 
   .app-sidebar {

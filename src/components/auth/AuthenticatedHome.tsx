@@ -9,8 +9,11 @@ import { BrandLogo } from "../brand/BrandLogo";
 import { TeamSystem } from "../teams/TeamSystem";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import { ProfileCenter } from "../profile/ProfileCenter";
+import { SubscriptionNavItem } from "../subscription/SubscriptionNavItem";
+import { SubscriptionPage } from "../subscription/SubscriptionPage";
 import { MAIN_NAV_ITEMS, getPathForSection, type MainSection, type ProjectsView } from "../../lib/navigation";
 import { getGroupColor } from "../../lib/groupColors";
+import { normalizeSubscriptionPlan } from "../../lib/subscription";
 
 import { ActivityCenter } from "../teams/ActivityCenter";
 
@@ -22,6 +25,8 @@ export function AuthenticatedHome() {
   const navigate = useNavigate();
 
   const profile = useQuery(api.profiles.getOrNull);
+  const subscription = useQuery(api.aiUsage.getCurrent, profile ? {} : "skip");
+  const currentPlan = normalizeSubscriptionPlan(subscription?.tier);
   const profileComplete =
     profile !== undefined &&
     profile !== null &&
@@ -55,7 +60,9 @@ export function AuthenticatedHome() {
   let projectsView: ProjectsView = "index";
   let selectedRoomId: Id<"teams"> | null = null;
 
-  if (path.startsWith("/profile")) {
+  if (path.startsWith("/subscription")) {
+    activeSection = "subscription";
+  } else if (path.startsWith("/profile")) {
     activeSection = "profile";
   } else if (path.startsWith("/projects/create")) {
     activeSection = "projects";
@@ -106,12 +113,12 @@ export function AuthenticatedHome() {
     );
   }
 
-  if (!profileComplete) {
+  if (!profileComplete && activeSection !== "subscription") {
     return (
       <main className="authenticated-shell profile-gate-shell">
         <header className="app-header">
           <Link className="nav-brand" to="/" aria-label="MayLamDi home"><BrandLogo compact /><span>MayLamDi</span></Link>
-          <div className="nav-actions"><ThemeToggle /><button className="secondary-button" type="button" onClick={() => void signOut()}>Sign out</button></div>
+          <div className="nav-actions"><SubscriptionNavItem plan={currentPlan} /><ThemeToggle /><button className="secondary-button" type="button" onClick={() => void signOut()}>Sign out</button></div>
         </header>
         <div className="profile-gate-content"><ProfileCenter setupRequired /></div>
       </main>
@@ -150,6 +157,7 @@ export function AuthenticatedHome() {
         </Link>
         <div className="nav-actions">
           {activeRoomId ? <ActivityCenter teamId={activeRoomId} /> : null}
+          <SubscriptionNavItem plan={currentPlan} />
           <ThemeToggle />
           <button
             className="secondary-button"
@@ -188,16 +196,20 @@ export function AuthenticatedHome() {
       {mobileMenuOpen ? <button className="nav-scrim" type="button" aria-label="Close navigation" onClick={() => setMobileMenuOpen(false)} /> : null}
       <div className="app-content">
         <div className="content-container">
-          <TeamSystem
-            profile={profile}
-            activeSection={activeSection}
-            projectsView={projectsView}
-            rooms={availableRooms}
-            selectedRoomId={activeRoomId}
-            onNavigateHome={() => navigate("/home")}
-            onOpenProjects={(view) => openProjects(view)}
-            onOpenRoom={(roomId) => openProjects("room", roomId)}
-          />
+          {activeSection === "subscription" ? (
+            <SubscriptionPage currentPlan={currentPlan} />
+          ) : (
+            <TeamSystem
+              profile={profile}
+              activeSection={activeSection}
+              projectsView={projectsView}
+              rooms={availableRooms}
+              selectedRoomId={activeRoomId}
+              onNavigateHome={() => navigate("/home")}
+              onOpenProjects={(view) => openProjects(view)}
+              onOpenRoom={(roomId) => openProjects("room", roomId)}
+            />
+          )}
         </div>
       </div>
       <nav className="mobile-bottom-nav" aria-label="Mobile navigation">

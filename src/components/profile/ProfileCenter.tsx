@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { X } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { api } from "../../../convex/_generated/api";
 import { getErrorMessage } from "../../lib/errors";
@@ -261,14 +262,14 @@ export function ProfileCenter({
 
       {!setupRequired ? (
         <div className="profile-context-settings">
-          <details className="profile-secondary-settings">
-            <summary>Subscription</summary>
-            <section className="profile-settings-card">
-              <p className="card-eyebrow">Current plan</p>
-              <h2>Free assignment demo</h2>
-              <p>Manual planning remains unlimited. AI assistance stays optional and uses free routes only.</p>
-            </section>
-          </details>
+          <section className="profile-subscription-link-card">
+            <div>
+              <p className="card-eyebrow">Subscription</p>
+              <h2>Plan and AI access</h2>
+              <p>See your current plan, compare Free and MayLamDi+, or review what each plan includes.</p>
+            </div>
+            <Link to="/subscription">Manage subscription →</Link>
+          </section>
           <details className="profile-secondary-settings">
             <summary>AI settings</summary>
             <section className="profile-settings-card ai-settings-card">
