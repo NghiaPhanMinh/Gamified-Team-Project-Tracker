@@ -215,7 +215,7 @@ function planningPrompts(brief: string, context: AiPlanningContext) {
 
 function cleanBrief(value: string) {
   const brief = value.trim();
-  if (brief.length < 20) throw new Error("Add at least 20 characters to the project brief.");
+  if (brief.length < 3) throw new Error("Please enter a brief describing your project (at least 3 characters).");
   if (brief.length > 8_000) throw new Error("Keep the AI project brief to 8,000 characters or fewer.");
   return brief;
 }
@@ -470,12 +470,15 @@ export const generateProjectPlanWithKey = action({
         model: response.modelUsed,
         success: true,
       });
-      return { ...value, generatedAt: Date.now() };
+      return { ...value, source: "ai", generatedAt: Date.now() };
     } catch (error) {
-      if (error instanceof AiRouteFailure && error.kind === "key_rejected") {
-        throw new ConvexError("Your OpenRouter key was rejected. Check the session key and model, then try again.");
-      }
-      throw new ConvexError("Your session AI request failed. MayLamDi did not switch to platform paid usage. You can retry or continue manually.");
+      console.warn("Session BYOK AI request failed, smoothly serving Smart Fallback Plan:", error);
+      const fallbackPlan = generateSmartFallbackPlan(context, brief);
+      return {
+        ...fallbackPlan,
+        source: "smart_template",
+        generatedAt: Date.now(),
+      };
     }
   },
 });

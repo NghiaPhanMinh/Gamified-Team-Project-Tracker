@@ -36,14 +36,35 @@ export function AIPlanningAssistant({
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const byokActive = getByokSession() !== null;
 
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingSeconds, setLoadingSeconds] = useState(0);
+  const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
     trackEvent("ai_assistant_opened", {
       project_status: workspace.project.status,
     });
     return () => {
       if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+      if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
     };
   }, [workspace.project.status]);
+
+  useEffect(() => {
+    if (isGenerating) {
+      setLoadingProgress(8);
+      setLoadingSeconds(0);
+      const startTime = Date.now();
+      loadingIntervalRef.current = setInterval(() => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        setLoadingSeconds(Math.floor(elapsed));
+        setLoadingProgress(Math.min(94, Math.floor(100 * (1 - Math.exp(-elapsed / 2.0)))));
+      }, 100);
+    } else {
+      if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
+      setLoadingProgress(100);
+    }
+  }, [isGenerating]);
 
   async function generateDraft(nextBrief: string) {
     const byok = getByokSession();
@@ -177,7 +198,7 @@ export function AIPlanningAssistant({
           <span>Project or assignment brief</span>
           <textarea
             required
-            minLength={20}
+            minLength={3}
             maxLength={8000}
             value={brief}
             onChange={(event) => setBrief(event.target.value)}
@@ -197,6 +218,34 @@ export function AIPlanningAssistant({
       </form>
       {error ? <p className="form-error ai-error" role="alert">{error}</p> : null}
       {retryNotice ? <p className="ai-retry-notice" role="status">{retryNotice}</p> : null}
+
+      {isGenerating ? (
+        <div className="ai-plan-loading-card" role="status" aria-live="polite" style={{ margin: "1.25rem 0", padding: "1.25rem", borderRadius: "16px", background: "color-mix(in srgb, var(--color-yellow) 12%, var(--color-surface))", border: "1.5px solid var(--color-yellow)", color: "var(--color-text)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+            <strong style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "1rem" }}>
+              <span className="spinner-icon">⚡</span> Building AI Project Plan...
+            </strong>
+            <small style={{ fontWeight: 700, opacity: 0.85 }}>
+              {loadingSeconds < 4 ? `~${Math.max(1, 4 - loadingSeconds)}s remaining` : "Finalizing..."} ({loadingSeconds}s elapsed)
+            </small>
+          </div>
+          <div className="loading-bar-track" style={{ width: "100%", height: "10px", borderRadius: "999px", background: "rgba(0,0,0,0.15)", overflow: "hidden", marginBottom: "0.75rem" }}>
+            <div
+              className="loading-bar-fill"
+              style={{
+                width: `${loadingProgress}%`,
+                height: "100%",
+                background: "var(--color-yellow)",
+                borderRadius: "999px",
+                transition: "width 0.15s ease-out",
+              }}
+            />
+          </div>
+          <p style={{ margin: 0, fontSize: "0.88rem", opacity: 0.9, display: "flex", alignItems: "center", gap: "0.4rem" }}>
+            {loadingSeconds < 1.5 ? "🔍 Analyzing brief requirements & deliverables..." : loadingSeconds < 3.0 ? "🏗️ Structuring project phases & task allocation..." : loadingSeconds < 4.5 ? "⚖️ Balancing effort hours, weights & risk factors..." : "✨ Finalizing draft plan for your review..."}
+          </p>
+        </div>
+      ) : null}
 
       {draft ? (
         <div className="ai-draft" aria-live="polite">
