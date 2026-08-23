@@ -98,9 +98,6 @@ export function LandscapePlayers({ members }: LandscapePlayersProps) {
                 role="img"
                 aria-label={`${member.displayName} (${mage.name}, ${active ? "Active today" : "Idle"})`}
               >
-                {/* 1. Ground Shadow */}
-                <ellipse cx="15" cy="46" rx="14" ry="4.5" fill="rgba(0,0,0,0.22)" stroke="none" />
-
                 {/* 2. Game ID Tag Pill rendered directly above avatar */}
                 <g transform="translate(15, -16)">
                   <rect

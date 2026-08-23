@@ -21,17 +21,20 @@ export function LandscapeQuestBoard({
   return (
     <div
       className="landscape-questboard-layer"
-      onClick={onOpenBoard}
+      onClick={(e) => {
+        e.stopPropagation();
+        onOpenBoard();
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       title="Click to open Quest Board"
       style={{
         position: "absolute",
         left: "440px",
-        top: "122px",
+        top: "115px",
         width: "90px",
         height: "105px",
-        zIndex: 5,
+        zIndex: 25,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -39,16 +42,15 @@ export function LandscapeQuestBoard({
         cursor: "pointer",
         userSelect: "none",
         transform: isHovered ? "scale(1.08) translateY(-3px)" : "scale(1)",
-        transition: "transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
-        filter: isHovered ? "drop-shadow(0 4px 8px rgba(0,0,0,0.45))" : "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+        transition: "transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)",
       }}
     >
-      {/* Medieval Rustic Wooden Notice Board SVG (No harsh black outline) */}
+      {/* Medieval Rustic Wooden Notice Board SVG (Flat clean colors, no shadows, no outlines) */}
       <svg
         viewBox="0 0 90 95"
         width="90"
         height="95"
-        style={{ overflow: "visible" }}
+        style={{ overflow: "visible", pointerEvents: "none" }}
       >
         {/* Support Timber Posts Planted in Earth */}
         <rect x="18" y="36" width="7" height="54" rx="1.5" fill="#3b1402" />
@@ -126,7 +128,7 @@ export function LandscapeQuestBoard({
         {/* Shingle Eaves Beam */}
         <rect x="6" y="14" width="78" height="3" rx="1" fill="#2e1002" />
 
-        {/* Small Notice Badge */}
+        {/* Small Notice Badge (No Emoji) */}
         <rect x="30" y="5" width="30" height="9" rx="2" fill="#2e1002" />
         <text
           x="45"
@@ -136,9 +138,9 @@ export function LandscapeQuestBoard({
           fontSize="5.5"
           fontWeight="bold"
           fontFamily="serif"
-          letterSpacing="0.4"
+          letterSpacing="0.6"
         >
-          📜 QUESTS
+          QUESTS
         </text>
 
         {/* Small Task Count Pill on Wood Post */}

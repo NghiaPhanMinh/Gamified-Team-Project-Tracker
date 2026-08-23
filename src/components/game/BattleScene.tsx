@@ -997,7 +997,7 @@ function QuestCardHoverItem({
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.72rem", fontWeight: 800 }}>
             <span style={{ background: "rgba(16,21,23,0.08)", padding: "2px 6px", borderRadius: "4px" }}>
-              📅 Due: {task.dueDate || "None"}
+              Due: {task.dueDate || "None"}
             </span>
             <span
               style={{
@@ -1008,7 +1008,7 @@ function QuestCardHoverItem({
                 borderRadius: "4px",
               }}
             >
-              👤 {task.assigneeName}
+              {task.assigneeName}
             </span>
           </div>
 
@@ -1024,7 +1024,7 @@ function QuestCardHoverItem({
                   onClaim(task);
                 }}
               >
-                {isClaimingQuest ? "Claiming..." : "✋ Claim Task"}
+                {isClaimingQuest ? "Claiming..." : "Claim Task"}
               </button>
             ) : task.isMine ? (
               <button
@@ -1036,7 +1036,7 @@ function QuestCardHoverItem({
                   onAttack(task);
                 }}
               >
-                ⚔️ Attack Dragon
+                Attack Dragon
               </button>
             ) : (
               <button
@@ -1061,7 +1061,7 @@ function QuestCardHoverItem({
               }}
               title="Open Quest Details"
             >
-              ℹ️
+              Details
             </button>
           </div>
         </div>
@@ -2830,7 +2830,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   setShowGoblinModal(true);
                 }}
               >
-                <span style={{ fontSize: "1.35rem" }}>👺</span>
                 <span style={{ fontSize: "0.95rem" }}>Daily Goblin</span>
                 <span style={{ fontSize: "0.68rem", opacity: 0.85, fontWeight: 700 }}>Log daily effort</span>
               </button>
@@ -2843,7 +2842,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   setShowBossModal(true);
                 }}
               >
-                <span style={{ fontSize: "1.35rem" }}>🐉</span>
                 <span style={{ fontSize: "0.95rem" }}>The Dragon</span>
                 <span style={{ fontSize: "0.68rem", opacity: 0.85, fontWeight: 700 }}>Submit task evidence</span>
               </button>
@@ -2863,7 +2861,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         <div className="rpg-modal-backdrop" onClick={() => setShowGoblinModal(false)}>
           <div className="rpg-modern-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "480px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 className="rpg-modern-title">👺 Slay Daily Goblin</h3>
+              <h3 className="rpg-modern-title">Slay Daily Goblin</h3>
               <button
                 type="button"
                 onClick={() => setShowGoblinModal(false)}
@@ -2907,10 +2905,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               {/* Validation Badges */}
               <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                 <span style={{ padding: "3px 8px", borderRadius: "6px", fontSize: "0.74rem", fontWeight: 800, border: "1.5px solid #101517", background: goblinWordCount >= 10 ? "#86efac" : "#f1f5f9", color: "#101517" }}>
-                  📝 {goblinWordCount}/10 words {goblinWordCount >= 10 ? "✓" : ""}
+                  {goblinWordCount}/10 words {goblinWordCount >= 10 ? "✓" : ""}
                 </span>
                 <span style={{ padding: "3px 8px", borderRadius: "6px", fontSize: "0.74rem", fontWeight: 800, border: "1.5px solid #101517", background: goblinImageCount >= 2 ? "#86efac" : "#f1f5f9", color: "#101517" }}>
-                  🖼️ {goblinImageCount}/2 images {goblinImageCount >= 2 ? "✓" : ""}
+                  {goblinImageCount}/2 images {goblinImageCount >= 2 ? "✓" : ""}
                 </span>
               </div>
 
@@ -2954,7 +2952,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 disabled={isSlaying || (!goblinText && goblinImageUrls.length === 0)}
                 style={{ marginTop: "4px" }}
               >
-                {isSlaying ? "Slaying..." : isGoblinValid ? "⚡ Slay Goblin!" : "Log Evidence (Needs 10 words or 2 images)"}
+                {isSlaying ? "Slaying..." : isGoblinValid ? "Slay Goblin!" : "Log Evidence (Needs 10 words or 2 images)"}
               </button>
 
               <button className="rpg-modern-btn is-secondary" type="button" onClick={() => setShowGoblinModal(false)}>
@@ -2972,7 +2970,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         <div className="rpg-modal-backdrop" onClick={() => setShowBossModal(false)}>
           <div className="rpg-modern-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "580px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 className="rpg-modern-title">🐉 Attack The Dragon</h3>
+              <h3 className="rpg-modern-title">Attack The Dragon</h3>
               <button
                 type="button"
                 onClick={() => setShowBossModal(false)}
@@ -3038,8 +3036,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                       >
                         <h4 style={{ margin: 0, fontSize: "0.85rem", fontWeight: 900, color: "#101517" }}>{task.title}</h4>
                         <div style={{ fontSize: "0.72rem", color: "#64748b", display: "flex", justifyContent: "space-between" }}>
-                          <span>📅 {task.dueDate}</span>
-                          <span>👤 {creatorName}</span>
+                          <span>Due: {task.dueDate}</span>
+                          <span>{creatorName}</span>
                         </div>
                         <button
                           className="rpg-modern-btn is-boss"
@@ -3064,7 +3062,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                       <div>
                         <span style={{ fontSize: "0.68rem", fontWeight: 900, textTransform: "uppercase", color: "#0369a1" }}>Selected Quest</span>
                         <h4 style={{ margin: "2px 0 0 0", fontSize: "0.92rem", fontWeight: 900, color: "#101517" }}>{task.title}</h4>
-                        <span style={{ fontSize: "0.74rem", color: "#0c4a6e" }}>📅 Due {task.dueDate} | Assigned by {creatorName}</span>
+                        <span style={{ fontSize: "0.74rem", color: "#0c4a6e" }}>Due {task.dueDate} | Assigned by {creatorName}</span>
                       </div>
                       <button
                         className="rpg-modern-btn is-secondary"
@@ -3094,7 +3092,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                           setEvidenceFile(null);
                         }}
                       >
-                        {tab === "note" ? "📝 Short Note" : tab === "link" ? "🔗 External Link" : tab === "image" ? "🖼️ Image File" : "📄 PDF File"}
+                        {tab === "note" ? "Short Note" : tab === "link" ? "External Link" : tab === "image" ? "Image File" : "PDF File"}
                       </button>
                     ))}
                   </div>
@@ -3255,7 +3253,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #101517", paddingBottom: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <h3 className="rpg-modern-title" style={{ fontSize: "1.28rem" }}>
-                  📜 Quests & Tasks
+                  Quests & Tasks
                 </h3>
                 <span
                   style={{
@@ -3406,7 +3404,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             {/* Minimal Subtext (No Close Board button) */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "2px solid #101517", paddingTop: "10px" }}>
               <span style={{ fontSize: "0.76rem", fontWeight: 700, opacity: 0.75 }}>
-                💡 Hover over any task to reveal details, claim open quests, or attack the dragon.
+                Hover over any task to reveal details, claim open quests, or attack the dragon.
               </span>
             </div>
           </div>
@@ -3422,7 +3420,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
               <div>
                 <span style={{ display: "inline-block", padding: "2px 8px", background: "#fff73f", color: "#101517", border: "1.5px solid #101517", borderRadius: "6px", fontSize: "0.7rem", fontWeight: 900, marginBottom: "6px" }}>
-                  ⭐ Quest Details
+                  Quest Details
                 </span>
                 <h3 className="rpg-modern-title" style={{ fontSize: "1.15rem" }}>{selectedQuestTask.title}</h3>
               </div>
@@ -3450,12 +3448,12 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
               <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "8px", padding: "8px 10px" }}>
                 <span style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, opacity: 0.7, textTransform: "uppercase" }}>Due Date</span>
-                <span style={{ fontSize: "0.84rem", fontWeight: 800 }}>📅 {selectedQuestTask.dueDate || "No deadline"}</span>
+                <span style={{ fontSize: "0.84rem", fontWeight: 800 }}>{selectedQuestTask.dueDate || "No deadline"}</span>
               </div>
               <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "8px", padding: "8px 10px" }}>
                 <span style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, opacity: 0.7, textTransform: "uppercase" }}>Assigned Hero</span>
                 <span style={{ fontSize: "0.84rem", fontWeight: 800, color: selectedQuestTask.isOpen ? "#dc2626" : "#101517" }}>
-                  👤 {selectedQuestTask.assigneeName}
+                  {selectedQuestTask.assigneeName}
                 </span>
               </div>
             </div>
@@ -3469,7 +3467,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   disabled={isClaimingQuest}
                   onClick={() => handleClaimQuest(selectedQuestTask)}
                 >
-                  {isClaimingQuest ? "Claiming Quest..." : "✋ Claim This Quest"}
+                  {isClaimingQuest ? "Claiming Quest..." : "Claim This Quest"}
                 </button>
               ) : selectedQuestTask.isMine ? (
                 <button
@@ -3481,7 +3479,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     setShowBossModal(true);
                   }}
                 >
-                  ⚔️ Submit Proof & Attack Dragon
+                  Submit Proof & Attack Dragon
                 </button>
               ) : (
                 <div style={{ textAlign: "center", fontSize: "0.78rem", fontWeight: 700, opacity: 0.8, padding: "4px" }}>
@@ -3504,7 +3502,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         <div className="rpg-modal-backdrop" onClick={() => setShowCreateQuestModal(false)}>
           <div className="rpg-modern-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "520px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 className="rpg-modern-title">📜 Post New Quest</h3>
+              <h3 className="rpg-modern-title">Post New Quest</h3>
               <button
                 type="button"
                 onClick={() => setShowCreateQuestModal(false)}
@@ -3795,7 +3793,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                       Ice Spell
                     </button>
                     <button type="button" style={{ padding: "6px", background: "#7c3aed", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("all")}>
-                      ⚡🔥❄️ All Spells at Once
+                      All Spells at Once
                     </button>
                     <button type="button" style={{ gridColumn: "1 / span 2", padding: "6px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell(null)}>
                       Clear Attack FX
