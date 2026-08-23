@@ -172,6 +172,7 @@ export const listForTask = query({
       reviews: decoratedReviews,
       latestReview: decoratedReviews[0] ?? null,
       currentProfileId: context.profile._id,
+      isSoloProject: projectMembers.length <= 1,
       canSubmit:
         context.canWrite &&
         context.task.assignmentState !== "unassigned" &&
@@ -520,3 +521,86 @@ export const decideCompletion = mutation({
     return context.task._id;
   },
 });
+
+export const selfCompleteSoloTask = mutation({
+  args: { taskId: v.id("tasks") },
+  handler: async (ctx, args) => {
+    const context = await getTaskContext(ctx, args.taskId);
+    requireEvidenceWriteAccess(context);
+
+    const projectMembers = await ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (query) => query.eq("projectId", context.project._id))
+      .collect();
+
+    const isSoloProject = projectMembers.length <= 1;
+    const isOwner = context.task.primaryOwnerProfileId === context.profile._id;
+    const isCreator = context.project.creatorProfileId === context.profile._id;
+
+    if (!isSoloProject && !isCreator && !isOwner) {
+      throw new Error("Self-completion is available for solo projects or room creators.");
+    }
+
+    const evidence = await ctx.db
+      .query("taskEvidence")
+      .withIndex("by_task", (query) => query.eq("taskId", context.task._id))
+      .take(1);
+
+    if (evidence.length === 0) {
+      throw new Error("Add evidence before completing this task.");
+    }
+
+    const now = Date.now();
+
+    const existingCombatEvent = await ctx.db
+      .query("combatEvents")
+      .withIndex("by_task", (query) => query.eq("taskId", context.task._id))
+      .unique();
+
+    let combatEventId = existingCombatEvent?._id;
+    if (!existingCombatEvent) {
+      const attackerMembership = await ctx.db
+        .query("teamMembers")
+        .withIndex("by_team_and_user", (query) =>
+          query.eq("teamId", context.project.teamId).eq("profileId", context.task.primaryOwnerProfileId),
+        )
+        .unique();
+
+      combatEventId = await ctx.db.insert("combatEvents", {
+        projectId: context.project._id,
+        taskId: context.task._id,
+        attackerProfileId: context.task.primaryOwnerProfileId,
+        reviewerProfileId: context.profile._id,
+        damage: taskDamage(context.task),
+        spellType: attackerMembership?.spellType ?? "spark",
+        createdAt: now,
+      });
+    }
+
+    await ctx.db.patch(context.task._id, {
+      status: "completed",
+      completedAt: now,
+      updatedAt: now,
+    });
+
+    await ctx.db.insert("activityLogs", {
+      teamId: context.project.teamId,
+      projectId: context.project._id,
+      actorProfileId: context.profile._id,
+      action: "creator_approved_task",
+      metadata: {
+        projectId: context.project._id,
+        taskId: context.task._id,
+        taskTitle: context.task.title,
+        taskStatus: "completed",
+        combatEventId,
+        damage: taskDamage(context.task),
+      },
+      createdAt: now,
+    });
+
+    await refreshProjectProgress(ctx, context.project, context.profile._id);
+    return context.task._id;
+  },
+});
+

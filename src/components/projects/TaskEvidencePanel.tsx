@@ -73,6 +73,7 @@ export function TaskEvidencePanel({
   const submitReview = useMutation(api.evidence.submitReview);
   const submitForReview = useMutation(api.evidence.submitForReview);
   const chooseReviewer = useMutation(api.tasks.chooseReviewer);
+  const selfCompleteSoloTask = useMutation(api.evidence.selfCompleteSoloTask);
   const [type, setType] = useState<EvidenceType>("note");
   const [note, setNote] = useState("");
   const [url, setUrl] = useState("");
@@ -82,6 +83,19 @@ export function TaskEvidencePanel({
   const [selectedReviewerId, setSelectedReviewerId] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function handleSelfCompleteSoloTask() {
+    setError(null);
+    setIsSaving(true);
+    try {
+      await selfCompleteSoloTask({ taskId });
+      trackEvent("review_completed", { review_status: "approved" });
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError, "The task could not be completed."));
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   function validateFile(selectedFile: File) {
     if (type === "image") {
@@ -286,7 +300,21 @@ export function TaskEvidencePanel({
         <p className="evidence-empty">No evidence has been added to this task.</p>
       )}
 
-      {requiresReview && details.isTaskOwner && !reviewerName && ["todo", "in_progress", "changes_requested"].includes(taskStatus) ? (
+      {details.isSoloProject && details.isTaskOwner && !["completed", "verified"].includes(taskStatus) ? (
+        <div className="solo-complete-panel" style={{ margin: "1rem 0", padding: "1rem", borderRadius: "12px", background: "color-mix(in srgb, var(--color-yellow) 15%, var(--color-surface))", border: "2px solid var(--color-yellow)" }}>
+          <p style={{ margin: "0 0 0.75rem", fontWeight: 800 }}>⚡ <strong>Solo Project:</strong> You can self-approve and complete your task once evidence is added.</p>
+          <button
+            className="primary-button submit-review-button"
+            type="button"
+            disabled={isSaving || details.evidence.length === 0}
+            onClick={() => void handleSelfCompleteSoloTask()}
+          >
+            {isSaving ? "Completing task..." : "Self-Approve & Complete Task"}
+          </button>
+        </div>
+      ) : null}
+
+      {!details.isSoloProject && requiresReview && details.isTaskOwner && !reviewerName && ["todo", "in_progress", "changes_requested"].includes(taskStatus) ? (
         <div className="reviewer-picker">
           <label>
             <span>Choose your reviewer</span>
@@ -306,13 +334,13 @@ export function TaskEvidencePanel({
         </div>
       ) : null}
 
-      {requiresReview && details.isTaskOwner && ["todo", "in_progress", "changes_requested"].includes(taskStatus) ? (
+      {!details.isSoloProject && requiresReview && details.isTaskOwner && ["todo", "in_progress", "changes_requested"].includes(taskStatus) ? (
         <button className="primary-button submit-review-button" type="button" disabled={isSaving || details.evidence.length === 0 || !reviewerName} onClick={() => void handleSubmitForReview()}>
           Submit for Review
         </button>
       ) : null}
 
-      {requiresReview ? (
+      {!details.isSoloProject && requiresReview ? (
         <div className="review-panel">
           <strong>{reviewerName ? `Assigned reviewer: ${reviewerName}` : "Reviewer not selected yet"}</strong>
           <p>The assigned reviewer recommends completion or requests changes. Final completion stays with the room creator.</p>
