@@ -5116,13 +5116,101 @@ footer {
 .brief-drawer form input, .brief-drawer form textarea { min-height: 46px; padding: .65rem; border: 2px solid var(--color-text); border-radius: 10px; background: var(--color-page); color: var(--color-text); }
 .brief-drawer form textarea { min-height: 200px; resize: vertical; }
 
-/* Cream forms deliberately remain light in dark mode. Keep their controls dark and legible. */
-:root[data-theme="dark"] .compact-plan-form,
-:root[data-theme="dark"] .task-evidence-panel,
-:root[data-theme="dark"] .ai-safety-note { color: var(--color-navy); }
+/* Universal High-Contrast Form Controls for Task Drawers and Compact Forms */
+.task-create-drawer,
+:root[data-theme="dark"] .task-create-drawer {
+  background: var(--color-surface, #101517);
+  color: var(--color-text, #ffffff);
+}
+
+.task-create-drawer label span,
+.compact-plan-form label span,
+.project-field-grid label span,
+:root[data-theme="dark"] .task-create-drawer label span,
+:root[data-theme="dark"] .compact-plan-form label span,
+:root[data-theme="dark"] .project-field-grid label span {
+  color: var(--color-text, #ffffff) !important;
+  font-weight: 800 !important;
+  font-size: 0.85rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  display: block !important;
+}
+
+.task-form-section legend,
+:root[data-theme="dark"] .task-form-section legend {
+  color: var(--color-yellow, #fff73f) !important;
+  font-family: var(--font-heading);
+  font-size: 1.25rem !important;
+  font-weight: 900 !important;
+}
+
+.task-create-drawer label small,
+.compact-plan-form label small,
+.project-field-grid label small,
+:root[data-theme="dark"] .task-create-drawer label small,
+:root[data-theme="dark"] .compact-plan-form label small,
+:root[data-theme="dark"] .project-field-grid label small {
+  color: var(--color-text, #ffffff) !important;
+  opacity: 0.85 !important;
+  font-weight: 500 !important;
+  font-size: 0.78rem !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+}
+
+/* Force solid, high-contrast black-on-white text for ALL Input, Textarea, and Select controls in Light and Dark Mode */
+.task-create-drawer input,
+.task-create-drawer textarea,
+.task-create-drawer select,
+.compact-plan-form input,
+.compact-plan-form textarea,
+.compact-plan-form select,
+.project-field-grid input,
+.project-field-grid textarea,
+.project-field-grid select,
+:root[data-theme="dark"] .task-create-drawer input,
+:root[data-theme="dark"] .task-create-drawer textarea,
+:root[data-theme="dark"] .task-create-drawer select,
 :root[data-theme="dark"] .compact-plan-form input,
 :root[data-theme="dark"] .compact-plan-form textarea,
-:root[data-theme="dark"] .compact-plan-form select { background: #fff; color: var(--color-navy); border-color: var(--color-navy); }
+:root[data-theme="dark"] .compact-plan-form select,
+:root[data-theme="dark"] .project-field-grid input,
+:root[data-theme="dark"] .project-field-grid textarea,
+:root[data-theme="dark"] .project-field-grid select {
+  background-color: #fffef9 !important;
+  color: #101517 !important;
+  border: 2px solid #101517 !important;
+  border-radius: 0.65rem !important;
+  padding: 0.65rem 0.85rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+}
+
+/* Force select options to be solid black text on white background */
+select option,
+.task-create-drawer select option,
+.compact-plan-form select option,
+.project-field-grid select option,
+:root[data-theme="dark"] select option,
+:root[data-theme="dark"] .task-create-drawer select option,
+:root[data-theme="dark"] .compact-plan-form select option,
+:root[data-theme="dark"] .project-field-grid select option {
+  background-color: #ffffff !important;
+  color: #101517 !important;
+  font-weight: 700 !important;
+}
+
+.task-create-drawer input::placeholder,
+.task-create-drawer textarea::placeholder,
+.compact-plan-form input::placeholder,
+.compact-plan-form textarea::placeholder,
+.project-field-grid input::placeholder,
+.project-field-grid textarea::placeholder {
+  color: #555555 !important;
+  opacity: 0.85 !important;
+}
 
 @media (max-width: 760px) {
   .profile-basic-card, .completion-request-panel article, .task-request-panel article, .final-meeting-overlay { align-items: stretch; flex-direction: column; }
