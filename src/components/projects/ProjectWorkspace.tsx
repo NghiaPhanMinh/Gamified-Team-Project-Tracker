@@ -287,6 +287,17 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
       if (task.reviewerProfileId === workspace.currentProfileId && !["completed", "verified"].includes(task.status)) {
         return { task, label: "MayReviewDi", actionType: REVIEW_WAITING_MESSAGE, kind: "review_waiting" as const, priority: 6 };
       }
+      if (!["completed", "verified"].includes(task.status)) {
+        const ownerName = memberNameById.get(task.primaryOwnerProfileId) ?? "Teammate";
+        const statusLabel = STATUS_LABELS[task.status as TaskStatus] ?? "In Progress";
+        return {
+          task,
+          label: `🔔 Remind ${ownerName}`,
+          actionType: `${ownerName} · ${statusLabel}`,
+          kind: "remind" as const,
+          priority: 7,
+        };
+      }
       return null;
     })
     .filter((item): item is NonNullable<typeof item> => item !== null)
@@ -430,6 +441,11 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
   function handleNextAction() {
     if (!nextAction) return;
     const taskId = nextAction.task._id;
+
+    if (nextAction.kind === "remind") {
+      setOpenBattleTaskId(taskId);
+      return;
+    }
 
     if (nextAction.kind === "claim") {
       void runAction(async () => {
