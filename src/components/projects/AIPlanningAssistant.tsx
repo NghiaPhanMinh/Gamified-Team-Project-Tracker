@@ -290,9 +290,9 @@ export function AIPlanningAssistant({
               <div className="ai-milestones-grid">
                 {draft.milestones.map((milestone) => (
                   <div key={milestone.tempId} className="ai-milestone-card">
-                    <div>
+                    <div className="ai-milestone-heading">
                       <strong>{milestone.title}</strong>
-                      <small>Due {milestone.dueDate} · {workspace.phases.find((p) => p._id === milestone.phaseId)?.title ?? "Phase"}</small>
+                      <small>Due: {milestone.dueDate} · Phase: {workspace.phases.find((p) => p._id === milestone.phaseId)?.title ?? "Phase"}</small>
                     </div>
                     <p>{milestone.description}</p>
                   </div>
@@ -309,11 +309,12 @@ export function AIPlanningAssistant({
             </div>
             <div className="ai-allocation-note"><strong>Suggested Allocation</strong><span>Owners and explanations are editable before the plan is saved.</span></div>
             <div className="ai-task-list">
-              {draft.tasks.map((task) => (
+              {draft.tasks.map((task, index) => (
                 <details key={task.tempId}>
                   <summary>
-                    <span><strong>{task.title}</strong><small>{task.estimatedEffortHours}h · difficulty {task.difficulty}/5</small></span>
-                    <span>{workspace.members.find((member) => member.profileId === task.primaryOwnerProfileId)?.displayName ?? "Choose owner"}</span>
+                    <span className="ai-task-sequence" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="ai-task-summary-copy"><strong>{task.title}</strong><small>{task.estimatedEffortHours}h · difficulty {task.difficulty}/5</small></span>
+                    <span className="ai-task-summary-owner">{workspace.members.find((member) => member.profileId === task.primaryOwnerProfileId)?.displayName ?? "Choose owner"}</span>
                   </summary>
                   <div className="ai-task-editor">
                     <label className="ai-field-wide">

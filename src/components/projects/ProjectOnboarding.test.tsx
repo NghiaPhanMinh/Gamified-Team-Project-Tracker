@@ -55,4 +55,25 @@ describe("ProjectOnboarding", () => {
     expect(screen.getByRole("textbox", { name: /^room code$/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /join room/i })).toBeInTheDocument();
   });
+
+  it("keeps every framework colourful while selection stays independently visible", () => {
+    const { container } = render(
+      <ProjectOnboarding
+        mode="create"
+        currentProfileId={"profile-1" as Id<"userProfiles">}
+        onCancel={vi.fn()}
+        onRoomReady={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /view all frameworks/i }));
+    const choices = [...container.querySelectorAll<HTMLElement>(".framework-choice")];
+
+    expect(choices).toHaveLength(9);
+    expect(choices.map((choice) => choice.style.getPropertyValue("--mld-framework-color"))).toEqual([
+      "#FF8AE7", "#FFF73F", "#FEAA01", "#1DD851", "#FD39E4", "#4CA0FE", "#17A738", "#FF8AE7", "#FFF73F",
+    ]);
+    expect(choices[0]).toHaveClass("is-selected");
+    expect(choices[0].querySelector(".framework-selected-mark")).toHaveTextContent("✓");
+  });
 });

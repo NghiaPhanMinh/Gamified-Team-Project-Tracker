@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import { useMutation } from "convex/react";
 
 import { api } from "../../../convex/_generated/api";
@@ -6,6 +6,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { BUILT_IN_FRAMEWORKS } from "../../data/frameworks";
 import { getErrorMessage } from "../../lib/errors";
 import { trackEvent } from "../../lib/analytics";
+import { MAYLAMDI_FRAMEWORK_COLORS, paletteColorAt } from "../../lib/brandPalette";
 
 type ProjectOnboardingProps = {
   mode: "create" | "join";
@@ -251,7 +252,46 @@ export function ProjectOnboarding({
       <button className="guided-back-link" type="button" onClick={step === 1 ? onCancel : () => { setStep((current) => current - 1); setError(null); }}>← Back</button>
       <ol className="guided-stepper" aria-label="Create project progress">{stepLabels.map((label, index) => <li key={label} className={step === index + 1 ? "is-current" : step > index + 1 ? "is-complete" : ""}><span>{index + 1}</span><small>{label}</small></li>)}</ol>
       <form className="guided-card" onSubmit={handleCreate}>
-        {step === 1 ? <><p className="kicker">Step 1 · Structure</p><h1 className="display-heading" id="create-flow-title">Choose your project structure</h1><p className="guided-helper">Choose how this project will be organised into phases.</p><div className="framework-choice-grid">{BUILT_IN_FRAMEWORKS.slice(0, showAllFrameworks ? BUILT_IN_FRAMEWORKS.length : 3).map((framework, index) => <button key={framework.id} className={frameworkChoice === framework.id ? `framework-choice ${index === 0 ? "is-recommended " : ""}is-selected` : `framework-choice ${index === 0 ? "is-recommended" : ""}`} type="button" onClick={() => setFrameworkChoice(framework.id)}><strong>{index === 0 ? "Recommended · " : ""}{framework.name}</strong><span>{framework.description.split(".")[0]}.</span><small>{framework.phases.length} phases</small>{frameworkChoice === framework.id ? <span className="framework-selected-mark" aria-label="Selected">✓</span> : null}</button>)}<button className={frameworkChoice === "custom" ? "framework-choice is-selected" : "framework-choice"} type="button" onClick={() => setFrameworkChoice("custom")}><strong>Custom Framework</strong><span>Name your own phase sequence.</span><small>Saved to the new room</small>{frameworkChoice === "custom" ? <span className="framework-selected-mark" aria-label="Selected">✓</span> : null}</button><button className={frameworkChoice === "none" ? "framework-choice is-selected" : "framework-choice"} type="button" onClick={() => setFrameworkChoice("none")}><strong>Simple / skip framework</strong><span>Use one flexible project phase.</span><small>Editable after creation</small>{frameworkChoice === "none" ? <span className="framework-selected-mark" aria-label="Selected">✓</span> : null}</button></div>{frameworkChoice === "custom" ? <div className="guided-field-grid custom-framework-quick-form"><label><span>Framework name</span><input value={customFrameworkName} onChange={(event) => setCustomFrameworkName(event.target.value)} /></label><label className="guided-field-wide"><span>Phase names, separated by commas</span><input value={customPhaseNames} onChange={(event) => setCustomPhaseNames(event.target.value)} /></label></div> : null}</> : null}
+        {step === 1 ? <>
+          <p className="kicker">Step 1 · Structure</p>
+          <h1 className="display-heading" id="create-flow-title">Choose your project structure</h1>
+          <p className="guided-helper">Choose how this project will be organised into phases.</p>
+          <div className="framework-choice-grid">
+            {BUILT_IN_FRAMEWORKS.slice(0, showAllFrameworks ? BUILT_IN_FRAMEWORKS.length : 3).map((framework, index) => (
+              <button
+                key={framework.id}
+                className={frameworkChoice === framework.id ? `framework-choice ${index === 0 ? "is-recommended " : ""}is-selected` : `framework-choice ${index === 0 ? "is-recommended" : ""}`}
+                style={{ "--mld-framework-color": paletteColorAt(MAYLAMDI_FRAMEWORK_COLORS, index) } as CSSProperties}
+                type="button"
+                onClick={() => setFrameworkChoice(framework.id)}
+              >
+                <strong>{index === 0 ? "Recommended · " : ""}{framework.name}</strong>
+                <span>{framework.description.split(".")[0]}.</span>
+                <small>{framework.phases.length} phases</small>
+                {frameworkChoice === framework.id ? <span className="framework-selected-mark" aria-label="Selected">✓</span> : null}
+              </button>
+            ))}
+            <button
+              className={frameworkChoice === "custom" ? "framework-choice is-selected" : "framework-choice"}
+              style={{ "--mld-framework-color": paletteColorAt(MAYLAMDI_FRAMEWORK_COLORS, BUILT_IN_FRAMEWORKS.length) } as CSSProperties}
+              type="button"
+              onClick={() => setFrameworkChoice("custom")}
+            >
+              <strong>Custom Framework</strong><span>Name your own phase sequence.</span><small>Saved to the new room</small>
+              {frameworkChoice === "custom" ? <span className="framework-selected-mark" aria-label="Selected">✓</span> : null}
+            </button>
+            <button
+              className={frameworkChoice === "none" ? "framework-choice is-selected" : "framework-choice"}
+              style={{ "--mld-framework-color": paletteColorAt(MAYLAMDI_FRAMEWORK_COLORS, BUILT_IN_FRAMEWORKS.length + 1) } as CSSProperties}
+              type="button"
+              onClick={() => setFrameworkChoice("none")}
+            >
+              <strong>Simple / skip framework</strong><span>Use one flexible project phase.</span><small>Editable after creation</small>
+              {frameworkChoice === "none" ? <span className="framework-selected-mark" aria-label="Selected">✓</span> : null}
+            </button>
+          </div>
+          {frameworkChoice === "custom" ? <div className="guided-field-grid custom-framework-quick-form"><label><span>Framework name</span><input value={customFrameworkName} onChange={(event) => setCustomFrameworkName(event.target.value)} /></label><label className="guided-field-wide"><span>Phase names, separated by commas</span><input value={customPhaseNames} onChange={(event) => setCustomPhaseNames(event.target.value)} /></label></div> : null}
+        </> : null}
 
         {step === 2 ? <><p className="kicker">Step 2 · Brief</p><h1 className="display-heading" id="create-flow-title">Tell us about your project</h1><div className="guided-field-grid"><label className="guided-field-wide brief-primary"><span>Project brief</span><small>What are you making, who is it for, and what needs to be delivered?</small><textarea required maxLength={8000} value={brief} onChange={(event) => setBrief(event.target.value)} /></label><label><span>Project name</span><input required maxLength={100} value={title} onChange={(event) => setTitle(event.target.value)} /></label><label className="deadline-inline-field"><span>Deadline</span><div className="deadline-input-preset-row"><input required type="date" min={dateAfter(1)} value={deadline} onChange={(event) => { setDeadline(event.target.value); setDraftDueDate(event.target.value); }} /><div className="deadline-preset-buttons"><button className="preset-pill-btn" type="button" onClick={() => setDeadline(dateAfter(7))}>7 days</button><button className="preset-pill-btn" type="button" onClick={() => setDeadline(dateAfter(14))}>14 days</button></div></div></label><label><span>Team size</span><select value={targetMemberCount} onChange={(event) => setTargetMemberCount(event.target.value)}>{Array.from({ length: 9 }, (_, index) => index + 2).map((size) => <option key={size} value={size}>{size} people</option>)}</select></label><label><span>Framework</span><select value={frameworkChoice} onChange={(event) => setFrameworkChoice(event.target.value)}><option value="none">Simple project</option><option value="custom">Custom Framework</option>{BUILT_IN_FRAMEWORKS.map((framework) => <option key={framework.id} value={framework.id}>{framework.name}</option>)}</select></label></div></> : null}
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  MAYLAMDI_FRAMEWORK_COLORS,
   MAYLAMDI_PHASE_COLORS,
   MAYLAMDI_SKILL_COLORS,
   paletteColorAt,
@@ -27,5 +28,17 @@ describe("MayLamDi reusable brand palettes", () => {
     expect(MAYLAMDI_PHASE_COLORS).toHaveLength(7);
     expect(paletteColorAt(MAYLAMDI_PHASE_COLORS, 0)).toBe("#FFF73F");
     expect(paletteColorAt(MAYLAMDI_PHASE_COLORS, 7)).toBe("#FFF73F");
+  });
+
+  it("gives framework choices the approved persistent palette", () => {
+    expect(MAYLAMDI_FRAMEWORK_COLORS).toEqual([
+      "#FF8AE7",
+      "#FFF73F",
+      "#FEAA01",
+      "#1DD851",
+      "#FD39E4",
+      "#4CA0FE",
+      "#17A738",
+    ]);
   });
 });

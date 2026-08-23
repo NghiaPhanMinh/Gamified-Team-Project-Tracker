@@ -62,7 +62,7 @@ describe("MayLamDi design-system contract", () => {
 
   it("keeps framework cards colourful, aligned, and readable", () => {
     expect(css).toContain("background: var(--framework-card-color)");
-    expect(css).toContain("grid-template-columns: repeat(7, minmax(150px, 1fr))");
+    expect(css).toContain("grid-template-columns: repeat(7, minmax(11rem, 1fr))");
     expect(css).toContain("min-height: 5.25rem");
     expect(css).toContain(".framework-preview-note");
     expect(css).toContain("background: #fff73f");
@@ -105,5 +105,30 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain(".battle-task-waiting");
     expect(css).toContain("line-height: 1.4");
     expect(css).toContain("padding: var(--mld-space-3) var(--mld-space-4)");
+  });
+
+  it("keeps project setup frameworks colourful with a separate selected state", () => {
+    expect(css).toContain("background: var(--mld-framework-color");
+    expect(css).toContain(".framework-choice.is-selected");
+    expect(css).toContain("outline: 3px solid #101517");
+    expect(css).toContain("box-shadow: 6px 6px 0 #4ca0fe");
+  });
+
+  it("keeps AI plan hierarchy, milestones, and task sequencing readable", () => {
+    expect(css).toContain(".ai-draft > header.ai-brief-interpretation h4");
+    expect(css).toContain("line-height: 1.03");
+    expect(css).toContain(".ai-task-sequence");
+    expect(css).toContain("--ai-plan-surface: #fffbd0");
+    expect(css).toContain(".ai-milestone-heading");
+  });
+
+  it("contains long framework names and groups brief metadata responsively", () => {
+    expect(css).toContain("grid-template-rows: auto minmax(6rem, auto) auto");
+    expect(css).toContain("grid-template-columns: repeat(7, minmax(11rem, 1fr))");
+    expect(css).toContain("overflow-wrap: normal");
+    expect(css).toContain("overflow-wrap: anywhere");
+    expect(css).toContain(".project-brief-details");
+    expect(css).toContain(".project-brief-summary-meta");
+    expect(css).toContain("grid-template-columns: 1fr");
   });
 });

@@ -756,7 +756,7 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 }
 
 .framework-picker {
-  grid-template-columns: repeat(7, minmax(150px, 1fr));
+  grid-template-columns: repeat(7, minmax(11rem, 1fr));
   gap: var(--mld-space-3);
   margin: 0 0 var(--mld-space-5);
   padding: var(--mld-space-2) var(--mld-space-2) var(--mld-space-4);
@@ -2674,6 +2674,266 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   color: #fffdec;
 }
 
+/* Project creation: every framework keeps its palette identity; selection is
+ * communicated independently through outline, shadow, and the check mark. */
+.framework-choice {
+  position: relative;
+  border: 2px solid #101517;
+  background: var(--mld-framework-color, #ff8ae7);
+  color: #101517;
+}
+
+.framework-choice:hover,
+.framework-choice:focus-visible {
+  border-color: #101517;
+  background: var(--mld-framework-color, #ff8ae7);
+  color: #101517;
+  transform: translateY(-2px);
+}
+
+.framework-choice.is-recommended,
+.framework-choice.is-selected,
+.framework-choice.is-selected:hover {
+  border-color: #101517;
+  background: var(--mld-framework-color, #ff8ae7);
+  color: #101517;
+}
+
+.framework-choice.is-selected,
+.framework-choice.is-selected:hover {
+  outline: 3px solid #101517;
+  outline-offset: 3px;
+  box-shadow: 6px 6px 0 #4ca0fe;
+  transform: none;
+}
+
+.framework-choice.is-selected > strong {
+  padding-right: var(--mld-space-7);
+}
+
+.framework-choice small {
+  color: #101517;
+  opacity: 0.78;
+}
+
+.framework-choice .framework-selected-mark {
+  position: absolute;
+  top: var(--mld-space-3);
+  right: var(--mld-space-3);
+  width: 28px;
+  height: 28px;
+  border: 2px solid #fffdec;
+  background: #101517;
+  color: #fffdec;
+}
+
+/* AI planning: separate interpretation hierarchy, calm sequenced tasks, and
+ * readable two-level milestone metadata. */
+.ai-brief-interpretation > div {
+  display: grid;
+  gap: var(--mld-space-4);
+  min-width: 0;
+}
+
+.ai-brief-interpretation > div > span,
+.ai-brief-interpretation h4,
+.ai-brief-interpretation p,
+.ai-interpretation-summary {
+  margin: 0;
+}
+
+.ai-draft > header.ai-brief-interpretation h4 {
+  line-height: 1.03;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.ai-milestones-grid {
+  gap: var(--mld-space-5);
+}
+
+.ai-milestone-card {
+  display: grid;
+  align-content: start;
+  gap: var(--mld-space-4);
+  min-width: 0;
+  padding: var(--mld-space-4);
+  border: 1px solid var(--mld-border-strong);
+  border-radius: var(--mld-radius-card);
+  background: var(--mld-surface-01);
+  color: var(--mld-text);
+}
+
+.ai-milestone-heading {
+  display: grid;
+  gap: var(--mld-space-2);
+}
+
+.ai-milestone-heading strong,
+.ai-milestone-heading small,
+.ai-milestone-card p {
+  display: block;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.ai-milestone-heading small {
+  color: var(--mld-muted);
+  line-height: 1.4;
+}
+
+.ai-milestone-card p {
+  line-height: var(--mld-body-leading);
+}
+
+.ai-task-list {
+  gap: var(--mld-space-4);
+}
+
+.ai-task-list details {
+  --ai-plan-surface: #fffbd0;
+  --ai-plan-accent: #fff73f;
+  border-color: #101517;
+  background: var(--ai-plan-surface);
+  color: #101517;
+}
+
+.ai-task-list details:nth-child(5n + 2) { --ai-plan-surface: #ffe2f8; --ai-plan-accent: #ff8ae7; }
+.ai-task-list details:nth-child(5n + 3) { --ai-plan-surface: #e4f1ff; --ai-plan-accent: #4ca0fe; }
+.ai-task-list details:nth-child(5n + 4) { --ai-plan-surface: #e4fbea; --ai-plan-accent: #1dd851; }
+.ai-task-list details:nth-child(5n + 5) { --ai-plan-surface: #fff0d1; --ai-plan-accent: #feaa01; }
+
+.ai-task-list summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(100px, auto);
+  align-items: center;
+  gap: var(--mld-space-4);
+  min-height: 76px;
+  padding: var(--mld-space-4);
+  background: var(--ai-plan-surface);
+  color: #101517;
+}
+
+.ai-task-sequence {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid #101517;
+  border-radius: var(--mld-radius-control);
+  background: var(--ai-plan-accent);
+  color: #101517;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.ai-task-list summary .ai-task-summary-copy {
+  display: grid;
+  min-width: 0;
+  gap: var(--mld-space-1);
+}
+
+.ai-task-summary-copy strong,
+.ai-task-summary-copy small,
+.ai-task-summary-owner {
+  color: #101517;
+  overflow-wrap: anywhere;
+}
+
+.ai-task-summary-owner {
+  text-align: right;
+  font-size: var(--mld-body-small-size);
+  font-weight: 700;
+}
+
+/* Framework Library: fixed title rhythm without clipping long names. */
+.framework-picker-card {
+  display: grid;
+  grid-template-rows: auto minmax(6rem, auto) auto;
+  align-content: start;
+  gap: var(--mld-space-4);
+  min-width: 0;
+  min-height: 260px;
+}
+
+.framework-picker-card .framework-card-title {
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  margin: 0;
+  line-height: 1.2;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: auto;
+}
+
+.framework-picker-card .framework-card-meta {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Brief Details: copy remains primary while all metadata forms one compact,
+ * responsive group on the right. */
+.project-brief-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.42fr);
+  align-items: start;
+  gap: var(--mld-space-6);
+}
+
+.project-brief-copy {
+  display: grid;
+  gap: var(--mld-space-3);
+  min-width: 0;
+}
+
+.project-brief-copy .card-eyebrow,
+.project-brief-copy h3,
+.project-brief-copy > p:last-child {
+  margin: 0;
+}
+
+.project-brief-copy > p:last-child {
+  max-width: 68ch;
+  line-height: var(--mld-body-large-leading);
+  white-space: pre-wrap;
+}
+
+.project-brief-summary-meta {
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-self: end;
+  gap: var(--mld-space-2);
+  width: min(100%, 320px);
+  margin: 0;
+}
+
+.project-brief-summary-meta > div {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: var(--mld-space-3);
+  padding: var(--mld-space-3) var(--mld-space-4);
+  border: 1px solid var(--mld-border);
+  border-radius: var(--mld-radius-control);
+  background: var(--mld-soft-blue);
+}
+
+.project-brief-summary-meta dt {
+  color: var(--mld-muted);
+  font-size: var(--mld-caption-size);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.project-brief-summary-meta dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--mld-text);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
 /* Project task rhythm: keep each section distinct without changing its structure. */
 .tasks-room-tab {
   display: grid;
@@ -2746,6 +3006,26 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 }
 
 @media (max-width: 760px) {
+  .ai-task-list summary {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .ai-task-summary-owner {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .project-brief-details {
+    grid-template-columns: 1fr;
+    gap: var(--mld-space-5);
+  }
+
+  .project-brief-summary-meta {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    justify-self: stretch;
+    width: 100%;
+  }
+
   .team-members-tab {
     gap: var(--mld-space-5);
   }
@@ -2784,6 +3064,25 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 }
 
 @media (max-width: 520px) {
+  .framework-choice-grid,
+  .ai-milestones-grid,
+  .project-brief-summary-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-task-list summary {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-task-sequence {
+    width: 40px;
+    height: 40px;
+  }
+
+  .ai-task-summary-owner {
+    grid-column: 1;
+  }
+
   .member-profile-card > div:nth-child(n + 3) {
     grid-column: 1 / -1;
   }

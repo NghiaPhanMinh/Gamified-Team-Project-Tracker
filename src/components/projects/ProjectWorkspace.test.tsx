@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -102,11 +102,16 @@ describe("ProjectWorkspace information hierarchy", () => {
   });
 
   it("switches smoothly between tabs", () => {
-    render(<ProjectWorkspace projectId={"project-1" as Id<"projects">} onClose={vi.fn()} initialTab="progress" />);
+    const { container } = render(<ProjectWorkspace projectId={"project-1" as Id<"projects">} onClose={vi.fn()} initialTab="progress" />);
 
     fireEvent.click(screen.getByRole("button", { name: "Project Plan" }));
     expect(screen.getByRole("button", { name: "Project Plan" })).toHaveClass("is-active");
     expect(screen.getByRole("heading", { name: "Task Responsibilities" })).toBeInTheDocument();
+    const briefDetails = container.querySelector<HTMLElement>(".project-brief-details");
+    expect(briefDetails).not.toBeNull();
+    expect(within(briefDetails!).getByText("Deadline")).toBeInTheDocument();
+    expect(within(briefDetails!).getByText("Team")).toBeInTheDocument();
+    expect(within(briefDetails!).getByText("Framework")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Tasks" }));
     expect(screen.getByRole("button", { name: "Tasks" })).toHaveClass("is-active");

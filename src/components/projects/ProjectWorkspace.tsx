@@ -569,20 +569,17 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
               </div>
             </div>
 
-            <section className="project-brief-card" aria-labelledby="project-brief-visible-title">
-              <div className="project-section-heading">
-                <div>
-                  <p className="card-eyebrow">Brief Details</p>
-                  <h3 id="project-brief-visible-title">{workspace.project.title}</h3>
-                </div>
+            <section className="project-brief-card project-brief-details" aria-labelledby="project-brief-visible-title">
+              <div className="project-brief-copy">
+                <p className="card-eyebrow">Brief Details</p>
+                <h3 id="project-brief-visible-title">{workspace.project.title}</h3>
+                <p>{workspace.project.description || "No project brief has been added yet."}</p>
               </div>
-              <p>{workspace.project.description || "No project brief has been added yet."}</p>
-              <div className="project-brief-meta project-brief-summary-meta">
-                <strong>Deadline</strong>
-                <span>{formatProjectDate(workspace.project.deadline)}</span>
-                <span>{workspace.members.length} team members</span>
-                <span>{workspace.project.frameworkName}</span>
-              </div>
+              <dl className="project-brief-meta project-brief-summary-meta">
+                <div><dt>Deadline</dt><dd>{formatProjectDate(workspace.project.deadline)}</dd></div>
+                <div><dt>Team</dt><dd>{workspace.members.length} team members</dd></div>
+                <div><dt>Framework</dt><dd>{workspace.project.frameworkName}</dd></div>
+              </dl>
             </section>
 
             <section className="phase-timeline-card" aria-labelledby="phase-timeline-title">

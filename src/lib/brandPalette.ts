@@ -18,6 +18,16 @@ export const MAYLAMDI_PHASE_COLORS = [
   "#17A738",
 ] as const;
 
+export const MAYLAMDI_FRAMEWORK_COLORS = [
+  "#FF8AE7",
+  "#FFF73F",
+  "#FEAA01",
+  "#1DD851",
+  "#FD39E4",
+  "#4CA0FE",
+  "#17A738",
+] as const;
+
 export function paletteColorAt(
   palette: readonly string[],
   index: number,

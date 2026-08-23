@@ -4,20 +4,11 @@ import {
   BUILT_IN_FRAMEWORKS,
   type BuiltInFramework,
 } from "../../data/frameworks";
+import { MAYLAMDI_FRAMEWORK_COLORS } from "../../lib/brandPalette";
 
 type FrameworkLibraryProps = {
   onDuplicate: (framework: BuiltInFramework) => void;
 };
-
-const FRAMEWORK_CARD_COLORS = [
-  "#FF8AE7",
-  "#FFF73F",
-  "#FEAA01",
-  "#1DD851",
-  "#FD39E4",
-  "#4CA0FE",
-  "#17A738",
-] as const;
 
 export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
   const [selectedFrameworkId, setSelectedFrameworkId] = useState(
@@ -79,7 +70,7 @@ export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
               key={framework.id}
               className={`framework-picker-card framework-accent-${framework.accent}`}
               type="button"
-              style={{ "--framework-card-color": FRAMEWORK_CARD_COLORS[frameworkIndex] } as CSSProperties}
+              style={{ "--framework-card-color": MAYLAMDI_FRAMEWORK_COLORS[frameworkIndex] } as CSSProperties}
               aria-pressed={framework.id === selectedFramework.id}
               onClick={() => setSelectedFrameworkId(framework.id)}
             >
