@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { Check, Clipboard, PencilLine } from "lucide-react";
+import { AlertTriangle, Check, Clipboard, Clock, Crown, Key, Lock, Megaphone, PencilLine, User, Users, Zap } from "lucide-react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -156,8 +156,8 @@ function RoomAssemblyLobby({
     }}>
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "1rem", marginBottom: "1rem" }}>
         <div>
-          <span className="card-eyebrow" style={{ display: "inline-block", background: "var(--color-yellow, #fff73f)", color: "#101517", padding: "0.25rem 0.65rem", borderRadius: "999px", fontWeight: "900", border: "1.5px solid #101517", fontSize: "0.8rem", marginBottom: "0.4rem" }}>
-            🔑 ROOM CODE LOBBY
+          <span className="card-eyebrow" style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", background: "var(--color-yellow, #fff73f)", color: "#101517", padding: "0.25rem 0.65rem", borderRadius: "999px", fontWeight: "900", border: "1.5px solid #101517", fontSize: "0.8rem", marginBottom: "0.4rem" }}>
+            <Key size={13} /> ROOM CODE LOBBY
           </span>
           <h3 style={{ margin: "0.2rem 0", fontSize: "1.6rem", fontWeight: "900" }}>
             Share Room Code &amp; Assemble Your Team
@@ -182,14 +182,15 @@ function RoomAssemblyLobby({
       </div>
 
       <div style={{ padding: "1rem", borderRadius: "14px", background: "color-mix(in srgb, var(--color-blue) 12%, var(--color-surface))", border: "2px solid var(--color-blue)", marginBottom: "1.25rem" }}>
-        <p style={{ margin: 0, fontSize: "0.93rem", lineHeight: "1.5", fontWeight: "600" }}>
-          <span>📢</span> Share room code <strong>{joinCode || "..."}</strong> with your teammates! As soon as team members join your room, <strong>AI Assistant will automatically activate and analyze your project brief</strong> to build and distribute tasks across your assembled team!
+        <p style={{ margin: 0, fontSize: "0.93rem", lineHeight: "1.5", fontWeight: "600", display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+          <Megaphone size={18} style={{ color: "var(--color-blue)", flexShrink: 0, marginTop: "2px" }} />
+          <span>Share room code <strong>{joinCode || "..."}</strong> with your teammates! As soon as team members join your room, <strong>AI Assistant will automatically activate and analyze your project brief</strong> to build and distribute tasks across your assembled team!</span>
         </p>
       </div>
 
       <div style={{ marginBottom: "1.25rem" }}>
-        <strong style={{ display: "block", fontSize: "0.95rem", marginBottom: "0.5rem" }}>
-          👥 Assembled Team Members ({members.length} Joined):
+        <strong style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.95rem", marginBottom: "0.5rem" }}>
+          <Users size={16} /> Assembled Team Members ({members.length} Joined):
         </strong>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
           {members.map((m, idx) => (
@@ -205,15 +206,15 @@ function RoomAssemblyLobby({
               fontWeight: "800",
               fontSize: "0.85rem",
             }}>
-              <span>{idx === 0 ? "👑" : "👤"}</span> {m.displayName} {idx === 0 ? "(Leader)" : ""}
+              {idx === 0 ? <Crown size={14} /> : <User size={14} />} {m.displayName} {idx === 0 ? "(Leader)" : ""}
             </span>
           ))}
         </div>
       </div>
 
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "1rem", paddingTop: "0.75rem", borderTop: "2px dashed color-mix(in srgb, var(--color-text) 20%, transparent)" }}>
-        <span style={{ fontSize: "0.85rem", opacity: 0.85, fontWeight: "600" }}>
-          ⏳ Waiting for teammates to join via room code...
+        <span style={{ fontSize: "0.85rem", opacity: 0.85, fontWeight: "600", display: "inline-flex", alignItems: "center", gap: "0.35rem" }}>
+          <Clock size={14} /> Waiting for teammates to join via room code...
         </span>
         <button
           className="secondary-button"
@@ -627,7 +628,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
                 if (!isLocked) setActiveTab(tab.value);
               }}
             >
-              {tab.label} {isLocked ? "🔒" : ""}
+              {tab.label} {isLocked ? <Lock size={13} style={{ display: "inline-block", verticalAlign: "-2px", marginLeft: "4px" }} /> : null}
             </button>
           );
         })}
@@ -635,7 +636,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
 
       {workspace.tasks.length === 0 ? (
         <div className="plan-lock-notice" style={{ margin: "0.5rem 0 0.85rem", padding: "0.75rem 1rem", borderRadius: "14px", background: "color-mix(in srgb, var(--color-pink) 15%, var(--color-surface))", border: "2px solid var(--color-pink)", color: "var(--color-text)", display: "flex", alignItems: "center", gap: "0.6rem" }}>
-          <span style={{ fontSize: "1.2rem" }}>🔒</span>
+          <Lock size={18} style={{ flexShrink: 0, color: "var(--color-pink)" }} />
           <p style={{ margin: 0, fontSize: "0.88rem", fontWeight: 700 }}>
             Các tab <strong>Progress</strong>, <strong>Tasks</strong>, và <strong>Team</strong> tạm thời bị khóa. {workspace.canManageProject ? "Bạn (Chủ phòng) vui lòng bấm 'Confirm & Save Plan' bên dưới để kích hoạt dự án &amp; mở khóa toàn bộ các tab!" : "Đang chờ Chủ phòng kiểm tra kế hoạch và bấm 'Confirm &amp; Save Plan' để khởi chạy dự án!"}
           </p>
@@ -645,7 +646,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
       {overdueTasks.length > 0 || inactiveMembers.length > 0 ? (
         <aside className="room-risk-banner" style={{ margin: "0.5rem 0 0.75rem", padding: "0.65rem 1rem", borderRadius: "12px", background: "color-mix(in srgb, #ef4444 12%, var(--color-surface))", border: "1.5px solid #ef4444", color: "var(--color-text)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.6rem" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-            <span style={{ fontSize: "1.1rem" }}>🚨</span>
+            <AlertTriangle size={18} style={{ flexShrink: 0, color: "#ef4444" }} />
             <div>
               <strong style={{ fontSize: "0.9rem", display: "block" }}>
                 Attention Required: {overdueTasks.length ? `${overdueTasks.length} overdue task(s)` : ""} {overdueTasks.length && inactiveMembers.length ? " · " : ""} {inactiveMembers.length ? `${inactiveMembers.length} member(s) inactive (7+ days)` : ""}
@@ -679,7 +680,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
           {workspace.tasks.length === 0 && shouldRunAi && (
             <div className="new-project-ai-notice" style={{ margin: "0.5rem 0 1rem", padding: "1rem 1.25rem", borderRadius: "16px", background: "color-mix(in srgb, var(--color-yellow) 15%, var(--color-surface))", border: "2px solid var(--color-yellow)", color: "var(--color-text)" }}>
               <strong style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "1.05rem", marginBottom: "0.25rem" }}>
-                <span>⚡</span> Team Assembled! AI Brief Analysis Activated ({workspace.members.length} Members)
+                <Zap size={18} style={{ color: "var(--color-yellow)", flexShrink: 0 }} /> Team Assembled! AI Brief Analysis Activated ({workspace.members.length} Members)
               </strong>
               <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.9 }}>
                 AI is analyzing your project brief and automatically generating task allocations for your assembled team members. Review the generated plan and click <strong>Confirm &amp; Save Plan</strong> to officially start your project!
@@ -898,7 +899,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
         <header className="battle-task-drawer-heading"><div><p className="card-eyebrow">Task details</p><h3 id="battle-task-detail-title">{openBattleTask.title}</h3></div><button className="quiet-button" type="button" onClick={() => setOpenBattleTaskId(null)}>Close</button></header>
         <p>{openBattleTask.description}</p>
         <dl className="battle-task-detail-meta">
-          <div><dt>Owner</dt><dd>{openBattleTask.isOpenForClaiming ? "Open for claiming" : memberNameById.get(openBattleTask.primaryOwnerProfileId) ?? "Team member"}{workspace.project.tasksLocked && !openBattleTask.isOpenForClaiming ? " 🔒" : ""}</dd></div>
+          <div><dt>Owner</dt><dd>{openBattleTask.isOpenForClaiming ? "Open for claiming" : memberNameById.get(openBattleTask.primaryOwnerProfileId) ?? "Team member"}{workspace.project.tasksLocked && !openBattleTask.isOpenForClaiming ? <Lock size={13} style={{ display: "inline-block", verticalAlign: "-2px", marginLeft: "4px" }} /> : ""}</dd></div>
           <div><dt>Phase</dt><dd>{phaseNameById.get(openBattleTask.phaseId) ?? "Project work"}</dd></div>
           <div><dt>Due</dt><dd>{openBattleTask.dueDate}</dd></div>
           <div><dt>Impact</dt><dd>Weight {openBattleTask.weight} · {openBattleTask.damage ?? 20} DMG</dd></div>
@@ -910,7 +911,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
         {openBattleTask.primaryOwnerProfileId === workspace.currentProfileId && openBattleTask.acceptanceStatus === "pending" ? <div className="battle-drawer-action-row"><button className="primary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => acceptTask({ taskId: openBattleTask._id }), "The request could not be accepted.")}>Accept</button><button className="quiet-button" type="button" disabled={isSaving} onClick={() => void runAction(() => declineTask({ taskId: openBattleTask._id }), "The request could not be declined.")}>Decline</button></div> : null}
 
         {(workspace.canManageProject || workspace.isTeamOwner) && !workspace.project.tasksLocked ? <section className="task-allocation-lock"><div><strong>Allocation</strong><span>Freeze the required task count and reveal the shared Boss HP baseline.</span></div><button className="secondary-button" type="button" disabled={isSaving} onClick={() => void runAction(() => lockTasks({ projectId: workspace.project._id }), "The task list could not be locked.")}>Lock project task list</button></section> : null}
-        {workspace.project.tasksLocked ? <p className="task-lock-state">🔒 Task allocation baseline is locked for this Battle.</p> : null}
+        {workspace.project.tasksLocked ? <p className="task-lock-state"><Lock size={14} style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "4px" }} /> Task allocation baseline is locked for this Battle.</p> : null}
 
         {workspace.canManageProject && openBattleTask.status === "awaiting_creator" ? <section className="battle-completion-actions"><strong>Reviewer recommends completion</strong><div><button className="primary-button" type="button" disabled={isSaving} onClick={() => void runAction(async () => {
           await decideCompletion({ taskId: openBattleTask._id, decision: "approve" });

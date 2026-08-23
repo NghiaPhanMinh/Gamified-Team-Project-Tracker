@@ -1,3 +1,4 @@
+import { AlertTriangle, Lock } from "lucide-react";
 import {
   getBattleTaskAction,
   type BattleTaskStatus,
@@ -80,11 +81,11 @@ function BattleTaskNote({
               size="xs"
             />
           ) : null}
-          {task.owner}{tasksLocked && !task.isOpenForClaiming ? <span aria-label="Task allocation locked"> 🔒</span> : null}
+          {task.owner}{tasksLocked && !task.isOpenForClaiming ? <Lock size={12} aria-label="Task allocation locked" style={{ display: "inline-block", verticalAlign: "-2px" }} /> : null}
         </span>
         <span className="battle-task-date">
           Due {task.dueDate}
-          {isOverdue ? <strong style={{ color: "#ef4444", marginLeft: "6px", fontWeight: 800 }}>🚨 Overdue</strong> : null}
+          {isOverdue ? <strong style={{ color: "#ef4444", marginLeft: "6px", fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "2px" }}><AlertTriangle size={12} /> Overdue</strong> : null}
         </span>
         <span className="battle-task-reviewer">Reviewer: {task.reviewer}</span>
         <span className="battle-task-impact">Weight {task.weight} · {task.damage} DMG</span>

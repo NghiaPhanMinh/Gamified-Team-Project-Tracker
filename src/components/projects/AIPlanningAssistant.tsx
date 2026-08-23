@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
+import { CheckCircle2, Clock, Layers, Rocket, Scale, Search, Sparkles, Zap } from "lucide-react";
 
 import { api } from "../../../convex/_generated/api";
 import { getErrorMessage } from "../../lib/errors";
@@ -229,7 +230,7 @@ export function AIPlanningAssistant({
             type="submit"
             disabled={isGenerating || workspace.project.status === "archived"}
           >
-            {isGenerating ? "Building a draft…" : draft ? "Regenerate Plan" : "⚡ Generate AI Plan"}
+            {isGenerating ? "Building a draft…" : draft ? "Regenerate Plan" : <><Zap size={15} style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "4px" }} /> Generate AI Plan</>}
           </button>
         </div>
       </form>
@@ -240,7 +241,7 @@ export function AIPlanningAssistant({
         <div className="ai-plan-loading-card" role="status" aria-live="polite" style={{ margin: "1.25rem 0", padding: "1.25rem", borderRadius: "16px", background: "color-mix(in srgb, var(--color-yellow) 12%, var(--color-surface))", border: "1.5px solid var(--color-yellow)", color: "var(--color-text)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
             <strong style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "1rem" }}>
-              <span className="spinner-icon">⚡</span> Building AI Project Plan...
+              <Zap size={16} className="spinner-icon" style={{ color: "var(--color-yellow)" }} /> Building AI Project Plan...
             </strong>
             <small style={{ fontWeight: 700, opacity: 0.85 }}>
               {loadingSeconds < 4 ? `~${Math.max(1, 4 - loadingSeconds)}s remaining` : "Finalizing..."} ({loadingSeconds}s elapsed)
@@ -259,7 +260,15 @@ export function AIPlanningAssistant({
             />
           </div>
           <p style={{ margin: 0, fontSize: "0.88rem", opacity: 0.9, display: "flex", alignItems: "center", gap: "0.4rem" }}>
-            {loadingSeconds < 1.5 ? "🔍 Analyzing brief requirements & deliverables..." : loadingSeconds < 3.0 ? "🏗️ Structuring project phases & task allocation..." : loadingSeconds < 4.5 ? "⚖️ Balancing effort hours, weights & risk factors..." : "✨ Finalizing draft plan for your review..."}
+            {loadingSeconds < 1.5 ? (
+              <><Search size={14} /> Analyzing brief requirements &amp; deliverables...</>
+            ) : loadingSeconds < 3.0 ? (
+              <><Layers size={14} /> Structuring project phases &amp; task allocation...</>
+            ) : loadingSeconds < 4.5 ? (
+              <><Scale size={14} /> Balancing effort hours, weights &amp; risk factors...</>
+            ) : (
+              <><Sparkles size={14} /> Finalizing draft plan for your review...</>
+            )}
           </p>
         </div>
       ) : null}
@@ -394,11 +403,13 @@ export function AIPlanningAssistant({
           </section>
           <div className="ai-save-actions-hero">
             <div className="ai-save-notice">
-              <strong>✨ Ready to Launch Your Project?</strong>
+              <strong style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                <Sparkles size={18} style={{ color: "var(--color-pink)" }} /> Ready to Launch Your Project?
+              </strong>
               <p>Clicking confirm saves all AI generated tasks, assigns team responsibilities, and unlocks the Battle Board, Tasks, and Progress tabs!</p>
             </div>
             <button className="primary-button hero-save-plan-button" type="button" disabled={isGenerating} onClick={() => void handleSavePlan()}>
-              {isGenerating ? "🚀 Saving & Launching Project…" : "✅ Confirm & Save Plan"}
+              {isGenerating ? <><Rocket size={18} style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "6px" }} /> Saving &amp; Launching Project…</> : <><CheckCircle2 size={18} style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "6px" }} /> Confirm &amp; Save Plan</>}
             </button>
           </div>
           {saveMessage ? <p className="form-success" role="status" style={{ marginTop: "1rem", fontSize: "1.05rem", fontWeight: 800 }}>{saveMessage}</p> : null}
