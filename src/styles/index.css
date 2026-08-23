@@ -2021,32 +2021,65 @@ select:focus-visible {
   gap: 1rem;
 }
 
+.custom-framework-builder label,
 .framework-basics label,
-.custom-phase-fields label {
+.custom-phase-fields label,
+:root[data-theme="dark"] .custom-framework-builder label,
+:root[data-theme="dark"] .framework-basics label,
+:root[data-theme="dark"] .custom-phase-fields label {
   display: grid;
   align-content: start;
   gap: 0.45rem;
-  font-size: 0.88rem;
-  font-weight: 800;
-  color: var(--color-text) !important;
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
 }
 
+/* Force solid, high-contrast, 100% visible white input boxes with crisp borders in both Light and Dark mode */
+.custom-framework-builder input,
+.custom-framework-builder textarea,
 .framework-basics input,
 .framework-basics textarea,
 .custom-phase-fields input,
-.custom-phase-fields textarea {
-  background: var(--color-surface, #ffffff) !important;
-  color: var(--color-text, #101517) !important;
-  border: 2px solid #101517 !important;
-  border-radius: 0.65rem;
-  padding: 0.65rem 0.85rem;
-  font-size: 0.95rem;
+.custom-phase-fields textarea,
+:root[data-theme="dark"] .custom-framework-builder input,
+:root[data-theme="dark"] .custom-framework-builder textarea,
+:root[data-theme="dark"] .framework-basics input,
+:root[data-theme="dark"] .framework-basics textarea,
+:root[data-theme="dark"] .custom-phase-fields input,
+:root[data-theme="dark"] .custom-phase-fields textarea {
+  background-color: #fffef9 !important;
+  color: #101517 !important;
+  border: 2.5px solid #101517 !important;
+  border-radius: 0.75rem !important;
+  padding: 0.75rem 0.9rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.15) !important;
+}
+
+.custom-framework-builder input:focus,
+.custom-framework-builder textarea:focus,
+.framework-basics input:focus,
+.framework-basics textarea:focus,
+.custom-phase-fields input:focus,
+.custom-phase-fields textarea:focus,
+:root[data-theme="dark"] .custom-framework-builder input:focus,
+:root[data-theme="dark"] .custom-framework-builder textarea:focus,
+:root[data-theme="dark"] .framework-basics input:focus,
+:root[data-theme="dark"] .framework-basics textarea:focus,
+:root[data-theme="dark"] .custom-phase-fields input:focus,
+:root[data-theme="dark"] .custom-phase-fields textarea:focus {
+  border-color: #101517 !important;
+  outline: 3px solid var(--color-yellow, #fff73f) !important;
+  box-shadow: 0 0 0 3px rgba(255, 247, 63, 0.4) !important;
 }
 
 .framework-basics input::placeholder,
 .custom-phase-fields input::placeholder {
-  color: var(--color-muted, #666666);
-  opacity: 0.75;
+  color: #666666 !important;
+  opacity: 0.85 !important;
 }
 
 .framework-basics label:last-child {
@@ -2061,13 +2094,14 @@ select:focus-visible {
   list-style: none;
 }
 
-.custom-phase-editor {
-  padding: 1.25rem;
-  border: 3px solid #101517;
-  border-radius: 1.25rem;
-  background: var(--color-surface, #ffffff);
-  color: var(--color-text, #101517);
-  box-shadow: 4px 4px 0 #101517;
+.custom-phase-editor,
+:root[data-theme="dark"] .custom-phase-editor {
+  padding: 1.25rem !important;
+  border: 3px solid var(--color-pink, #ff8ae7) !important;
+  border-radius: 1.25rem !important;
+  background: #182228 !important;
+  color: #ffffff !important;
+  box-shadow: 4px 4px 0 #101517 !important;
 }
 
 .custom-phase-toolbar {
@@ -2136,17 +2170,26 @@ select:focus-visible {
   margin-top: 1.25rem;
 }
 
-.phase-option-grid label {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.6rem 0.85rem;
-  border: 2px solid #101517;
-  border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--color-yellow) 15%, var(--color-surface));
-  color: var(--color-text) !important;
-  font-size: 0.88rem;
-  font-weight: 800;
+.phase-option-grid label,
+:root[data-theme="dark"] .phase-option-grid label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.6rem !important;
+  padding: 0.65rem 0.9rem !important;
+  border: 2px solid #101517 !important;
+  border-radius: 0.75rem !important;
+  background-color: #fffef9 !important;
+  color: #101517 !important;
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  box-shadow: 2px 2px 0 #101517 !important;
+}
+
+.phase-option-grid input[type="checkbox"] {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--color-pink);
   cursor: pointer;
 }
 
