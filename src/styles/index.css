@@ -2146,9 +2146,20 @@ select:focus-visible {
   transform: translateY(-1px);
 }
 
-.custom-phase-toolbar button.remove-phase-button {
-  background: #ff4d4d !important;
-  color: #ffffff !important;
+.custom-phase-toolbar button.remove-phase-button,
+:root[data-theme="dark"] .custom-phase-toolbar button.remove-phase-button {
+  background-color: var(--color-orange, #feaa01) !important;
+  color: #101517 !important;
+  border: 2px solid #101517 !important;
+  font-weight: 900 !important;
+  box-shadow: 2px 2px 0 #101517 !important;
+}
+
+.custom-phase-toolbar button.remove-phase-button:hover:not(:disabled) {
+  background-color: var(--color-orange, #feaa01) !important;
+  color: #101517 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 3px 3px 0 #101517 !important;
 }
 
 .custom-phase-toolbar button:disabled {
