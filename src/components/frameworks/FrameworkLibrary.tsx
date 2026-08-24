@@ -8,9 +8,10 @@ import { MAYLAMDI_FRAMEWORK_COLORS } from "../../lib/brandPalette";
 
 type FrameworkLibraryProps = {
   onDuplicate?: (framework: BuiltInFramework) => void;
+  hideHeader?: boolean;
 };
 
-export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
+export function FrameworkLibrary({ onDuplicate, hideHeader = false }: FrameworkLibraryProps) {
   const [selectedFrameworkId, setSelectedFrameworkId] = useState(
     BUILT_IN_FRAMEWORKS[0].id,
   );
@@ -39,24 +40,29 @@ export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
 
   return (
     <section className="framework-library" aria-labelledby="framework-title">
-      <div className="framework-library-heading">
-        <div>
-          <p className="kicker">Seven built-in frameworks</p>
-          <h2 className="display-heading" id="framework-title">A strong structure, never a straitjacket.</h2>
-          <p>
-            Preview typical phases, outputs, skills, dependencies, overlap, and
-            review points. Every framework will use the same shared planning
-            engine.
-          </p>
+      {!hideHeader ? (
+        <div className="framework-library-heading">
+          <div>
+            <p className="kicker">Seven built-in frameworks</p>
+            <h2 className="display-heading" id="framework-title">A strong structure, never a straitjacket.</h2>
+            <p>
+              Preview typical phases, outputs, skills, dependencies, overlap, and
+              review points. Every framework will use the same shared planning
+              engine.
+            </p>
+          </div>
+          <span className="version-badge">
+            {BUILT_IN_FRAMEWORKS.length} templates · version 1
+          </span>
         </div>
-        <span className="version-badge">
-          {BUILT_IN_FRAMEWORKS.length} templates · version 1
-        </span>
-      </div>
+      ) : null}
 
       <div className="framework-library-controls">
         <label><span>Search frameworks or disciplines</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="UX, agile, research…" /></label>
-        <button className="secondary-button" type="button" onClick={() => setViewAll((current) => !current)}>{viewAll ? "Show recommendations" : "View all frameworks"}</button>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          {hideHeader ? <span className="version-badge" style={{ margin: 0 }}>{BUILT_IN_FRAMEWORKS.length} templates</span> : null}
+          <button className="secondary-button" type="button" onClick={() => setViewAll((current) => !current)}>{viewAll ? "Show recommendations" : "View all frameworks"}</button>
+        </div>
       </div>
       <div
         className="framework-picker"
