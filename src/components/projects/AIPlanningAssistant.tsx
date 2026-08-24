@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2, Clock, CreditCard, Layers, Rocket, Scale, Search, Sparkles, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Clock, CreditCard, Layers, Rocket, Scale, Search, Sparkles, Zap } from "lucide-react";
 
 import { api } from "../../../convex/_generated/api";
 import { getErrorMessage } from "../../lib/errors";

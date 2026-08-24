@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Check, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Check, Sparkles } from "lucide-react";
 
 import {
   getSubscriptionPlanLabel,
@@ -49,11 +50,33 @@ function PlanFeatureList({ features }: { features: string[] }) {
 }
 
 export function SubscriptionPage({ currentPlan }: { currentPlan: SubscriptionPlan }) {
+  const navigate = useNavigate();
   const [upgradeMessage, setUpgradeMessage] = useState<string | null>(null);
   const currentPlanLabel = getSubscriptionPlanLabel(currentPlan);
 
   return (
     <section className="subscription-page-v2" aria-labelledby="subscription-page-title">
+      <div style={{ marginBottom: "1rem" }}>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="primary-button"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.4rem",
+            padding: "0.5rem 1.1rem",
+            fontSize: "0.92rem",
+            background: "var(--color-surface)",
+            border: "2.5px solid #101517",
+            boxShadow: "3px 3px 0 #101517",
+            cursor: "pointer",
+            fontWeight: 700,
+          }}
+        >
+          <ArrowLeft size={16} /> Back to Project
+        </button>
+      </div>
       <header className="subscription-page-heading">
         <div>
           <p className="kicker">Subscription</p>

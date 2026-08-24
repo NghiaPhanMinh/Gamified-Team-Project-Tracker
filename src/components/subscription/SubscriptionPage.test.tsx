@@ -26,7 +26,7 @@ describe("subscription experience", () => {
   });
 
   it("renders both student-friendly plans and marks Free as current", () => {
-    render(<SubscriptionPage currentPlan="free" />);
+    render(<MemoryRouter><SubscriptionPage currentPlan="free" /></MemoryRouter>);
 
     expect(screen.getByRole("heading", { name: "Choose the support your team needs." })).toBeInTheDocument();
     expect(screen.getByText("Get the team moving.")).toBeInTheDocument();
@@ -39,7 +39,7 @@ describe("subscription experience", () => {
   });
 
   it("marks MayLamDi+ as current without offering checkout again", () => {
-    render(<SubscriptionPage currentPlan="plus" />);
+    render(<MemoryRouter><SubscriptionPage currentPlan="plus" /></MemoryRouter>);
 
     expect(screen.getByLabelText("Your current plan is MayLamDi+")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Upgrade to Plus" })).not.toBeInTheDocument();
