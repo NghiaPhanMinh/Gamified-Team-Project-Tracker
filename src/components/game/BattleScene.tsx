@@ -28,7 +28,7 @@ import { LandscapePlayers, getMageTheme } from "./landscape/LandscapePlayers";
 import { LandscapeDragon, DRAGON_ORIGINAL_SHAPES, parseCoordinates } from "./landscape/LandscapeDragon";
 import { LandscapeFX } from "./landscape/LandscapeFX";
 import { LandscapeQuestBoard, type QuestTask } from "./landscape/LandscapeQuestBoard";
-import { LandscapeTutorial, type TutorialSceneId } from "./landscape/LandscapeTutorial";
+import { LandscapeTutorial } from "./landscape/LandscapeTutorial";
 import { CharacterAvatar } from "../common/CharacterAvatar";
 import {
   gameAudio,
@@ -1339,7 +1339,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
   // Interactive Cutscene Tutorial State
   const [showTutorial, setShowTutorial] = useState(false);
-  const [tutorialScene, setTutorialScene] = useState<TutorialSceneId>("A");
   const [showTutorialChoice, setShowTutorialChoice] = useState<boolean>(() => {
     try {
       if (typeof window === "undefined") return false;
@@ -2420,24 +2419,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const funnyBossName = useMemo(() => getFunnyName(BOSS_FUNNY_NAMES, state?.project._id || "boss"), [state?.project._id]);
   const funnyVillageName = useMemo(() => getFunnyName(VILLAGE_FUNNY_NAMES, state?.project._id || "village"), [state?.project._id]);
 
-  const tutorialCameraTransform = useMemo(() => {
-    if (!showTutorial) return undefined;
-    switch (tutorialScene) {
-      case "A":
-        return "scale(1.55) translate(16%, -4%)";
-      case "B":
-        return "scale(1.05) translate(0%, 0%)";
-      case "C":
-        return "scale(1.85) translate(-4%, -14%)";
-      case "D":
-        return "scale(1.6) translate(-22%, 4%)";
-      case "E":
-        return "scale(1.08) translate(8%, -5%)";
-      default:
-        return undefined;
-    }
-  }, [showTutorial, tutorialScene]);
-
   if (state === undefined) {
     return <section className="battle-loading" aria-busy="true">Preparing the battle scene…</section>;
   }
@@ -2625,10 +2606,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           <button
             className="rpg-btn-leaderboard rpg-btn-tutorial"
             style={{ position: "relative", top: 0, right: 0 }}
-            onClick={() => {
-              setTutorialScene("A");
-              setShowTutorial(true);
-            }}
+            onClick={() => setShowTutorial(true)}
             type="button"
           >
             <span className="rpg-book-icon" aria-hidden="true">
@@ -2684,17 +2662,9 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
         {/* Attack Circular Action Button */}
         <button
-          className={`rpg-btn-attack-circle ${showTutorial && tutorialScene === "E" ? "is-tutorial-highlighted" : ""}`}
+          className="rpg-btn-attack-circle"
           onClick={() => setShowAttackChoiceModal(true)}
           type="button"
-          style={
-            showTutorial && tutorialScene === "E"
-              ? {
-                  boxShadow: "0 0 20px #facc15, 0 0 40px #ea580c",
-                  zIndex: 70,
-                }
-              : undefined
-          }
         >
           Attack
         </button>
@@ -2806,7 +2776,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
         {/* Layer 5: Section 3 & 5 - Grounded Village & Anchored Village HP Bar with Humorous Town Name */}
         <div
-          className={showTutorial && tutorialScene === "A" ? "tutorial-assembling-village" : ""}
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 5, transform: `translate(${layerTransforms.village?.x || 0}px, ${layerTransforms.village?.y || 0}px) scale(${layerTransforms.village?.scale || 1})`, display: layerTransforms.village?.visible !== false ? "block" : "none" }}
         >
           <LandscapeVillage
@@ -2821,7 +2790,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
         {/* Layer 6: Section 8 - Daily Goblins Wave System (1 per active player) */}
         <div
-          className={showTutorial && tutorialScene === "B" ? "tutorial-assembling-goblins" : ""}
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 6, transform: `translate(${layerTransforms.goblins?.x || 0}px, ${layerTransforms.goblins?.y || 0}px) scale(${layerTransforms.goblins?.scale || 1})`, display: layerTransforms.goblins?.visible !== false ? "block" : "none" }}
         >
           <LandscapeGoblins goblins={goblins} />
@@ -2834,7 +2802,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
         {/* Layer 8: Section 1 - Medieval Dragon Visuals & Wings */}
         <div
-          className={showTutorial && tutorialScene === "B" ? "tutorial-assembling-dragon" : ""}
           style={{
             position: "absolute",
             inset: 0,
@@ -5729,7 +5696,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 className="rpg-modern-btn is-primary"
                 onClick={() => {
                   setShowTutorialChoice(false);
-                  setTutorialScene("A");
                   setShowTutorial(true);
                 }}
                 style={{
