@@ -224,90 +224,119 @@ class GameAudioEngine {
     const timers: any[] = [];
 
     if (spellType === "lightning" || spellType === "spark" || spellType === "all") {
-      // CINEMATIC THUNDERBLAST & BOMB DETONATION (Zero metallic resonance, pure explosive boom & rolling rumble)
-      const playExplosiveThunderDetonation = () => {
+      // =========================================================================
+      // 1. CONTINUOUS THUNDERSTORM RAIN AMBIANCE (Audible rain downpour background)
+      // =========================================================================
+      const rainBuffer = ctx.createBuffer(1, ctx.sampleRate * 2.5, ctx.sampleRate);
+      const rainData = rainBuffer.getChannelData(0);
+      let rainLast = 0;
+      for (let i = 0; i < rainData.length; i++) {
+        const white = Math.random() * 2 - 1;
+        rainData[i] = (rainLast + 0.08 * white) / 1.08; // Smooth pink noise for realistic rainfall
+        rainLast = rainData[i];
+      }
+      const rainSrc = ctx.createBufferSource();
+      rainSrc.buffer = rainBuffer;
+      rainSrc.loop = true;
+
+      const rainFilter = ctx.createBiquadFilter();
+      rainFilter.type = "lowpass";
+      rainFilter.frequency.setValueAtTime(1600, now);
+
+      const rainGain = ctx.createGain();
+      rainGain.gain.setValueAtTime(0.25, now); // Clear, audible rain downpour
+
+      rainSrc.connect(rainFilter);
+      rainFilter.connect(rainGain);
+      rainGain.connect(loopGain);
+      rainSrc.start(now);
+      nodes.push(rainSrc, rainFilter, rainGain);
+
+      // =========================================================================
+      // 2. ELECTRIC ZAP + MASSIVE LONG-STRETCHED BOMB THUNDER EXPLOSION
+      // =========================================================================
+      const playThunderstormStrike = () => {
         if (!this.ctx || !this.activeSpellLoop) return;
         const strikeTime = this.ctx.currentTime;
 
-        // 1. Initial High-Voltage Spark Crackle (Diffuse non-tonal snap, 0.035s)
-        const snapLen = Math.floor(this.ctx.sampleRate * 0.04);
-        const snapBuf = this.ctx.createBuffer(1, snapLen, this.ctx.sampleRate);
-        const snapData = snapBuf.getChannelData(0);
-        for (let i = 0; i < snapLen; i++) {
-          snapData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.008));
-        }
-        const snapSrc = this.ctx.createBufferSource();
-        snapSrc.buffer = snapBuf;
+        // --- A. ELECTRIC CURRENT ZAP (0.0s - 0.28s) ---
+        // Fast modulated voltage sizzle + ionization snap
+        const zapOsc = this.ctx.createOscillator();
+        const zapGain = this.ctx.createGain();
+        zapOsc.type = "sawtooth";
+        zapOsc.frequency.setValueAtTime(220, strikeTime);
+        zapOsc.frequency.linearRampToValueAtTime(750, strikeTime + 0.12);
+        zapOsc.frequency.exponentialRampToValueAtTime(140, strikeTime + 0.25);
 
-        const snapHp = this.ctx.createBiquadFilter();
-        snapHp.type = "highpass";
-        snapHp.frequency.setValueAtTime(2800, strikeTime);
-        snapHp.Q.setValueAtTime(0.5, strikeTime); // Zero ringing resonance
+        const zapFilter = this.ctx.createBiquadFilter();
+        zapFilter.type = "bandpass";
+        zapFilter.frequency.setValueAtTime(900, strikeTime);
+        zapFilter.Q.setValueAtTime(1.5, strikeTime);
 
-        const snapGain = this.ctx.createGain();
-        snapGain.gain.setValueAtTime(0.24, strikeTime);
+        zapGain.gain.setValueAtTime(0, strikeTime);
+        zapGain.gain.linearRampToValueAtTime(0.35, strikeTime + 0.02);
+        zapGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 0.26);
 
-        snapSrc.connect(snapHp);
-        snapHp.connect(snapGain);
-        snapGain.connect(loopGain);
-        snapSrc.start(strikeTime);
+        zapOsc.connect(zapFilter);
+        zapFilter.connect(zapGain);
+        zapGain.connect(loopGain);
+        zapOsc.start(strikeTime);
+        zapOsc.stop(strikeTime + 0.28);
 
-        // 2. Heavy Bomb Detonation Blast Wave (Organic Brownian explosion noise through dual non-resonant lowpass)
-        const blastLen = Math.floor(this.ctx.sampleRate * 0.95);
-        const blastBuf = this.ctx.createBuffer(1, blastLen, this.ctx.sampleRate);
-        const blastData = blastBuf.getChannelData(0);
-        let brown = 0;
-        for (let i = 0; i < blastLen; i++) {
+        // --- B. MASSIVE INSTANT DETONATION "BOOM" (0ms Instant attack, deep sub-bass body) ---
+        const boomSine = this.ctx.createOscillator();
+        const boomGain = this.ctx.createGain();
+        boomSine.type = "sine";
+        boomSine.frequency.setValueAtTime(130, strikeTime + 0.02);
+        boomSine.frequency.exponentialRampToValueAtTime(38, strikeTime + 0.75); // Deep pitch drop
+
+        boomGain.gain.setValueAtTime(0, strikeTime);
+        boomGain.gain.setValueAtTime(0.75, strikeTime + 0.03); // Instant explosive chest-hitting BOOM
+        boomGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 1.25);
+
+        const boomLp = this.ctx.createBiquadFilter();
+        boomLp.type = "lowpass";
+        boomLp.frequency.setValueAtTime(160, strikeTime);
+
+        boomSine.connect(boomLp);
+        boomLp.connect(boomGain);
+        boomGain.connect(loopGain);
+        boomSine.start(strikeTime + 0.02);
+        boomSine.stop(strikeTime + 1.30);
+
+        // --- C. LONG STRETCHED ROLLING THUNDER EXPLOSION SHOCKWAVE (1.8s long acoustic tail) ---
+        const blastLength = Math.floor(this.ctx.sampleRate * 1.85);
+        const blastBuffer = this.ctx.createBuffer(1, blastLength, this.ctx.sampleRate);
+        const blastChannel = blastBuffer.getChannelData(0);
+        let bOut = 0;
+        for (let i = 0; i < blastLength; i++) {
           const white = Math.random() * 2 - 1;
-          brown = (brown + 0.04 * white) / 1.04;
-          // Fast explosive impact envelope decaying into rolling tail
-          const env = 0.8 * Math.exp(-i / (this.ctx.sampleRate * 0.09)) + 0.35 * Math.exp(-i / (this.ctx.sampleRate * 0.45));
-          blastData[i] = brown * env * 4.5;
+          bOut = (bOut + 0.035 * white) / 1.035; // Dense low rumble
+          // Explosive shockwave envelope stretched over 1.8 seconds
+          const env = 0.9 * Math.exp(-i / (this.ctx.sampleRate * 0.18)) + 0.45 * Math.exp(-i / (this.ctx.sampleRate * 0.85));
+          blastChannel[i] = bOut * env * 4.2;
         }
         const blastSrc = this.ctx.createBufferSource();
-        blastSrc.buffer = blastBuf;
+        blastSrc.buffer = blastBuffer;
 
-        // Dual cascading lowpass filters (Butterworth response - completely eliminates metallic pipe frequencies)
-        const lp1 = this.ctx.createBiquadFilter();
-        lp1.type = "lowpass";
-        lp1.frequency.setValueAtTime(100, strikeTime);
-        lp1.frequency.exponentialRampToValueAtTime(45, strikeTime + 0.85);
-        lp1.Q.setValueAtTime(0.5, strikeTime);
-
-        const lp2 = this.ctx.createBiquadFilter();
-        lp2.type = "lowpass";
-        lp2.frequency.setValueAtTime(120, strikeTime);
-        lp2.frequency.exponentialRampToValueAtTime(55, strikeTime + 0.85);
-        lp2.Q.setValueAtTime(0.5, strikeTime);
+        const blastLp1 = this.ctx.createBiquadFilter();
+        blastLp1.type = "lowpass";
+        blastLp1.frequency.setValueAtTime(120, strikeTime);
+        blastLp1.frequency.exponentialRampToValueAtTime(42, strikeTime + 1.7);
+        blastLp1.Q.setValueAtTime(0.6, strikeTime);
 
         const blastGain = this.ctx.createGain();
-        blastGain.gain.setValueAtTime(0.65, strikeTime);
-        blastGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 0.92);
+        blastGain.gain.setValueAtTime(0.70, strikeTime + 0.02);
+        blastGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 1.8);
 
-        blastSrc.connect(lp1);
-        lp1.connect(lp2);
-        lp2.connect(blastGain);
+        blastSrc.connect(blastLp1);
+        blastLp1.connect(blastGain);
         blastGain.connect(loopGain);
-        blastSrc.start(strikeTime);
-
-        // 3. Ultra-Low Sub-Bass Pressure Impact (Pure 48Hz -> 26Hz sub rumble, felt in chest)
-        const subOsc = this.ctx.createOscillator();
-        const subGain = this.ctx.createGain();
-        subOsc.type = "sine";
-        subOsc.frequency.setValueAtTime(52, strikeTime);
-        subOsc.frequency.exponentialRampToValueAtTime(26, strikeTime + 0.65);
-
-        subGain.gain.setValueAtTime(0.42, strikeTime);
-        subGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 0.75);
-
-        subOsc.connect(subGain);
-        subGain.connect(loopGain);
-        subOsc.start(strikeTime);
-        subOsc.stop(strikeTime + 0.80);
+        blastSrc.start(strikeTime + 0.02);
       };
 
-      playExplosiveThunderDetonation();
-      const timerThunder = setInterval(playExplosiveThunderDetonation, 1000); // 1.0s loop
+      playThunderstormStrike();
+      const timerThunder = setInterval(playThunderstormStrike, 1900); // 1.9s cadence so long rumble can play out
       timers.push(timerThunder);
     } else if (spellType === "ice" || spellType === "water") {
       // REALISTIC SUB-ZERO FREEZING & ICE CRACKING
