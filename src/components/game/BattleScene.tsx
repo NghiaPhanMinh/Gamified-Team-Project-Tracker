@@ -1750,6 +1750,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       const mageInfo = getMageTheme(currentMember?.spellType, currentMember?.profileId, Math.max(0, memberIndex));
       const targetCoords = getGoblinCoordinates(Math.max(0, memberIndex));
 
+      if (currentMember?.profileId) {
+        setTestDeadGoblins((prev) => ({
+          ...prev,
+          [currentMember.profileId]: true,
+        }));
+      }
+
       setLocalAttack({
         id: `goblin_atk_${Date.now()}`,
         attackerName: currentMember?.displayName || "Adventurer",
@@ -4371,21 +4378,33 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               <div style={{ display: "grid", gap: "10px" }}>
                 {/* Attack VFX trigger */}
                 <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155" }}>
-                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#38bdf8", textTransform: "uppercase" }}>Combat Attack Effects (Debug All Monsters & Boss)</h5>
+                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#38bdf8", textTransform: "uppercase" }}>Combat Attack Effects (Debug Spells & Monsters)</h5>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
                     <button type="button" style={{ padding: "6px", background: "#0284c7", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("lightning")}>
-                      Lightning Spell
+                      ⚡ Lightning Spell
                     </button>
                     <button type="button" style={{ padding: "6px", background: "#ea580c", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("fire")}>
-                      Fire Spell
+                      🔥 Fire Spell
                     </button>
                     <button type="button" style={{ padding: "6px", background: "#0d9488", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("ice")}>
-                      Ice Spell
+                      ❄️ Ice Spell
                     </button>
                     <button type="button" style={{ padding: "6px", background: "#7c3aed", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("all")}>
                       ⚡🔥❄️ All Spells at Once
                     </button>
-                    <button type="button" style={{ gridColumn: "1 / span 2", padding: "6px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell(null)}>
+                    <button
+                      type="button"
+                      style={{ padding: "6px", background: "#b91c1c", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }}
+                      onClick={() => {
+                        const map: Record<string, boolean> = {};
+                        state.members.forEach(m => { map[m.profileId] = true; });
+                        setTestDeadGoblins(map);
+                        setTestActiveSpell("lightning");
+                      }}
+                    >
+                      ⚡ Strike &amp; Slay Horde
+                    </button>
+                    <button type="button" style={{ padding: "6px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell(null)}>
                       Clear Attack FX
                     </button>
                   </div>
@@ -4393,8 +4412,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
                 {/* Goblin Slaying */}
                 <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155" }}>
-                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#4ade80", textTransform: "uppercase" }}>Goblins Simulation</h5>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#4ade80", textTransform: "uppercase" }}>Goblins Simulation (Individual &amp; Horde)</h5>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "8px" }}>
                     <button
                       type="button"
                       style={{ padding: "6px", background: "#16a34a", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }}
@@ -4409,6 +4428,38 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     <button type="button" style={{ padding: "6px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestDeadGoblins({})}>
                       Revive All Goblins
                     </button>
+                  </div>
+
+                  {/* Per-member goblin toggles */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                    {state.members.map((member, idx) => {
+                      const isDead = (testDeadGoblins[member.profileId] ?? false) || member.hasSubmittedToday;
+                      return (
+                        <div key={member.profileId} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1e293b", padding: "4px 8px", borderRadius: "4px", fontSize: "0.68rem" }}>
+                          <span>{member.displayName} (Goblin #{idx + 1})</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTestDeadGoblins(prev => ({
+                                ...prev,
+                                [member.profileId]: !isDead,
+                              }));
+                            }}
+                            style={{
+                              padding: "2px 8px",
+                              borderRadius: "3px",
+                              border: "none",
+                              background: isDead ? "#3b82f6" : "#dc2626",
+                              color: "#fff",
+                              fontWeight: "bold",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {isDead ? "Defeated (Click Revive)" : "Active (Click Slay)"}
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 

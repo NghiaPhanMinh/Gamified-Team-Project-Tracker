@@ -255,7 +255,7 @@ export function LandscapeDragon({
   }, [layerOrder, customShapes]);
 
   // Build individual element props (coordinates, select handles, drag handles, fills)
-  function getShapeProps(shapeId: string, defaultFill?: string, defaultStroke?: string, defaultStrokeWidth?: number) {
+  function getShapeProps(shapeId: string, defaultFill?: string, defaultStroke?: string, defaultStrokeWidth?: number, group?: string) {
     const isSelected = selectedPart === shapeId;
     const offset = offsets[shapeId] || { x: 0, y: 0, rotate: 0, scale: 1 };
     const scaleVal = offset.scale ?? 1;
@@ -270,6 +270,33 @@ export function LandscapeDragon({
         tx += customShapeObj.x;
         ty += customShapeObj.y;
         baseRot += customShapeObj.rotate ?? 0;
+      }
+    }
+
+    // Anatomical slayed/collapsed posture per body part group
+    if (isDefeated) {
+      if (group === "headNeck") {
+        tx -= 35;
+        ty += 85;
+        baseRot += 38;
+      } else if (group === "frontWing") {
+        tx -= 22;
+        ty += 65;
+        baseRot += 62;
+      } else if (group === "backWing") {
+        tx += 25;
+        ty += 60;
+        baseRot -= 55;
+      } else if (group === "frontLeg" || group === "frontArm" || group === "frontClaw") {
+        tx -= 18;
+        ty += 55;
+        baseRot -= 28;
+      } else if (group === "tail") {
+        tx += 25;
+        ty += 45;
+        baseRot += 22;
+      } else {
+        ty += 45;
       }
     }
     
@@ -390,19 +417,19 @@ export function LandscapeDragon({
 
                 switch (shape.type) {
                   case "path":
-                    element = <path d={geom} {...getShapeProps(shape.id, shape.defaultFill)} />;
+                    element = <path d={geom} {...getShapeProps(shape.id, shape.defaultFill, undefined, undefined, shape.group)} />;
                     break;
                   case "polygon":
-                    element = <polygon points={geom} {...getShapeProps(shape.id, shape.defaultFill)} />;
+                    element = <polygon points={geom} {...getShapeProps(shape.id, shape.defaultFill, undefined, undefined, shape.group)} />;
                     break;
                   case "circle":
-                    element = <circle cx={shape.cx} cy={shape.cy} r={shape.r} {...getShapeProps(shape.id, shape.defaultFill)} />;
+                    element = <circle cx={shape.cx} cy={shape.cy} r={shape.r} {...getShapeProps(shape.id, shape.defaultFill, undefined, undefined, shape.group)} />;
                     break;
                   case "ellipse":
-                    element = <ellipse cx={shape.cx} cy={shape.cy} rx={shape.rx} ry={shape.ry} {...getShapeProps(shape.id, shape.defaultFill)} />;
+                    element = <ellipse cx={shape.cx} cy={shape.cy} rx={shape.rx} ry={shape.ry} {...getShapeProps(shape.id, shape.defaultFill, undefined, undefined, shape.group)} />;
                     break;
                   case "rect":
-                    element = <rect x={shape.x} y={shape.y} width={shape.width} height={shape.height} rx={shape.rx} ry={shape.ry} {...getShapeProps(shape.id, shape.defaultFill)} />;
+                    element = <rect x={shape.x} y={shape.y} width={shape.width} height={shape.height} rx={shape.rx} ry={shape.ry} {...getShapeProps(shape.id, shape.defaultFill, undefined, undefined, shape.group)} />;
                     break;
                   default:
                     return null;
@@ -412,7 +439,7 @@ export function LandscapeDragon({
                 if (shape.group === "backWing") {
                   element = (
                     <g transform-origin="120 110">
-                      {animationsEnabled && (
+                      {!isDefeated && animationsEnabled && (
                         <animateTransform
                           attributeName="transform"
                           type="rotate"
@@ -428,7 +455,7 @@ export function LandscapeDragon({
                 } else if (shape.group === "frontWing") {
                   element = (
                     <g transform-origin="110 115">
-                      {animationsEnabled && (
+                      {!isDefeated && animationsEnabled && (
                         <animateTransform
                           attributeName="transform"
                           type="rotate"
@@ -455,6 +482,33 @@ export function LandscapeDragon({
                   tx += shape.x ?? 0;
                   ty += shape.y ?? 0;
                   baseRot += (shape as any).rotate ?? 0;
+                }
+
+                // Anatomical slayed/collapsed posture per body part group
+                if (isDefeated) {
+                  if (shape.group === "headNeck") {
+                    tx -= 35;
+                    ty += 85;
+                    baseRot += 38;
+                  } else if (shape.group === "frontWing") {
+                    tx -= 22;
+                    ty += 65;
+                    baseRot += 62;
+                  } else if (shape.group === "backWing") {
+                    tx += 25;
+                    ty += 60;
+                    baseRot -= 55;
+                  } else if (shape.group === "frontLeg" || shape.group === "frontArm" || shape.group === "frontClaw") {
+                    tx -= 18;
+                    ty += 55;
+                    baseRot -= 28;
+                  } else if (shape.group === "tail") {
+                    tx += 25;
+                    ty += 45;
+                    baseRot += 22;
+                  } else {
+                    ty += 45;
+                  }
                 }
 
                 const baseTransform = `translate(${tx}, ${ty}) rotate(${((offset.rotate ?? 0) + baseRot)}) scale(${scaleVal})`;

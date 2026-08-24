@@ -63,7 +63,7 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
                 transform={`translate(${offsetX}, ${offsetY})`}
                 className={`goblin-item ${isGhost ? "goblin-ghost-defeated" : "goblin-active-attacking"}`}
                 style={{
-                  opacity: isGhost ? 0.38 : 1,
+                  opacity: isGhost ? 0.92 : 1,
                   filter: isGhost ? "drop-shadow(0 0 6px #60a5fa)" : "none",
                 }}
                 role="img"

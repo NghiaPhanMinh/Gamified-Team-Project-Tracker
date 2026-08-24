@@ -10,7 +10,7 @@ class GameAudioEngine {
   private bgmGain: GainNode | null = null;
 
   private isMuted: boolean = false;
-  private masterVolume: number = 0.55; // 40% lower default volume for comfortable listening
+  private masterVolume: number = 0.30; // Naturally set to 30% default
   private isBgmPlaying: boolean = false;
   private bgmIntervalId: any = null;
   private ambientRoarIntervalId: any = null;
@@ -30,6 +30,8 @@ class GameAudioEngine {
       const savedVol = localStorage.getItem("rpg_sound_volume");
       if (savedVol !== null) {
         this.masterVolume = Math.max(0, Math.min(1, parseFloat(savedVol)));
+      } else {
+        this.masterVolume = 0.30; // 30% default
       }
     }
   }
@@ -45,8 +47,8 @@ class GameAudioEngine {
         this.bgmGain = this.ctx.createGain();
 
         this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : this.masterVolume, this.ctx.currentTime);
-        this.sfxGain.gain.setValueAtTime(0.70, this.ctx.currentTime); // +10% increase in attack SFX volume
-        this.bgmGain.gain.setValueAtTime(0.35, this.ctx.currentTime);
+        this.sfxGain.gain.setValueAtTime(0.30, this.ctx.currentTime); // Master sound effect naturally set to 30%
+        this.bgmGain.gain.setValueAtTime(0.30, this.ctx.currentTime);
 
         this.sfxGain.connect(this.masterGain);
         this.bgmGain.connect(this.masterGain);
@@ -257,7 +259,7 @@ class GameAudioEngine {
       rainFilter.Q.setValueAtTime(0.7, now);
 
       const rainGain = ctx.createGain();
-      rainGain.gain.setValueAtTime(0.28, now); // Reduced rain volume 30%
+      rainGain.gain.setValueAtTime(0.19, now); // Reduced rain volume another 30%
 
       rainSrc.connect(rainFilter);
       rainFilter.connect(rainGain);
