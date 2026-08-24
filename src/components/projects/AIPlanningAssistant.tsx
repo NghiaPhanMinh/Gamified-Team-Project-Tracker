@@ -276,14 +276,14 @@ export function AIPlanningAssistant({
         <div className="subscription-limit-card" style={{ margin: "1.25rem 0", padding: "1.5rem", borderRadius: "20px", background: "color-mix(in srgb, var(--color-pink) 15%, var(--color-surface))", border: "3px solid #101517", boxShadow: "6px 6px 0 #101517", color: "var(--color-text)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.5rem" }}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", background: "var(--color-pink)", color: "#101517", padding: "0.25rem 0.65rem", borderRadius: "999px", fontWeight: "900", border: "1.5px solid #101517", fontSize: "0.88rem" }}>
-              <CreditCard size={13} /> SUBSCRIPTION LIMIT REACHED ({usage.used}/{usage.limit ?? 2} USED)
+              <CreditCard size={13} /> SUBSCRIPTION LIMIT REACHED ({usage.used}/{usage.limit ?? 1} USED)
             </span>
           </div>
           <h3 style={{ margin: "0.3rem 0 0.5rem", fontSize: "1.35rem", fontWeight: "900" }}>
             Upgrade Your Plan to Generate More AI Drafts
           </h3>
           <p style={{ margin: "0 0 1rem", fontSize: "0.92rem", lineHeight: "1.5", opacity: 0.9 }}>
-            You have used your {usage.limit ?? 2} free AI plan generations for this project. Upgrade your plan on the Subscription page to unlock unlimited AI project plan regenerations, workload balancing, and priority AI execution!
+            Free tier includes 1 AI plan &amp; 1 allocation per project. Upgrade your plan on the Subscription page to unlock unlimited AI project plan regenerations, workload balancing, and priority AI execution!
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", alignItems: "center" }}>
             <Link to="/subscription" className="primary-button hero-save-plan-button" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.75rem 1.5rem", minHeight: "auto", fontSize: "1rem", textDecoration: "none" }}>
