@@ -2,7 +2,7 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { FolderKanban, Home, ListChecks, Menu, UserRound } from "lucide-react";
+import { CheckSquare, FolderKanban, Home, ListChecks, Menu, UserRound } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { BrandLogo } from "../brand/BrandLogo";
@@ -176,9 +176,6 @@ export function AuthenticatedHome() {
             </button>
           ))}
           <div className="sidebar-room-tree" aria-label="Project rooms">
-            <button className={projectsView === "personal-tasks" ? "is-active is-room" : "is-room"} type="button" onClick={() => openProjects("personal-tasks")}>
-              <span aria-hidden="true">📋</span><strong>My Tasks</strong>
-            </button>
             <div className="sidebar-projects-scroll">
               {availableRooms.map((room, index) => (
                 <button
@@ -193,6 +190,15 @@ export function AuthenticatedHome() {
               ))}
             </div>
           </div>
+          <button
+            className={projectsView === "personal-tasks" ? "is-active sidebar-bottom-tasks-button" : "sidebar-bottom-tasks-button"}
+            type="button"
+            onClick={() => openProjects("personal-tasks")}
+            style={{ marginTop: "0.25rem" }}
+          >
+            <CheckSquare size={18} aria-hidden="true" style={{ display: "inline-block", verticalAlign: "-3px" }} />
+            <strong>My Tasks</strong>
+          </button>
         </nav>
       </aside>
       {mobileMenuOpen ? <button className="nav-scrim" type="button" aria-label="Close navigation" onClick={() => setMobileMenuOpen(false)} /> : null}

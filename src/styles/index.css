@@ -4713,7 +4713,11 @@ footer {
 
 /* Guided journey and simplified information architecture */
 .sidebar-room-tree { display: grid; margin: -.35rem 0 .35rem 1.15rem; padding-left: .55rem; border-left: 2px solid color-mix(in srgb, var(--color-text) 28%, transparent); gap: .2rem; }
-.sidebar-projects-scroll { display: grid; gap: .2rem; max-height: 260px; overflow-y: auto; padding-right: 2px; }
+.sidebar-projects-scroll { display: grid; gap: .2rem; max-height: 260px; overflow-y: auto; padding-right: 2px; -ms-overflow-style: none; scrollbar-width: none; }
+.sidebar-projects-scroll::-webkit-scrollbar,
+.app-sidebar::-webkit-scrollbar { display: none; width: 0; height: 0; }
+.app-sidebar { -ms-overflow-style: none; scrollbar-width: none; }
+.sidebar-bottom-tasks-button { margin-top: .35rem; }
 .app-sidebar .sidebar-room-tree .is-room { min-height: 38px; padding: .38rem .55rem; border-radius: 10px; font-size: .82rem; }
 .app-sidebar .sidebar-room-tree .is-room span { font-family: monospace; opacity: .55; }
 .sidebar-collapsed .sidebar-room-tree { display: none; }
