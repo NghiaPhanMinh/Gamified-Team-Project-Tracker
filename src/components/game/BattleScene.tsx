@@ -914,56 +914,59 @@ function QuestCardHoverItem({
         color: "#101517",
         border: "2px solid #101517",
         borderRadius: "8px",
-        padding: "10px 12px",
+        padding: "12px 14px",
         cursor: "pointer",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
-        height: "105px",
+        justifyContent: "center",
+        minHeight: hovered ? "115px" : "72px",
         boxSizing: "border-box",
-        transition: "background-color 0.15s ease",
+        transition: "background-color 0.15s ease, min-height 0.15s ease",
       }}
     >
-      {/* Top Header: Title + Status Pill */}
-      <div>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "6px" }}>
-          <h4
-            style={{
-              margin: 0,
-              fontSize: "0.92rem",
-              fontWeight: 800,
-              color: "#101517",
-              lineHeight: "1.25",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}
-          >
-            {task.title}
-          </h4>
-          <span
-            style={{
-              fontSize: "0.7rem",
-              fontWeight: 700,
-              background: task.isOpen ? "#fee2e2" : "rgba(16,21,23,0.08)",
-              color: task.isOpen ? "#b91c1c" : "#101517",
-              border: "1px solid " + (task.isOpen ? "#ef4444" : "#101517"),
-              padding: "1px 5px",
-              borderRadius: "4px",
-              whiteSpace: "nowrap",
-              flexShrink: 0,
-            }}
-          >
-            {task.isOpen ? "Open" : task.assigneeName}
-          </span>
-        </div>
+      {/* Task Name (Big & Boldest) */}
+      <h4
+        style={{
+          margin: 0,
+          fontSize: "1.05rem",
+          fontWeight: 900,
+          color: "#101517",
+          lineHeight: "1.25",
+          display: "-webkit-box",
+          WebkitLineClamp: hovered ? 3 : 2,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+        }}
+      >
+        {task.title}
+      </h4>
+
+      {/* Owner Name Under */}
+      <div
+        style={{
+          fontSize: "0.78rem",
+          fontWeight: 700,
+          color: task.isOpen ? "#dc2626" : "#475569",
+          marginTop: "4px",
+        }}
+      >
+        {task.isOpen ? "Unassigned" : `By: ${task.assigneeName}`}
       </div>
 
-      {/* Bottom Area: Shows more detail and actions on hover */}
-      {hovered ? (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", marginTop: "4px" }}>
-          <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#334155" }}>
+      {/* Details & Actions Revealed on Hover */}
+      {hovered && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "8px",
+            marginTop: "8px",
+            paddingTop: "8px",
+            borderTop: "1px solid rgba(16,21,23,0.12)",
+          }}
+        >
+          <span style={{ fontSize: "0.74rem", fontWeight: 700, color: "#334155" }}>
             Due: {task.dueDate || "No date"}
           </span>
           <div style={{ display: "flex", gap: "4px" }}>
@@ -993,16 +996,11 @@ function QuestCardHoverItem({
                 Attack Dragon
               </button>
             ) : (
-              <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#64748b" }}>
-                Assigned: {task.assigneeName}
+              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b" }}>
+                Click for details
               </span>
             )}
           </div>
-        </div>
-      ) : (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "0.72rem", color: "#64748b", fontWeight: 600 }}>
-          <span>Due: {task.dueDate || "No date"}</span>
-          <span>Click for details</span>
         </div>
       )}
     </div>
@@ -1043,11 +1041,22 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
   // Quest Board States
   const [showQuestBoardModal, setShowQuestBoardModal] = useState(false);
-  const [questBoardFilter, setQuestBoardFilter] = useState<"all" | "mine">("all");
+  const [questBoardTab, setQuestBoardTab] = useState<"all" | "mine" | "reviews" | "daily_proof">("all");
   const [selectedQuestTask, setSelectedQuestTask] = useState<QuestTask | null>(null);
   const [showCreateQuestModal, setShowCreateQuestModal] = useState(false);
   const [isClaimingQuest, setIsClaimingQuest] = useState(false);
   const [claimQuestError, setClaimQuestError] = useState<string | null>(null);
+
+  // Daily Feed query for Daily Proof Tab
+  const dailyPosts = useQuery((api as any).daily.listForProject, { projectId });
+
+  // Reviews Mutation & State
+  const submitReviewMutation = useMutation(api.evidence.submitReview);
+  const decideCompletionMutation = useMutation(api.evidence.decideCompletion);
+  const [reviewingTaskId, setReviewingTaskId] = useState<Id<"tasks"> | null>(null);
+  const [reviewComment, setReviewComment] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
 
   const [newQuestTitle, setNewQuestTitle] = useState("");
   const [newQuestDesc, setNewQuestDesc] = useState("");
@@ -2092,6 +2101,54 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       });
   }, [workspace?.tasks, workspace?.members, state?.currentProfileId]);
 
+  // Pending Quests requiring peer review by current user or final creator approval
+  const pendingReviews = useMemo(() => {
+    if (!workspace?.tasks) return [];
+    return workspace.tasks
+      .filter((t) => {
+        const isReviewer = t.reviewerProfileId === state?.currentProfileId;
+        const isCreator = workspace?.project?.creatorProfileId === state?.currentProfileId;
+        if (isReviewer && (t.status === "review" || t.status === "submitted")) return true;
+        if (isCreator && t.status === "awaiting_creator") return true;
+        return false;
+      })
+      .map((t) => {
+        const assignee = workspace.members.find((m) => m?.profileId === t.primaryOwnerProfileId);
+        const isCreatorApproval = t.status === "awaiting_creator";
+        return {
+          ...t,
+          assigneeName: assignee?.displayName ?? "Teammate",
+          isCreatorApproval,
+        };
+      });
+  }, [workspace?.tasks, workspace?.members, workspace?.project?.creatorProfileId, state?.currentProfileId]);
+
+  async function handleReviewDecision(taskId: Id<"tasks">, decision: "approved" | "changes_requested", isCreatorApproval: boolean) {
+    setIsSubmittingReview(true);
+    setReviewError(null);
+    try {
+      if (isCreatorApproval) {
+        await decideCompletionMutation({
+          taskId,
+          decision: decision === "approved" ? "approve" : "reject",
+          comment: reviewComment.trim() || undefined,
+        });
+      } else {
+        await submitReviewMutation({
+          taskId,
+          status: decision,
+          comment: reviewComment.trim() || (decision === "approved" ? "Approved by peer reviewer." : "Changes requested."),
+        });
+      }
+      setReviewingTaskId(null);
+      setReviewComment("");
+    } catch (err) {
+      setReviewError(getErrorMessage(err, "Failed to submit review decision."));
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  }
+
   async function handleClaimQuest(task: QuestTask) {
     setIsClaimingQuest(true);
     setClaimQuestError(null);
@@ -2495,7 +2552,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         <LandscapeQuestBoard
           tasksCount={questTasks.length}
           onOpenBoard={() => {
-            setQuestBoardFilter("all");
+            setQuestBoardTab("all");
             setShowQuestBoardModal(true);
           }}
         />
@@ -3200,10 +3257,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           <div
             className="rpg-modern-modal-card"
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: "660px", maxHeight: "88vh" }}
+            style={{ maxWidth: "720px", width: "95vw", height: "600px", display: "flex", flexDirection: "column", boxSizing: "border-box" }}
           >
             {/* Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #101517", paddingBottom: "12px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #101517", paddingBottom: "12px", flexShrink: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <h3 className="rpg-modern-title" style={{ fontSize: "1.28rem" }}>
                   Tasks & Quests
@@ -3257,106 +3314,410 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               </div>
             </div>
 
-            {/* Filter Tabs (Only All Tasks and My Tasks) */}
-            <div style={{ display: "flex", gap: "8px" }}>
+            {/* Navigation Tabs (All Tasks, My Tasks, Reviews, Daily Proof) */}
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", margin: "10px 0 6px 0", flexShrink: 0 }}>
               {[
                 { id: "all", label: `All Tasks (${questTasks.length})` },
                 { id: "mine", label: `My Tasks (${questTasks.filter((t) => t.isMine).length})` },
+                { id: "reviews", label: `Reviews (${pendingReviews.length})` },
+                { id: "daily_proof", label: `Daily Proof (${dailyPosts?.length ?? 0})` },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   type="button"
-                  className={`rpg-modern-btn ${questBoardFilter === tab.id ? "is-primary" : "is-secondary"}`}
-                  style={{ padding: "5px 14px", fontSize: "0.8rem", boxShadow: "none" }}
-                  onClick={() => setQuestBoardFilter(tab.id as any)}
+                  className={`rpg-modern-btn ${questBoardTab === tab.id ? "is-primary" : "is-secondary"}`}
+                  style={{ padding: "5px 12px", fontSize: "0.8rem", boxShadow: "none" }}
+                  onClick={() => setQuestBoardTab(tab.id as any)}
                 >
                   {tab.label}
                 </button>
               ))}
             </div>
 
-            {/* Clean Non-Crowded Cards Grid with Hover Details */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-                gap: "12px",
-                overflowY: "auto",
-                maxHeight: "56vh",
-                padding: "6px 2px",
-              }}
-            >
-              {(() => {
-                const filtered = questTasks.filter((t) => {
-                  if (questBoardFilter === "mine") return t.isMine;
-                  return true;
-                });
+            {/* Modal Body: Scrollable, UI height stays stable */}
+            <div style={{ flex: 1, overflowY: "auto", minHeight: 0, padding: "4px 2px" }}>
+              {/* TAB 1 & 2: ALL TASKS / MY TASKS */}
+              {(questBoardTab === "all" || questBoardTab === "mine") && (
+                <div>
+                  {(() => {
+                    const filtered = questTasks.filter((t) => {
+                      if (questBoardTab === "mine") return t.isMine;
+                      return true;
+                    });
 
-                if (filtered.length === 0) {
-                  return (
+                    if (filtered.length === 0) {
+                      return (
+                        <div
+                          style={{
+                            background: "rgba(16,21,23,0.04)",
+                            border: "2px dashed #94a3b8",
+                            borderRadius: "12px",
+                            padding: "32px 16px",
+                            textAlign: "center",
+                            color: "#64748b",
+                            margin: "12px 0",
+                          }}
+                        >
+                          <p style={{ margin: 0, fontWeight: 800, fontSize: "0.95rem", color: "#101517" }}>
+                            {questBoardTab === "mine" ? "No quests assigned to you yet!" : "No quests found!"}
+                          </p>
+                          <p style={{ margin: "6px 0 14px 0", fontSize: "0.82rem" }}>
+                            {questBoardTab === "mine" ? "Claim an open quest or post a new one to help defeat the dragon." : "Post a new quest to coordinate team tasks and defend the realm."}
+                          </p>
+                          <button
+                            className="rpg-modern-btn is-primary"
+                            type="button"
+                            onClick={() => {
+                              setCreateQuestError(null);
+                              setShowCreateQuestModal(true);
+                            }}
+                          >
+                            + Post Quest
+                          </button>
+                        </div>
+                      );
+                    }
+
+                    const NOTE_PALETTES = [
+                      { bg: "#fef08a", border: "#ca8a04", pin: "#ef4444" },
+                      { bg: "#bae6fd", border: "#0284c7", pin: "#f97316" },
+                      { bg: "#fbcfe8", border: "#db2777", pin: "#8b5cf6" },
+                      { bg: "#bbf7d0", border: "#16a34a", pin: "#ef4444" },
+                      { bg: "#fed7aa", border: "#ea580c", pin: "#0ea5e9" },
+                    ];
+
+                    return (
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                          gap: "12px",
+                          paddingBottom: "8px",
+                        }}
+                      >
+                        {filtered.map((task, idx) => {
+                          const palette = NOTE_PALETTES[idx % NOTE_PALETTES.length];
+                          return (
+                            <QuestCardHoverItem
+                              key={task._id}
+                              task={task}
+                              palette={palette}
+                              isClaimingQuest={isClaimingQuest}
+                              onClaim={handleClaimQuest}
+                              onAttack={(t) => {
+                                setShowQuestBoardModal(false);
+                                setSelectedTaskId(t._id);
+                                setShowBossModal(true);
+                              }}
+                              onDetails={(t) => setSelectedQuestTask(t)}
+                            />
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* TAB 3: REVIEWS */}
+              {questBoardTab === "reviews" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px", paddingBottom: "8px" }}>
+                  {pendingReviews.length === 0 ? (
                     <div
                       style={{
-                        gridColumn: "1 / -1",
                         background: "rgba(16,21,23,0.04)",
                         border: "2px dashed #94a3b8",
                         borderRadius: "12px",
-                        padding: "32px 16px",
+                        padding: "36px 16px",
                         textAlign: "center",
                         color: "#64748b",
+                        margin: "12px 0",
                       }}
                     >
                       <p style={{ margin: 0, fontWeight: 800, fontSize: "0.95rem", color: "#101517" }}>
-                        No quests found in this category!
+                        No pending reviews!
+                      </p>
+                      <p style={{ margin: "6px 0 0 0", fontSize: "0.82rem" }}>
+                        You have reviewed all submitted quests assigned to you.
+                      </p>
+                    </div>
+                  ) : (
+                    pendingReviews.map((task) => {
+                      const isBeingReviewed = reviewingTaskId === task._id;
+                      return (
+                        <div
+                          key={task._id}
+                          style={{
+                            background: "#ffffff",
+                            border: "2px solid #101517",
+                            borderRadius: "10px",
+                            padding: "14px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "8px",
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+                            <div>
+                              <h4 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 900, color: "#101517" }}>
+                                {task.title}
+                              </h4>
+                              <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#475569", marginTop: "2px" }}>
+                                Submitted by: {task.assigneeName} · Due: {task.dueDate || "No deadline"}
+                              </div>
+                            </div>
+                            <span
+                              style={{
+                                fontSize: "0.72rem",
+                                fontWeight: 800,
+                                background: task.isCreatorApproval ? "#fed7aa" : "#bae6fd",
+                                color: task.isCreatorApproval ? "#c2410c" : "#0369a1",
+                                border: `1.5px solid ${task.isCreatorApproval ? "#ea580c" : "#0284c7"}`,
+                                padding: "2px 8px",
+                                borderRadius: "4px",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {task.isCreatorApproval ? "Creator Final Approval" : "Peer Review Required"}
+                            </span>
+                          </div>
+
+                          {task.description && (
+                            <p style={{ margin: 0, fontSize: "0.82rem", color: "#334155", lineHeight: "1.4" }}>
+                              {task.description}
+                            </p>
+                          )}
+
+                          {!isBeingReviewed ? (
+                            <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
+                              <button
+                                className="rpg-modern-btn is-primary"
+                                type="button"
+                                style={{ padding: "5px 12px", fontSize: "0.78rem" }}
+                                onClick={() => {
+                                  setReviewingTaskId(task._id);
+                                  setReviewComment("");
+                                  setReviewError(null);
+                                }}
+                              >
+                                Review Submission
+                              </button>
+                              <button
+                                className="rpg-modern-btn is-secondary"
+                                type="button"
+                                style={{ padding: "5px 12px", fontSize: "0.78rem" }}
+                                onClick={() => setSelectedQuestTask(task)}
+                              >
+                                View Full Details
+                              </button>
+                            </div>
+                          ) : (
+                            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "6px", paddingTop: "8px", borderTop: "1.5px solid #101517" }}>
+                              {reviewError && (
+                                <div style={{ padding: "6px 10px", background: "#fee2e2", border: "1.5px solid #ef4444", borderRadius: "6px", color: "#b91c1c", fontSize: "0.78rem", fontWeight: 800 }}>
+                                  {reviewError}
+                                </div>
+                              )}
+                              <label style={{ fontSize: "0.76rem", fontWeight: 800 }}>
+                                Reviewer Feedback & Notes:
+                              </label>
+                              <textarea
+                                className="rpg-modern-textarea"
+                                rows={2}
+                                value={reviewComment}
+                                onChange={(e) => setReviewComment(e.target.value)}
+                                placeholder="Add notes for your peer (required if requesting changes)..."
+                              />
+                              <div style={{ display: "flex", gap: "8px" }}>
+                                <button
+                                  className="rpg-modern-btn is-boss"
+                                  type="button"
+                                  disabled={isSubmittingReview}
+                                  style={{ padding: "6px 12px", fontSize: "0.78rem" }}
+                                  onClick={() => handleReviewDecision(task._id, "approved", Boolean(task.isCreatorApproval))}
+                                >
+                                  {isSubmittingReview ? "Submitting..." : "Approve & Slay Dragon"}
+                                </button>
+                                <button
+                                  className="rpg-modern-btn is-secondary"
+                                  type="button"
+                                  disabled={isSubmittingReview}
+                                  style={{ padding: "6px 12px", fontSize: "0.78rem", background: "#fee2e2", color: "#991b1b" }}
+                                  onClick={() => handleReviewDecision(task._id, "changes_requested", Boolean(task.isCreatorApproval))}
+                                >
+                                  Request Changes
+                                </button>
+                                <button
+                                  className="rpg-modern-btn is-secondary"
+                                  type="button"
+                                  disabled={isSubmittingReview}
+                                  style={{ padding: "6px 12px", fontSize: "0.78rem" }}
+                                  onClick={() => {
+                                    setReviewingTaskId(null);
+                                    setReviewError(null);
+                                  }}
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+
+              {/* TAB 4: DAILY PROOF (Forum Chat Feed) */}
+              {questBoardTab === "daily_proof" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px", paddingBottom: "8px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#f8fafc", border: "1.5px solid #101517", borderRadius: "8px", padding: "8px 12px", flexShrink: 0 }}>
+                    <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#334155" }}>
+                      Daily goblin battle reports submitted by heroes.
+                    </span>
+                    <button
+                      className="rpg-modern-btn is-primary"
+                      type="button"
+                      style={{ padding: "4px 10px", fontSize: "0.75rem" }}
+                      onClick={() => {
+                        setShowQuestBoardModal(false);
+                        setShowGoblinModal(true);
+                      }}
+                    >
+                      + Slay Daily Goblin
+                    </button>
+                  </div>
+
+                  {!dailyPosts || dailyPosts.length === 0 ? (
+                    <div
+                      style={{
+                        background: "rgba(16,21,23,0.04)",
+                        border: "2px dashed #94a3b8",
+                        borderRadius: "12px",
+                        padding: "36px 16px",
+                        textAlign: "center",
+                        color: "#64748b",
+                        margin: "8px 0",
+                      }}
+                    >
+                      <p style={{ margin: 0, fontWeight: 800, fontSize: "0.95rem", color: "#101517" }}>
+                        No daily proofs submitted today yet!
                       </p>
                       <p style={{ margin: "6px 0 14px 0", fontSize: "0.82rem" }}>
-                        Post a new quest to give your team tasks and earn combat damage against the dragon.
+                        Defend the village and slay daily goblins by posting your progress notes or screenshots.
                       </p>
                       <button
                         className="rpg-modern-btn is-primary"
                         type="button"
                         onClick={() => {
-                          setCreateQuestError(null);
-                          setShowCreateQuestModal(true);
+                          setShowQuestBoardModal(false);
+                          setShowGoblinModal(true);
                         }}
                       >
-                        + Post Quest
+                        + Post Daily Goblin Proof
                       </button>
                     </div>
-                  );
-                }
+                  ) : (
+                    dailyPosts.map((post: any) => (
+                      <div
+                        key={post._id}
+                        style={{
+                          display: "flex",
+                          gap: "10px",
+                          padding: "12px",
+                          background: "#ffffff",
+                          border: "2px solid #101517",
+                          borderRadius: "10px",
+                        }}
+                      >
+                        {/* Avatar */}
+                        <div
+                          style={{
+                            width: "36px",
+                            height: "36px",
+                            borderRadius: "50%",
+                            background: post.authorFill || "#FFF73F",
+                            border: `2px solid ${post.authorOutline || "#101517"}`,
+                            display: "grid",
+                            placeItems: "center",
+                            fontWeight: 900,
+                            fontSize: "0.88rem",
+                            color: "#101517",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {(post.authorName || "H").charAt(0).toUpperCase()}
+                        </div>
 
-                const NOTE_PALETTES = [
-                  { bg: "#fef08a", border: "#ca8a04", pin: "#ef4444" },
-                  { bg: "#bae6fd", border: "#0284c7", pin: "#f97316" },
-                  { bg: "#fbcfe8", border: "#db2777", pin: "#8b5cf6" },
-                  { bg: "#bbf7d0", border: "#16a34a", pin: "#ef4444" },
-                  { bg: "#fed7aa", border: "#ea580c", pin: "#0ea5e9" },
-                ];
+                        {/* Post Body */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                              <span style={{ fontWeight: 900, fontSize: "0.92rem", color: "#101517" }}>
+                                {post.authorName}
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: "0.68rem",
+                                  fontWeight: 800,
+                                  background: post.isValid ? "#dcfce7" : "#fee2e2",
+                                  color: post.isValid ? "#15803d" : "#b91c1c",
+                                  border: `1px solid ${post.isValid ? "#22c55e" : "#ef4444"}`,
+                                  padding: "1px 6px",
+                                  borderRadius: "4px",
+                                }}
+                              >
+                                {post.isValid ? "Goblin Slayed" : "Check-in"}
+                              </span>
+                            </div>
+                            <span style={{ fontSize: "0.72rem", color: "#64748b", fontWeight: 700 }}>
+                              {new Date(post.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })},{" "}
+                              {new Date(post.createdAt).toLocaleDateString([], { month: "short", day: "numeric" })}
+                            </span>
+                          </div>
 
-                return filtered.map((task, idx) => {
-                  const palette = NOTE_PALETTES[idx % NOTE_PALETTES.length];
-                  return (
-                    <QuestCardHoverItem
-                      key={task._id}
-                      task={task}
-                      palette={palette}
-                      isClaimingQuest={isClaimingQuest}
-                      onClaim={handleClaimQuest}
-                      onAttack={(t) => {
-                        setShowQuestBoardModal(false);
-                        setSelectedTaskId(t._id);
-                        setShowBossModal(true);
-                      }}
-                      onDetails={(t) => setSelectedQuestTask(t)}
-                    />
-                  );
-                });
-              })()}
+                          <p style={{ margin: "4px 0", fontSize: "0.85rem", color: "#1e293b", lineHeight: "1.45", wordBreak: "break-word" }}>
+                            {post.text}
+                          </p>
+
+                          {post.imageUrls && post.imageUrls.length > 0 && (
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
+                              {post.imageUrls.map((url: string, i: number) => (
+                                <a
+                                  key={i}
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{ display: "block" }}
+                                >
+                                  <img
+                                    src={url}
+                                    alt={`Proof attachment ${i + 1}`}
+                                    style={{
+                                      width: "110px",
+                                      height: "75px",
+                                      objectFit: "cover",
+                                      borderRadius: "6px",
+                                      border: "1.5px solid #101517",
+                                      display: "block",
+                                    }}
+                                  />
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Minimal Subtext (No Close Board button) */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "2px solid #101517", paddingTop: "10px" }}>
-              <span style={{ fontSize: "0.76rem", fontWeight: 700, opacity: 0.75 }}>
+            {/* Minimal Subtext */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "2px solid #101517", paddingTop: "8px", flexShrink: 0 }}>
+              <span style={{ fontSize: "0.75rem", fontWeight: 700, opacity: 0.75 }}>
                 Hover over any task to see details and actions. Click to view full quest details.
               </span>
             </div>
