@@ -121,17 +121,22 @@ export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
           </g>
 
           {/* =========================================================================
-              4. ACTIVE PLAYER ELEMENTAL ATTACK SPELL ANIMATIONS (Attacks All Mobs and Dragon)
+              4. ACTIVE PLAYER ELEMENTAL ATTACK SPELL ANIMATIONS (Single Target or Admin All)
               ========================================================================= */}
           {activeEvent && (
             <>
-              {[
-                { id: "goblin-0", x: 505, y: 290, scale: 0.85 },
-                { id: "goblin-1", x: 550, y: 302, scale: 0.85 },
-                { id: "goblin-2", x: 595, y: 290, scale: 0.85 },
-                { id: "goblin-3", x: 640, y: 302, scale: 0.85 },
-                { id: "dragon-boss", x: 750, y: 175, scale: 2.2 },
-              ].map((target) => (
+              {(activeEvent.attackerName === "Layout Admin" && activeEvent.spellType === "all"
+                ? [
+                    { id: "goblin-0", x: 505, y: 290, scale: 0.85 },
+                    { id: "goblin-1", x: 550, y: 302, scale: 0.85 },
+                    { id: "goblin-2", x: 595, y: 290, scale: 0.85 },
+                    { id: "goblin-3", x: 640, y: 302, scale: 0.85 },
+                    { id: "dragon-boss", x: 750, y: 175, scale: 2.2 },
+                  ]
+                : isGoblinTarget
+                  ? [{ id: "target-goblin", x: targetX, y: targetY, scale: 0.85 }]
+                  : [{ id: "target-dragon", x: targetX, y: targetY, scale: 2.2 }]
+              ).map((target) => (
                 <g key={target.id} transform={`translate(${target.x}, ${target.y}) scale(${target.scale})`}>
                   {/* --- LIGHTNING ATTACK: Thundercloud & Repeating Electric Bolt Strikes --- */}
                   {isLightning && (

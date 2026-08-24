@@ -5035,11 +5035,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
           }}
         >
-          {/* Fun Animated Goblin Combat Mini-Panel */}
+          {/* Exact In-Game Goblin Asset Panel */}
           <div
             style={{
-              width: "60px",
-              height: "46px",
+              width: "64px",
+              height: "50px",
               background: "#fee2e2",
               border: "1.5px solid #ef4444",
               borderRadius: "8px",
@@ -5049,29 +5049,40 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               flexShrink: 0,
             }}
           >
-            <svg viewBox="0 0 54 42" width="100%" height="100%">
-              {/* Mini Wooden Wall */}
-              <rect x="36" y="8" width="6" height="30" fill="#78350f" rx="1" />
-              <rect x="44" y="8" width="6" height="30" fill="#5c2406" rx="1" />
-              {/* Mini Goblin */}
-              <g className="goblin-idle-anim" transform="translate(10, 8)">
-                {/* Body */}
-                <rect x="4" y="10" width="12" height="14" rx="3" fill="#16a34a" />
-                {/* Head */}
-                <circle cx="10" cy="7" r="6" fill="#22c55e" />
-                {/* Ears */}
-                <polygon points="4,5 0,2 5,8" fill="#16a34a" />
-                <polygon points="16,5 20,2 15,8" fill="#16a34a" />
-                {/* Eyes */}
-                <circle cx="8" cy="6.5" r="1.2" fill="#facc15" />
-                <circle cx="12" cy="6.5" r="1.2" fill="#facc15" />
-                {/* Sword slashing */}
-                <line x1="15" y1="14" x2="26" y2="8" stroke="#cbd5e1" strokeWidth="2.5" strokeLinecap="round" />
-                <polygon points="26,8 24,12 28,10" fill="#f59e0b" />
+            <svg viewBox="0 0 45 45" width="100%" height="100%" style={{ overflow: "visible" }}>
+              {/* Ground Shadow */}
+              <ellipse cx="18" cy="40" rx="14" ry="4" fill="rgba(0,0,0,0.22)" />
+              {/* Actual Game Goblin */}
+              <g className="goblin-idle-anim" transform="translate(4, 2)">
+                {/* Boots */}
+                <rect x="8" y="34" width="4" height="4" rx="1" fill="#0f172a" />
+                <rect x="18" y="34" width="4" height="4" rx="1" fill="#0f172a" />
+                {/* Tunic */}
+                <polygon points="7,20 23,20 21,34 9,34" fill="#1dd851" />
+                {/* Belt & Buckle */}
+                <rect x="8" y="27" width="14" height="2.5" fill="#451a03" />
+                <rect x="13.5" y="26.5" width="3" height="3.5" fill="#facc15" />
+                {/* Left Arm */}
+                <polygon points="7,21 2,28 5,30 9,24" fill="#a3e635" />
+                {/* Right Arm */}
+                <polygon points="23,21 29,26 27,29 21,24" fill="#a3e635" />
+                {/* Spear */}
+                <line x1="28" y1="36" x2="28" y2="3" stroke="#78350f" strokeWidth="2" strokeLinecap="round" />
+                <polygon points="28,-2 24,5 32,5" fill="#f8fafc" />
+                <rect x="26.5" y="5" width="3" height="2" fill="#dc2626" />
+                {/* Head & Pointy Ears */}
+                <circle cx="15" cy="12" r="7" fill="#bef264" />
+                <polygon points="9,10 0,6 8,14" fill="#65a30d" />
+                <polygon points="21,10 30,6 22,14" fill="#65a30d" />
+                {/* Nose */}
+                <polygon points="15,11 13.5,14 16.5,14" fill="#65a30d" />
+                {/* Glowing Crimson Eyes */}
+                <circle cx="12.5" cy="10.5" r="1.3" fill="#ff0033" />
+                <circle cx="17.5" cy="10.5" r="1.3" fill="#ff0033" />
+                {/* Underbite Fangs */}
+                <polygon points="13,15 14,15 13.5,17" fill="#ffffff" />
+                <polygon points="16,15 17,15 16.5,17" fill="#ffffff" />
               </g>
-              {/* Spark effect */}
-              <circle cx="34" cy="16" r="2" fill="#facc15" />
-              <circle cx="36" cy="14" r="1" fill="#f97316" />
             </svg>
           </div>
 
@@ -5131,11 +5142,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
           }}
         >
-          {/* Fun Animated Dragon Head Mini-Panel (Safely contained inside - no clipping) */}
+          {/* Exact In-Game Dragon Head Asset Panel */}
           <div
             style={{
-              width: "60px",
-              height: "46px",
+              width: "64px",
+              height: "50px",
               background: "#ffedd5",
               border: "1.5px solid #f97316",
               borderRadius: "8px",
@@ -5145,22 +5156,42 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               flexShrink: 0,
             }}
           >
-            <svg viewBox="0 0 60 46" width="100%" height="100%">
-              {/* Mini Dragon Head contained inside */}
-              <g transform="translate(6, 6) scale(0.65)">
+            <svg viewBox="-40 -40 140 100" width="100%" height="100%">
+              <g transform="translate(10, 0)">
                 {/* Horns */}
-                <polygon points="12,12 6,2 14,8" fill="#450a0a" />
-                <polygon points="18,10 16,0 22,7" fill="#450a0a" />
-                {/* Head */}
-                <path d="M 10 14 L 32 18 L 36 24 L 28 28 L 10 26 Z" fill="#dc2626" />
-                {/* Snout Jaw */}
-                <path d="M 12 26 L 30 28 L 24 34 L 12 32 Z" fill="#991b1b" />
-                {/* Glowing Eye */}
-                <circle cx="20" cy="18" r="2.5" fill="#facc15" />
-                <circle cx="21" cy="18" r="1" fill="#000000" />
-                {/* Fire Stream */}
-                <path d="M 34 22 Q 44 20 50 24 Q 44 27 34 25 Z" fill="#f97316" />
-                <path d="M 35 23 Q 42 22 46 24 Q 42 26 35 25 Z" fill="#fde047" />
+                <path d="M 42 6 L 64 -12 L 54 -14 L 82 -32 L 58 -18 L 66 -16 Z" fill="#260404" />
+                <path d="M 37 2 L 59 -16 L 49 -18 L 77 -36 L 53 -22 L 61 -20 Z" fill="#7f1d1d" />
+                <polygon points="42,8 55,-4 58,10" fill="#7f1d1d" />
+                <polygon points="30,18 12,14 26,26" fill="#991b1b" />
+                <polygon points="38,16 22,8 34,22" fill="#450a0a" />
+                {/* Skull Base */}
+                <path d="M 48 20 L -24 5 L 8 -10 L 62 8 Z" fill="#991b1b" />
+                {/* Throat Cavity */}
+                <path d="M 32 20 L -10 15 L -16 28 L 8 40 L 32 30 Z" fill="#220303" />
+                {/* Mouth Webbing */}
+                <path d="M 28 20 Q 20 28 8 36 Q 22 38 28 20 Z" fill="#b91c1c" />
+                {/* Snout */}
+                <polygon points="-24,5 -8,-1 5,-7 -17,0" fill="#7f1d1d" />
+                <ellipse cx="-12" cy="2" rx="4" ry="2.2" fill="#260404" />
+                {/* Lower Jaw */}
+                <path d="M 38 34 L -26 18 L 8 42 Z" fill="#7f1d1d" />
+                {/* Upper Fangs */}
+                <polygon points="-16,7 -22,14 -11,9" fill="#ffffff" />
+                <polygon points="-10,8 -14,16 -5,10" fill="#ffffff" />
+                <polygon points="-4,9 -8,17 1,11" fill="#ffffff" />
+                <polygon points="2,10 0,18 7,12" fill="#ffffff" />
+                {/* Lower Fangs */}
+                <polygon points="-20,20 -14,12 -15,22" fill="#ffffff" />
+                <polygon points="-12,22 -7,14 -7,24" fill="#ffffff" />
+                <polygon points="-4,24 1,16 1,26" fill="#ffffff" />
+                {/* Eye */}
+                <ellipse cx="28" cy="4" rx="8" ry="5" fill="#f59e0b" />
+                <polygon points="28,-1 30,4 28,9 26,4" fill="#000000" />
+                <circle cx="25" cy="2" r="1.8" fill="#ffffff" />
+                <polygon points="18,-2 38,0 36,3 20,1" fill="#260404" />
+                {/* Snout Fire Puff */}
+                <path d="M -24 10 Q -40 6 -48 12 Q -40 18 -24 14 Z" fill="#f97316" />
+                <path d="M -24 10 Q -36 8 -42 12 Q -36 16 -24 14 Z" fill="#fde047" />
               </g>
             </svg>
           </div>
