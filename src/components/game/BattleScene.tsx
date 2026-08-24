@@ -2134,6 +2134,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       });
   }, [workspace?.tasks, workspace?.members, state?.currentProfileId]);
 
+  const userIncompleteTasksCount = useMemo(() => {
+    return questTasks.filter((t) => t.isMine && !t.isCompleted).length;
+  }, [questTasks]);
+
   // Pending Quests requiring peer review by current user or final creator approval
   const pendingReviews = useMemo(() => {
     if (!workspace?.tasks) return [];
@@ -2589,6 +2593,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         {/* Layer 4.5: In-Canvas Medieval Quest Board (Directly Clickable) */}
         <LandscapeQuestBoard
           tasksCount={questTasks.length}
+          hasNotification={userIncompleteTasksCount > 0}
+          notificationCount={userIncompleteTasksCount}
           onOpenBoard={() => {
             setQuestBoardTab("all");
             setShowQuestBoardModal(true);
@@ -2618,20 +2624,31 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         </div>
 
         {/* Layer 8: Section 1 - Medieval Dragon Visuals & Wings */}
-        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "auto", zIndex: 8, transform: `translate(${layerTransforms.dragon?.x || 0}px, ${layerTransforms.dragon?.y || 0}px) scale(${layerTransforms.dragon?.scale || 1})`, display: layerTransforms.dragon?.visible !== false ? "block" : "none" }}>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: adminAuthenticated && showDragonEditor ? "auto" : "none",
+            zIndex: 8,
+            transform: `translate(${layerTransforms.dragon?.x || 0}px, ${layerTransforms.dragon?.y || 0}px) scale(${layerTransforms.dragon?.scale || 1})`,
+            display: layerTransforms.dragon?.visible !== false ? "block" : "none",
+          }}
+        >
           <LandscapeDragon
             bossHpPercent={hpPercent}
             isDefeated={defeated}
             offsets={dragonOffsets as any}
-            onSelectPart={setSelectedDragonPart as any}
-            selectedPart={selectedDragonPart as any}
+            onSelectPart={adminAuthenticated && showDragonEditor ? (setSelectedDragonPart as any) : undefined}
+            selectedPart={adminAuthenticated && showDragonEditor ? (selectedDragonPart as any) : null}
             animationsEnabled={animationsEnabled}
             customShapes={customShapes}
             fills={dragonFills}
             deletedShapes={deletedShapes}
-            onStartDragShape={handleStartDragShape}
+            onStartDragShape={adminAuthenticated && showDragonEditor ? handleStartDragShape : undefined}
             geometries={dragonGeometries}
-            onStartDragNode={handleStartDragNode}
+            onStartDragNode={adminAuthenticated && showDragonEditor ? handleStartDragNode : undefined}
             layerOrder={layerOrder}
           />
         </div>
@@ -3326,14 +3343,14 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   onClick={() => {
                     const isRoomOwner = workspace?.project?.creatorProfileId === state?.currentProfileId;
                     if (!isRoomOwner) {
-                      setCreateQuestError("Only the room owner can post new quests.");
+                      setCreateQuestError("Only the room owner can create new tasks.");
                     } else {
                       setCreateQuestError(null);
                     }
                     setShowCreateQuestModal(true);
                   }}
                 >
-                  + Post New Quest
+                  + New Task
                 </button>
                 <button
                   type="button"
@@ -3402,20 +3419,25 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                           }}
                         >
                           <p style={{ margin: 0, fontWeight: 800, fontSize: "0.95rem", color: "#101517" }}>
-                            {questBoardTab === "mine" ? "No quests assigned to you yet!" : "No quests found!"}
+                            {questBoardTab === "mine" ? "No tasks assigned to you yet!" : "No tasks found!"}
                           </p>
                           <p style={{ margin: "6px 0 14px 0", fontSize: "0.82rem" }}>
-                            {questBoardTab === "mine" ? "Claim an open quest or post a new one to help defeat the dragon." : "Post a new quest to coordinate team tasks and defend the realm."}
+                            {questBoardTab === "mine" ? "Claim an open task or create a new task to help defeat the dragon." : "Create a new task to coordinate team tasks and defend the realm."}
                           </p>
                           <button
                             className="rpg-modern-btn is-primary"
                             type="button"
                             onClick={() => {
-                              setCreateQuestError(null);
+                              const isRoomOwner = workspace?.project?.creatorProfileId === state?.currentProfileId;
+                              if (!isRoomOwner) {
+                                setCreateQuestError("Only the room owner can create new tasks.");
+                              } else {
+                                setCreateQuestError(null);
+                              }
                               setShowCreateQuestModal(true);
                             }}
                           >
-                            + Post Quest
+                            + New Task
                           </button>
                         </div>
                       );
@@ -3859,7 +3881,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         <div className="rpg-modal-backdrop" onClick={() => setShowCreateQuestModal(false)}>
           <div className="rpg-modern-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "520px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 className="rpg-modern-title">Post New Quest</h3>
+              <h3 className="rpg-modern-title">New Task</h3>
               <button
                 type="button"
                 onClick={() => setShowCreateQuestModal(false)}
@@ -3872,7 +3894,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             {workspace?.project?.creatorProfileId !== state?.currentProfileId ? (
               <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginTop: "14px" }}>
                 <div style={{ padding: "12px 14px", background: "#fee2e2", border: "2px solid #ef4444", borderRadius: "8px", color: "#b91c1c", fontSize: "0.88rem", fontWeight: 800 }}>
-                  Only the room owner can post new quests to the board.
+                  Only the room owner can create new tasks for the board.
                 </div>
                 <button
                   className="rpg-modern-btn is-secondary"
@@ -3892,7 +3914,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
                 <div>
                   <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
-                    Quest Title *
+                    Task Title *
                   </label>
                   <input
                     type="text"
@@ -3989,7 +4011,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   disabled={isCreatingQuest}
                   style={{ marginTop: "6px", boxShadow: "none" }}
                 >
-                  {isCreatingQuest ? "Posting Quest..." : "Post Quest to Board"}
+                  {isCreatingQuest ? "Creating Task..." : "Create Task"}
                 </button>
 
                 <button className="rpg-modern-btn is-secondary" type="button" onClick={() => setShowCreateQuestModal(false)}>

@@ -5164,12 +5164,74 @@ footer {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .cloud-far {
     display: none;
   }
+  .boss-hp-container {
+    transform: scale(0.85);
+    transform-origin: center top;
+  }
+  .village-hp-container {
+    transform: scale(0.85);
+    transform-origin: center top;
+  }
+  .landscape-questboard-layer {
+    transform: scale(0.88);
+    transform-origin: center center;
+  }
+  .rpg-btn-leaderboard {
+    padding: 5px 9px;
+    font-size: 0.74rem;
+    top: 10px;
+    right: 10px;
+  }
+  .rpg-btn-layout-admin {
+    right: 120px !important;
+  }
+  .rpg-btn-attack-circle {
+    width: 54px;
+    height: 54px;
+    font-size: 0.72rem;
+    bottom: 12px;
+    left: 12px;
+  }
+}
+
+@media (max-width: 520px) {
   .landscape-scene-container {
     aspect-ratio: 16 / 9;
+  }
+  .boss-hp-container {
+    transform: scale(0.72);
+    transform-origin: center top;
+  }
+  .village-hp-container {
+    transform: scale(0.72);
+    transform-origin: center top;
+  }
+  .landscape-questboard-layer {
+    transform: scale(0.74);
+    transform-origin: center center;
+  }
+  .pvz-deadline-progress-container {
+    transform: translateX(-50%) scale(0.82) !important;
+  }
+  .rpg-btn-leaderboard {
+    padding: 4px 7px;
+    font-size: 0.68rem;
+    top: 8px;
+    right: 8px;
+  }
+  .rpg-btn-layout-admin {
+    right: 105px !important;
+  }
+  .rpg-btn-attack-circle {
+    width: 46px;
+    height: 46px;
+    font-size: 0.65rem;
+    bottom: 8px;
+    left: 8px;
   }
 }
 

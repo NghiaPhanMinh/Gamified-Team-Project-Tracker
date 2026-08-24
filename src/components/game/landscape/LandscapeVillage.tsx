@@ -151,10 +151,48 @@ export function LandscapeVillage({
             <path d="M -2,4 Q -6,8 -3,12 Q 2,14 4,8 Q 2,4 -2,4 Z" fill="#15803d" />
             <circle cx="5" cy="1" r="1.5" fill="#1dd851" />
           </g>
+
+          {/* Embedded Styles for Village Chimney Smoke & Swaying Vines */}
+          <style>{`
+            @keyframes villageSmokePuff1 {
+              0% { transform: translate(0px, 0px) scale(0.5); opacity: 0; }
+              15% { opacity: 0.8; }
+              65% { opacity: 0.35; }
+              100% { transform: translate(-6px, -24px) scale(1.6); opacity: 0; }
+            }
+            @keyframes villageSmokePuff2 {
+              0% { transform: translate(0px, 0px) scale(0.4); opacity: 0; }
+              20% { opacity: 0.7; }
+              70% { opacity: 0.25; }
+              100% { transform: translate(5px, -30px) scale(1.9); opacity: 0; }
+            }
+            @keyframes villageSmokePuff3 {
+              0% { transform: translate(0px, 0px) scale(0.6); opacity: 0; }
+              25% { opacity: 0.65; }
+              75% { opacity: 0.2; }
+              100% { transform: translate(-2px, -36px) scale(2.3); opacity: 0; }
+            }
+            @keyframes vineSway1 {
+              0%, 100% { transform: rotate(0deg); }
+              50% { transform: rotate(4.5deg) translateY(-0.5px); }
+            }
+            @keyframes vineSway2 {
+              0%, 100% { transform: rotate(0deg); }
+              50% { transform: rotate(-4deg) translateY(0.5px); }
+            }
+            .village-smoke-1 { animation: villageSmokePuff1 3.2s ease-out infinite; }
+            .village-smoke-2 { animation: villageSmokePuff2 3.2s ease-out 1.1s infinite; }
+            .village-smoke-3 { animation: villageSmokePuff3 3.2s ease-out 2.2s infinite; }
+            .swaying-vine-left { transform-origin: 0px 10px; animation: vineSway1 3.6s ease-in-out infinite alternate; }
+            .swaying-vine-right { transform-origin: 60px 10px; animation: vineSway2 4.2s ease-in-out infinite alternate; }
+          `}</style>
         </defs>
 
         {/* --- 3D ISOMETRIC WALLED MEDIEVAL VILLAGE (Compact Grounded Medieval Houses) --- */}
         <g transform="translate(15, 0)">
+
+          {/* 0. GROUNDED VILLAGE UNDERSHADOW (Grounded Base Shadow, Static like Terrain) */}
+          <ellipse cx="128" cy="265" rx="126" ry="24" fill="#000000" opacity="0.22" />
 
           {/* 1. COURTYARD GRASS FLOOR (Seamless Natural Grass) */}
           <polygon points="18,185 236,185 244,256 10,256" fill="#17a738" />
@@ -236,14 +274,12 @@ export function LandscapeVillage({
           <g transform="translate(166, 178)">
             {/* Stone Chimney */}
             <rect x="26" y="2" width="11" height="26" fill="#475569" />
-            {/* Gentle Smoke from Chimney */}
-            {isHealthy ? (
-              <g transform="translate(31, -8)">
-                <circle cx="0" cy="0" r="3.5" fill="#e2e8f0" opacity="0.8" />
-                <circle cx="-3" cy="-7" r="5" fill="#e2e8f0" opacity="0.6" />
-                <circle cx="2" cy="-15" r="7" fill="#cbd5e1" opacity="0.3" />
-              </g>
-            ) : null}
+            {/* Active Chimney Smoke Animation (Looping Puff Animation) */}
+            <g transform="translate(31.5, 2)">
+              <circle cx="0" cy="0" r="3.5" fill="#f1f5f9" className="village-smoke-1" />
+              <circle cx="0" cy="0" r="4.2" fill="#e2e8f0" className="village-smoke-2" />
+              <circle cx="0" cy="0" r="5" fill="#cbd5e1" className="village-smoke-3" />
+            </g>
             {/* Half-Timbered Plaster Lower Body */}
             <rect x="0" y="28" width="46" height="42" fill="#fef3c7" />
             {/* Timber Frame Beams */}
@@ -320,13 +356,17 @@ export function LandscapeVillage({
             <line x1="22" y1="28" x2="52" y2="28" stroke="#78350f" strokeWidth="2" />
             <line x1="22" y1="40" x2="52" y2="40" stroke="#78350f" strokeWidth="2" />
 
-            {/* Climbing Green Vine Leaves on Brick Posts & Arch */}
-            <use href="#vine-cluster" x="-1" y="10" />
-            <use href="#vine-cluster" x="2" y="30" transform="scale(0.8)" />
-            <use href="#vine-cluster" x="8" y="2" transform="scale(0.85)" />
-            <use href="#vine-cluster" x="50" y="2" transform="scale(0.85)" />
-            <use href="#vine-cluster" x="53" y="12" />
-            <use href="#vine-cluster" x="55" y="32" transform="scale(0.85)" />
+            {/* Climbing Green Vine Leaves on Brick Posts & Arch with Wind Breeze Sway */}
+            <g className="swaying-vine-left">
+              <use href="#vine-cluster" x="-1" y="10" />
+              <use href="#vine-cluster" x="2" y="30" transform="scale(0.8)" />
+              <use href="#vine-cluster" x="8" y="2" transform="scale(0.85)" />
+            </g>
+            <g className="swaying-vine-right">
+              <use href="#vine-cluster" x="50" y="2" transform="scale(0.85)" />
+              <use href="#vine-cluster" x="53" y="12" />
+              <use href="#vine-cluster" x="55" y="32" transform="scale(0.85)" />
+            </g>
           </g>
 
           {/* CORNER WATCHTOWER 3: Bottom-Left (Foreground) */}
