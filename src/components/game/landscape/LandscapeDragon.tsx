@@ -273,30 +273,21 @@ export function LandscapeDragon({
       }
     }
 
-    // Anatomical slayed/collapsed posture per body part group (Kept in-bounds on grassland)
+    // Anatomical slayed posture: only head and wings remain resting on the shadow plane, other body pieces dissolve
+    let isVisibleWhenDead = group === "headNeck" || group === "frontWing" || group === "backWing";
     if (isDefeated) {
       if (group === "headNeck") {
-        tx -= 15;
-        ty += 32;
-        baseRot += 18;
+        tx -= 10;
+        ty += 52;
+        baseRot += 14;
       } else if (group === "frontWing") {
-        tx -= 8;
-        ty += 20;
-        baseRot += 35;
+        tx -= 6;
+        ty += 42;
+        baseRot += 32;
       } else if (group === "backWing") {
-        tx += 10;
-        ty += 15;
-        baseRot -= 25;
-      } else if (group === "frontLeg" || group === "frontArm" || group === "frontClaw") {
-        tx -= 5;
-        ty += 12;
-        baseRot -= 12;
-      } else if (group === "tail") {
-        tx += 10;
-        ty += 10;
-        baseRot += 10;
-      } else {
-        ty += 15;
+        tx += 8;
+        ty += 38;
+        baseRot -= 24;
       }
     }
     
@@ -319,6 +310,8 @@ export function LandscapeDragon({
       style: {
         cursor: onSelectPart ? "pointer" : "inherit",
         pointerEvents: (onSelectPart ? "auto" : "none") as any,
+        opacity: isDefeated ? (isVisibleWhenDead ? (group === "headNeck" ? 0.95 : 0.6) : 0) : 1,
+        display: isDefeated && !isVisibleWhenDead ? "none" : "block",
       },
       stroke: isSelected ? "#ffd700" : defaultStroke,
       strokeWidth: isSelected ? 3 : defaultStrokeWidth,
@@ -345,14 +338,14 @@ export function LandscapeDragon({
         height="100%"
         style={{ pointerEvents: (onSelectPart ? "auto" : "none") as any }}
       >
-        {/* Dragon Group anchored on Far-Right End (Settles down slightly when defeated) */}
+        {/* Dragon Group anchored on Far-Right End (Settles down into shadow plane when defeated) */}
         <g
-          transform={`translate(${dragonX}, ${isDefeated ? 145 : 130})`}
+          transform={`translate(${dragonX}, ${isDefeated ? 150 : 130})`}
           className="dragon-group"
         >
           {/* Defeated Ghost Soul and Slayed Indicator */}
           {isDefeated && (
-            <g transform="translate(100, -20)" style={{ animation: "dragon-ghost-soul 3s ease-in-out infinite", pointerEvents: "none" }}>
+            <g transform="translate(90, -25)" style={{ animation: "dragon-ghost-soul 3s ease-in-out infinite", pointerEvents: "none" }}>
               <text x="0" y="0" fill="#94a3b8" fontSize="18" fontWeight="900" fontFamily="var(--font-heading), sans-serif" textAnchor="middle" opacity="0.85">
                 Slayed Boss
               </text>
@@ -362,7 +355,7 @@ export function LandscapeDragon({
             </g>
           )}
 
-          {/* Dragon Ground Shadow (Grounded directly under dragon body/feet, never cropped) */}
+          {/* Dragon Ground Shadow Plane */}
           <g transform={`translate(85, ${isDefeated ? 165 : 180})`}>
             {!isDefeated && animationsEnabled && (
               <animateTransform
@@ -374,7 +367,7 @@ export function LandscapeDragon({
                 additive="sum"
               />
             )}
-            <ellipse cx="0" cy="0" rx="105" ry="22" fill="rgba(0,0,0,0.22)" stroke="none" />
+            <ellipse cx="0" cy="0" rx={isDefeated ? 115 : 105} ry={isDefeated ? 26 : 22} fill="rgba(0,0,0,0.28)" stroke="none" />
           </g>
 
           {/* Hovering animation tag */}
@@ -582,6 +575,18 @@ export function LandscapeDragon({
                   </g>
                 );
               })}
+
+              {/* Slayed Boss Dead X X Eyes directly over the resting skull */}
+              {isDefeated && (
+                <g transform="translate(18, 56) rotate(14)" style={{ pointerEvents: "none" }}>
+                  {/* Left X Eye */}
+                  <line x1="-10" y1="-5" x2="-2" y2="3" stroke="#67e8f9" strokeWidth="3" strokeLinecap="round" />
+                  <line x1="-2" y1="-5" x2="-10" y2="3" stroke="#67e8f9" strokeWidth="3" strokeLinecap="round" />
+                  {/* Right X Eye */}
+                  <line x1="8" y1="-5" x2="16" y2="3" stroke="#67e8f9" strokeWidth="3" strokeLinecap="round" />
+                  <line x1="16" y1="-5" x2="8" y2="3" stroke="#67e8f9" strokeWidth="3" strokeLinecap="round" />
+                </g>
+              )}
             </g>
           </g>
         </g>

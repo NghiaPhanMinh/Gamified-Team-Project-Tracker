@@ -1087,13 +1087,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     }
     const memberIndex = state?.members.findIndex((m) => m.profileId === state.currentProfileId) ?? 0;
     const currentMember = state?.members[Math.max(0, memberIndex)];
-    setLocalAttack({
-      id: `element_switch_${Date.now()}`,
-      attackerName: currentMember?.displayName || "Adventurer",
-      damage: 0,
-      spellType: newSpellType,
-      target: "all",
-    });
 
     try {
       if (workspace?.project?.teamId) {
@@ -2878,6 +2871,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           <LandscapeFX
             activeEvent={combinedActiveEvent}
             isVictory={defeated}
+            goblins={goblins}
+            layerTransforms={layerTransforms}
           />
         </div>
 

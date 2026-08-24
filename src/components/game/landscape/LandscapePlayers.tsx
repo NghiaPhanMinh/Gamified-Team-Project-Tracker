@@ -38,37 +38,37 @@ export function getMageTheme(spellType?: string, profileId: string = "", index: 
     return {
       type,
       name: "Lightning Mage",
-      robePrimary: "#1e3a8a",
-      trim: "#4ca0fe",
-      hat: "#172554",
-      ribbon: "#fff73f",
-      orbCore: "#fff73f",
-      orbAccent: "#4ca0fe",
-      glowColor: "#fff73f",
+      robePrimary: "#312e81",
+      trim: "#facc15",
+      hat: "#1e1b4b",
+      ribbon: "#fde047",
+      orbCore: "#fde047",
+      orbAccent: "#67e8f9",
+      glowColor: "#fde047",
     };
   } else if (type === "fire") {
     return {
       type,
       name: "Fire Mage",
       robePrimary: "#991b1b",
-      trim: "#feaa01",
+      trim: "#f97316",
       hat: "#450a0a",
-      ribbon: "#feaa01",
-      orbCore: "#fd39e4",
-      orbAccent: "#fff73f",
-      glowColor: "#feaa01",
+      ribbon: "#fbbf24",
+      orbCore: "#ef4444",
+      orbAccent: "#fde047",
+      glowColor: "#f97316",
     };
   } else {
     return {
       type,
       name: "Ice Mage",
-      robePrimary: "#0369a1",
-      trim: "#ff8ae7",
-      hat: "#0c4a6e",
-      ribbon: "#fffded",
-      orbCore: "#4ca0fe",
-      orbAccent: "#ffffff",
-      glowColor: "#ff8ae7",
+      robePrimary: "#38bdf8",
+      trim: "#ffffff",
+      hat: "#0284c7",
+      ribbon: "#ff8ae7",
+      orbCore: "#ffffff",
+      orbAccent: "#38bdf8",
+      glowColor: "#38bdf8",
     };
   }
 }
@@ -83,9 +83,7 @@ export function LandscapePlayers({ members, currentProfileId, onSelectElement }:
 
   const handleElementPick = (e: React.MouseEvent, type: MageType) => {
     e.stopPropagation();
-    if (type === "lightning") gameAudio.playLightning(1200);
-    else if (type === "fire") gameAudio.playFireBurn(1200);
-    else if (type === "ice") gameAudio.playFreeze();
+    gameAudio.playTing();
 
     if (onSelectElement) {
       onSelectElement(type);

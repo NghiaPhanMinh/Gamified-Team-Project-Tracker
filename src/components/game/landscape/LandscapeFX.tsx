@@ -13,9 +13,11 @@ type ActiveCombatEvent = {
 type LandscapeFXProps = {
   activeEvent: ActiveCombatEvent | null;
   isVictory: boolean;
+  goblins?: Array<{ id: string; isDefeated?: boolean }>;
+  layerTransforms?: Record<string, { x: number; y: number; scale: number; visible: boolean }>;
 };
 
-export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
+export function LandscapeFX({ activeEvent, isVictory, goblins, layerTransforms }: LandscapeFXProps) {
   // Elemental spell type resolution
   const spell = activeEvent?.spellType || "lightning";
   const isAll = spell === "all";
@@ -25,34 +27,35 @@ export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
 
   const attackTargets = useMemo(() => {
     if (!activeEvent) return [];
+
+    const goblinLayerX = layerTransforms?.goblins?.x ?? 50;
+    const goblinLayerY = layerTransforms?.goblins?.y ?? 0;
+    const dragonLayerX = layerTransforms?.dragon?.x ?? 0;
+    const dragonLayerY = layerTransforms?.dragon?.y ?? 0;
+
+    const activeGoblinCount = goblins && goblins.length > 0 ? goblins.length : 2;
+    const liveGoblinTargets = Array.from({ length: activeGoblinCount }).map((_, idx) => ({
+      id: `goblin-${idx}`,
+      x: 490 + goblinLayerX + idx * 45 + 15,
+      y: 270 + goblinLayerY + (idx % 2) * 12 + 18,
+      scale: 0.85,
+    }));
+
+    const dragonTarget = {
+      id: "dragon-boss",
+      x: 730 + dragonLayerX + 70,
+      y: 130 + dragonLayerY + 45,
+      scale: 2.2,
+    };
+
     if (activeEvent.spellType === "all" || activeEvent.target === "all") {
-      return [
-        { id: "goblin-0", x: 505, y: 290, scale: 0.85 },
-        { id: "goblin-1", x: 550, y: 302, scale: 0.85 },
-        { id: "goblin-2", x: 595, y: 290, scale: 0.85 },
-        { id: "goblin-3", x: 640, y: 302, scale: 0.85 },
-        { id: "dragon-boss", x: 750, y: 175, scale: 2.2 },
-      ];
+      return [...liveGoblinTargets, dragonTarget];
     }
     if (activeEvent.target === "goblin") {
-      return [
-        {
-          id: "goblin-target",
-          x: activeEvent.targetX ?? 505,
-          y: activeEvent.targetY ?? 290,
-          scale: 0.85,
-        },
-      ];
+      return liveGoblinTargets;
     }
-    return [
-      {
-        id: "dragon-boss",
-        x: activeEvent.targetX ?? 750,
-        y: activeEvent.targetY ?? 175,
-        scale: 2.2,
-      },
-    ];
-  }, [activeEvent]);
+    return [dragonTarget];
+  }, [activeEvent, goblins, layerTransforms]);
 
   return (
     <div className="landscape-layer layer-9-fx" aria-hidden="true">
@@ -70,83 +73,74 @@ export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
               dur="10s"
               repeatCount="indefinite"
             />
-            <animate
-              attributeName="opacity"
-              values="0; 1; 1; 0; 0"
-              keyTimes="0; 0.02; 0.19; 0.21; 1"
-              dur="10s"
-              repeatCount="indefinite"
-            />
-            {/* Arrows tilted upwards pointing towards the dragon fire intercept */}
-            <g transform="rotate(-11)">
-              {/* Lead Arrow */}
-              <line x1="0" y1="0" x2="34" y2="0" stroke="#facc15" strokeWidth="2.5" strokeLinecap="round" />
-              <polygon points="34,0 26,-4 26,4" fill="#ef4444" />
-              {/* Flanking Arrow Top */}
-              <line x1="-15" y1="-10" x2="18" y2="-10" stroke="#facc15" strokeWidth="2" strokeLinecap="round" />
-              <polygon points="18,-10 11,-14 11,-6" fill="#ef4444" />
-              {/* Flanking Arrow Bottom */}
-              <line x1="-12" y1="10" x2="20" y2="10" stroke="#facc15" strokeWidth="2" strokeLinecap="round" />
-              <polygon points="20,10 13,6 13,14" fill="#ef4444" />
+            {/* Arrow Projectile with Trajectory Trail */}
+            <g transform="rotate(-15)">
+              <line x1="-18" y1="0" x2="6" y2="0" stroke="#fef08a" strokeWidth="2.5" strokeLinecap="round" />
+              <polygon points="6,-3 12,0 6,3" fill="#facc15" />
+              <line x1="-24" y1="0" x2="-18" y2="0" stroke="#ffffff" strokeWidth="1.2" opacity="0.6" />
             </g>
           </g>
 
           {/* =========================================================================
-              2. DRAGON SNOUT FIRE BREATH (Fires every 10s straight from mouth x=705, y=160 to sky intercept x=475, y=150)
+              2. DRAGON CONTINUOUS FIREBALL SPIT (Spits large fireball from mouth x=680, y=130 towards village center x=160, y=280 every 12s)
               ========================================================================= */}
           <g>
             <animateTransform
               attributeName="transform"
               type="translate"
-              values="705 160; 590 155; 475 150; 475 150"
-              keyTimes="0; 0.12; 0.20; 1"
-              dur="10s"
+              values="680 130; 420 205; 160 280; 160 280"
+              keyTimes="0; 0.18; 0.30; 1"
+              dur="12s"
               repeatCount="indefinite"
             />
-            <animate
-              attributeName="opacity"
-              values="0; 1; 1; 0; 0"
-              keyTimes="0; 0.02; 0.19; 0.21; 1"
-              dur="10s"
-              repeatCount="indefinite"
-            />
-            {/* Clean Vector Flame Stream pointing forward towards left */}
-            <g>
-              {/* Core Yellow Fire */}
-              <polygon points="0,0 -35,-10 -60,0 -35,10" fill="#fef08a" />
-              {/* Vivid Orange Body */}
-              <polygon points="15,-6 -25,-15 -50,-4 -20,6" fill="#f97316" />
-              <polygon points="15,6 -25,-4 -50,6 -20,15" fill="#f97316" />
-              {/* Outer Crimson Flames */}
-              <polygon points="30,-8 -15,-20 -40,-6 -10,3" fill="#dc2626" />
-              <polygon points="30,8 -15,-3 -40,10 -10,18" fill="#dc2626" />
+            {/* Blazing Comet / Fireball FX */}
+            <g transform="rotate(164)">
+              {/* Molten Outer Flare */}
+              <ellipse cx="0" cy="0" rx="20" ry="10" fill="#ea580c" opacity="0.85" />
+              {/* Glowing Core */}
+              <ellipse cx="-4" cy="0" rx="14" ry="6" fill="#fde047" />
+              {/* Center White Heat */}
+              <ellipse cx="-6" cy="0" rx="8" ry="3" fill="#ffffff" />
+              {/* Trailing Smoke / Embers */}
+              <polygon points="12,-6 32,-3 18,0 36,4 12,6" fill="#dc2626" opacity="0.9" />
+              <circle cx="28" cy="-8" r="2.5" fill="#f97316" />
+              <circle cx="34" cy="7" r="2" fill="#fde047" />
             </g>
           </g>
 
           {/* =========================================================================
-              3. HIGH SKY CLASH EXPLOSION AT INTERCEPT POINT (x=475, y=150) (Every 10s)
+              3. VICTORY CELEBRATION CONFETTI & SPARKS
               ========================================================================= */}
-          <g transform="translate(475, 150)">
-            <animate
-              attributeName="opacity"
-              values="0; 0; 1; 0.9; 0; 0"
-              keyTimes="0; 0.19; 0.21; 0.28; 0.34; 1"
-              dur="10s"
-              repeatCount="indefinite"
-            />
-            <animateTransform
-              attributeName="transform"
-              type="scale"
-              values="0.2; 0.2; 1.6; 0.8; 0"
-              keyTimes="0; 0.19; 0.21; 0.28; 0.34; 1"
-              dur="10s"
-              repeatCount="indefinite"
-              additive="sum"
-            />
-            <circle cx="0" cy="0" r="26" fill="#fef08a" />
-            <circle cx="0" cy="0" r="16" fill="#f97316" />
-            <polygon points="0,-28 8,-10 28,0 8,10 0,28 -8,10 -28,0 -8,-10" fill="#e11d48" />
-          </g>
+          {isVictory && (
+            <g>
+              {/* Confetti Ribbon 1 */}
+              <g transform="translate(200, 50)">
+                <animateTransform attributeName="transform" type="translate" values="200,20; 200,380" dur="4s" repeatCount="indefinite" />
+                <rect width="10" height="6" fill="#f43f5e" transform="rotate(45)">
+                  <animateTransform attributeName="transform" type="rotate" values="0; 360" dur="1.2s" repeatCount="indefinite" />
+                </rect>
+              </g>
+              {/* Confetti Ribbon 2 */}
+              <g transform="translate(450, 20)">
+                <animateTransform attributeName="transform" type="translate" values="450,10; 450,380" dur="3.5s" repeatCount="indefinite" />
+                <rect width="8" height="8" fill="#38bdf8" transform="rotate(30)">
+                  <animateTransform attributeName="transform" type="rotate" values="0; 360" dur="0.9s" repeatCount="indefinite" />
+                </rect>
+              </g>
+              {/* Confetti Ribbon 3 */}
+              <g transform="translate(700, 30)">
+                <animateTransform attributeName="transform" type="translate" values="700,15; 700,380" dur="4.2s" repeatCount="indefinite" />
+                <circle r="5" fill="#facc15" />
+              </g>
+              {/* Confetti Ribbon 4 */}
+              <g transform="translate(850, 40)">
+                <animateTransform attributeName="transform" type="translate" values="850,0; 850,380" dur="3.8s" repeatCount="indefinite" />
+                <rect width="12" height="5" fill="#4ade80" transform="rotate(60)">
+                  <animateTransform attributeName="transform" type="rotate" values="0; 360" dur="1.5s" repeatCount="indefinite" />
+                </rect>
+              </g>
+            </g>
+          )}
 
           {/* =========================================================================
               4. ACTIVE PLAYER ELEMENTAL ATTACK SPELL ANIMATIONS
@@ -318,43 +312,18 @@ export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
               top: "35%",
               fontSize: "1.4rem",
               fontWeight: 900,
-              color: isLightning ? "#facc15" : isFire ? "#ef4444" : "#38bdf8",
-              textShadow: "0 2px 4px #000",
+              fontFamily: "var(--font-heading), sans-serif",
+              color: activeEvent.spellType === "ice" ? "#38bdf8" : activeEvent.spellType === "fire" ? "#f97316" : "#fde047",
+              textShadow: "0 0 10px rgba(0,0,0,0.8)",
               pointerEvents: "none",
+              zIndex: 30,
+              animation: "float-damage-anim 1.5s ease-out forwards",
             }}
           >
-            -{activeEvent.damage} HP
-          </div>
-          <div
-            key={activeEvent.id + "-goblin"}
-            className="floating-damage"
-            style={{
-              position: "absolute",
-              left: "54%",
-              top: "52%",
-              fontSize: "1.1rem",
-              fontWeight: 900,
-              color: isLightning ? "#facc15" : isFire ? "#ef4444" : "#38bdf8",
-              textShadow: "0 2px 4px #000",
-              pointerEvents: "none",
-            }}
-          >
-            -100 HP
+            -{activeEvent.damage} DMG!
           </div>
         </>
       )}
-
-      {/* Victory Particle Burst on Final Blow */}
-      {isVictory ? (
-        <svg viewBox="0 0 1000 400" width="100%" height="100%" style={{ position: "absolute", inset: 0 }}>
-          <g transform="translate(800, 80)">
-            <circle cx="0" cy="0" r="8" fill="#facc15" opacity="0.8" />
-            <polygon points="0,-15 5,-5 15,0 5,5 0,15 -5,5 -15,0 -5,-5" fill="#facc15" />
-            <polygon points="-30,-30 -20,-25 -25,-15" fill="#ef4444" />
-            <polygon points="30,-40 25,-25 40,-30" fill="#38bdf8" />
-          </g>
-        </svg>
-      ) : null}
     </div>
   );
 }
