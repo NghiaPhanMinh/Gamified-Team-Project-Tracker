@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "convex/react";
+import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 
 import { api } from "../../../convex/_generated/api";
 import type { Doc, Id } from "../../../convex/_generated/dataModel";
@@ -260,7 +261,7 @@ export function CustomFrameworkBuilder({
                   aria-label={`Move ${phase.name || `phase ${index + 1}`} up`}
                   onClick={() => movePhase(index, -1)}
                 >
-                  ↑
+                  <ChevronUp size={16} aria-hidden="true" />
                 </button>
                 <button
                   type="button"
@@ -268,7 +269,7 @@ export function CustomFrameworkBuilder({
                   aria-label={`Move ${phase.name || `phase ${index + 1}`} down`}
                   onClick={() => movePhase(index, 1)}
                 >
-                  ↓
+                  <ChevronDown size={16} aria-hidden="true" />
                 </button>
                 <button
                   type="button"
@@ -276,6 +277,7 @@ export function CustomFrameworkBuilder({
                   aria-label={`Remove ${phase.name || `phase ${index + 1}`}`}
                   onClick={() => removePhase(index)}
                 >
+                  <Trash2 size={15} aria-hidden="true" style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "4px" }} />
                   Remove
                 </button>
               </div>
@@ -406,7 +408,8 @@ export function CustomFrameworkBuilder({
         disabled={phases.length >= 20}
         onClick={() => setPhases((current) => [...current, blankPhase()])}
       >
-        + Add phase
+        <Plus size={16} aria-hidden="true" style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "4px" }} />
+        Add phase
       </button>
 
       {saveError ? (
