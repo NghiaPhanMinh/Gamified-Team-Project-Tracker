@@ -2699,19 +2699,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           Attack
         </button>
 
-        {/* Dynamic Camera Zoom Viewport for Tutorial Cutscenes */}
-        <div
-          className="landscape-camera-viewport"
-          style={{
-            position: "absolute",
-            inset: 0,
-            transform: tutorialCameraTransform,
-            transformOrigin: "center center",
-            transition: "transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)",
-            pointerEvents: showTutorial ? "none" : "auto",
-          }}
-        >
-
         {/* Floating Mob-Style Boss HP Bar (With Humorous Boss Name Above, HP % Inside, Adjustable Size) */}
         <div
           className="boss-hp-container"
@@ -2883,7 +2870,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             isVictory={defeated}
           />
         </div>
-      </div>
 
         {/* Layer 10: Bottom-Middle Plant vs Zombies Style Deadline Progress Bar (Flat Style, No Shadow, No Outline) */}
         <div
@@ -2993,6 +2979,22 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             ))}
           </div>
         </div>
+
+        {/* Interactive Visual Novel Cutscene Tutorial Overlay (Strictly inside game canvas) */}
+        {showTutorial && (
+          <LandscapeTutorial
+            isOpen={showTutorial}
+            onClose={() => setShowTutorial(false)}
+            villageName={funnyVillageName}
+            bossName={funnyBossName}
+            dragonOffsets={dragonOffsets}
+            customShapes={customShapes}
+            dragonFills={dragonFills}
+            deletedShapes={deletedShapes}
+            dragonGeometries={dragonGeometries}
+            layerOrder={layerOrder}
+          />
+        )}
       </div>
 
       {/* =========================================================================
@@ -5663,76 +5665,90 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       {showTutorialChoice && !showTutorial && (
         <div className="rpg-modal-overlay" style={{ zIndex: 60 }}>
           <div
-            className="rpg-parchment-modal"
-            style={{ maxWidth: "480px", textAlign: "center", animation: "tutorialPopIn 0.35s ease forwards" }}
+            style={{
+              maxWidth: "460px",
+              width: "90%",
+              textAlign: "center",
+              background: "#fffded",
+              border: "3px solid #101517",
+              boxShadow: "6px 6px 0 #101517",
+              borderRadius: "16px",
+              padding: "24px 20px",
+              animation: "tutorialPopIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+              color: "#101517",
+            }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="rpg-modal-header" style={{ justifyContent: "center" }}>
-              <h2>Welcome to the Realm!</h2>
-            </div>
-            <div className="rpg-modal-body" style={{ display: "grid", gap: "16px", padding: "16px 20px" }}>
-              <div style={{ fontSize: "2.5rem" }}>🏰⚔️🐉</div>
-              <p style={{ margin: 0, fontSize: "0.9rem", color: "#f1f5f9", lineHeight: 1.5 }}>
-                Would you like a quick 1-minute visual walkthrough on defending the village, daily goblins, and defeating <strong>{funnyBossName}</strong>?
-              </p>
-              <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "8px" }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (typeof window !== "undefined") {
-                      localStorage.setItem("rpg_tutorial_seen", "true");
-                    }
-                    setShowTutorialChoice(false);
-                  }}
-                  style={{
-                    padding: "8px 18px",
-                    borderRadius: "8px",
-                    background: "#334155",
-                    color: "#cbd5e1",
-                    border: "none",
-                    fontSize: "0.85rem",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}
-                >
-                  Skip Tutorial
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowTutorialChoice(false);
-                    setTutorialScene("A");
-                    setShowTutorial(true);
-                  }}
-                  style={{
-                    padding: "8px 24px",
-                    borderRadius: "8px",
-                    background: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)",
-                    color: "#ffffff",
-                    border: "none",
-                    fontSize: "0.85rem",
-                    fontWeight: 800,
-                    cursor: "pointer",
-                    boxShadow: "0 4px 14px rgba(2, 132, 199, 0.4)",
-                  }}
-                >
-                  Start Tutorial ➜
-                </button>
-              </div>
+            <div style={{ fontSize: "2.8rem", marginBottom: "8px" }}>🏰⚔️🐉</div>
+            <h2
+              style={{
+                margin: "0 0 8px 0",
+                fontSize: "1.3rem",
+                fontWeight: 900,
+                fontFamily: "var(--font-heading), sans-serif",
+                color: "#101517",
+              }}
+            >
+              Welcome to the Realm!
+            </h2>
+            <p
+              style={{
+                margin: "0 0 20px 0",
+                fontSize: "0.88rem",
+                color: "#334155",
+                lineHeight: 1.45,
+                fontWeight: 600,
+              }}
+            >
+              Would you like a quick 1-minute visual walkthrough on defending your village, daily goblins, and defeating <strong>{funnyBossName}</strong>?
+            </p>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button
+                type="button"
+                className="rpg-modern-btn is-secondary"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    localStorage.setItem("rpg_tutorial_seen", "true");
+                  }
+                  setShowTutorialChoice(false);
+                }}
+                style={{
+                  padding: "8px 18px",
+                  borderRadius: "8px",
+                  border: "2px solid #101517",
+                  boxShadow: "3px 3px 0 #101517",
+                  fontSize: "0.85rem",
+                  fontWeight: 800,
+                  cursor: "pointer",
+                }}
+              >
+                Skip Tutorial
+              </button>
+              <button
+                type="button"
+                className="rpg-modern-btn is-primary"
+                onClick={() => {
+                  setShowTutorialChoice(false);
+                  setTutorialScene("A");
+                  setShowTutorial(true);
+                }}
+                style={{
+                  padding: "8px 24px",
+                  borderRadius: "8px",
+                  background: "#fff73f",
+                  color: "#101517",
+                  border: "2px solid #101517",
+                  boxShadow: "3px 3px 0 #101517",
+                  fontSize: "0.85rem",
+                  fontWeight: 900,
+                  cursor: "pointer",
+                }}
+              >
+                Start Tutorial ➜
+              </button>
             </div>
           </div>
         </div>
-      )}
-
-      {/* Interactive Visual Novel Cutscene Tutorial Overlay */}
-      {showTutorial && (
-        <LandscapeTutorial
-          isOpen={showTutorial}
-          onClose={() => setShowTutorial(false)}
-          villageName={funnyVillageName}
-          bossName={funnyBossName}
-          onSceneChange={(sc) => setTutorialScene(sc)}
-        />
       )}
     </section>
   );
