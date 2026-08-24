@@ -344,6 +344,21 @@ export function LandscapeDragon({
             </g>
           )}
 
+          {/* Dragon Ground Shadow (Grounded on the grassland floor) */}
+          <g transform="translate(140, 180)">
+            {!isDefeated && animationsEnabled && (
+              <animateTransform
+                attributeName="transform"
+                type="scale"
+                values="1; 0.92; 1"
+                dur="3.2s"
+                repeatCount="indefinite"
+                additive="sum"
+              />
+            )}
+            <ellipse cx="0" cy="0" rx="130" ry="25" fill="rgba(0,0,0,0.22)" stroke="none" />
+          </g>
+
           {/* Hovering animation tag */}
           <g>
             {!isDefeated && animationsEnabled && (

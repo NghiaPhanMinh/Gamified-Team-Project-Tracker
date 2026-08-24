@@ -64,10 +64,13 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
                 className={`goblin-item ${isGhost ? "goblin-ghost-defeated" : "goblin-active-attacking"}`}
                 style={{
                   opacity: isGhost ? 0.38 : 1,
+                  filter: isGhost ? "drop-shadow(0 0 6px #60a5fa)" : "none",
                 }}
                 role="img"
                 aria-label={`Goblin wave defense for ${goblin.memberName} (${isGhost ? "Defeated ghost" : "Attacking fence"})`}
               >
+                {/* 1. Ground Shadow (Always visible on floor) */}
+                <ellipse cx="15" cy="38" rx="14" ry="4" fill="rgba(0,0,0,0.22)" stroke="none" />
 
                 {isGhost ? (
                   /* =========================================================================

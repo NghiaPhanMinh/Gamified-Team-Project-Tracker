@@ -913,58 +913,43 @@ function QuestCardHoverItem({
         background: hovered ? palette.bg : "#ffffff",
         color: "#101517",
         border: "2px solid #101517",
-        borderRadius: "10px",
-        padding: hovered ? "14px 12px 12px 12px" : "12px 14px",
-        boxShadow: hovered ? "4px 4px 0 #101517" : "2px 2px 0 #101517",
+        borderRadius: "8px",
+        padding: "10px 12px",
         cursor: "pointer",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
-        minHeight: hovered ? "145px" : "60px",
-        transition: "all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)",
-        transform: hovered ? "translateY(-3px) scale(1.02)" : "none",
+        justifyContent: "space-between",
+        height: "105px",
+        boxSizing: "border-box",
+        transition: "background-color 0.15s ease",
       }}
     >
-      {/* Pushpin Marker (Only on hover) */}
-      {hovered && (
-        <div
-          style={{
-            position: "absolute",
-            top: "-6px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "12px",
-            height: "12px",
-            borderRadius: "50%",
-            background: palette.pin,
-            border: "2px solid #101517",
-            boxShadow: "0 2px 3px rgba(0,0,0,0.25)",
-          }}
-        />
-      )}
-
-      {/* Task Name (Always visible) */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px" }}>
-        <h4
-          style={{
-            margin: 0,
-            fontSize: "0.95rem",
-            fontWeight: 900,
-            color: "#101517",
-            lineHeight: "1.25",
-          }}
-        >
-          {task.title}
-        </h4>
-        {!hovered && (
+      {/* Top Header: Title + Status Pill */}
+      <div>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "6px" }}>
+          <h4
+            style={{
+              margin: 0,
+              fontSize: "0.92rem",
+              fontWeight: 800,
+              color: "#101517",
+              lineHeight: "1.25",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {task.title}
+          </h4>
           <span
             style={{
-              fontSize: "0.72rem",
-              fontWeight: 800,
+              fontSize: "0.7rem",
+              fontWeight: 700,
               background: task.isOpen ? "#fee2e2" : "rgba(16,21,23,0.08)",
               color: task.isOpen ? "#b91c1c" : "#101517",
               border: "1px solid " + (task.isOpen ? "#ef4444" : "#101517"),
-              padding: "1px 6px",
+              padding: "1px 5px",
               borderRadius: "4px",
               whiteSpace: "nowrap",
               flexShrink: 0,
@@ -972,52 +957,21 @@ function QuestCardHoverItem({
           >
             {task.isOpen ? "Open" : task.assigneeName}
           </span>
-        )}
+        </div>
       </div>
 
-      {/* Details Revealed on Hover */}
-      {hovered && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "8px" }}>
-          {task.description && (
-            <p
-              style={{
-                margin: 0,
-                fontSize: "0.78rem",
-                color: "#334155",
-                lineHeight: "1.35",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }}
-            >
-              {task.description}
-            </p>
-          )}
-
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.72rem", fontWeight: 800 }}>
-            <span style={{ background: "rgba(16,21,23,0.08)", padding: "2px 6px", borderRadius: "4px" }}>
-              Due: {task.dueDate || "None"}
-            </span>
-            <span
-              style={{
-                background: task.isOpen ? "#fee2e2" : "rgba(16,21,23,0.08)",
-                color: task.isOpen ? "#b91c1c" : "#101517",
-                border: "1px solid " + (task.isOpen ? "#ef4444" : "#101517"),
-                padding: "2px 6px",
-                borderRadius: "4px",
-              }}
-            >
-              {task.assigneeName}
-            </span>
-          </div>
-
-          <div style={{ display: "flex", gap: "6px", marginTop: "2px" }}>
+      {/* Bottom Area: Shows more detail and actions on hover */}
+      {hovered ? (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", marginTop: "4px" }}>
+          <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#334155" }}>
+            Due: {task.dueDate || "No date"}
+          </span>
+          <div style={{ display: "flex", gap: "4px" }}>
             {task.isOpen ? (
               <button
                 className="rpg-modern-btn is-primary"
                 type="button"
-                style={{ flex: 1, padding: "5px 8px", fontSize: "0.75rem" }}
+                style={{ padding: "4px 8px", fontSize: "0.72rem", boxShadow: "none" }}
                 disabled={isClaimingQuest}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1030,7 +984,7 @@ function QuestCardHoverItem({
               <button
                 className="rpg-modern-btn is-boss"
                 type="button"
-                style={{ flex: 1, padding: "5px 8px", fontSize: "0.75rem" }}
+                style={{ padding: "4px 8px", fontSize: "0.72rem", boxShadow: "none" }}
                 onClick={(e) => {
                   e.stopPropagation();
                   onAttack(task);
@@ -1039,31 +993,16 @@ function QuestCardHoverItem({
                 Attack Dragon
               </button>
             ) : (
-              <button
-                className="rpg-modern-btn is-secondary"
-                type="button"
-                style={{ flex: 1, padding: "5px 8px", fontSize: "0.75rem" }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDetails(task);
-                }}
-              >
-                View Details
-              </button>
+              <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#64748b" }}>
+                Assigned: {task.assigneeName}
+              </span>
             )}
-            <button
-              className="rpg-modern-btn is-secondary"
-              type="button"
-              style={{ padding: "5px 8px", fontSize: "0.75rem" }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onDetails(task);
-              }}
-              title="Open Quest Details"
-            >
-              Details
-            </button>
           </div>
+        </div>
+      ) : (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "0.72rem", color: "#64748b", fontWeight: 600 }}>
+          <span>Due: {task.dueDate || "No date"}</span>
+          <span>Click for details</span>
         </div>
       )}
     </div>
@@ -2182,8 +2121,20 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     setCreateQuestError(null);
     try {
       const nowStr = new Date().toISOString().split("T")[0];
-      const assignedId = newQuestAssignee ? (newQuestAssignee as Id<"userProfiles">) : (state?.currentProfileId as Id<"userProfiles">);
+      const fallbackProfileId = (state?.currentProfileId || workspace?.members?.[0]?.profileId) as Id<"userProfiles">;
+      const assignedId = (newQuestAssignee ? newQuestAssignee : fallbackProfileId) as Id<"userProfiles">;
       const isOpen = !newQuestAssignee;
+
+      const projStart = workspace?.project?.startDate || nowStr;
+      const projDeadline = workspace?.project?.deadline || new Date(Date.now() + 86400000 * 30).toISOString().split("T")[0];
+
+      let safeStartDate = nowStr;
+      if (safeStartDate < projStart) safeStartDate = projStart;
+      if (safeStartDate > projDeadline) safeStartDate = projDeadline;
+
+      let safeDueDate = newQuestDueDate || nowStr;
+      if (safeDueDate < safeStartDate) safeDueDate = safeStartDate;
+      if (safeDueDate > projDeadline) safeDueDate = projDeadline;
 
       await createTaskMutation({
         projectId,
@@ -2194,8 +2145,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         collaboratorProfileIds: [],
         weight: newQuestWeight || 3,
         required: true,
-        startDate: nowStr,
-        dueDate: newQuestDueDate || nowStr,
+        startDate: safeStartDate,
+        dueDate: safeDueDate,
         requiresReview: true,
         isOpenForClaiming: isOpen,
         assignmentState: isOpen ? "open" : "assigned",
@@ -2540,7 +2491,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           <LandscapeTerrain />
         </div>
 
-        {/* Layer 4.5: In-Canvas Medieval Quest Board (Behind Village, Players, Dragon & FX) */}
+        {/* Layer 4.5: In-Canvas Medieval Quest Board (Directly Clickable) */}
         <LandscapeQuestBoard
           tasksCount={questTasks.length}
           onOpenBoard={() => {
@@ -2550,7 +2501,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         />
 
         {/* Layer 5: Section 3 & 5 - Grounded Village & Anchored Village HP Bar with Humorous Town Name */}
-        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "auto", zIndex: 5, transform: `translate(${layerTransforms.village?.x || 0}px, ${layerTransforms.village?.y || 0}px) scale(${layerTransforms.village?.scale || 1})`, display: layerTransforms.village?.visible !== false ? "block" : "none" }}>
+        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 5, transform: `translate(${layerTransforms.village?.x || 0}px, ${layerTransforms.village?.y || 0}px) scale(${layerTransforms.village?.scale || 1})`, display: layerTransforms.village?.visible !== false ? "block" : "none" }}>
           <LandscapeVillage
             villageHpPercent={effectiveVillageHp}
             villageName={funnyVillageName}
@@ -2562,7 +2513,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         </div>
 
         {/* Layer 6: Section 8 - Daily Goblins Wave System (1 per active player) */}
-        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "auto", zIndex: 6, transform: `translate(${layerTransforms.goblins?.x || 0}px, ${layerTransforms.goblins?.y || 0}px) scale(${layerTransforms.goblins?.scale || 1})`, display: layerTransforms.goblins?.visible !== false ? "block" : "none" }}>
+        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 6, transform: `translate(${layerTransforms.goblins?.x || 0}px, ${layerTransforms.goblins?.y || 0}px) scale(${layerTransforms.goblins?.scale || 1})`, display: layerTransforms.goblins?.visible !== false ? "block" : "none" }}>
           <LandscapeGoblins goblins={goblins} />
         </div>
 
@@ -2590,8 +2541,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           />
         </div>
 
-        {/* Layer 9: Section 2 - Cosmetic Combat Exchange & Elemental Attacks */}
-        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 9, transform: `translate(${layerTransforms.fx?.x || 0}px, ${layerTransforms.fx?.y || 0}px) scale(${layerTransforms.fx?.scale || 1})`, display: layerTransforms.fx?.visible !== false ? "block" : "none" }}>
+        {/* Layer 9: Section 2 - Cosmetic Combat Exchange & Elemental Attacks (Flying on Top at zIndex 25) */}
+        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 25, transform: `translate(${layerTransforms.fx?.x || 0}px, ${layerTransforms.fx?.y || 0}px) scale(${layerTransforms.fx?.scale || 1})`, display: layerTransforms.fx?.visible !== false ? "block" : "none" }}>
           <LandscapeFX
             activeEvent={combinedActiveEvent}
             isVictory={defeated}
@@ -2830,6 +2781,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   setShowGoblinModal(true);
                 }}
               >
+                <span style={{ fontSize: "1.35rem" }}>👺</span>
                 <span style={{ fontSize: "0.95rem" }}>Daily Goblin</span>
                 <span style={{ fontSize: "0.68rem", opacity: 0.85, fontWeight: 700 }}>Log daily effort</span>
               </button>
@@ -2842,6 +2794,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   setShowBossModal(true);
                 }}
               >
+                <span style={{ fontSize: "1.35rem" }}>🐉</span>
                 <span style={{ fontSize: "0.95rem" }}>The Dragon</span>
                 <span style={{ fontSize: "0.68rem", opacity: 0.85, fontWeight: 700 }}>Submit task evidence</span>
               </button>
@@ -2861,7 +2814,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         <div className="rpg-modal-backdrop" onClick={() => setShowGoblinModal(false)}>
           <div className="rpg-modern-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "480px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 className="rpg-modern-title">Slay Daily Goblin</h3>
+              <h3 className="rpg-modern-title">👺 Slay Daily Goblin</h3>
               <button
                 type="button"
                 onClick={() => setShowGoblinModal(false)}
@@ -2905,10 +2858,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               {/* Validation Badges */}
               <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                 <span style={{ padding: "3px 8px", borderRadius: "6px", fontSize: "0.74rem", fontWeight: 800, border: "1.5px solid #101517", background: goblinWordCount >= 10 ? "#86efac" : "#f1f5f9", color: "#101517" }}>
-                  {goblinWordCount}/10 words {goblinWordCount >= 10 ? "✓" : ""}
+                  📝 {goblinWordCount}/10 words {goblinWordCount >= 10 ? "✓" : ""}
                 </span>
                 <span style={{ padding: "3px 8px", borderRadius: "6px", fontSize: "0.74rem", fontWeight: 800, border: "1.5px solid #101517", background: goblinImageCount >= 2 ? "#86efac" : "#f1f5f9", color: "#101517" }}>
-                  {goblinImageCount}/2 images {goblinImageCount >= 2 ? "✓" : ""}
+                  🖼️ {goblinImageCount}/2 images {goblinImageCount >= 2 ? "✓" : ""}
                 </span>
               </div>
 
@@ -2952,7 +2905,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 disabled={isSlaying || (!goblinText && goblinImageUrls.length === 0)}
                 style={{ marginTop: "4px" }}
               >
-                {isSlaying ? "Slaying..." : isGoblinValid ? "Slay Goblin!" : "Log Evidence (Needs 10 words or 2 images)"}
+                {isSlaying ? "Slaying..." : isGoblinValid ? "⚡ Slay Goblin!" : "Log Evidence (Needs 10 words or 2 images)"}
               </button>
 
               <button className="rpg-modern-btn is-secondary" type="button" onClick={() => setShowGoblinModal(false)}>
@@ -2970,7 +2923,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         <div className="rpg-modal-backdrop" onClick={() => setShowBossModal(false)}>
           <div className="rpg-modern-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "580px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 className="rpg-modern-title">Attack The Dragon</h3>
+              <h3 className="rpg-modern-title">🐉 Attack The Dragon</h3>
               <button
                 type="button"
                 onClick={() => setShowBossModal(false)}
@@ -3036,8 +2989,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                       >
                         <h4 style={{ margin: 0, fontSize: "0.85rem", fontWeight: 900, color: "#101517" }}>{task.title}</h4>
                         <div style={{ fontSize: "0.72rem", color: "#64748b", display: "flex", justifyContent: "space-between" }}>
-                          <span>Due: {task.dueDate}</span>
-                          <span>{creatorName}</span>
+                          <span>📅 {task.dueDate}</span>
+                          <span>👤 {creatorName}</span>
                         </div>
                         <button
                           className="rpg-modern-btn is-boss"
@@ -3062,7 +3015,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                       <div>
                         <span style={{ fontSize: "0.68rem", fontWeight: 900, textTransform: "uppercase", color: "#0369a1" }}>Selected Quest</span>
                         <h4 style={{ margin: "2px 0 0 0", fontSize: "0.92rem", fontWeight: 900, color: "#101517" }}>{task.title}</h4>
-                        <span style={{ fontSize: "0.74rem", color: "#0c4a6e" }}>Due {task.dueDate} | Assigned by {creatorName}</span>
+                        <span style={{ fontSize: "0.74rem", color: "#0c4a6e" }}>📅 Due {task.dueDate} | Assigned by {creatorName}</span>
                       </div>
                       <button
                         className="rpg-modern-btn is-secondary"
@@ -3092,7 +3045,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                           setEvidenceFile(null);
                         }}
                       >
-                        {tab === "note" ? "Short Note" : tab === "link" ? "External Link" : tab === "image" ? "Image File" : "PDF File"}
+                        {tab === "note" ? "📝 Short Note" : tab === "link" ? "🔗 External Link" : tab === "image" ? "🖼️ Image File" : "📄 PDF File"}
                       </button>
                     ))}
                   </div>
@@ -3253,7 +3206,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #101517", paddingBottom: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <h3 className="rpg-modern-title" style={{ fontSize: "1.28rem" }}>
-                  Quests & Tasks
+                  Tasks & Quests
                 </h3>
                 <span
                   style={{
@@ -3274,7 +3227,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 <button
                   className="rpg-modern-btn is-primary"
                   type="button"
-                  style={{ padding: "6px 12px", fontSize: "0.8rem" }}
+                  style={{ padding: "6px 12px", fontSize: "0.8rem", boxShadow: "none" }}
                   onClick={() => {
                     setCreateQuestError(null);
                     setShowCreateQuestModal(true);
@@ -3314,7 +3267,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   key={tab.id}
                   type="button"
                   className={`rpg-modern-btn ${questBoardFilter === tab.id ? "is-primary" : "is-secondary"}`}
-                  style={{ padding: "5px 14px", fontSize: "0.8rem" }}
+                  style={{ padding: "5px 14px", fontSize: "0.8rem", boxShadow: "none" }}
                   onClick={() => setQuestBoardFilter(tab.id as any)}
                 >
                   {tab.label}
@@ -3404,7 +3357,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             {/* Minimal Subtext (No Close Board button) */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "2px solid #101517", paddingTop: "10px" }}>
               <span style={{ fontSize: "0.76rem", fontWeight: 700, opacity: 0.75 }}>
-                Hover over any task to reveal details, claim open quests, or attack the dragon.
+                Hover over any task to see details and actions. Click to view full quest details.
               </span>
             </div>
           </div>
@@ -3616,9 +3569,9 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 className="rpg-modern-btn is-primary"
                 type="submit"
                 disabled={isCreatingQuest}
-                style={{ marginTop: "6px" }}
+                style={{ marginTop: "6px", boxShadow: "none" }}
               >
-                {isCreatingQuest ? "Posting Quest..." : "📜 Post Quest to Board"}
+                {isCreatingQuest ? "Posting Quest..." : "Post Quest to Board"}
               </button>
 
               <button className="rpg-modern-btn is-secondary" type="button" onClick={() => setShowCreateQuestModal(false)}>
@@ -3793,7 +3746,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                       Ice Spell
                     </button>
                     <button type="button" style={{ padding: "6px", background: "#7c3aed", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("all")}>
-                      All Spells at Once
+                      ⚡🔥❄️ All Spells at Once
                     </button>
                     <button type="button" style={{ gridColumn: "1 / span 2", padding: "6px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell(null)}>
                       Clear Attack FX

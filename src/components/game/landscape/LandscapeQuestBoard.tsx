@@ -21,36 +21,33 @@ export function LandscapeQuestBoard({
   return (
     <div
       className="landscape-questboard-layer"
-      onClick={(e) => {
-        e.stopPropagation();
-        onOpenBoard();
-      }}
+      onClick={onOpenBoard}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       title="Click to open Quest Board"
       style={{
         position: "absolute",
         left: "440px",
-        top: "115px",
+        top: "122px",
         width: "90px",
         height: "105px",
-        zIndex: 25,
+        zIndex: 15,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         pointerEvents: "auto",
         cursor: "pointer",
         userSelect: "none",
-        transform: isHovered ? "scale(1.08) translateY(-3px)" : "scale(1)",
-        transition: "transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        transform: isHovered ? "scale(1.05) translateY(-2px)" : "scale(1)",
+        transition: "transform 0.15s ease",
       }}
     >
-      {/* Medieval Rustic Wooden Notice Board SVG (Flat clean colors, no shadows, no outlines) */}
+      {/* Medieval Rustic Wooden Notice Board SVG (Pure Vector, No Fake Shadow, No Emoji) */}
       <svg
         viewBox="0 0 90 95"
         width="90"
         height="95"
-        style={{ overflow: "visible", pointerEvents: "none" }}
+        style={{ overflow: "visible" }}
       >
         {/* Support Timber Posts Planted in Earth */}
         <rect x="18" y="36" width="7" height="54" rx="1.5" fill="#3b1402" />
@@ -128,7 +125,7 @@ export function LandscapeQuestBoard({
         {/* Shingle Eaves Beam */}
         <rect x="6" y="14" width="78" height="3" rx="1" fill="#2e1002" />
 
-        {/* Small Notice Badge (No Emoji) */}
+        {/* Small Notice Badge */}
         <rect x="30" y="5" width="30" height="9" rx="2" fill="#2e1002" />
         <text
           x="45"
@@ -138,7 +135,7 @@ export function LandscapeQuestBoard({
           fontSize="5.5"
           fontWeight="bold"
           fontFamily="serif"
-          letterSpacing="0.6"
+          letterSpacing="0.4"
         >
           QUESTS
         </text>
