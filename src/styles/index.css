@@ -5539,7 +5539,7 @@ select option,
 .project-plan-summary, .progress-metrics-card, .project-brief-card, .phase-timeline-card, .game-status-preview, .team-tab { padding: clamp(1rem, 2.4vw, 1.5rem); border: 2px solid var(--color-text); border-radius: 20px; background: var(--color-surface); color: var(--color-text); }
 .project-plan-summary-heading, .project-section-heading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
 .project-plan-summary-heading h2, .project-section-heading h2, .progress-metrics-card h2, .game-status-preview h2 { margin: .1rem 0 .3rem; font-size: clamp(1.65rem, 3vw, 2.5rem); }
-.project-deadline-line { margin: 0; color: var(--color-muted); font-weight: 800; }
+.project-deadline-line { margin: 0; color: var(--color-muted); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .project-progress-pill, .read-only-label { flex: 0 0 auto; padding: .4rem .65rem; border: 2px solid var(--color-text); border-radius: 999px; background: var(--color-yellow); color: var(--color-navy); font-size: .78rem; font-weight: 900; }
 .read-only-label { background: transparent; color: var(--color-muted); }
 .project-plan-metrics, .progress-metrics-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .7rem; margin: 1rem 0 0; }

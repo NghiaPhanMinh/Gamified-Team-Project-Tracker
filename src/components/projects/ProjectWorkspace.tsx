@@ -599,7 +599,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
           </div>
           <p className="project-deadline-line">
             {formatDeadline(workspace.project.deadline)} · {workspace.project.frameworkName}
-            {workspace.project.description ? ` · ${workspace.project.description}` : ""}
+            {workspace.project.description ? ` · ${workspace.project.description.length > 70 ? `${workspace.project.description.slice(0, 70).trim()}...` : workspace.project.description}` : ""}
           </p>
         </div>
         <dl className="compact-project-priority">
@@ -703,7 +703,23 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
                 <div className="project-brief-copy">
                   <p className="card-eyebrow">Brief Details</p>
                   <h3 id="project-brief-visible-title">{workspace.project.title}</h3>
-                  <p>{workspace.project.description || "No project brief has been added yet."}</p>
+                  <p>
+                    {workspace.project.description
+                      ? workspace.project.description.length > 100
+                        ? `${workspace.project.description.slice(0, 100).trim()}...`
+                        : workspace.project.description
+                      : "No project brief has been added yet."}
+                    {(workspace.project.description?.length ?? 0) > 100 ? (
+                      <button
+                        type="button"
+                        className="quiet-button"
+                        style={{ display: "inline-block", marginLeft: "0.5rem", fontWeight: 800, textDecoration: "underline", fontSize: "0.85rem", cursor: "pointer" }}
+                        onClick={() => setBriefOpen(true)}
+                      >
+                        View full brief in Edit Plan →
+                      </button>
+                    ) : null}
+                  </p>
                 </div>
                 <dl className="project-brief-meta project-brief-summary-meta">
                   <div><dt>Deadline</dt><dd>{formatProjectDate(workspace.project.deadline)}</dd></div>
