@@ -5042,20 +5042,38 @@ footer {
 }
 
 .chimney-smoke-p {
-  animation: landscape-smoke-float 2.2s ease-out infinite;
+  animation: landscape-smoke-float 2.4s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+  transform-origin: center bottom;
+}
+
+.village-smoke-1 {
+  animation: landscape-smoke-float 2.4s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+  transform-origin: center bottom;
+}
+.village-smoke-2 {
+  animation: landscape-smoke-float 2.4s cubic-bezier(0.2, 0.6, 0.4, 1) infinite 0.8s;
+  transform-origin: center bottom;
+}
+.village-smoke-3 {
+  animation: landscape-smoke-float 2.4s cubic-bezier(0.2, 0.6, 0.4, 1) infinite 1.6s;
   transform-origin: center bottom;
 }
 
 @keyframes landscape-smoke-float {
   0% {
-    transform: translateY(0) scale(0.7);
-    opacity: 0.8;
+    transform: translate(0, 0) scale(0.6);
+    opacity: 0.85;
   }
-  50% {
-    opacity: 0.5;
+  40% {
+    transform: translate(-3px, -16px) scale(1.3);
+    opacity: 0.65;
+  }
+  80% {
+    transform: translate(-8px, -36px) scale(2.2);
+    opacity: 0.35;
   }
   100% {
-    transform: translateY(-28px) scale(1.6);
+    transform: translate(-14px, -52px) scale(3.0);
     opacity: 0;
   }
 }
@@ -5177,20 +5195,17 @@ footer {
     transform-origin: center top;
   }
   .landscape-questboard-layer {
-    transform: scale(0.88);
+    transform: translate(-50%, -50%) scale(0.88);
     transform-origin: center center;
   }
-  .rpg-btn-leaderboard {
-    padding: 5px 9px;
-    font-size: 0.74rem;
-    top: 10px;
-    right: 10px;
+  .rpg-top-bar-controls {
+    top: 8px !important;
+    right: 8px !important;
+    gap: 4px !important;
   }
-  .rpg-btn-layout-admin {
-    right: 110px !important;
-  }
-  .rpg-btn-sound-controls {
-    right: 215px !important;
+  .rpg-top-bar-controls .rpg-btn-leaderboard {
+    padding: 4px 8px !important;
+    font-size: 0.72rem !important;
   }
   .rpg-btn-attack-circle {
     width: 54px;
@@ -5214,25 +5229,20 @@ footer {
     transform-origin: center top;
   }
   .landscape-questboard-layer {
-    transform: scale(0.74);
+    transform: translate(-50%, -50%) scale(0.75);
     transform-origin: center center;
   }
   .pvz-deadline-progress-container {
     transform: translateX(-50%) scale(0.82) !important;
   }
-  .rpg-btn-leaderboard {
-    padding: 4px 7px;
-    font-size: 0.68rem;
-    top: 8px;
-    right: 8px;
+  .rpg-top-bar-controls {
+    top: 6px !important;
+    right: 6px !important;
+    gap: 3px !important;
   }
-  .rpg-btn-layout-admin {
-    right: 98px !important;
-  }
-  .rpg-btn-sound-controls {
-    right: 185px !important;
-    padding: 4px 7px;
-    font-size: 0.68rem;
+  .rpg-top-bar-controls .rpg-btn-leaderboard {
+    padding: 3px 6px !important;
+    font-size: 0.65rem !important;
   }
   .rpg-btn-attack-circle {
     width: 46px;

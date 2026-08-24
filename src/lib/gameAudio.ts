@@ -10,10 +10,17 @@ class GameAudioEngine {
   private bgmGain: GainNode | null = null;
 
   private isMuted: boolean = false;
-  private masterVolume: number = 0.7;
+  private masterVolume: number = 0.75;
   private isBgmPlaying: boolean = false;
   private bgmIntervalId: any = null;
   private ambientRoarIntervalId: any = null;
+
+  // Active looping spell sound nodes
+  private activeSpellLoop: {
+    nodes: (AudioNode | OscillatorNode | AudioBufferSourceNode)[];
+    gainNode: GainNode;
+    spellType: string;
+  } | null = null;
 
   constructor() {
     if (typeof window !== "undefined") {
@@ -38,7 +45,7 @@ class GameAudioEngine {
 
         this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : this.masterVolume, this.ctx.currentTime);
         this.sfxGain.gain.setValueAtTime(1.0, this.ctx.currentTime);
-        this.bgmGain.gain.setValueAtTime(0.35, this.ctx.currentTime);
+        this.bgmGain.gain.setValueAtTime(0.4, this.ctx.currentTime);
 
         this.sfxGain.connect(this.masterGain);
         this.bgmGain.connect(this.masterGain);
@@ -82,14 +89,14 @@ class GameAudioEngine {
   }
 
   // ============================================================================
-  // 1. SATISFYING TASK SUBMIT "TING" SOUND (Crystal Bell Chime with Warm Decay)
+  // 1. SATISFYING TASK SUBMIT "TING" SOUND (Crisp Crystal Bell Chime)
   // ============================================================================
   public playTing() {
     const ctx = this.initContext();
     if (!ctx || !this.sfxGain || this.isMuted) return;
 
     const now = ctx.currentTime;
-    const freqs = [1760, 2637, 3520]; // A6, E7, A7 bright bell harmonics
+    const freqs = [1760, 2637, 3520, 5274]; // Crisp metallic chime harmonics
 
     freqs.forEach((freq, idx) => {
       const osc = ctx.createOscillator();
@@ -99,19 +106,19 @@ class GameAudioEngine {
       osc.frequency.setValueAtTime(freq, now);
 
       gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.28 / (idx + 1), now + 0.006);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2 - idx * 0.2);
+      gain.gain.linearRampToValueAtTime(0.3 / (idx + 1), now + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.3 - idx * 0.18);
 
       osc.connect(gain);
       gain.connect(this.sfxGain!);
 
       osc.start(now);
-      osc.stop(now + 1.25);
+      osc.stop(now + 1.35);
     });
   }
 
   // ============================================================================
-  // 2. DRAGON ROAR SOUND (Low Guttural Rumble + Sweeping Roar Resonator)
+  // 2. POWERFUL CINEMATIC DRAGON ROAR (Multi-layered Sub-bass & Ferocious Growl)
   // ============================================================================
   public playDragonRoar() {
     const ctx = this.initContext();
@@ -119,186 +126,250 @@ class GameAudioEngine {
 
     const now = ctx.currentTime;
 
-    // Deep Pitch-Dropping Oscillator
-    const osc = ctx.createOscillator();
-    const oscGain = ctx.createGain();
-    osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(140, now);
-    osc.frequency.exponentialRampToValueAtTime(220, now + 0.35);
-    osc.frequency.exponentialRampToValueAtTime(45, now + 1.6);
+    // Layer 1: Sub-Bass Chest Rumble (Pitch Sweep with Heavy Growl Modulation)
+    const roarOsc = ctx.createOscillator();
+    const growlLfo = ctx.createOscillator();
+    const growlLfoGain = ctx.createGain();
+    const roarGain = ctx.createGain();
 
-    oscGain.gain.setValueAtTime(0, now);
-    oscGain.gain.linearRampToValueAtTime(0.45, now + 0.15);
-    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+    roarOsc.type = "sawtooth";
+    roarOsc.frequency.setValueAtTime(160, now);
+    roarOsc.frequency.linearRampToValueAtTime(280, now + 0.25);
+    roarOsc.frequency.exponentialRampToValueAtTime(55, now + 1.9);
 
-    // Roaring Filter
-    const filter = ctx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(480, now);
-    filter.frequency.exponentialRampToValueAtTime(1200, now + 0.35);
-    filter.frequency.exponentialRampToValueAtTime(120, now + 1.7);
-    filter.Q.setValueAtTime(4, now);
+    // 38Hz Growl Vibrato
+    growlLfo.type = "sawtooth";
+    growlLfo.frequency.setValueAtTime(38, now);
+    growlLfoGain.gain.setValueAtTime(75, now);
+    growlLfo.connect(roarOsc.frequency);
 
-    // Noise breath burst
-    const bufferSize = ctx.sampleRate * 1.5;
+    // Roar Filter Sweep
+    const roarFilter = ctx.createBiquadFilter();
+    roarFilter.type = "lowpass";
+    roarFilter.frequency.setValueAtTime(350, now);
+    roarFilter.frequency.exponentialRampToValueAtTime(1600, now + 0.35);
+    roarFilter.frequency.exponentialRampToValueAtTime(110, now + 1.9);
+    roarFilter.Q.setValueAtTime(5.5, now);
+
+    roarGain.gain.setValueAtTime(0, now);
+    roarGain.gain.linearRampToValueAtTime(0.55, now + 0.12);
+    roarGain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+
+    roarOsc.connect(roarFilter);
+    roarFilter.connect(roarGain);
+    roarGain.connect(this.sfxGain);
+
+    growlLfo.start(now);
+    roarOsc.start(now);
+    growlLfo.stop(now + 2.0);
+    roarOsc.stop(now + 2.0);
+
+    // Layer 2: Ferocious Wind & Breath Blast
+    const bufferSize = ctx.sampleRate * 2.0;
     const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const output = noiseBuffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) {
       output[i] = Math.random() * 2 - 1;
     }
-    const whiteNoise = ctx.createBufferSource();
-    whiteNoise.buffer = noiseBuffer;
+    const noiseSrc = ctx.createBufferSource();
+    noiseSrc.buffer = noiseBuffer;
 
     const noiseFilter = ctx.createBiquadFilter();
     noiseFilter.type = "bandpass";
-    noiseFilter.frequency.setValueAtTime(320, now);
-    noiseFilter.frequency.exponentialRampToValueAtTime(700, now + 0.4);
-    noiseFilter.frequency.exponentialRampToValueAtTime(140, now + 1.5);
-    noiseFilter.Q.setValueAtTime(2.5, now);
+    noiseFilter.frequency.setValueAtTime(450, now);
+    noiseFilter.frequency.exponentialRampToValueAtTime(1200, now + 0.3);
+    noiseFilter.frequency.exponentialRampToValueAtTime(180, now + 1.8);
+    noiseFilter.Q.setValueAtTime(3.2, now);
 
     const noiseGain = ctx.createGain();
     noiseGain.gain.setValueAtTime(0, now);
-    noiseGain.gain.linearRampToValueAtTime(0.35, now + 0.2);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.6);
+    noiseGain.gain.linearRampToValueAtTime(0.45, now + 0.15);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.9);
 
-    osc.connect(filter);
-    filter.connect(oscGain);
-    oscGain.connect(this.sfxGain);
-
-    whiteNoise.connect(noiseFilter);
+    noiseSrc.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
     noiseGain.connect(this.sfxGain);
 
-    osc.start(now);
-    osc.stop(now + 1.85);
-    whiteNoise.start(now);
-    whiteNoise.stop(now + 1.65);
+    noiseSrc.start(now);
+    noiseSrc.stop(now + 2.0);
   }
 
   // ============================================================================
-  // 3. LIGHTNING ATTACK SOUND (Electric crackle, buzz & thunder crash)
+  // 3. CONTINUOUS LOOPING SPELL SOUNDS (Plays while visual is active, stops on end)
   // ============================================================================
-  public playLightning(durationMs: number = 1400) {
+  public startSpellLoop(spellType: string) {
+    this.stopSpellLoop();
     const ctx = this.initContext();
     if (!ctx || !this.sfxGain || this.isMuted) return;
 
     const now = ctx.currentTime;
-    const duration = durationMs / 1000;
+    const loopGain = ctx.createGain();
+    loopGain.gain.setValueAtTime(0, now);
+    loopGain.gain.linearRampToValueAtTime(0.38, now + 0.1);
+    loopGain.connect(this.sfxGain);
 
-    // Modulated carrier for electric arc
-    const carrier = ctx.createOscillator();
-    const modulator = ctx.createOscillator();
-    const modGain = ctx.createGain();
-    const mainGain = ctx.createGain();
+    const nodes: (AudioNode | OscillatorNode | AudioBufferSourceNode)[] = [];
 
-    carrier.type = "sawtooth";
-    carrier.frequency.setValueAtTime(220, now);
-    carrier.frequency.linearRampToValueAtTime(440, now + duration * 0.4);
-    carrier.frequency.linearRampToValueAtTime(110, now + duration);
+    if (spellType === "lightning" || spellType === "spark" || spellType === "all") {
+      // SHOCKING HIGH-VOLTAGE ELECTRICITY: 60Hz hum + intense FM electric arcs
+      const carrier = ctx.createOscillator();
+      carrier.type = "sawtooth";
+      carrier.frequency.setValueAtTime(180, now);
 
-    modulator.type = "square";
-    modulator.frequency.setValueAtTime(48, now);
-    modGain.gain.setValueAtTime(280, now);
+      const modulator = ctx.createOscillator();
+      modulator.type = "square";
+      modulator.frequency.setValueAtTime(64, now);
 
-    modulator.connect(carrier.frequency);
+      const modGain = ctx.createGain();
+      modGain.gain.setValueAtTime(380, now);
 
-    mainGain.gain.setValueAtTime(0, now);
-    mainGain.gain.linearRampToValueAtTime(0.35, now + 0.05);
-    mainGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      modulator.connect(carrier.frequency);
 
-    carrier.connect(mainGain);
-    mainGain.connect(this.sfxGain);
+      // Electric Sizzle Noise
+      const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const data = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = noiseBuffer;
+      noise.loop = true;
 
-    carrier.start(now);
-    modulator.start(now);
-    carrier.stop(now + duration);
-    modulator.stop(now + duration);
-  }
+      const noiseFilter = ctx.createBiquadFilter();
+      noiseFilter.type = "highpass";
+      noiseFilter.frequency.setValueAtTime(1400, now);
 
-  // ============================================================================
-  // 4. ICE / FREEZE ATTACK SOUND (Crystalline glassy chimes & frost crack)
-  // ============================================================================
-  public playFreeze() {
-    const ctx = this.initContext();
-    if (!ctx || !this.sfxGain || this.isMuted) return;
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.4, now);
 
-    const now = ctx.currentTime;
-    const frostNotes = [1568, 2093, 2637, 3135, 4186];
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(loopGain);
 
-    frostNotes.forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+      carrier.connect(loopGain);
 
-      gain.gain.setValueAtTime(0, now + idx * 0.06);
-      gain.gain.linearRampToValueAtTime(0.18, now + idx * 0.06 + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.06 + 0.7);
+      carrier.start(now);
+      modulator.start(now);
+      noise.start(now);
 
-      osc.connect(gain);
-      gain.connect(this.sfxGain!);
+      nodes.push(carrier, modulator, noise, noiseFilter, noiseGain, modGain);
+    } else if (spellType === "ice" || spellType === "water") {
+      // GLACIAL FREEZE & FROST SHATTER: Chilling wind resonance + crystal frost shimmer
+      const frostOsc = ctx.createOscillator();
+      frostOsc.type = "sine";
+      frostOsc.frequency.setValueAtTime(2400, now);
 
-      osc.start(now + idx * 0.06);
-      osc.stop(now + idx * 0.06 + 0.75);
-    });
-  }
+      const lfo = ctx.createOscillator();
+      lfo.frequency.setValueAtTime(12, now);
+      const lfoGain = ctx.createGain();
+      lfoGain.gain.setValueAtTime(180, now);
+      lfo.connect(frostOsc.frequency);
 
-  // ============================================================================
-  // 5. FIRE / BURN ATTACK SOUND (Crackling flame whoosh & ignition)
-  // ============================================================================
-  public playFireBurn(durationMs: number = 1400) {
-    const ctx = this.initContext();
-    if (!ctx || !this.sfxGain || this.isMuted) return;
+      // Sub-zero wind sweep
+      const windBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const data = windBuffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      const wind = ctx.createBufferSource();
+      wind.buffer = windBuffer;
+      wind.loop = true;
 
-    const now = ctx.currentTime;
-    const duration = durationMs / 1000;
+      const windFilter = ctx.createBiquadFilter();
+      windFilter.type = "bandpass";
+      windFilter.frequency.setValueAtTime(950, now);
+      windFilter.Q.setValueAtTime(4.5, now);
 
-    const bufferSize = ctx.sampleRate * duration;
-    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const output = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      output[i] = Math.random() * 2 - 1;
+      wind.connect(windFilter);
+      windFilter.connect(loopGain);
+      frostOsc.connect(loopGain);
+
+      frostOsc.start(now);
+      lfo.start(now);
+      wind.start(now);
+
+      nodes.push(frostOsc, lfo, lfoGain, wind, windFilter);
+    } else if (spellType === "fire") {
+      // TURBULENT ROARING FLAME WHOOSH & COMBUSTION
+      const fireBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const data = fireBuffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      const fire = ctx.createBufferSource();
+      fire.buffer = fireBuffer;
+      fire.loop = true;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(320, now);
+      filter.Q.setValueAtTime(1.5, now);
+
+      fire.connect(filter);
+      filter.connect(loopGain);
+      fire.start(now);
+
+      nodes.push(fire, filter);
     }
 
-    const noise = ctx.createBufferSource();
-    noise.buffer = noiseBuffer;
+    this.activeSpellLoop = {
+      nodes,
+      gainNode: loopGain,
+      spellType,
+    };
+  }
 
-    const filter = ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.setValueAtTime(260, now);
-    filter.frequency.linearRampToValueAtTime(580, now + 0.3);
-    filter.frequency.linearRampToValueAtTime(180, now + duration);
-    filter.Q.setValueAtTime(1.8, now);
+  public stopSpellLoop() {
+    if (!this.activeSpellLoop || !this.ctx) return;
+    const { nodes, gainNode } = this.activeSpellLoop;
+    const now = this.ctx.currentTime;
 
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.4, now + 0.1);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    try {
+      gainNode.gain.linearRampToValueAtTime(0.001, now + 0.12);
+      setTimeout(() => {
+        nodes.forEach((n: any) => {
+          try {
+            if (typeof n.stop === "function") n.stop();
+            if (typeof n.disconnect === "function") n.disconnect();
+          } catch {}
+        });
+      }, 150);
+    } catch {}
 
-    noise.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.sfxGain);
+    this.activeSpellLoop = null;
+  }
 
-    noise.start(now);
-    noise.stop(now + duration);
+  // One-shot Spell Playback
+  public playLightning(durationMs: number = 1600) {
+    this.startSpellLoop("lightning");
+    setTimeout(() => this.stopSpellLoop(), durationMs);
+  }
+
+  public playFreeze(durationMs: number = 1600) {
+    this.startSpellLoop("ice");
+    setTimeout(() => this.stopSpellLoop(), durationMs);
+  }
+
+  public playFireBurn(durationMs: number = 1600) {
+    this.startSpellLoop("fire");
+    setTimeout(() => this.stopSpellLoop(), durationMs);
   }
 
   // ============================================================================
-  // 6. HEROIC FANFARE MELODY (3.5 Second Triumphant Victory / Notification Fanfare)
+  // 4. HEROIC FANFARE MELODY (Triumphant Victory Melodic Fanfare)
   // ============================================================================
   public playHeroicMelody() {
     const ctx = this.initContext();
     if (!ctx || !this.sfxGain || this.isMuted) return;
 
     const now = ctx.currentTime;
-    // D Major / Medieval Triumphant Fanfare Sequence: D4 -> F#4 -> A4 -> D5 -> C#5 -> D5
     const fanfareNotes = [
-      { freq: 293.66, start: 0.0, dur: 0.28 }, // D4
-      { freq: 369.99, start: 0.28, dur: 0.28 }, // F#4
-      { freq: 440.0, start: 0.56, dur: 0.32 }, // A4
-      { freq: 587.33, start: 0.88, dur: 0.55 }, // D5
-      { freq: 554.37, start: 1.43, dur: 0.25 }, // C#5
-      { freq: 587.33, start: 1.68, dur: 1.2 },  // D5 sustain
+      { freq: 293.66, start: 0.0, dur: 0.22 }, // D4
+      { freq: 369.99, start: 0.22, dur: 0.22 }, // F#4
+      { freq: 440.0, start: 0.44, dur: 0.28 }, // A4
+      { freq: 587.33, start: 0.72, dur: 0.55 }, // D5
+      { freq: 554.37, start: 1.27, dur: 0.24 }, // C#5
+      { freq: 587.33, start: 1.51, dur: 1.4 },  // D5 sustain
     ];
 
     fanfareNotes.forEach((n) => {
@@ -308,100 +379,115 @@ class GameAudioEngine {
       osc.type = "triangle";
       osc.frequency.setValueAtTime(n.freq, now + n.start);
 
-      // Add harmonic brass warmth
-      const osc2 = ctx.createOscillator();
-      osc2.type = "sawtooth";
-      osc2.frequency.setValueAtTime(n.freq, now + n.start);
-
       const brassFilter = ctx.createBiquadFilter();
       brassFilter.type = "lowpass";
-      brassFilter.frequency.setValueAtTime(1400, now + n.start);
+      brassFilter.frequency.setValueAtTime(1800, now + n.start);
 
       gain.gain.setValueAtTime(0, now + n.start);
-      gain.gain.linearRampToValueAtTime(0.24, now + n.start + 0.03);
+      gain.gain.linearRampToValueAtTime(0.28, now + n.start + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + n.start + n.dur);
 
-      osc.connect(gain);
-      osc2.connect(brassFilter);
+      osc.connect(brassFilter);
       brassFilter.connect(gain);
       gain.connect(this.sfxGain!);
 
       osc.start(now + n.start);
       osc.stop(now + n.start + n.dur + 0.05);
-      osc2.start(now + n.start);
-      osc2.stop(now + n.start + n.dur + 0.05);
     });
   }
 
   // ============================================================================
-  // 7. MEDIEVAL CHILL LO-FI BGM GENERATOR (Looping Lute Chords + Lo-fi Atmosphere)
+  // 5. ENERGETIC MEDIEVAL HEROIC BGM (Driving Gallop & Heroic Combat Fanfare)
   // ============================================================================
-  public startMedievalLofiBgm() {
+  public startMedievalHeroicBgm() {
     if (this.isBgmPlaying) return;
     const ctx = this.initContext();
     if (!ctx) return;
 
     this.isBgmPlaying = true;
-    let barIndex = 0;
+    let step = 0;
 
-    // 4-Bar Lo-Fi Medieval Progression: Dm9 -> Bbmaj7 -> Gm7 -> A7sus4/A7
-    const chords = [
-      [146.83, 220.0, 261.63, 329.63], // Dm9
-      [116.54, 174.61, 220.0, 293.66], // Bbmaj7
-      [98.0, 146.83, 174.61, 246.94],  // Gm7
-      [110.0, 164.81, 220.0, 277.18],  // A7
+    // Driving Medieval Heroic Progression (D minor -> F major -> C major -> G minor -> A major) at 128 BPM
+    const bassline = [
+      146.83, 146.83, 146.83, 146.83, // D3
+      174.61, 174.61, 174.61, 174.61, // F3
+      130.81, 130.81, 130.81, 130.81, // C3
+      98.0, 98.0, 110.0, 110.0,       // G2 -> A2
     ];
 
-    const playChordBar = () => {
+    const leadMelody = [
+      587.33, 440.0, 587.33, 659.25, // D5, A4, D5, E5
+      698.46, 587.33, 698.46, 783.99, // F5, D5, F5, G5
+      523.25, 659.25, 523.25, 440.0,  // C5, E5, C5, A4
+      392.0, 440.0, 554.37, 587.33,   // G4, A4, C#5, D5
+    ];
+
+    const playHeroicBeat = () => {
       if (!this.isBgmPlaying || !this.ctx || !this.bgmGain) return;
       const now = this.ctx.currentTime;
-      const currentChord = chords[barIndex % chords.length];
+      const beatIdx = step % 16;
 
-      // Pluck lute string arpeggios
-      currentChord.forEach((freq, noteIdx) => {
-        const osc = this.ctx!.createOscillator();
-        const gain = this.ctx!.createGain();
-        const filter = this.ctx!.createBiquadFilter();
-
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(freq, now + noteIdx * 0.18);
-
-        filter.type = "lowpass";
-        filter.frequency.setValueAtTime(850, now);
-
-        gain.gain.setValueAtTime(0, now + noteIdx * 0.18);
-        gain.gain.linearRampToValueAtTime(0.09, now + noteIdx * 0.18 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + noteIdx * 0.18 + 2.2);
-
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.bgmGain!);
-
-        osc.start(now + noteIdx * 0.18);
-        osc.stop(now + noteIdx * 0.18 + 2.3);
-      });
-
-      // Warm soft lo-fi sub note
+      // 1. Driving Medieval Lute / String Ostinato (Galloping Rhythm)
+      const bassFreq = bassline[Math.floor(beatIdx / 4) * 4];
       const bassOsc = this.ctx.createOscillator();
       const bassGain = this.ctx.createGain();
-      bassOsc.type = "sine";
-      bassOsc.frequency.setValueAtTime(currentChord[0] * 0.5, now);
+      bassOsc.type = "sawtooth";
+      bassOsc.frequency.setValueAtTime(bassFreq * (beatIdx % 2 === 0 ? 1 : 0.5), now);
+
+      const bassFilter = this.ctx.createBiquadFilter();
+      bassFilter.type = "lowpass";
+      bassFilter.frequency.setValueAtTime(650, now);
 
       bassGain.gain.setValueAtTime(0, now);
-      bassGain.gain.linearRampToValueAtTime(0.12, now + 0.04);
-      bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.6);
+      bassGain.gain.linearRampToValueAtTime(0.14, now + 0.01);
+      bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
 
-      bassOsc.connect(bassGain);
+      bassOsc.connect(bassFilter);
+      bassFilter.connect(bassGain);
       bassGain.connect(this.bgmGain);
 
       bassOsc.start(now);
-      bassOsc.stop(now + 2.8);
+      bassOsc.stop(now + 0.24);
 
-      barIndex++;
+      // 2. Lead Brass Fanfare Melody
+      const leadFreq = leadMelody[beatIdx];
+      const leadOsc = this.ctx.createOscillator();
+      const leadGain = this.ctx.createGain();
+      leadOsc.type = "triangle";
+      leadOsc.frequency.setValueAtTime(leadFreq, now);
+
+      leadGain.gain.setValueAtTime(0, now);
+      leadGain.gain.linearRampToValueAtTime(0.12, now + 0.02);
+      leadGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+
+      leadOsc.connect(leadGain);
+      leadGain.connect(this.bgmGain);
+
+      leadOsc.start(now);
+      leadOsc.stop(now + 0.3);
+
+      // 3. Medieval Battle Drum (Kick on beat 0, 4, 8, 12, rim on 2, 6, 10, 14)
+      if (beatIdx % 4 === 0) {
+        const kickOsc = this.ctx.createOscillator();
+        const kickGain = this.ctx.createGain();
+        kickOsc.frequency.setValueAtTime(120, now);
+        kickOsc.frequency.exponentialRampToValueAtTime(45, now + 0.14);
+
+        kickGain.gain.setValueAtTime(0.35, now);
+        kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+        kickOsc.connect(kickGain);
+        kickGain.connect(this.bgmGain);
+
+        kickOsc.start(now);
+        kickOsc.stop(now + 0.18);
+      }
+
+      step++;
     };
 
-    playChordBar();
-    this.bgmIntervalId = setInterval(playChordBar, 3200); // ~75 BPM bar length
+    playHeroicBeat();
+    this.bgmIntervalId = setInterval(playHeroicBeat, 234); // ~128 BPM 8th-note gallop
 
     // Periodic Ambient Roar every 1 minute
     if (!this.ambientRoarIntervalId) {
@@ -413,7 +499,7 @@ class GameAudioEngine {
     }
   }
 
-  public stopMedievalLofiBgm() {
+  public stopMedievalHeroicBgm() {
     this.isBgmPlaying = false;
     if (this.bgmIntervalId) {
       clearInterval(this.bgmIntervalId);
@@ -478,6 +564,7 @@ export function sendWebNotification(title: string, body: string, soundType?: "ti
         body,
         icon: "/favicon.ico",
         badge: "/favicon.ico",
+        requireInteraction: true, // Keep notification visible until user interacts with it
         silent: false,
       });
     } catch (err) {

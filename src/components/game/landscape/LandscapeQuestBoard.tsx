@@ -32,10 +32,11 @@ export function LandscapeQuestBoard({
       title="Click to open Quest Board"
       style={{
         position: "absolute",
-        left: "440px",
-        top: "112px",
-        width: "108px",
-        height: "124px",
+        left: "44%",
+        top: "28%",
+        width: "10.8%",
+        aspectRatio: "108 / 124",
+        maxWidth: "115px",
         zIndex: 15,
         display: "flex",
         flexDirection: "column",
@@ -43,17 +44,20 @@ export function LandscapeQuestBoard({
         pointerEvents: "auto",
         cursor: "pointer",
         userSelect: "none",
-        transform: isHovered ? "scale(1.05) translateY(-2px)" : "scale(1)",
+        transform: isHovered ? "translate(-50%, -50%) scale(1.06) translateY(-2px)" : "translate(-50%, -50%) scale(1)",
         transition: "transform 0.15s ease",
       }}
     >
-      {/* Medieval Rustic Wooden Notice Board SVG (Pure Vector, No Fake Shadow, No Emoji) */}
+      {/* Medieval Rustic Wooden Notice Board SVG (Pure Vector with Ground Vector Shadow, No Emoji) */}
       <svg
         viewBox="0 0 92 98"
         width="100%"
         height="100%"
         style={{ overflow: "visible" }}
       >
+        {/* Ground Vector Shadow Under Support Posts (No drop shadow filter, flat vector ellipse) */}
+        <ellipse cx="46" cy="94" rx="44" ry="5.5" fill="#000000" opacity="0.25" />
+
         {/* Support Timber Posts Planted in Earth */}
         <rect x="18" y="36" width="7.5" height="58" rx="1.5" fill="#3b1402" />
         <rect x="66.5" y="36" width="7.5" height="58" rx="1.5" fill="#3b1402" />

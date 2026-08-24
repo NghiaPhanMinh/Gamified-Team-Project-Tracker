@@ -2155,6 +2155,16 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     return questTasks.filter((t) => t.isMine && !t.isCompleted).length;
   }, [questTasks]);
 
+  // Auto-prompt for Browser Push Notifications if not decided yet
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
+      const timer = setTimeout(() => {
+        requestWebPushPermission().then((granted) => setHasPushGranted(granted));
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   // Periodic Web Push Notification and Task/Goblin Reminder Engine
   useEffect(() => {
     const checkReminders = () => {
@@ -2177,8 +2187,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       if (!hasSubmittedToday && (is11PM || isDue6Hours)) {
         localStorage.setItem("rpg_last_goblin_reminder", String(nowMs));
         sendWebNotification(
-          `${projectName}: Village Under Attack!`,
-          "village is under attack, submit everyday progress now to defend from goblin",
+          `${projectName}: VILLAGE IS UNDER ATTACK!`,
+          "Slay the goblin horde now to defend the village!",
           "fanfare"
         );
         setShowGoblinAttackAlert(true);
@@ -2197,8 +2207,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         if (nearDeadlineTask) {
           localStorage.setItem("rpg_last_deadline_reminder", String(nowMs));
           sendWebNotification(
-            `${projectName}: Task Deadline Due Soon!`,
-            "Task deadline due soon please submit to deal damage to the boss.",
+            `${projectName}: BOSS DEADLINE DUE SOON!`,
+            `Task "${nearDeadlineTask.title}" deadline due soon. Submit proof to strike the boss!`,
             "roar"
           );
           setTaskDeadlineAlertTask(nearDeadlineTask);
@@ -2211,20 +2221,17 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     return () => clearInterval(interval);
   }, [workspace?.project?.title, state?.project?.title, state?.members, state?.currentProfileId, questTasks]);
 
-  // Attack Elemental Sound Effects Trigger
+  // Attack Elemental Sound Effects Trigger (Synchronized looping while visual is active)
   useEffect(() => {
     const spell = testActiveSpell || combinedActiveEvent?.spellType;
     if (spell) {
-      if (spell === "lightning" || spell === "spark" || spell === "all") {
-        gameAudio.playLightning(1600);
-      }
-      if (spell === "fire" || spell === "all") {
-        gameAudio.playFireBurn(1600);
-      }
-      if (spell === "ice" || spell === "water" || spell === "all") {
-        gameAudio.playFreeze();
-      }
+      gameAudio.startSpellLoop(spell);
+    } else {
+      gameAudio.stopSpellLoop();
     }
+    return () => {
+      gameAudio.stopSpellLoop();
+    };
   }, [testActiveSpell, combinedActiveEvent]);
 
   // Pending Quests requiring peer review by current user or final creator approval
@@ -2549,48 +2556,63 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
       {/* Main 10-Layer Geometric SVG Landscape Scene */}
       <div className="landscape-scene-container" style={{ position: "relative" }} aria-label="Interactive project encounter scene">
-        {/* Leaderboard Overlay Button */}
-        <button
-          className="rpg-btn-leaderboard"
-          onClick={() => setShowLeaderboardModal(true)}
-          type="button"
-        >
-          <span className="rpg-control-icon rpg-rank-icon" aria-hidden="true"><i /><i /><i /></span>
-          Leaderboard
-        </button>
-
-        {/* Admin Edit Dragon Layout Overlay Button */}
-        <button
-          className="rpg-btn-leaderboard rpg-btn-layout-admin"
-          style={{ right: "185px" }}
-          onClick={() => {
-            if (!adminAuthenticated) {
-              setShowAdminPasswordModal(true);
-            } else {
-              setShowDragonEditor((prev) => !prev);
-              if (!selectedDragonPart) {
-                setSelectedDragonPart("headNeck");
-              }
-            }
+        {/* Top Control Bar Overlay (Flex row - prevents any collision across all screen dimensions) */}
+        <div
+          className="rpg-top-bar-controls"
+          style={{
+            position: "absolute",
+            top: "14px",
+            right: "16px",
+            zIndex: 25,
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
           }}
-          type="button"
         >
-          <span className="rpg-control-icon rpg-layout-icon" aria-hidden="true"><i /><i /><i /><i /></span>
-          Layout Admin
-        </button>
+          {/* Sound & Notifications Controls Button */}
+          <button
+            className="rpg-btn-leaderboard rpg-btn-sound-controls"
+            style={{ position: "relative", top: 0, right: 0 }}
+            onClick={() => setShowSoundSettingsModal(true)}
+            type="button"
+          >
+            <span className="rpg-control-icon rpg-sound-icon" aria-hidden="true">
+              <i /><i /><i />
+            </span>
+            {isAudioMuted ? "Sound: Muted" : (isLofiBgmPlaying ? "Heroic BGM: On" : "Sound & Music")}
+          </button>
 
-        {/* Sound & Notifications Controls Button (Pure vector / typography, No Emoji) */}
-        <button
-          className="rpg-btn-leaderboard rpg-btn-sound-controls"
-          style={{ right: "350px" }}
-          onClick={() => setShowSoundSettingsModal(true)}
-          type="button"
-        >
-          <span className="rpg-control-icon rpg-sound-icon" aria-hidden="true">
-            <i /><i /><i />
-          </span>
-          {isAudioMuted ? "Sound: Muted" : "Sound & Music"}
-        </button>
+          {/* Admin Edit Dragon Layout Overlay Button */}
+          <button
+            className="rpg-btn-leaderboard rpg-btn-layout-admin"
+            style={{ position: "relative", top: 0, right: 0 }}
+            onClick={() => {
+              if (!adminAuthenticated) {
+                setShowAdminPasswordModal(true);
+              } else {
+                setShowDragonEditor((prev) => !prev);
+                if (!selectedDragonPart) {
+                  setSelectedDragonPart("headNeck");
+                }
+              }
+            }}
+            type="button"
+          >
+            <span className="rpg-control-icon rpg-layout-icon" aria-hidden="true"><i /><i /><i /><i /></span>
+            Layout Admin
+          </button>
+
+          {/* Leaderboard Overlay Button */}
+          <button
+            className="rpg-btn-leaderboard"
+            style={{ position: "relative", top: 0, right: 0 }}
+            onClick={() => setShowLeaderboardModal(true)}
+            type="button"
+          >
+            <span className="rpg-control-icon rpg-rank-icon" aria-hidden="true"><i /><i /><i /></span>
+            Leaderboard
+          </button>
+        </div>
 
         {/* Attack Circular Action Button */}
         <button
@@ -4991,7 +5013,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       )}
 
       {/* =========================================================================
-          IN-APP ANIMATED GOBLIN ATTACK ALERT BANNER
+          IN-APP ANIMATED GOBLIN ATTACK ALERT BANNER (Theme-matched & Clean Outline)
          ========================================================================= */}
       {showGoblinAttackAlert && (
         <div
@@ -5001,34 +5023,72 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 9999,
-            background: "#dc2626",
-            color: "#ffffff",
-            border: "3px solid #101517",
+            background: "var(--color-surface, #ffffff)",
+            color: "var(--color-text, #101517)",
+            border: "2px solid var(--color-text, #101517)",
             borderRadius: "14px",
-            padding: "12px 20px",
+            padding: "12px 18px",
             display: "flex",
             alignItems: "center",
             gap: "14px",
-            maxWidth: "92%",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+            maxWidth: "94%",
+            boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
           }}
         >
-          <div style={{ width: "36px", height: "36px", background: "#fef08a", borderRadius: "50%", border: "2px solid #101517", display: "grid", placeItems: "center", fontWeight: 900, color: "#101517", flexShrink: 0 }}>
-            !
+          {/* Fun Animated Goblin Combat Mini-Panel */}
+          <div
+            style={{
+              width: "60px",
+              height: "46px",
+              background: "#fee2e2",
+              border: "1.5px solid #ef4444",
+              borderRadius: "8px",
+              overflow: "hidden",
+              display: "grid",
+              placeItems: "center",
+              flexShrink: 0,
+            }}
+          >
+            <svg viewBox="0 0 54 42" width="100%" height="100%">
+              {/* Mini Wooden Wall */}
+              <rect x="36" y="8" width="6" height="30" fill="#78350f" rx="1" />
+              <rect x="44" y="8" width="6" height="30" fill="#5c2406" rx="1" />
+              {/* Mini Goblin */}
+              <g className="goblin-idle-anim" transform="translate(10, 8)">
+                {/* Body */}
+                <rect x="4" y="10" width="12" height="14" rx="3" fill="#16a34a" />
+                {/* Head */}
+                <circle cx="10" cy="7" r="6" fill="#22c55e" />
+                {/* Ears */}
+                <polygon points="4,5 0,2 5,8" fill="#16a34a" />
+                <polygon points="16,5 20,2 15,8" fill="#16a34a" />
+                {/* Eyes */}
+                <circle cx="8" cy="6.5" r="1.2" fill="#facc15" />
+                <circle cx="12" cy="6.5" r="1.2" fill="#facc15" />
+                {/* Sword slashing */}
+                <line x1="15" y1="14" x2="26" y2="8" stroke="#cbd5e1" strokeWidth="2.5" strokeLinecap="round" />
+                <polygon points="26,8 24,12 28,10" fill="#f59e0b" />
+              </g>
+              {/* Spark effect */}
+              <circle cx="34" cy="16" r="2" fill="#facc15" />
+              <circle cx="36" cy="14" r="1" fill="#f97316" />
+            </svg>
           </div>
+
           <div style={{ display: "grid", gap: "2px" }}>
-            <span style={{ fontWeight: 900, fontSize: "0.95rem", letterSpacing: "0.02em" }}>
-              {workspace?.project?.title || state?.project?.title || "Realm"}: Village is under attack!
+            <span style={{ fontWeight: 900, fontSize: "0.92rem", letterSpacing: "0.03em", color: "#b91c1c" }}>
+              VILLAGE IS UNDER ATTACK!
             </span>
-            <span style={{ fontSize: "0.82rem", opacity: 0.95 }}>
-              Submit everyday progress now to defend from goblin!
+            <span style={{ fontSize: "0.8rem", color: "var(--color-text, #101517)", opacity: 0.9 }}>
+              {workspace?.project?.title || state?.project?.title || "Realm"}: Slay the goblin horde now to defend the village!
             </span>
           </div>
+
           <div style={{ display: "flex", gap: "8px", marginLeft: "auto" }}>
             <button
               type="button"
               className="rpg-modern-btn is-primary"
-              style={{ padding: "6px 12px", fontSize: "0.8rem", whiteSpace: "nowrap" }}
+              style={{ padding: "6px 14px", fontSize: "0.8rem", whiteSpace: "nowrap", background: "#ef4444", color: "#ffffff", borderColor: "#101517" }}
               onClick={() => {
                 setShowGoblinAttackAlert(false);
                 setShowGoblinModal(true);
@@ -5049,7 +5109,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       )}
 
       {/* =========================================================================
-          IN-APP TASK DEADLINE ALERT BANNER
+          IN-APP TASK DEADLINE ALERT BANNER (Theme-matched & Clean Outline)
          ========================================================================= */}
       {taskDeadlineAlertTask && (
         <div
@@ -5059,34 +5119,66 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 9999,
-            background: "#ea580c",
-            color: "#ffffff",
-            border: "3px solid #101517",
+            background: "var(--color-surface, #ffffff)",
+            color: "var(--color-text, #101517)",
+            border: "2px solid var(--color-text, #101517)",
             borderRadius: "14px",
-            padding: "12px 20px",
+            padding: "12px 18px",
             display: "flex",
             alignItems: "center",
             gap: "14px",
-            maxWidth: "92%",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+            maxWidth: "94%",
+            boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
           }}
         >
-          <div style={{ width: "36px", height: "36px", background: "#fef08a", borderRadius: "50%", border: "2px solid #101517", display: "grid", placeItems: "center", fontWeight: 900, color: "#101517", flexShrink: 0 }}>
-            !
+          {/* Fun Animated Dragon Head Mini-Panel (Safely contained inside - no clipping) */}
+          <div
+            style={{
+              width: "60px",
+              height: "46px",
+              background: "#ffedd5",
+              border: "1.5px solid #f97316",
+              borderRadius: "8px",
+              overflow: "hidden",
+              display: "grid",
+              placeItems: "center",
+              flexShrink: 0,
+            }}
+          >
+            <svg viewBox="0 0 60 46" width="100%" height="100%">
+              {/* Mini Dragon Head contained inside */}
+              <g transform="translate(6, 6) scale(0.65)">
+                {/* Horns */}
+                <polygon points="12,12 6,2 14,8" fill="#450a0a" />
+                <polygon points="18,10 16,0 22,7" fill="#450a0a" />
+                {/* Head */}
+                <path d="M 10 14 L 32 18 L 36 24 L 28 28 L 10 26 Z" fill="#dc2626" />
+                {/* Snout Jaw */}
+                <path d="M 12 26 L 30 28 L 24 34 L 12 32 Z" fill="#991b1b" />
+                {/* Glowing Eye */}
+                <circle cx="20" cy="18" r="2.5" fill="#facc15" />
+                <circle cx="21" cy="18" r="1" fill="#000000" />
+                {/* Fire Stream */}
+                <path d="M 34 22 Q 44 20 50 24 Q 44 27 34 25 Z" fill="#f97316" />
+                <path d="M 35 23 Q 42 22 46 24 Q 42 26 35 25 Z" fill="#fde047" />
+              </g>
+            </svg>
           </div>
+
           <div style={{ display: "grid", gap: "2px" }}>
-            <span style={{ fontWeight: 900, fontSize: "0.95rem", letterSpacing: "0.02em" }}>
-              {workspace?.project?.title || state?.project?.title || "Realm"}: Task Deadline Due Soon!
+            <span style={{ fontWeight: 900, fontSize: "0.92rem", letterSpacing: "0.03em", color: "#c2410c" }}>
+              BOSS DEADLINE DUE SOON!
             </span>
-            <span style={{ fontSize: "0.82rem", opacity: 0.95 }}>
-              Task "{taskDeadlineAlertTask.title}" deadline due soon please submit to deal damage to the boss.
+            <span style={{ fontSize: "0.8rem", color: "var(--color-text, #101517)", opacity: 0.9 }}>
+              {workspace?.project?.title || state?.project?.title || "Realm"}: Task "{taskDeadlineAlertTask.title}" deadline due soon. Submit proof to strike the boss!
             </span>
           </div>
+
           <div style={{ display: "flex", gap: "8px", marginLeft: "auto" }}>
             <button
               type="button"
               className="rpg-modern-btn is-boss"
-              style={{ padding: "6px 12px", fontSize: "0.8rem", whiteSpace: "nowrap" }}
+              style={{ padding: "6px 14px", fontSize: "0.8rem", whiteSpace: "nowrap", background: "#ea580c", color: "#ffffff", borderColor: "#101517" }}
               onClick={() => {
                 const targetId = taskDeadlineAlertTask._id;
                 setTaskDeadlineAlertTask(null);
@@ -5172,12 +5264,12 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               </div>
             </div>
 
-            {/* 2. Medieval Chill Lo-Fi Background Music */}
+            {/* 2. Medieval Heroic Combat Background Music */}
             <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "10px", padding: "14px", display: "grid", gap: "8px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 900, color: "#101517" }}>Medieval Chill Lo-Fi BGM</h4>
-                  <p style={{ margin: "2px 0 0 0", fontSize: "0.76rem", color: "#64748b" }}>Procedurally generated acoustic lute & harp lo-fi progression</p>
+                  <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 900, color: "#101517" }}>Medieval Heroic Combat BGM</h4>
+                  <p style={{ margin: "2px 0 0 0", fontSize: "0.76rem", color: "#64748b" }}>Driving 128 BPM medieval gallop, battle drums, and brass fanfare</p>
                 </div>
                 <button
                   type="button"
@@ -5185,19 +5277,19 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   style={{ padding: "6px 14px", fontSize: "0.8rem" }}
                   onClick={() => {
                     if (isLofiBgmPlaying) {
-                      gameAudio.stopMedievalLofiBgm();
+                      gameAudio.stopMedievalHeroicBgm();
                       setIsLofiBgmPlaying(false);
                     } else {
-                      gameAudio.startMedievalLofiBgm();
+                      gameAudio.startMedievalHeroicBgm();
                       setIsLofiBgmPlaying(true);
                     }
                   }}
                 >
-                  {isLofiBgmPlaying ? "Pause Lo-Fi Music" : "Play Lo-Fi Music"}
+                  {isLofiBgmPlaying ? "Pause Heroic Music" : "Play Heroic Music"}
                 </button>
               </div>
               <p style={{ margin: 0, fontSize: "0.74rem", color: "#475569" }}>
-                Ambient dragon roar periodically echoes in the realm every 60 seconds while music is active.
+                Ferocious dragon roar periodically echoes across the battlefield every 60 seconds while music is active.
               </p>
             </div>
 
@@ -5240,8 +5332,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     style={{ padding: "4px 8px", fontSize: "0.72rem" }}
                     onClick={() => {
                       sendWebNotification(
-                        `${workspace?.project?.title || "Realm"}: Village Under Attack!`,
-                        "village is under attack, submit everyday progress now to defend from goblin",
+                        `${workspace?.project?.title || "Realm"}: VILLAGE IS UNDER ATTACK!`,
+                        "Slay the goblin horde now to defend the village!",
                         "fanfare"
                       );
                       setShowGoblinAttackAlert(true);
@@ -5251,7 +5343,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   </button>
                 </div>
                 <span style={{ fontSize: "0.75rem", color: "#7f1d1d" }}>
-                  Plays a 3.5s Heroic Melody and triggers: "village is under attack, submit everyday progress now to defend from goblin"
+                  Plays a 3.5s Heroic Melody and triggers: "VILLAGE IS UNDER ATTACK! Slay the goblin horde now to defend the village!"
                 </span>
               </div>
 
@@ -5267,8 +5359,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     style={{ padding: "4px 8px", fontSize: "0.72rem" }}
                     onClick={() => {
                       sendWebNotification(
-                        `${workspace?.project?.title || "Realm"}: Task Deadline Due Soon!`,
-                        "Task deadline due soon please submit to deal damage to the boss.",
+                        `${workspace?.project?.title || "Realm"}: BOSS DEADLINE DUE SOON!`,
+                        "Task deadline due soon. Submit proof to strike the boss!",
                         "roar"
                       );
                       const mockTask = questTasks.find(t => t.isMine && !t.isCompleted) || questTasks[0] || {
@@ -5283,7 +5375,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   </button>
                 </div>
                 <span style={{ fontSize: "0.75rem", color: "#7c2d12" }}>
-                  Plays Dragon Roar and triggers: "Task deadline due soon please submit to deal damage to the boss."
+                  Plays Powerful Dragon Roar and triggers: "BOSS DEADLINE DUE SOON! Submit proof to strike the boss!"
                 </span>
               </div>
             </div>

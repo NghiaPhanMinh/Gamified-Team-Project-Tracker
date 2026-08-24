@@ -191,8 +191,8 @@ export function LandscapeVillage({
         {/* --- 3D ISOMETRIC WALLED MEDIEVAL VILLAGE (Compact Grounded Medieval Houses) --- */}
         <g transform="translate(15, 0)">
 
-          {/* 0. GROUNDED VILLAGE UNDERSHADOW (Grounded Base Shadow, Static like Terrain) */}
-          <ellipse cx="128" cy="265" rx="126" ry="24" fill="#000000" opacity="0.22" />
+          {/* 0. GROUNDED VILLAGE UNDERSHADOW (Enlarged Vector Base Shadow, Static like Terrain) */}
+          <ellipse cx="128" cy="268" rx="148" ry="32" fill="#000000" opacity="0.25" />
 
           {/* 1. COURTYARD GRASS FLOOR (Seamless Natural Grass) */}
           <polygon points="18,185 236,185 244,256 10,256" fill="#17a738" />
@@ -222,6 +222,14 @@ export function LandscapeVillage({
 
           {/* Building 1: Left Medieval Half-Timbered Cottage */}
           <g transform="translate(36, 178)">
+            {/* Stone Chimney */}
+            <rect x="6" y="2" width="9" height="26" fill="#475569" />
+            {/* Active Chimney Smoke Puffs */}
+            <g transform="translate(10.5, 2)">
+              <circle cx="0" cy="0" r="4.5" fill="#f1f5f9" className="village-smoke-1" />
+              <circle cx="0" cy="0" r="5.8" fill="#e2e8f0" className="village-smoke-2" />
+              <circle cx="0" cy="0" r="7.2" fill="#cbd5e1" className="village-smoke-3" />
+            </g>
             {/* Medieval Cream/Plaster Lower Ground Floor */}
             <rect x="0" y="28" width="46" height="42" fill="#fef3c7" />
             {/* Dark Brown Timber Corner Beams */}
@@ -245,6 +253,14 @@ export function LandscapeVillage({
 
           {/* Building 2: Center Medieval Great Hall / Town Hall (Grounded at y = 248) */}
           <g transform="translate(94, 142)">
+            {/* Great Hall Stone Chimney */}
+            <rect x="52" y="10" width="10" height="30" fill="#475569" />
+            {/* Active Chimney Smoke Puffs */}
+            <g transform="translate(57, 10)">
+              <circle cx="0" cy="0" r="5.2" fill="#f1f5f9" className="village-smoke-2" />
+              <circle cx="0" cy="0" r="6.6" fill="#e2e8f0" className="village-smoke-3" />
+              <circle cx="0" cy="0" r="8.0" fill="#cbd5e1" className="village-smoke-1" />
+            </g>
             {/* Half-Timbered Plaster Base */}
             <rect x="0" y="38" width="68" height="68" fill="#fef3c7" />
             {/* Timber Framing Vertical & Horizontal Grid */}
@@ -276,9 +292,9 @@ export function LandscapeVillage({
             <rect x="26" y="2" width="11" height="26" fill="#475569" />
             {/* Active Chimney Smoke Animation (Looping Puff Animation) */}
             <g transform="translate(31.5, 2)">
-              <circle cx="0" cy="0" r="3.5" fill="#f1f5f9" className="village-smoke-1" />
-              <circle cx="0" cy="0" r="4.2" fill="#e2e8f0" className="village-smoke-2" />
-              <circle cx="0" cy="0" r="5" fill="#cbd5e1" className="village-smoke-3" />
+              <circle cx="0" cy="0" r="4.8" fill="#f1f5f9" className="village-smoke-3" />
+              <circle cx="0" cy="0" r="6.2" fill="#e2e8f0" className="village-smoke-1" />
+              <circle cx="0" cy="0" r="7.8" fill="#cbd5e1" className="village-smoke-2" />
             </g>
             {/* Half-Timbered Plaster Lower Body */}
             <rect x="0" y="28" width="46" height="42" fill="#fef3c7" />
