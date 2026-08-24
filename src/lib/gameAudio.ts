@@ -45,7 +45,7 @@ class GameAudioEngine {
         this.bgmGain = this.ctx.createGain();
 
         this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : this.masterVolume, this.ctx.currentTime);
-        this.sfxGain.gain.setValueAtTime(0.6, this.ctx.currentTime); // ~40% lower SFX volume
+        this.sfxGain.gain.setValueAtTime(0.70, this.ctx.currentTime); // +10% increase in attack SFX volume
         this.bgmGain.gain.setValueAtTime(0.35, this.ctx.currentTime);
 
         this.sfxGain.connect(this.masterGain);
@@ -107,7 +107,7 @@ class GameAudioEngine {
       osc.frequency.setValueAtTime(freq, now);
 
       gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.2 / (idx + 1), now + 0.005);
+      gain.gain.linearRampToValueAtTime(0.22 / (idx + 1), now + 0.005);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2 - idx * 0.2);
 
       osc.connect(gain);
@@ -135,7 +135,7 @@ class GameAudioEngine {
     subOsc.frequency.exponentialRampToValueAtTime(38, now + 1.8);
 
     subGain.gain.setValueAtTime(0, now);
-    subGain.gain.linearRampToValueAtTime(0.45, now + 0.15);
+    subGain.gain.linearRampToValueAtTime(0.48, now + 0.15);
     subGain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
 
     const subFilter = ctx.createBiquadFilter();
@@ -163,7 +163,7 @@ class GameAudioEngine {
     formantFilter1.Q.setValueAtTime(3.5, now);
 
     throatGain.gain.setValueAtTime(0, now);
-    throatGain.gain.linearRampToValueAtTime(0.35, now + 0.18);
+    throatGain.gain.linearRampToValueAtTime(0.38, now + 0.18);
     throatGain.gain.exponentialRampToValueAtTime(0.001, now + 1.9);
 
     throatOsc.connect(formantFilter1);
@@ -195,7 +195,7 @@ class GameAudioEngine {
 
     const noiseGain = ctx.createGain();
     noiseGain.gain.setValueAtTime(0, now);
-    noiseGain.gain.linearRampToValueAtTime(0.3, now + 0.2);
+    noiseGain.gain.linearRampToValueAtTime(0.32, now + 0.2);
     noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.9);
 
     noiseSrc.connect(noiseFilter);
@@ -217,71 +217,119 @@ class GameAudioEngine {
     const now = ctx.currentTime;
     const loopGain = ctx.createGain();
     loopGain.gain.setValueAtTime(0, now);
-    loopGain.gain.linearRampToValueAtTime(0.24, now + 0.08); // 40% lower volume
+    loopGain.gain.linearRampToValueAtTime(0.28, now + 0.08); // +10% attack SFX volume
     loopGain.connect(this.sfxGain);
 
     const nodes: (AudioNode | OscillatorNode | AudioBufferSourceNode)[] = [];
     const timers: any[] = [];
 
     if (spellType === "lightning" || spellType === "spark" || spellType === "all") {
-      // REALISTIC THUNDER STRIKE (Acoustic Thunder Clap -> Low Rolling Rumble -> 1s pause -> Secondary strike)
-      const playSingleThunderClap = (offset: number) => {
+      // 1. AMBIENT RAIN SOUND (Soft continuous thunderstorm rain in background)
+      const rainBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const rainData = rainBuffer.getChannelData(0);
+      for (let i = 0; i < rainData.length; i++) {
+        rainData[i] = (Math.random() * 2 - 1) * 0.45;
+      }
+      const rainSrc = ctx.createBufferSource();
+      rainSrc.buffer = rainBuffer;
+      rainSrc.loop = true;
+
+      const rainFilter = ctx.createBiquadFilter();
+      rainFilter.type = "bandpass";
+      rainFilter.frequency.setValueAtTime(950, now);
+      rainFilter.Q.setValueAtTime(0.8, now);
+
+      const rainGain = ctx.createGain();
+      rainGain.gain.setValueAtTime(0.12, now); // Gentle rain ambiance
+
+      rainSrc.connect(rainFilter);
+      rainFilter.connect(rainGain);
+      rainGain.connect(loopGain);
+      rainSrc.start(now);
+      nodes.push(rainSrc, rainFilter, rainGain);
+
+      // 2. THUNDERSTORM QUICK ELECTRIC ZAP & DEEP HEAVY "BOOM" (Loops every 1.0 second)
+      const playThunderZapBoom = () => {
         if (!this.ctx || !this.activeSpellLoop) return;
         const strikeTime = this.ctx.currentTime;
 
-        // 1. Initial Sharp Air Snap
-        const snapBuffer = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * 0.08), this.ctx.sampleRate);
-        const snapData = snapBuffer.getChannelData(0);
-        for (let i = 0; i < snapData.length; i++) {
-          snapData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.015));
+        // A. Quick Zapping Arc (Short electrical discharge zap, 0.08s)
+        const zapBuffer = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * 0.08), this.ctx.sampleRate);
+        const zapData = zapBuffer.getChannelData(0);
+        for (let i = 0; i < zapData.length; i++) {
+          const env = Math.exp(-i / (this.ctx.sampleRate * 0.018));
+          zapData[i] = ((Math.random() * 2 - 1) * 0.75 + Math.sin(i * 0.15) * 0.25) * env;
         }
-        const snap = this.ctx.createBufferSource();
-        snap.buffer = snapBuffer;
-        const snapFilter = this.ctx.createBiquadFilter();
-        snapFilter.type = "highpass";
-        snapFilter.frequency.setValueAtTime(1800, strikeTime);
-        const snapGain = this.ctx.createGain();
-        snapGain.gain.setValueAtTime(0.3, strikeTime);
+        const zapSrc = this.ctx.createBufferSource();
+        zapSrc.buffer = zapBuffer;
 
-        snap.connect(snapFilter);
-        snapFilter.connect(snapGain);
-        snapGain.connect(loopGain);
-        snap.start(strikeTime);
+        const zapFilter = this.ctx.createBiquadFilter();
+        zapFilter.type = "bandpass";
+        zapFilter.frequency.setValueAtTime(1400, strikeTime);
+        zapFilter.Q.setValueAtTime(1.2, strikeTime);
 
-        // 2. Rolling Thunder Sub-Bass Decay
-        const rumbleBuffer = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * 1.1), this.ctx.sampleRate);
+        const zapGain = this.ctx.createGain();
+        zapGain.gain.setValueAtTime(0.30, strikeTime);
+
+        zapSrc.connect(zapFilter);
+        zapFilter.connect(zapGain);
+        zapGain.connect(loopGain);
+        zapSrc.start(strikeTime);
+
+        // B. Heavy Thunder Impact "BOOM" (Deep Sub-Bass Blast dropping from 115Hz to 36Hz)
+        const boomOsc = this.ctx.createOscillator();
+        const boomGain = this.ctx.createGain();
+        boomOsc.type = "sine";
+        boomOsc.frequency.setValueAtTime(115, strikeTime + 0.02);
+        boomOsc.frequency.exponentialRampToValueAtTime(36, strikeTime + 0.55);
+
+        boomGain.gain.setValueAtTime(0, strikeTime);
+        boomGain.gain.setValueAtTime(0.50, strikeTime + 0.03); // Instant explosive BOOM
+        boomGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 0.85);
+
+        const boomFilter = this.ctx.createBiquadFilter();
+        boomFilter.type = "lowpass";
+        boomFilter.frequency.setValueAtTime(180, strikeTime);
+
+        boomOsc.connect(boomFilter);
+        boomFilter.connect(boomGain);
+        boomGain.connect(loopGain);
+
+        boomOsc.start(strikeTime + 0.02);
+        boomOsc.stop(strikeTime + 0.90);
+
+        // C. Rolling Thunder Acoustic Sub-Rumble Tail
+        const rumbleBuffer = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * 0.90), this.ctx.sampleRate);
         const rumbleData = rumbleBuffer.getChannelData(0);
-        let b0 = 0, b1 = 0, b2 = 0;
+        let r0 = 0, r1 = 0, r2 = 0;
         for (let i = 0; i < rumbleData.length; i++) {
           const white = Math.random() * 2 - 1;
-          b0 = 0.99886 * b0 + white * 0.0555179;
-          b1 = 0.99332 * b1 + white * 0.0750759;
-          b2 = 0.96900 * b2 + white * 0.1538520;
-          rumbleData[i] = (b0 + b1 + b2) * Math.exp(-i / (this.ctx.sampleRate * 0.35));
+          r0 = 0.99886 * r0 + white * 0.0555179;
+          r1 = 0.99332 * r1 + white * 0.0750759;
+          r2 = 0.96900 * r2 + white * 0.1538520;
+          rumbleData[i] = (r0 + r1 + r2) * Math.exp(-i / (this.ctx.sampleRate * 0.32));
         }
-        const rumble = this.ctx.createBufferSource();
-        rumble.buffer = rumbleBuffer;
+        const rumbleSrc = this.ctx.createBufferSource();
+        rumbleSrc.buffer = rumbleBuffer;
 
         const rumbleFilter = this.ctx.createBiquadFilter();
         rumbleFilter.type = "lowpass";
-        rumbleFilter.frequency.setValueAtTime(160, strikeTime);
-        rumbleFilter.frequency.exponentialRampToValueAtTime(65, strikeTime + 1.0);
+        rumbleFilter.frequency.setValueAtTime(130, strikeTime + 0.04);
+        rumbleFilter.frequency.exponentialRampToValueAtTime(55, strikeTime + 0.85);
 
         const rumbleGain = this.ctx.createGain();
-        rumbleGain.gain.setValueAtTime(0.35, strikeTime);
-        rumbleGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 1.05);
+        rumbleGain.gain.setValueAtTime(0.42, strikeTime + 0.04);
+        rumbleGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 0.88);
 
-        rumble.connect(rumbleFilter);
+        rumbleSrc.connect(rumbleFilter);
         rumbleFilter.connect(rumbleGain);
         rumbleGain.connect(loopGain);
-        rumble.start(strikeTime);
+        rumbleSrc.start(strikeTime + 0.04);
       };
 
-      playSingleThunderClap(0);
-      const timer1 = setInterval(() => {
-        playSingleThunderClap(0);
-      }, 1200); // 1.2s thunder clap intervals
-      timers.push(timer1);
+      playThunderZapBoom();
+      const timerThunder = setInterval(playThunderZapBoom, 1000); // 1.0s quick loop as requested!
+      timers.push(timerThunder);
     } else if (spellType === "ice" || spellType === "water") {
       // REALISTIC SUB-ZERO FREEZING & ICE CRACKING
       // 1. Chilling Arctic Wind
