@@ -273,30 +273,30 @@ export function LandscapeDragon({
       }
     }
 
-    // Anatomical slayed/collapsed posture per body part group
+    // Anatomical slayed/collapsed posture per body part group (Kept in-bounds on grassland)
     if (isDefeated) {
       if (group === "headNeck") {
-        tx -= 35;
-        ty += 85;
-        baseRot += 38;
+        tx -= 15;
+        ty += 32;
+        baseRot += 18;
       } else if (group === "frontWing") {
-        tx -= 22;
-        ty += 65;
-        baseRot += 62;
+        tx -= 8;
+        ty += 20;
+        baseRot += 35;
       } else if (group === "backWing") {
-        tx += 25;
-        ty += 60;
-        baseRot -= 55;
+        tx += 10;
+        ty += 15;
+        baseRot -= 25;
       } else if (group === "frontLeg" || group === "frontArm" || group === "frontClaw") {
-        tx -= 18;
-        ty += 55;
-        baseRot -= 28;
+        tx -= 5;
+        ty += 12;
+        baseRot -= 12;
       } else if (group === "tail") {
-        tx += 25;
-        ty += 45;
-        baseRot += 22;
+        tx += 10;
+        ty += 10;
+        baseRot += 10;
       } else {
-        ty += 45;
+        ty += 15;
       }
     }
     
@@ -333,19 +333,10 @@ export function LandscapeDragon({
       aria-label={`Epic Rigged Western Red Dragon (${bossHpPercent}% HP left)`}
     >
       <style>{`
-        @keyframes dragon-slain-fall {
-          0% { transform: translateY(0) rotate(0deg); opacity: 0.95; }
-          30% { transform: translateY(25px) rotate(8deg); opacity: 0.8; }
-          60% { transform: translateY(55px) rotate(16deg) scale(0.92); opacity: 0.6; }
-          100% { transform: translateY(75px) rotate(22deg) scale(0.85); opacity: 0.35; }
-        }
         @keyframes dragon-ghost-soul {
           0% { transform: translateY(0) scale(0.8); opacity: 0; }
-          50% { transform: translateY(-30px) scale(1.1); opacity: 0.85; }
-          100% { transform: translateY(-65px) scale(1.3); opacity: 0; }
-        }
-        .dragon-defeated-anim {
-          animation: dragon-slain-fall 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+          50% { transform: translateY(-25px) scale(1.1); opacity: 0.85; }
+          100% { transform: translateY(-50px) scale(1.3); opacity: 0; }
         }
       `}</style>
       <svg
@@ -354,10 +345,10 @@ export function LandscapeDragon({
         height="100%"
         style={{ pointerEvents: (onSelectPart ? "auto" : "none") as any }}
       >
-        {/* Dragon Group anchored on Far-Right End */}
+        {/* Dragon Group anchored on Far-Right End (Settles down slightly when defeated) */}
         <g
-          transform={`translate(${dragonX}, 130)`}
-          className={`dragon-group ${isDefeated ? "dragon-defeated-anim" : ""}`}
+          transform={`translate(${dragonX}, ${isDefeated ? 145 : 130})`}
+          className="dragon-group"
         >
           {/* Defeated Ghost Soul and Slayed Indicator */}
           {isDefeated && (
@@ -372,7 +363,7 @@ export function LandscapeDragon({
           )}
 
           {/* Dragon Ground Shadow (Grounded directly under dragon body/feet, never cropped) */}
-          <g transform="translate(85, 180)">
+          <g transform={`translate(85, ${isDefeated ? 165 : 180})`}>
             {!isDefeated && animationsEnabled && (
               <animateTransform
                 attributeName="transform"
@@ -435,18 +426,17 @@ export function LandscapeDragon({
                     return null;
                 }
 
-                // Wrap element inside Wing Flapping animation transform if needed
+                // Wrap element inside Wing Flapping animation transform if needed (Disabled when defeated)
                 if (shape.group === "backWing") {
                   element = (
-                    <g transform-origin="120 110">
+                    <g>
                       {!isDefeated && animationsEnabled && (
                         <animateTransform
                           attributeName="transform"
                           type="rotate"
-                          values="0; -45; 15; 0"
+                          values="0 120 110; -45 120 110; 15 120 110; 0 120 110"
                           dur="1.8s"
                           repeatCount="indefinite"
-                          additive="sum"
                         />
                       )}
                       {element}
@@ -454,15 +444,14 @@ export function LandscapeDragon({
                   );
                 } else if (shape.group === "frontWing") {
                   element = (
-                    <g transform-origin="110 115">
+                    <g>
                       {!isDefeated && animationsEnabled && (
                         <animateTransform
                           attributeName="transform"
                           type="rotate"
-                          values="0; 45; -15; 0"
+                          values="0 110 115; 45 110 115; -15 110 115; 0 110 115"
                           dur="1.8s"
                           repeatCount="indefinite"
-                          additive="sum"
                         />
                       )}
                       {element}

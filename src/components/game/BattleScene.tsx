@@ -1072,6 +1072,40 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const deleteProjectPermanently = useMutation(api.projects.deletePermanently);
   const claimTaskMutation = useMutation(api.tasks.claimTask);
   const createTaskMutation = useMutation(api.tasks.createTask);
+  const updateCharacterMutation = useMutation((api as any).teams.updateCharacter);
+
+  // Local Spell Type Switcher state
+  const [localSpellType, setLocalSpellType] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("rpg_user_spell_type");
+  });
+
+  const handleSelectElement = async (newSpellType: "lightning" | "fire" | "ice") => {
+    setLocalSpellType(newSpellType);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("rpg_user_spell_type", newSpellType);
+    }
+    const memberIndex = state?.members.findIndex((m) => m.profileId === state.currentProfileId) ?? 0;
+    const currentMember = state?.members[Math.max(0, memberIndex)];
+    setLocalAttack({
+      id: `element_switch_${Date.now()}`,
+      attackerName: currentMember?.displayName || "Adventurer",
+      damage: 0,
+      spellType: newSpellType,
+      target: "all",
+    });
+
+    try {
+      if (workspace?.project?.teamId) {
+        await updateCharacterMutation({
+          teamId: workspace.project.teamId,
+          fill: currentMember?.characterFill || "#FF8AE7",
+          outline: currentMember?.characterOutline || "#121F25",
+          spellType: newSpellType,
+        });
+      }
+    } catch {}
+  };
 
   // Quest Board States
   const [showQuestBoardModal, setShowQuestBoardModal] = useState(false);
@@ -2066,7 +2100,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     attackerName: string;
     damage: number;
     spellType?: string;
-    target?: "goblin" | "dragon";
+    target?: "goblin" | "dragon" | "all";
     targetX?: number;
     targetY?: number;
   } | null>(null);
@@ -2106,9 +2140,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         attackerName: "Layout Admin",
         damage: 999,
         spellType: testActiveSpell,
-        target: "dragon" as const,
-        targetX: 750,
-        targetY: 175,
+        target: "all" as const,
       };
     }
     if (localAttack) return localAttack;
@@ -2147,11 +2179,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       displayName: member.displayName,
       characterFill: member.characterFill,
       characterOutline: member.characterOutline,
-      spellType: member.spellType,
+      spellType: (member.profileId === state.currentProfileId && localSpellType) ? localSpellType : member.spellType,
       isActiveToday: member.hasSubmittedToday,
       isAttacking: (combinedActiveEvent?.attackerName === member.displayName || activeEvent?.attackerProfileId === member.profileId),
     }));
-  }, [state, activeEvent, combinedActiveEvent]);
+  }, [state, activeEvent, combinedActiveEvent, localSpellType]);
 
   // All Project Tasks for In-Canvas Quest Board (Active first, Completed sent to end)
   const questTasks: QuestTask[] = useMemo(() => {
@@ -2802,9 +2834,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           <LandscapeGoblins goblins={goblins} />
         </div>
 
-        {/* Layer 7: Section 6 - Party Members & Deterministic Game ID Tags */}
-        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 7, transform: `translate(${layerTransforms.players?.x || 0}px, ${layerTransforms.players?.y || 0}px) scale(${layerTransforms.players?.scale || 1})`, display: layerTransforms.players?.visible !== false ? "block" : "none" }}>
-          <LandscapePlayers members={players} />
+        {/* Layer 7: Section 6 - Party Members & Interactive Element Switcher */}
+        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "auto", zIndex: 12, transform: `translate(${layerTransforms.players?.x || 0}px, ${layerTransforms.players?.y || 0}px) scale(${layerTransforms.players?.scale || 1})`, display: layerTransforms.players?.visible !== false ? "block" : "none" }}>
+          <LandscapePlayers
+            members={players}
+            currentProfileId={state?.currentProfileId}
+            onSelectElement={handleSelectElement}
+          />
         </div>
 
         {/* Layer 8: Section 1 - Medieval Dragon Visuals & Wings */}

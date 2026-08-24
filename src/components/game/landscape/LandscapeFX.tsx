@@ -268,7 +268,7 @@ export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
                   {isIce && (
                     <g>
                       {/* Frost Blizzard Cloud */}
-                      <g transform="translate(0, -60)">
+                      <g transform="translate(0, -50)">
                         <ellipse cx="-12" cy="0" rx="16" ry="8" fill="#e0f2fe" opacity="0.8" />
                         <ellipse cx="12" cy="-2" rx="14" ry="7" fill="#bae6fd" opacity="0.85" />
                         <circle cx="0" cy="-5" r="12" fill="#ffffff" opacity="0.9" />
@@ -281,19 +281,19 @@ export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
                         </polygon>
                       </g>
 
-                      {/* Giant Freezing Glacial Ice Spikes */}
-                      <g transform="translate(0, 15)">
+                      {/* Giant Freezing Glacial Ice Spikes (Directly enveloping mob body) */}
+                      <g transform="translate(0, 0)">
                         {/* Central Sharp Ice Peak */}
-                        <polygon points="-12,0 0,-55 12,0" fill="#7dd3fc" opacity="0.85">
+                        <polygon points="-14,14 0,-42 14,14" fill="#7dd3fc" opacity="0.85">
                           <animate attributeName="opacity" values="0.75; 0.95; 0.75" dur="0.7s" repeatCount="indefinite" />
                         </polygon>
-                        <polygon points="-4,0 0,-55 8,-10" fill="#bae6fd" opacity="0.9" />
+                        <polygon points="-5,14 0,-42 9,0" fill="#bae6fd" opacity="0.9" />
                         {/* Left Ice Shard */}
-                        <polygon points="-24,0 -16,-38 -6,0" fill="#38bdf8" opacity="0.8" />
+                        <polygon points="-24,14 -16,-28 -6,14" fill="#38bdf8" opacity="0.8" />
                         {/* Right Ice Shard */}
-                        <polygon points="6,0 18,-42 26,0" fill="#38bdf8" opacity="0.8" />
+                        <polygon points="6,14 18,-32 26,14" fill="#38bdf8" opacity="0.8" />
                         {/* Front Crystal Facet */}
-                        <polygon points="-8,-5 0,-32 8,-5 0,4" fill="#ffffff" opacity="0.85">
+                        <polygon points="-8,4 0,-22 8,4 0,12" fill="#ffffff" opacity="0.85">
                           <animate attributeName="opacity" values="0.7; 1; 0.7" dur="0.4s" repeatCount="indefinite" />
                         </polygon>
                       </g>
