@@ -25,6 +25,16 @@ describe("smartFallbackPlanner", () => {
   it("generates a generic plan for unknown domain", () => {
     const genericContext = { ...mockContext, project: { ...mockContext.project, title: "Random Activity" } };
     const plan = generateSmartFallbackPlan(genericContext, "Do some tasks");
-    expect(plan.tasks.length).toBe(5);
+    expect(plan.tasks.length).toBe(4);
+  });
+
+  it("extracts specific animation deliverables for animation briefs", () => {
+    const animContext = { ...mockContext, project: { ...mockContext.project, title: "A3 Narrative" } };
+    const plan = generateSmartFallbackPlan(animContext, "creating a 2D animated narrative project delivered through Script, Shot List, Design Document, and 45+ second greyscale Animatic");
+    const taskTitles = plan.tasks.map((t) => t.title);
+    expect(taskTitles.some((t) => t.includes("Script"))).toBe(true);
+    expect(taskTitles.some((t) => t.includes("Shot List"))).toBe(true);
+    expect(taskTitles.some((t) => t.includes("Design Document"))).toBe(true);
+    expect(taskTitles.some((t) => t.includes("Animatic"))).toBe(true);
   });
 });

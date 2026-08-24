@@ -13,7 +13,7 @@ import {
   runFreeModelFallback,
   type AiResponseMode,
 } from "./lib/openRouterFallback";
-import { generateSmartFallbackPlan } from "./lib/smartFallbackPlanner";
+import { extractDeliverablesFromBrief, generateSmartFallbackPlan } from "./lib/smartFallbackPlanner";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
@@ -188,6 +188,8 @@ type GeneratedAiPlan = ValidatedAiPlan & {
 };
 
 function planningPrompts(brief: string, context: AiPlanningContext) {
+  const extractedDeliverables = extractDeliverablesFromBrief(brief, context.project.title);
+
   const systemPrompt = [
     "You are MayLamDi's Lead AI Technical Architect.",
     "CHAIN-OF-THOUGHT STEP 1: Dissect the user's project brief to extract domain-specific deliverables, technical stack requirements, assets, and explicit features.",
@@ -206,6 +208,7 @@ function planningPrompts(brief: string, context: AiPlanningContext) {
   const userPrompt = JSON.stringify({
     request: "Perform deep brief analysis, extract concrete technical deliverables, and assign tasks to assembled team members based on their skills.",
     brief,
+    extractedBriefDeliverables: extractedDeliverables.map((item: { title: string }) => item.title),
     project: context.project,
     currentFramework: context.project.frameworkName,
     phases: context.phases,
