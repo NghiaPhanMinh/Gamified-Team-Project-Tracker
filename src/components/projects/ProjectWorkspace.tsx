@@ -801,10 +801,12 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
 
       {activeTab === "progress" ? (
         <div className="project-overview-flow battle-workspace-overview project-progress-view">
-          <header className="project-list-heading" style={{ margin: "0.5rem 0 1rem" }}>
+          <header className="game-section-header" style={{ margin: "0 0 0.6rem", padding: 0 }}>
             <div>
-              <h3>Villagers vs Dragon</h3>
-              <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--color-muted)", margin: "0.3rem 0 0" }}>
+              <h3 className="display-heading" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, margin: "0 0 0.4rem", lineHeight: "1.15" }}>
+                Villagers vs Dragon
+              </h3>
+              <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--color-muted)", margin: 0, lineHeight: "1.3" }}>
                 Complete tasks to attack the dragon
               </p>
             </div>
