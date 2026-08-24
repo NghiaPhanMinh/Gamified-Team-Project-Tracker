@@ -599,8 +599,13 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
           </div>
           <p className="project-deadline-line">
             {formatDeadline(workspace.project.deadline)} · {workspace.project.frameworkName}
-            {workspace.project.description ? ` · ${workspace.project.description.length > 70 ? `${workspace.project.description.slice(0, 70).trim()}...` : workspace.project.description}` : ""}
           </p>
+          {workspace.project.description ? (
+            <p className="project-header-brief" style={{ marginTop: "0.25rem", fontSize: "0.88rem", opacity: 0.85, fontWeight: 700 }}>
+              <span style={{ fontWeight: 900, textTransform: "uppercase", fontSize: "0.72rem", background: "color-mix(in srgb, var(--color-blue) 20%, var(--color-surface))", padding: "0.15rem 0.4rem", borderRadius: "6px", border: "1px solid color-mix(in srgb, var(--color-text) 20%, transparent)", marginRight: "0.4rem" }}>Brief</span>
+              {workspace.project.description.length > 90 ? `${workspace.project.description.slice(0, 90).trim()}...` : workspace.project.description}
+            </p>
+          ) : null}
         </div>
         <dl className="compact-project-priority">
           <div><dt>Progress</dt><dd>{progressPercent}%</dd></div>
