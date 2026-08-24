@@ -1752,6 +1752,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       const mageInfo = getMageTheme(currentMember?.spellType, currentMember?.profileId, Math.max(0, memberIndex));
       const targetCoords = getGoblinCoordinates(Math.max(0, memberIndex));
 
+      // Optimistically mark this player's goblin as dead immediately
+      if (state?.currentProfileId) {
+        setTestDeadGoblins((prev) => ({ ...prev, [state.currentProfileId]: true }));
+      }
+
       setLocalAttack({
         id: `goblin_atk_${Date.now()}`,
         attackerName: currentMember?.displayName || "Adventurer",

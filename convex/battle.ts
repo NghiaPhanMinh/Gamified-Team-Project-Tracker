@@ -127,7 +127,7 @@ export const getState = query({
       ).length,
       members: memberships.map((member) => {
         const hasValidDailyToday = dailyPosts.some(
-          (p) => p.authorProfileId === member.profileId && p.isValid && p.createdAt >= startOfToday,
+          (p) => p.authorProfileId === member.profileId && p.createdAt >= startOfToday,
         );
         const hasSubmittedToday = hasValidDailyToday || uniqueEvents.some(
           (event) => event.attackerProfileId === member.profileId && event.createdAt >= startOfToday,

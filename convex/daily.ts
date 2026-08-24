@@ -60,8 +60,8 @@ export const postDailyEvidence = mutation({
     const wordCount = textTrimmed.length > 0 ? textTrimmed.split(/\s+/).filter(Boolean).length : 0;
     const imageCount = args.imageUrls.length;
 
-    // Rule: At least 20 words OR at least 2 pictures attached
-    const isValid = wordCount >= 20 || imageCount >= 2;
+    // Rule: Any daily progress note or screenshot is valid proof of work
+    const isValid = wordCount > 0 || imageCount > 0;
 
     const now = Date.now();
     const id = await ctx.db.insert("dailyFeed", {
