@@ -801,14 +801,14 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
 
       {activeTab === "progress" ? (
         <div className="project-overview-flow battle-workspace-overview project-progress-view">
-          <div className="game-title-header" style={{ margin: "0 0 0.85rem" }}>
-            <h2 style={{ fontSize: "1.75rem", fontWeight: 900, color: "var(--color-text)", margin: 0, letterSpacing: "-0.02em" }}>
-              Villagers vs Dragon
-            </h2>
-            <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--color-muted)", margin: "0.2rem 0 0" }}>
-              Complete tasks to attack the dragon
-            </p>
-          </div>
+          <header className="project-list-heading" style={{ margin: "0.5rem 0 1rem" }}>
+            <div>
+              <h3>Villagers vs Dragon</h3>
+              <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--color-muted)", margin: "0.3rem 0 0" }}>
+                Complete tasks to attack the dragon
+              </p>
+            </div>
+          </header>
 
           <section className="shared-battle-stage" aria-label="Shared project Battle scene">
             <BattleScene projectId={workspace.project._id} currentPhase={currentPhase} tasksLocked={Boolean(workspace.project.tasksLocked)} />
