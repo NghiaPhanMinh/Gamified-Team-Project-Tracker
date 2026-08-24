@@ -344,8 +344,8 @@ export function LandscapeDragon({
             </g>
           )}
 
-          {/* Dragon Ground Shadow (Grounded on the grassland floor) */}
-          <g transform="translate(140, 180)">
+          {/* Dragon Ground Shadow (Grounded directly under dragon body/feet, never cropped) */}
+          <g transform="translate(85, 180)">
             {!isDefeated && animationsEnabled && (
               <animateTransform
                 attributeName="transform"
@@ -356,7 +356,7 @@ export function LandscapeDragon({
                 additive="sum"
               />
             )}
-            <ellipse cx="0" cy="0" rx="130" ry="25" fill="rgba(0,0,0,0.22)" stroke="none" />
+            <ellipse cx="0" cy="0" rx="105" ry="22" fill="rgba(0,0,0,0.22)" stroke="none" />
           </g>
 
           {/* Hovering animation tag */}

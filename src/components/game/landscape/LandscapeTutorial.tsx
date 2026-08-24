@@ -48,8 +48,18 @@ export function LandscapeTutorial({
 }: LandscapeTutorialProps) {
   const [step, setStep] = useState<TutorialStep>(1);
 
-  // User adjustable positions for Village HP Bar and Dragon (persisted in localStorage)
-  const [villageHpOffset, setVillageHpOffset] = useState(() => {
+  // Position adjustments with persistent localStorage
+  const [villagePos, setVillagePos] = useState(() => {
+    if (typeof window === "undefined") return { x: 35.5, y: 0 };
+    try {
+      const saved = localStorage.getItem("rpg_tut_village_pos");
+      return saved ? JSON.parse(saved) : { x: 35.5, y: 0 };
+    } catch {
+      return { x: 35.5, y: 0 };
+    }
+  });
+
+  const [villageHpPos, setVillageHpPos] = useState(() => {
     if (typeof window === "undefined") return { x: 0, y: 0 };
     try {
       const saved = localStorage.getItem("rpg_tut_village_hp_pos");
@@ -59,7 +69,7 @@ export function LandscapeTutorial({
     }
   });
 
-  const [dragonOffset, setDragonOffset] = useState(() => {
+  const [dragonPos, setDragonPos] = useState(() => {
     if (typeof window === "undefined") return { x: -28, y: -2 };
     try {
       const saved = localStorage.getItem("rpg_tut_dragon_pos");
@@ -69,23 +79,29 @@ export function LandscapeTutorial({
     }
   });
 
+  const [dragonHpPos, setDragonHpPos] = useState(() => {
+    if (typeof window === "undefined") return { x: 0, y: 0 };
+    try {
+      const saved = localStorage.getItem("rpg_tut_dragon_hp_pos");
+      return saved ? JSON.parse(saved) : { x: 0, y: 0 };
+    } catch {
+      return { x: 0, y: 0 };
+    }
+  });
+
   const [showNudgePanel, setShowNudgePanel] = useState(false);
+  const [nudgeTarget, setNudgeTarget] = useState<"element" | "hp">("hp");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem("rpg_tut_village_hp_pos", JSON.stringify(villageHpOffset));
+        localStorage.setItem("rpg_tut_village_pos", JSON.stringify(villagePos));
+        localStorage.setItem("rpg_tut_village_hp_pos", JSON.stringify(villageHpPos));
+        localStorage.setItem("rpg_tut_dragon_pos", JSON.stringify(dragonPos));
+        localStorage.setItem("rpg_tut_dragon_hp_pos", JSON.stringify(dragonHpPos));
       } catch {}
     }
-  }, [villageHpOffset]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("rpg_tut_dragon_pos", JSON.stringify(dragonOffset));
-      } catch {}
-    }
-  }, [dragonOffset]);
+  }, [villagePos, villageHpPos, dragonPos, dragonHpPos]);
 
   if (!isOpen) return null;
 
@@ -152,13 +168,13 @@ export function LandscapeTutorial({
             height: "100%",
             pointerEvents: "none",
             zIndex: 2,
-            transform: "translateX(35.5%)",
+            transform: `translate(${villagePos.x}%, ${villagePos.y}%)`,
           }}
         >
           <LandscapeVillage
             villageHpPercent={100}
             villageName={villageName}
-            villageHpBarPos={{ x: villageHpOffset.x - 355, y: villageHpOffset.y - 10 }}
+            villageHpBarPos={{ x: villageHpPos.x - 355, y: villageHpPos.y - 10 }}
           />
         </div>
       )}
@@ -224,7 +240,7 @@ export function LandscapeTutorial({
             height: "100%",
             pointerEvents: "none",
             zIndex: 3,
-            transform: `translate(${dragonOffset.x}%, ${dragonOffset.y}%)`,
+            transform: `translate(${dragonPos.x}%, ${dragonPos.y}%)`,
           }}
         >
           <LandscapeDragon
@@ -246,8 +262,8 @@ export function LandscapeTutorial({
         <div
           style={{
             position: "absolute",
-            left: `calc(50% + ${(dragonOffset.x + 28) * 6}px)`,
-            top: `calc(55px + ${dragonOffset.y * 3}px)`,
+            left: `calc(50% + ${(dragonPos.x + 28) * 6 + dragonHpPos.x}px)`,
+            top: `calc(55px + ${dragonPos.y * 3 + dragonHpPos.y}px)`,
             transform: "translateX(-50%)",
             display: "flex",
             flexDirection: "column",
@@ -492,22 +508,63 @@ export function LandscapeTutorial({
             border: "2px solid #101517",
             boxShadow: "3px 3px 0 #101517",
             borderRadius: "10px",
-            padding: "8px 12px",
+            padding: "10px 14px",
             display: "flex",
             flexDirection: "column",
-            gap: "6px",
+            gap: "8px",
             fontSize: "0.72rem",
             fontWeight: 800,
             color: "#101517",
           }}
         >
+          {/* Target Toggle */}
+          <div style={{ display: "flex", gap: "4px" }}>
+            <button
+              type="button"
+              onClick={() => setNudgeTarget("element")}
+              style={{
+                flex: 1,
+                padding: "3px 6px",
+                borderRadius: "6px",
+                border: "1.5px solid #101517",
+                background: nudgeTarget === "element" ? "#fff73f" : "#fff",
+                fontSize: "0.68rem",
+                fontWeight: 900,
+                cursor: "pointer",
+              }}
+            >
+              {step === 1 ? "Village" : "Dragon"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setNudgeTarget("hp")}
+              style={{
+                flex: 1,
+                padding: "3px 6px",
+                borderRadius: "6px",
+                border: "1.5px solid #101517",
+                background: nudgeTarget === "hp" ? "#fff73f" : "#fff",
+                fontSize: "0.68rem",
+                fontWeight: 900,
+                cursor: "pointer",
+              }}
+            >
+              HP Bar
+            </button>
+          </div>
+
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span>Nudge {step === 1 ? "Village Bar" : "Dragon"}</span>
+            <span>Nudge {nudgeTarget === "element" ? (step === 1 ? "Village" : "Dragon") : "HP Bar"}</span>
             <button
               type="button"
               onClick={() => {
-                if (step === 1) setVillageHpOffset({ x: 0, y: 0 });
-                if (step === 3) setDragonOffset({ x: -28, y: -2 });
+                if (step === 1) {
+                  if (nudgeTarget === "element") setVillagePos({ x: 35.5, y: 0 });
+                  else setVillageHpPos({ x: 0, y: 0 });
+                } else if (step === 3) {
+                  if (nudgeTarget === "element") setDragonPos({ x: -28, y: -2 });
+                  else setDragonHpPos({ x: 0, y: 0 });
+                }
               }}
               style={{
                 background: "transparent",
@@ -529,8 +586,13 @@ export function LandscapeTutorial({
             <button
               type="button"
               onClick={() => {
-                if (step === 1) setVillageHpOffset((p: any) => ({ ...p, x: p.x - 5 }));
-                if (step === 3) setDragonOffset((p: any) => ({ ...p, x: p.x - 1 }));
+                if (step === 1) {
+                  if (nudgeTarget === "element") setVillagePos((p: any) => ({ ...p, x: p.x - 1 }));
+                  else setVillageHpPos((p: any) => ({ ...p, x: p.x - 5 }));
+                } else if (step === 3) {
+                  if (nudgeTarget === "element") setDragonPos((p: any) => ({ ...p, x: p.x - 1 }));
+                  else setDragonHpPos((p: any) => ({ ...p, x: p.x - 5 }));
+                }
               }}
               style={{ padding: "4px 8px", borderRadius: "4px", border: "1.5px solid #101517", background: "#fff", cursor: "pointer" }}
             >
@@ -540,8 +602,13 @@ export function LandscapeTutorial({
               <button
                 type="button"
                 onClick={() => {
-                  if (step === 1) setVillageHpOffset((p: any) => ({ ...p, y: p.y - 5 }));
-                  if (step === 3) setDragonOffset((p: any) => ({ ...p, y: p.y - 1 }));
+                  if (step === 1) {
+                    if (nudgeTarget === "element") setVillagePos((p: any) => ({ ...p, y: p.y - 1 }));
+                    else setVillageHpPos((p: any) => ({ ...p, y: p.y - 5 }));
+                  } else if (step === 3) {
+                    if (nudgeTarget === "element") setDragonPos((p: any) => ({ ...p, y: p.y - 1 }));
+                    else setDragonHpPos((p: any) => ({ ...p, y: p.y - 5 }));
+                  }
                 }}
                 style={{ padding: "4px 8px", borderRadius: "4px", border: "1.5px solid #101517", background: "#fff", cursor: "pointer" }}
               >
@@ -550,8 +617,13 @@ export function LandscapeTutorial({
               <button
                 type="button"
                 onClick={() => {
-                  if (step === 1) setVillageHpOffset((p: any) => ({ ...p, y: p.y + 5 }));
-                  if (step === 3) setDragonOffset((p: any) => ({ ...p, y: p.y + 1 }));
+                  if (step === 1) {
+                    if (nudgeTarget === "element") setVillagePos((p: any) => ({ ...p, y: p.y + 1 }));
+                    else setVillageHpPos((p: any) => ({ ...p, y: p.y + 5 }));
+                  } else if (step === 3) {
+                    if (nudgeTarget === "element") setDragonPos((p: any) => ({ ...p, y: p.y + 1 }));
+                    else setDragonHpPos((p: any) => ({ ...p, y: p.y + 5 }));
+                  }
                 }}
                 style={{ padding: "4px 8px", borderRadius: "4px", border: "1.5px solid #101517", background: "#fff", cursor: "pointer" }}
               >
@@ -561,8 +633,13 @@ export function LandscapeTutorial({
             <button
               type="button"
               onClick={() => {
-                if (step === 1) setVillageHpOffset((p: any) => ({ ...p, x: p.x + 5 }));
-                if (step === 3) setDragonOffset((p: any) => ({ ...p, x: p.x + 1 }));
+                if (step === 1) {
+                  if (nudgeTarget === "element") setVillagePos((p: any) => ({ ...p, x: p.x + 1 }));
+                  else setVillageHpPos((p: any) => ({ ...p, x: p.x + 5 }));
+                } else if (step === 3) {
+                  if (nudgeTarget === "element") setDragonPos((p: any) => ({ ...p, x: p.x + 1 }));
+                  else setDragonHpPos((p: any) => ({ ...p, x: p.x + 5 }));
+                }
               }}
               style={{ padding: "4px 8px", borderRadius: "4px", border: "1.5px solid #101517", background: "#fff", cursor: "pointer" }}
             >

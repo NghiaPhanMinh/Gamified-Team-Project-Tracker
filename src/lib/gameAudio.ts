@@ -257,7 +257,7 @@ class GameAudioEngine {
       rainFilter.Q.setValueAtTime(0.7, now);
 
       const rainGain = ctx.createGain();
-      rainGain.gain.setValueAtTime(0.40, now); // -20% adjusted rain volume
+      rainGain.gain.setValueAtTime(0.28, now); // Reduced rain volume 30%
 
       rainSrc.connect(rainFilter);
       rainFilter.connect(rainGain);
@@ -332,8 +332,35 @@ class GameAudioEngine {
         blastGain.connect(loopGain);
         blastSrc.start(strikeTime);
 
-        // --- B. RAPID MULTI-STAGE ARCS (Target Electrocuting Bursts) ---
-        const burstTimes = [0, 0.02, 0.06, 0.12, 0.19, 0.28, 0.38];
+        // --- B. POST-STRIKE RESIDUAL ELECTROCUTION SIZZLE (0.12s to 0.78s after impact) ---
+        const postArcLength = Math.floor(this.ctx.sampleRate * 0.65);
+        const postArcBuf = this.ctx.createBuffer(1, postArcLength, this.ctx.sampleRate);
+        const postArcData = postArcBuf.getChannelData(0);
+        for (let i = 0; i < postArcLength; i++) {
+          const raw = Math.random() * 2 - 1;
+          const crackle = Math.random() > 0.94 ? 2.5 : raw * 0.5;
+          postArcData[i] = crackle * (1 - i / postArcLength);
+        }
+        const postArcSrc = this.ctx.createBufferSource();
+        postArcSrc.buffer = postArcBuf;
+
+        const postArcBand = this.ctx.createBiquadFilter();
+        postArcBand.type = "bandpass";
+        postArcBand.frequency.setValueAtTime(3200, strikeTime + 0.12);
+        postArcBand.Q.setValueAtTime(4.0, strikeTime + 0.12);
+
+        const postArcGain = this.ctx.createGain();
+        postArcGain.gain.setValueAtTime(0, strikeTime + 0.12);
+        postArcGain.gain.linearRampToValueAtTime(0.65, strikeTime + 0.18);
+        postArcGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 0.75);
+
+        postArcSrc.connect(postArcBand);
+        postArcBand.connect(postArcGain);
+        postArcGain.connect(loopGain);
+        postArcSrc.start(strikeTime + 0.12);
+
+        // --- C. RAPID MULTI-STAGE ARCS (Target Electrocuting Bursts) ---
+        const burstTimes = [0, 0.02, 0.06, 0.12, 0.19, 0.28, 0.38, 0.50, 0.62];
         burstTimes.forEach((delay, idx) => {
           const t = strikeTime + delay;
           const arcLength = Math.floor(this.ctx!.sampleRate * 0.04);
@@ -347,7 +374,7 @@ class GameAudioEngine {
 
           const arcFilter = this.ctx!.createBiquadFilter();
           arcFilter.type = "bandpass";
-          arcFilter.frequency.setValueAtTime(2000 + idx * 300, t);
+          arcFilter.frequency.setValueAtTime(2000 + idx * 250, t);
           arcFilter.Q.setValueAtTime(3.8, t);
 
           const arcGain = this.ctx!.createGain();

@@ -155,7 +155,7 @@ export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
             <>
               {attackTargets.map((target) => (
                 <g key={target.id} transform={`translate(${target.x}, ${target.y}) scale(${target.scale})`}>
-                  {/* --- LIGHTNING ATTACK: Thundercloud & Repeating Electric Bolt Strikes --- */}
+                  {/* --- LIGHTNING ATTACK: Thundercloud, Synced Bolt Strikes & Residual Electricity --- */}
                   {isLightning && (
                     <g>
                       {/* Thunder Storm Cloud */}
@@ -165,21 +165,27 @@ export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
                         <circle cx="0" cy="-6" r="14" fill="#334155" />
                         {/* Cloud Electric Sparks */}
                         <polygon points="-10,2 -6,8 -8,9 -4,15" fill="#fde047">
-                          <animate attributeName="opacity" values="0.2; 1; 0.2" dur="0.25s" repeatCount="indefinite" />
+                          <animate attributeName="opacity" values="0.2; 1; 0.2" dur="0.22s" repeatCount="indefinite" />
                         </polygon>
                         <polygon points="8,2 12,8 10,9 14,14" fill="#67e8f9">
-                          <animate attributeName="opacity" values="1; 0.2; 1" dur="0.3s" repeatCount="indefinite" />
+                          <animate attributeName="opacity" values="1; 0.2; 1" dur="0.28s" repeatCount="indefinite" />
                         </polygon>
                       </g>
 
-                      {/* Jagged Lightning Bolt Strike crashing straight down */}
+                      {/* Main Jagged Lightning Bolt Strike (Synced with 0.88s audio thunderclap) */}
                       <g>
-                        <animate attributeName="opacity" values="0.1; 1; 0.3; 1; 0.2; 1; 0.1" dur="0.5s" repeatCount="indefinite" />
+                        <animate
+                          attributeName="opacity"
+                          values="0; 1; 1; 0.9; 0.4; 0.8; 0.2; 0; 0"
+                          keyTimes="0; 0.04; 0.10; 0.16; 0.24; 0.36; 0.52; 0.70; 1"
+                          dur="0.88s"
+                          repeatCount="indefinite"
+                        />
                         {/* Outer Cyan Lightning Aura */}
                         <polygon
                           points="0,-65 -8,-35 -2,-34 -14,-5 4,-6 -4,22 10,22 2,-8 10,-8 0,-35 6,-35"
                           fill="#38bdf8"
-                          opacity="0.75"
+                          opacity="0.85"
                         />
                         {/* Inner Intense Golden Lightning Core */}
                         <polygon
@@ -188,12 +194,40 @@ export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
                         />
                       </g>
 
-                      {/* Ground Electric Shockwave Burst */}
+                      {/* Residual Post-Strike Electrocution Arcs (Crackling after the main blast) */}
+                      <g>
+                        <animate
+                          attributeName="opacity"
+                          values="0; 0; 1; 0.3; 0.9; 0.2; 0.7; 0.1; 0"
+                          keyTimes="0; 0.12; 0.18; 0.28; 0.40; 0.54; 0.68; 0.80; 1"
+                          dur="0.88s"
+                          repeatCount="indefinite"
+                        />
+                        <path
+                          d="M -12,12 Q -6,6 2,14 Q 10,4 16,10"
+                          fill="none"
+                          stroke="#67e8f9"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M -8,-6 Q 4,-12 12,-4 Q 18,-14 6,-18"
+                          fill="none"
+                          stroke="#fde047"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                        />
+                        <circle cx="-10" cy="8" r="2" fill="#38bdf8" />
+                        <circle cx="14" cy="6" r="2.2" fill="#facc15" />
+                        <circle cx="4" cy="-8" r="1.8" fill="#ffffff" />
+                      </g>
+
+                      {/* Ground Electric Shockwave Burst (Synced to 0.88s) */}
                       <g transform="translate(0, 18)">
-                        <ellipse cx="0" cy="0" rx="22" ry="7" fill="none" stroke="#facc15" strokeWidth="2">
-                          <animate attributeName="rx" values="10; 26; 34" dur="0.5s" repeatCount="indefinite" />
-                          <animate attributeName="ry" values="3; 8; 11" dur="0.5s" repeatCount="indefinite" />
-                          <animate attributeName="opacity" values="1; 0.6; 0" dur="0.5s" repeatCount="indefinite" />
+                        <ellipse cx="0" cy="0" rx="22" ry="7" fill="none" stroke="#facc15" strokeWidth="2.5">
+                          <animate attributeName="rx" values="6; 28; 38" dur="0.88s" repeatCount="indefinite" />
+                          <animate attributeName="ry" values="2; 9; 12" dur="0.88s" repeatCount="indefinite" />
+                          <animate attributeName="opacity" values="1; 0.8; 0" dur="0.88s" repeatCount="indefinite" />
                         </ellipse>
                       </g>
                     </g>
