@@ -5035,11 +5035,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
           }}
         >
-          {/* Exact In-Game Goblin Asset Panel */}
+          {/* Exact In-game Goblin Asset Mini-Panel */}
           <div
             style={{
-              width: "64px",
-              height: "50px",
+              width: "60px",
+              height: "46px",
               background: "#fee2e2",
               border: "1.5px solid #ef4444",
               borderRadius: "8px",
@@ -5049,16 +5049,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               flexShrink: 0,
             }}
           >
-            <svg viewBox="0 0 45 45" width="100%" height="100%" style={{ overflow: "visible" }}>
-              {/* Ground Shadow */}
-              <ellipse cx="18" cy="40" rx="14" ry="4" fill="rgba(0,0,0,0.22)" />
-              {/* Actual Game Goblin */}
-              <g className="goblin-idle-anim" transform="translate(4, 2)">
-                {/* Boots */}
+            <svg viewBox="0 0 45 42" width="100%" height="100%">
+              <g transform="translate(6, 4) scale(0.85)">
+                {/* Feet */}
                 <rect x="8" y="34" width="4" height="4" rx="1" fill="#0f172a" />
                 <rect x="18" y="34" width="4" height="4" rx="1" fill="#0f172a" />
-                {/* Tunic */}
-                <polygon points="7,20 23,20 21,34 9,34" fill="#1dd851" />
+                {/* Body Tunic */}
+                <polygon points="7,20 23,20 21,34 9,34" fill="#feaa01" />
                 {/* Belt & Buckle */}
                 <rect x="8" y="27" width="14" height="2.5" fill="#451a03" />
                 <rect x="13.5" y="26.5" width="3" height="3.5" fill="#facc15" />
@@ -5142,11 +5139,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
           }}
         >
-          {/* Exact In-Game Dragon Head Asset Panel */}
+          {/* Exact In-game Dragon Head Asset Mini-Panel */}
           <div
             style={{
-              width: "64px",
-              height: "50px",
+              width: "60px",
+              height: "46px",
               background: "#ffedd5",
               border: "1.5px solid #f97316",
               borderRadius: "8px",
@@ -5156,42 +5153,40 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               flexShrink: 0,
             }}
           >
-            <svg viewBox="-40 -40 140 100" width="100%" height="100%">
-              <g transform="translate(10, 0)">
-                {/* Horns */}
-                <path d="M 42 6 L 64 -12 L 54 -14 L 82 -32 L 58 -18 L 66 -16 Z" fill="#260404" />
-                <path d="M 37 2 L 59 -16 L 49 -18 L 77 -36 L 53 -22 L 61 -20 Z" fill="#7f1d1d" />
-                <polygon points="42,8 55,-4 58,10" fill="#7f1d1d" />
-                <polygon points="30,18 12,14 26,26" fill="#991b1b" />
-                <polygon points="38,16 22,8 34,22" fill="#450a0a" />
+            <svg viewBox="-30 -38 120 85" width="100%" height="100%">
+              {/* Actual Ingame Dragon Head Polygons & Geometry */}
+              <g transform="translate(0, 0)">
+                {/* Neck plate */}
+                <path d="M 28 50 C 44 42 60 48 68 56 C 54 62 38 58 28 50 Z" fill="#580e0e" />
                 {/* Skull Base */}
                 <path d="M 48 20 L -24 5 L 8 -10 L 62 8 Z" fill="#991b1b" />
-                {/* Throat Cavity */}
-                <path d="M 32 20 L -10 15 L -16 28 L 8 40 L 32 30 Z" fill="#220303" />
-                {/* Mouth Webbing */}
-                <path d="M 28 20 Q 20 28 8 36 Q 22 38 28 20 Z" fill="#b91c1c" />
-                {/* Snout */}
+                {/* Snout structure */}
                 <polygon points="-24,5 -8,-1 5,-7 -17,0" fill="#7f1d1d" />
+                {/* Nostril Cavity */}
                 <ellipse cx="-12" cy="2" rx="4" ry="2.2" fill="#260404" />
-                {/* Lower Jaw */}
+                {/* Lower Jawbone */}
                 <path d="M 38 34 L -26 18 L 8 42 Z" fill="#7f1d1d" />
                 {/* Upper Fangs */}
                 <polygon points="-16,7 -22,14 -11,9" fill="#ffffff" />
                 <polygon points="-10,8 -14,16 -5,10" fill="#ffffff" />
                 <polygon points="-4,9 -8,17 1,11" fill="#ffffff" />
                 <polygon points="2,10 0,18 7,12" fill="#ffffff" />
+                <polygon points="8,11 6,19 13,13" fill="#ffffff" />
                 {/* Lower Fangs */}
                 <polygon points="-20,20 -14,12 -15,22" fill="#ffffff" />
                 <polygon points="-12,22 -7,14 -7,24" fill="#ffffff" />
                 <polygon points="-4,24 1,16 1,26" fill="#ffffff" />
+                {/* Lightning Horns */}
+                <path d="M 42 6 L 64 -12 L 54 -14 L 82 -32 L 58 -18 L 66 -16 Z" fill="#260404" />
+                <path d="M 37 2 L 59 -16 L 49 -18 L 77 -36 L 53 -22 L 61 -20 Z" fill="#7f1d1d" />
+                {/* Head Spines */}
+                <polygon points="42,8 55,-4 58,10" fill="#7f1d1d" />
+                <polygon points="30,18 12,14 26,26" fill="#991b1b" />
                 {/* Eye */}
                 <ellipse cx="28" cy="4" rx="8" ry="5" fill="#f59e0b" />
                 <polygon points="28,-1 30,4 28,9 26,4" fill="#000000" />
                 <circle cx="25" cy="2" r="1.8" fill="#ffffff" />
                 <polygon points="18,-2 38,0 36,3 20,1" fill="#260404" />
-                {/* Snout Fire Puff */}
-                <path d="M -24 10 Q -40 6 -48 12 Q -40 18 -24 14 Z" fill="#f97316" />
-                <path d="M -24 10 Q -36 8 -42 12 Q -36 16 -24 14 Z" fill="#fde047" />
               </g>
             </svg>
           </div>
