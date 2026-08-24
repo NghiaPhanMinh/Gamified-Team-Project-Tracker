@@ -1585,26 +1585,28 @@ select:focus-visible {
 }
 
 .framework-library {
-  margin-top: 1.5rem;
-  padding: clamp(1.5rem, 4vw, 3rem);
-  border: var(--border-strong);
-  border-radius: 2rem;
+  margin-top: 1.75rem;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+  border: 2px solid color-mix(in srgb, var(--color-text) 30%, transparent);
+  border-radius: 24px;
   background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+  box-shadow: none;
 }
 
 .framework-library-heading {
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 2rem;
+  gap: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .framework-library-heading h2 {
-  max-width: 15ch;
-  margin: 0;
-  font-size: clamp(2.8rem, 6vw, 5.5rem);
-  letter-spacing: -0.045em;
+  max-width: 36ch;
+  margin: 0.35rem 0 0.5rem;
+  font-size: clamp(1.75rem, 3.8vw, 3.2rem);
+  letter-spacing: -0.025em;
+  line-height: 1.15;
 }
 
 .framework-library-heading > div > p:last-child {
