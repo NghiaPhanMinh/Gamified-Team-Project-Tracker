@@ -4777,11 +4777,15 @@ footer {
 .signed-in-welcome .display-heading, .focused-page-heading .display-heading { margin: .2rem 0; }
 .home-next-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(260px, .85fr); gap: 1rem; }
 .home-focus-card, .home-due-card, .next-action-card, .guarded-route, .guided-card, .personal-task-group { padding: clamp(1.1rem, 3vw, 2rem); border: 2px solid var(--color-text); border-radius: 22px; background: var(--color-surface); color: var(--color-text); }
-.home-focus-card { background: var(--color-pink); color: var(--text-on-pink); box-shadow: 7px 7px 0 var(--color-blue); }
+.home-focus-card { background: #ffffff; color: #101517; border: 3px solid #101517; box-shadow: 6px 6px 0 #101517; }
+.home-focus-card h2, .home-focus-card p, .home-focus-card .card-eyebrow { color: #101517; }
+.home-focus-card .primary-button { background-color: var(--color-orange, #feaa01) !important; color: #101517 !important; border: 2px solid #101517 !important; box-shadow: 2px 2px 0 #101517 !important; }
+.home-focus-card .primary-button:hover { background-color: #e59700 !important; color: #101517 !important; }
 :root[data-theme="dark"] .signed-in-home,
 :root[data-theme="dark"] .signed-in-welcome,
 :root[data-theme="dark"] .home-due-card { color: var(--text-on-dark); }
-:root[data-theme="dark"] .home-focus-card { border-color: var(--color-pink); background: var(--color-surface); color: var(--text-on-dark); box-shadow: 7px 7px 0 var(--color-pink); }
+:root[data-theme="dark"] .home-focus-card { border-color: rgba(255, 253, 236, 0.35); background: #0e191d; color: var(--text-on-dark); box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.4); }
+:root[data-theme="dark"] .home-focus-card h2, :root[data-theme="dark"] .home-focus-card p, :root[data-theme="dark"] .home-focus-card .card-eyebrow { color: #fffdec; }
 .home-focus-card h2, .home-due-card h2 { margin: .25rem 0; font-size: clamp(1.7rem, 4vw, 3rem); }
 .home-secondary-actions, .projects-index-actions, .overview-compact-actions, .room-header-actions, .room-switch-row, .personal-task-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
 .home-secondary-actions, .projects-index-actions { margin-top: 1rem; }

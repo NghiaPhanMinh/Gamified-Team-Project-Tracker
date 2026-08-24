@@ -911,15 +911,16 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 
 .home-focus-card {
   min-height: 240px;
-  background: #101517;
-  color: #fffdec;
-  box-shadow: none;
+  background: #ffffff;
+  color: #101517;
+  border: 3px solid #101517;
+  box-shadow: 6px 6px 0 #101517;
 }
 
 .home-focus-card h2,
 .home-focus-card p,
 .home-focus-card .card-eyebrow {
-  color: #fffdec;
+  color: #101517;
 }
 
 .home-focus-card h2,
@@ -930,10 +931,10 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 }
 
 :root[data-theme="dark"] .home-focus-card {
-  border-color: var(--mld-border);
-  background: #101517;
+  border-color: rgba(255, 253, 236, 0.35);
+  background: #0e191d;
   color: #fffdec;
-  box-shadow: none;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.4);
 }
 
 :root[data-theme="dark"] .home-focus-card h2,
@@ -950,7 +951,16 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 }
 
 .home-focus-card .primary-button {
-  border-color: #fffdec;
+  background-color: var(--color-orange, #feaa01) !important;
+  color: #101517 !important;
+  border: 2px solid #101517 !important;
+  box-shadow: 2px 2px 0 #101517 !important;
+}
+
+.home-focus-card .primary-button:hover {
+  background-color: #e59700 !important;
+  color: #101517 !important;
+  transform: translateY(-1px);
 }
 
 .room-index-card {
