@@ -105,6 +105,13 @@ html, body {
   overflow: hidden;
 }
 
+html:has(.marketing-shell),
+body:has(.marketing-shell) {
+  height: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 html {
   scroll-behavior: smooth;
 }
