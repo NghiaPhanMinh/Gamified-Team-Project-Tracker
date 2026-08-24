@@ -102,6 +102,8 @@
 
 html {
   scroll-behavior: smooth;
+  font-size: 118.75%;
+  zoom: 1.15;
 }
 
 body {
@@ -4412,7 +4414,7 @@ footer {
   transition: padding-left 180ms ease;
 }
 
-.content-container { width: min(100%, 1480px); min-height: 100%; margin: 0 auto; padding: clamp(1rem, 3vw, 2.5rem); }
+.content-container { width: 100%; max-width: 100%; min-height: 100%; margin: 0; padding: clamp(1rem, 2.5vw, 2rem); }
 .content-container > .room-workspace,
 .content-container > .profile-page,
 .content-container > .projects-index,
@@ -4420,7 +4422,7 @@ footer {
 .content-container > .guided-flow,
 .content-container > .personal-tasks-page { width: 100%; max-width: none; }
 
-.team-workspace { width: min(100%, 1480px); margin: 0 auto; padding: clamp(1rem, 3vw, 2.5rem); }
+.team-workspace { width: 100%; max-width: 100%; margin: 0; padding: clamp(1rem, 2.5vw, 2rem); }
 .project-hub { margin-top: 0; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--color-text); box-shadow: none; }
 .project-workspace { color: var(--color-text); }
 .phase-status-board, .framework-library { background: var(--color-surface); color: var(--color-text); box-shadow: none; }
@@ -4723,7 +4725,7 @@ footer {
 .app-sidebar .sidebar-room-tree .is-room { min-height: 38px; padding: .38rem .55rem; border-radius: 10px; font-size: .82rem; }
 .app-sidebar .sidebar-room-tree .is-room span { font-family: monospace; opacity: .55; }
 .sidebar-collapsed .sidebar-room-tree { display: none; }
-.signed-in-home, .projects-index, .personal-tasks-page, .guided-flow, .profile-page { width: min(100%, 1180px); margin: 0 auto; }
+.signed-in-home, .projects-index, .personal-tasks-page, .guided-flow, .profile-page { width: 100%; max-width: 100%; margin: 0; }
 .signed-in-welcome, .focused-page-heading { margin-bottom: 1.4rem; }
 .signed-in-welcome .display-heading, .focused-page-heading .display-heading { margin: .2rem 0; }
 .home-next-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(260px, .85fr); gap: 1rem; }
