@@ -910,6 +910,7 @@ function QuestCardHoverItem({
 }: QuestCardHoverItemProps) {
   const [hovered, setHovered] = useState(false);
   const isCompleted = Boolean(task.isCompleted || task.status === "completed" || task.status === "verified");
+  const isInReview = Boolean(task.status === "review" || task.status === "submitted" || task.status === "awaiting_creator");
 
   return (
     <div
@@ -922,28 +923,28 @@ function QuestCardHoverItem({
         color: "#101517",
         border: "2px solid #101517",
         borderRadius: "8px",
-        padding: "12px 14px",
+        padding: "10px 14px",
         cursor: "pointer",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
-        minHeight: hovered ? "115px" : "72px",
+        justifyContent: "space-between",
+        minHeight: "78px",
         boxSizing: "border-box",
-        opacity: isCompleted ? (hovered ? 0.75 : 0.3) : 1,
-        transition: "background-color 0.15s ease, min-height 0.15s ease, opacity 0.15s ease",
+        opacity: isCompleted ? 0.45 : 1,
+        transition: "background-color 0.15s ease",
       }}
     >
       {/* Top Header Row: Task Name & Assignee */}
-      <div style={{ paddingRight: "65px" }}>
+      <div style={{ paddingRight: "70px" }}>
         <h4
           style={{
             margin: 0,
-            fontSize: "1.05rem",
+            fontSize: "0.98rem",
             fontWeight: 900,
             color: "#101517",
             lineHeight: "1.25",
             display: "-webkit-box",
-            WebkitLineClamp: hovered ? 3 : 2,
+            WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
             textDecoration: isCompleted ? "line-through" : "none",
@@ -955,27 +956,27 @@ function QuestCardHoverItem({
         {/* Owner Name Under */}
         <div
           style={{
-            fontSize: "0.78rem",
+            fontSize: "0.76rem",
             fontWeight: 700,
             color: task.isOpen ? "#dc2626" : "#475569",
-            marginTop: "4px",
+            marginTop: "3px",
           }}
         >
-          {task.isOpen ? "Unassigned" : `By: ${task.assigneeName}`}
+          {task.isOpen ? "Unassigned" : `By: ${task.assigneeName}`} · Due: {task.dueDate || "No date"}
         </div>
       </div>
 
-      {/* Bottom Right Corner Status Badge (Green Completed / Red Incomplete) */}
+      {/* Bottom Right Corner Status Badge */}
       <span
         style={{
           position: "absolute",
           bottom: "10px",
-          right: "12px",
-          fontSize: "0.68rem",
+          right: "10px",
+          fontSize: "0.66rem",
           fontWeight: 900,
-          color: isCompleted ? "#16a34a" : "#dc2626",
-          background: isCompleted ? "#dcfce7" : "#fee2e2",
-          border: `1px solid ${isCompleted ? "#22c55e" : "#ef4444"}`,
+          color: isInReview ? "#b45309" : (isCompleted ? "#16a34a" : (task.isOpen ? "#0369a1" : "#dc2626")),
+          background: isInReview ? "#fef3c7" : (isCompleted ? "#dcfce7" : (task.isOpen ? "#e0f2fe" : "#fee2e2")),
+          border: `1px solid ${isInReview ? "#f59e0b" : (isCompleted ? "#22c55e" : (task.isOpen ? "#0284c7" : "#ef4444"))}`,
           padding: "1.5px 6px",
           borderRadius: "4px",
           letterSpacing: "0.02em",
@@ -983,60 +984,8 @@ function QuestCardHoverItem({
           textTransform: "capitalize",
         }}
       >
-        {isCompleted ? "Completed" : "Incomplete"}
+        {isInReview ? "In Review" : (isCompleted ? "Completed" : (task.isOpen ? "Open" : "In Progress"))}
       </span>
-
-      {/* Details & Actions Revealed on Hover */}
-      {hovered && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "8px",
-            marginTop: "8px",
-            paddingTop: "8px",
-            paddingRight: "80px",
-            borderTop: "1px solid rgba(16,21,23,0.12)",
-          }}
-        >
-          <span style={{ fontSize: "0.74rem", fontWeight: 700, color: "#334155" }}>
-            Due: {task.dueDate || "No date"}
-          </span>
-          <div style={{ display: "flex", gap: "4px" }}>
-            {!isCompleted && task.isOpen ? (
-              <button
-                className="rpg-modern-btn is-primary"
-                type="button"
-                style={{ padding: "4px 8px", fontSize: "0.72rem", boxShadow: "none" }}
-                disabled={isClaimingQuest}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClaim(task);
-                }}
-              >
-                {isClaimingQuest ? "Claiming..." : "Claim Task"}
-              </button>
-            ) : !isCompleted && task.isMine ? (
-              <button
-                className="rpg-modern-btn is-boss"
-                type="button"
-                style={{ padding: "4px 8px", fontSize: "0.72rem", boxShadow: "none" }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAttack(task);
-                }}
-              >
-                Attack Dragon
-              </button>
-            ) : (
-              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b" }}>
-                {isCompleted ? "Done" : "Click for details"}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -2276,6 +2225,9 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     if (!workspace?.tasks) return [];
     return workspace.tasks
       .filter((t) => {
+        // A user cannot review their own task:
+        if (t.primaryOwnerProfileId === state?.currentProfileId) return false;
+
         const isReviewer = t.reviewerProfileId === state?.currentProfileId;
         const isCreator = workspace?.project?.creatorProfileId === state?.currentProfileId;
         if (isReviewer && (t.status === "review" || t.status === "submitted")) return true;
@@ -3998,7 +3950,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             {/* Minimal Subtext */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "2px solid #101517", paddingTop: "8px", flexShrink: 0 }}>
               <span style={{ fontSize: "0.75rem", fontWeight: 700, opacity: 0.75 }}>
-                Hover over any task to see details and actions. Click to view full quest details.
+                Click on any task to view quest details and submit proof.
               </span>
             </div>
           </div>
@@ -4063,21 +4015,75 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 >
                   {isClaimingQuest ? "Claiming Quest..." : "Claim This Quest"}
                 </button>
-              ) : selectedQuestTask.isMine ? (
-                <button
-                  className="rpg-modern-btn is-boss"
-                  type="button"
-                  onClick={() => {
-                    setSelectedTaskId(selectedQuestTask._id);
-                    setSelectedQuestTask(null);
-                    setShowBossModal(true);
-                  }}
-                >
-                  Submit Proof & Attack Dragon
-                </button>
+              ) : questBoardTab === "mine" ? (
+                (() => {
+                  const isInReview = Boolean(
+                    selectedQuestTask.status === "review" ||
+                    selectedQuestTask.status === "submitted" ||
+                    selectedQuestTask.status === "awaiting_creator"
+                  );
+                  const isCompleted = Boolean(
+                    selectedQuestTask.isCompleted ||
+                    selectedQuestTask.status === "completed" ||
+                    selectedQuestTask.status === "verified"
+                  );
+
+                  if (isInReview) {
+                    return (
+                      <div
+                        style={{
+                          background: "#fef3c7",
+                          border: "2px solid #f59e0b",
+                          borderRadius: "8px",
+                          padding: "10px 14px",
+                          color: "#92400e",
+                          fontWeight: 800,
+                          fontSize: "0.84rem",
+                          textAlign: "center",
+                        }}
+                      >
+                        ⏳ Status: In Review — Your proof has been submitted and is currently awaiting peer review.
+                      </div>
+                    );
+                  }
+
+                  if (isCompleted) {
+                    return (
+                      <div
+                        style={{
+                          background: "#dcfce7",
+                          border: "2px solid #16a34a",
+                          borderRadius: "8px",
+                          padding: "10px 14px",
+                          color: "#15803d",
+                          fontWeight: 800,
+                          fontSize: "0.84rem",
+                          textAlign: "center",
+                        }}
+                      >
+                        ✅ Status: Completed & Verified — The Dragon took damage!
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <button
+                      className="rpg-modern-btn is-boss"
+                      type="button"
+                      onClick={() => {
+                        setSelectedTaskId(selectedQuestTask._id);
+                        setSelectedQuestTask(null);
+                        setShowQuestBoardModal(false);
+                        setShowBossModal(true);
+                      }}
+                    >
+                      Submit Proof & Attack Dragon ➜
+                    </button>
+                  );
+                })()
               ) : (
                 <div style={{ textAlign: "center", fontSize: "0.78rem", fontWeight: 700, opacity: 0.8, padding: "4px" }}>
-                  Currently assigned to {selectedQuestTask.assigneeName}
+                  Currently assigned to {selectedQuestTask.assigneeName} · Status: {selectedQuestTask.status || "active"}
                 </div>
               )}
 
