@@ -100,7 +100,7 @@ export function SubscriptionPage({ currentPlan }: { currentPlan: SubscriptionPla
             <p className="subscription-price"><strong>0₫</strong></p>
           </header>
           <PlanFeatureList features={FREE_FEATURES} />
-          <footer>
+          <footer className="subscription-plan-actions">
             <button type="button" disabled>
               {currentPlan === "free" ? "Current plan" : "Included with Plus"}
             </button>
@@ -116,7 +116,7 @@ export function SubscriptionPage({ currentPlan }: { currentPlan: SubscriptionPla
             <p className="subscription-semester-price">or 99K₫ / semester</p>
           </header>
           <PlanFeatureList features={PLUS_FEATURES} />
-          <footer>
+          <footer className="subscription-plan-actions">
             {currentPlan === "plus" ? (
               <button type="button" disabled>Current plan</button>
             ) : (

@@ -62,8 +62,10 @@ describe("MayLamDi design-system contract", () => {
 
   it("keeps framework cards colourful, aligned, and readable", () => {
     expect(css).toContain("background: var(--framework-card-color)");
-    expect(css).toContain("grid-template-columns: repeat(7, minmax(11rem, 1fr))");
-    expect(css).toContain("min-height: 5.25rem");
+    expect(css).toContain("grid-template-columns: repeat(4, minmax(0, 1fr))");
+    expect(css).toContain("grid-template-columns: repeat(3, minmax(0, 1fr))");
+    expect(css).toContain("grid-template-columns: repeat(2, minmax(0, 1fr))");
+    expect(css).toContain("grid-template-rows: auto minmax(6rem, auto) minmax(3.75rem, auto)");
     expect(css).toContain(".framework-preview-note");
     expect(css).toContain("background: #fff73f");
     expect(css).toContain("color: #101517");
@@ -123,8 +125,8 @@ describe("MayLamDi design-system contract", () => {
   });
 
   it("contains long framework names and groups brief metadata responsively", () => {
-    expect(css).toContain("grid-template-rows: auto minmax(6rem, auto) auto");
-    expect(css).toContain("grid-template-columns: repeat(7, minmax(11rem, 1fr))");
+    expect(css).toContain("grid-template-rows: auto minmax(6rem, auto) minmax(3.75rem, auto)");
+    expect(css).toContain("grid-template-columns: repeat(4, minmax(0, 1fr))");
     expect(css).toContain("overflow-wrap: normal");
     expect(css).toContain("overflow-wrap: anywhere");
     expect(css).toContain(".project-brief-details");

@@ -196,6 +196,10 @@ describe("extended project workflows", () => {
   it("requires project-owner authority and exact-name confirmation for deletion", async () => {
     const database = convexTest(schema, modules);
     const { owner, member, projectId } = await setupProject(database);
+    const ownerProjects = await owner.asUser.query(api.projects.listMineAcrossRooms, {});
+    const memberProjects = await member.asUser.query(api.projects.listMineAcrossRooms, {});
+    expect(ownerProjects[0]).toMatchObject({ _id: projectId, title: "Workflow Project", canDelete: true });
+    expect(memberProjects[0]).toMatchObject({ _id: projectId, title: "Workflow Project", canDelete: false });
     await expect(member.asUser.mutation(api.projects.deletePermanently, { projectId, confirmationName: "Workflow Project" })).rejects.toThrow(/room creator/i);
     await expect(owner.asUser.mutation(api.projects.deletePermanently, { projectId, confirmationName: "wrong name" })).rejects.toThrow(/exact project name/i);
     expect(await owner.asUser.query(api.projects.listForTeam, { teamId: (await owner.asUser.query(api.tasks.getWorkspace, { projectId })).project.teamId })).toHaveLength(1);

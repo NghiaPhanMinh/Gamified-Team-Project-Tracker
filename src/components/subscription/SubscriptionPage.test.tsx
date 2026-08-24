@@ -61,5 +61,8 @@ describe("subscription experience", () => {
     expect(designStyles).toContain(".subscription-page-heading,");
     expect(designStyles).toContain(".subscription-plan-grid");
     expect(designStyles).toContain("grid-template-columns: 1fr;");
+    expect(designStyles).toContain(".subscription-plan-actions");
+    expect(designStyles).toContain("background: transparent;");
+    expect(designStyles).toContain("margin: var(--mld-space-5) 0 0;");
   });
 });

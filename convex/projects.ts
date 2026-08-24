@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 
 import { mutation, query } from "./_generated/server";
-import { requireCompleteUserProfile, requireTeamMember } from "./lib/auth";
+import { requireCompleteUserProfile, requireTeamMember, requireUserProfile } from "./lib/auth";
 import { deriveProjectStatus } from "./lib/projectProgress";
 import {
   validateBuiltInFramework,
@@ -30,6 +30,62 @@ const projectMemberValidator = v.object({
   ),
   preferences: v.string(),
   weeklyCapacity: v.optional(v.number()),
+});
+
+export const listMineAcrossRooms = query({
+  args: {},
+  handler: async (ctx) => {
+    const profile = await requireUserProfile(ctx);
+    const memberships = await ctx.db
+      .query("teamMembers")
+      .withIndex("by_user", (indexQuery) =>
+        indexQuery.eq("profileId", profile._id),
+      )
+      .collect();
+
+    const groupedProjects = await Promise.all(
+      memberships.map(async (membership) => {
+        const [team, members, projects] = await Promise.all([
+          ctx.db.get(membership.teamId),
+          ctx.db
+            .query("teamMembers")
+            .withIndex("by_team", (indexQuery) =>
+              indexQuery.eq("teamId", membership.teamId),
+            )
+            .collect(),
+          ctx.db
+            .query("projects")
+            .withIndex("by_team_and_updated", (indexQuery) =>
+              indexQuery.eq("teamId", membership.teamId),
+            )
+            .order("desc")
+            .take(50),
+        ]);
+
+        if (team === null) {
+          return [];
+        }
+
+        return projects.map((project) => ({
+          _id: project._id,
+          teamId: team._id,
+          roomName: team.name,
+          title: project.title,
+          description: project.description,
+          frameworkName: project.frameworkName,
+          status: project.status,
+          deadline: project.deadline,
+          memberCount: members.length,
+          canDelete: project.creatorProfileId === profile._id,
+          updatedAt: project.updatedAt,
+        }));
+      }),
+    );
+
+    return groupedProjects
+      .flat()
+      .sort((first, second) => second.updatedAt - first.updatedAt);
+  },
 });
 
 export const listForTeam = query({

@@ -86,7 +86,16 @@ export function PersonalTasks({ onOpenRoom }: { onOpenRoom: (roomId: Id<"teams">
         </section>
       ) : null)}
 
-      {groups?.map((group) => <details key={group.projectId} className="personal-trade-details"><summary>{group.projectTitle} task trades</summary><TaskTradePanel projectId={group.projectId} /></details>)}
+      {groups?.length ? (
+        <div className="personal-trade-groups" aria-label="Task trades by project">
+          {groups.map((group) => (
+            <details key={group.projectId} className="personal-trade-details">
+              <summary>{group.projectTitle} task trades</summary>
+              <TaskTradePanel projectId={group.projectId} />
+            </details>
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }

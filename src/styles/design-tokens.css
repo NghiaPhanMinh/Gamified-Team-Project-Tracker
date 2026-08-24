@@ -799,25 +799,30 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 }
 
 .framework-picker {
-  grid-template-columns: repeat(7, minmax(11rem, 1fr));
-  gap: var(--mld-space-3);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--mld-space-4);
+  width: 100%;
   margin: 0 0 var(--mld-space-5);
-  padding: var(--mld-space-2) var(--mld-space-2) var(--mld-space-4);
-  scroll-padding-inline: var(--mld-space-2);
+  padding: var(--mld-space-2) 0 var(--mld-space-4);
+  overflow: visible;
 }
 
 .framework-picker-card {
-  display: flex;
-  min-height: 228px;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
+  display: grid;
+  grid-template-rows: auto minmax(6rem, auto) minmax(3.75rem, auto);
+  align-content: start;
+  gap: var(--mld-space-4);
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  min-height: 260px;
+  height: 100%;
   padding: var(--mld-space-4);
   border: 2px solid #101517;
   background: var(--framework-card-color);
   color: #101517;
   box-shadow: 0 2px 0 rgba(16, 21, 23, 0.18);
-  scroll-snap-align: start;
 }
 
 .framework-picker-card:hover {
@@ -1349,6 +1354,24 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   cursor: default;
 }
 
+.subscription-plan-actions {
+  display: block;
+  margin: var(--mld-space-5) 0 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.subscription-plan-card.is-plus .subscription-plan-actions button:not(:disabled) {
+  box-shadow: 4px 4px 0 var(--mld-info);
+  cursor: pointer;
+}
+
+.subscription-plan-card.is-plus .subscription-plan-actions button:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 5px 5px 0 var(--mld-info);
+}
+
 .subscription-upgrade-note,
 .subscription-core-note {
   margin: 0;
@@ -1780,6 +1803,10 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   .content-container {
     padding: var(--mld-space-6) var(--mld-space-5);
   }
+
+  .framework-picker {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 850px) {
@@ -1959,12 +1986,15 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   }
 
   .framework-picker {
-    grid-template-columns: repeat(7, minmax(168px, 72vw));
-    scroll-snap-type: x proximity;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 520px) {
+  .framework-picker {
+    grid-template-columns: 1fr;
+  }
+
   .home-focus-card,
   .home-due-card,
   .guided-card,
@@ -3193,7 +3223,7 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 /* Framework Library: fixed title rhythm without clipping long names. */
 .framework-picker-card {
   display: grid;
-  grid-template-rows: auto minmax(6rem, auto) auto;
+  grid-template-rows: auto minmax(6rem, auto) minmax(3.75rem, auto);
   align-content: start;
   gap: var(--mld-space-4);
   min-width: 0;
@@ -3214,7 +3244,142 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 .framework-picker-card .framework-card-meta {
   min-width: 0;
   margin: 0;
+  align-self: end;
   overflow-wrap: anywhere;
+}
+
+/* Project index: the destructive control is explicit, owner-only, and
+ * independent from the card's primary open action. */
+.project-index-card-shell {
+  position: relative;
+  min-width: 0;
+}
+
+.project-index-card-shell .project-index-card {
+  width: 100%;
+  height: 100%;
+  padding-right: var(--mld-space-8);
+}
+
+.project-index-delete-button {
+  position: absolute;
+  z-index: 2;
+  top: var(--mld-space-3);
+  right: var(--mld-space-3);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  border: 2px solid #101517;
+  border-radius: var(--mld-radius-pill);
+  background: rgba(255, 253, 236, 0.9);
+  color: #101517;
+  box-shadow: 2px 2px 0 rgba(16, 21, 23, 0.3);
+  cursor: pointer;
+}
+
+.project-index-delete-button:hover,
+.project-index-delete-button:focus-visible {
+  border-color: var(--mld-danger);
+  background: #fffdec;
+  color: var(--mld-danger);
+  transform: translateY(-1px);
+}
+
+.project-index-delete-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.project-delete-overlay {
+  position: fixed;
+  z-index: 200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--mld-space-5);
+  background: rgba(7, 18, 22, 0.72);
+}
+
+.project-delete-dialog {
+  display: grid;
+  gap: var(--mld-space-4);
+  width: min(100%, 520px);
+  padding: var(--mld-space-6);
+  border: 2px solid var(--mld-text);
+  border-radius: var(--mld-radius-lg);
+  background: var(--mld-surface-01);
+  color: var(--mld-text);
+  box-shadow: 8px 8px 0 var(--mld-danger);
+}
+
+.project-delete-dialog h2,
+.project-delete-dialog p {
+  margin: 0;
+}
+
+.project-delete-confirmation {
+  display: grid;
+  gap: var(--mld-space-2);
+}
+
+.project-delete-confirmation input {
+  width: 100%;
+}
+
+.project-delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--mld-space-3);
+  margin-top: var(--mld-space-2);
+}
+
+/* Task trades: clear project-level groups and calmer accordion rhythm. */
+.personal-trade-groups {
+  display: grid;
+  gap: var(--mld-space-7);
+}
+
+.personal-trade-details {
+  padding: var(--mld-space-5);
+}
+
+.personal-trade-details > summary,
+.task-trade-panel > summary {
+  line-height: 1.45;
+}
+
+.personal-trade-details > summary {
+  padding-block: var(--mld-space-2);
+  font-size: var(--mld-h4-size);
+}
+
+.personal-trade-details > .task-trade-panel {
+  margin: var(--mld-space-5) 0 0;
+  padding: var(--mld-space-4);
+}
+
+.task-trade-panel > summary {
+  padding-block: var(--mld-space-2);
+}
+
+.task-trade-panel .trade-request-form,
+.task-trade-panel .trade-list {
+  margin-top: var(--mld-space-5);
+}
+
+.task-trade-panel .trade-request-form {
+  gap: var(--mld-space-4);
+}
+
+.task-trade-panel .trade-list {
+  gap: var(--mld-space-4);
+}
+
+.task-trade-panel .trade-list li {
+  padding: var(--mld-space-4);
 }
 
 /* Brief Details: copy remains primary while all metadata forms one compact,
