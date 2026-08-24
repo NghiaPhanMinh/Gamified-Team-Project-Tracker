@@ -28,6 +28,7 @@ import { LandscapePlayers, getMageTheme } from "./landscape/LandscapePlayers";
 import { LandscapeDragon, DRAGON_ORIGINAL_SHAPES, parseCoordinates } from "./landscape/LandscapeDragon";
 import { LandscapeFX } from "./landscape/LandscapeFX";
 import { LandscapeQuestBoard, type QuestTask } from "./landscape/LandscapeQuestBoard";
+import { LandscapeTutorial, type TutorialSceneId } from "./landscape/LandscapeTutorial";
 import { CharacterAvatar } from "../common/CharacterAvatar";
 import {
   gameAudio,
@@ -1336,6 +1337,18 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [showDragonEditor, setShowDragonEditor] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
 
+  // Interactive Cutscene Tutorial State
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialScene, setTutorialScene] = useState<TutorialSceneId>("A");
+  const [showTutorialChoice, setShowTutorialChoice] = useState<boolean>(() => {
+    try {
+      if (typeof window === "undefined") return false;
+      return localStorage.getItem("rpg_tutorial_seen") === null;
+    } catch {
+      return false;
+    }
+  });
+
   // Sound & Web Push Notification System State
   const [showSoundSettingsModal, setShowSoundSettingsModal] = useState(false);
   const [isAudioMuted, setIsAudioMuted] = useState(() => gameAudio.getMuted());
@@ -2435,6 +2448,24 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const damageClearedFraction = (100 - hpPercent) / 100;
   const dragonX = 730 + damageClearedFraction * 60;
 
+  const tutorialCameraTransform = useMemo(() => {
+    if (!showTutorial) return undefined;
+    switch (tutorialScene) {
+      case "A":
+        return "scale(1.55) translate(16%, -4%)";
+      case "B":
+        return "scale(1.05) translate(0%, 0%)";
+      case "C":
+        return "scale(1.85) translate(-4%, -14%)";
+      case "D":
+        return "scale(1.6) translate(-22%, 4%)";
+      case "E":
+        return "scale(1.08) translate(8%, -5%)";
+      default:
+        return undefined;
+    }
+  }, [showTutorial, tutorialScene]);
+
   // Post-Deadline End-Game Screen (Overrides active game scene when deadline is reached)
   if ((testOverdueOverride !== null ? testOverdueOverride : state.isOverdue) && !viewBattleSceneOverride) {
     const isVillageDefended = effectiveVillageHp >= 50;
@@ -2576,7 +2607,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       <SVGDefs />
 
       {/* Main 10-Layer Geometric SVG Landscape Scene */}
-      <div className="landscape-scene-container" style={{ position: "relative" }} aria-label="Interactive project encounter scene">
+      <div className="landscape-scene-container" style={{ position: "relative", overflow: "hidden" }} aria-label="Interactive project encounter scene">
         {/* Top Control Bar Overlay (Flex row - prevents any collision across all screen dimensions) */}
         <div
           className="rpg-top-bar-controls"
@@ -2590,6 +2621,22 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             gap: "8px",
           }}
         >
+          {/* Tutorial Cutscene Button */}
+          <button
+            className="rpg-btn-leaderboard rpg-btn-tutorial"
+            style={{ position: "relative", top: 0, right: 0 }}
+            onClick={() => {
+              setTutorialScene("A");
+              setShowTutorial(true);
+            }}
+            type="button"
+          >
+            <span className="rpg-book-icon" aria-hidden="true">
+              <i /><i />
+            </span>
+            Tutorial
+          </button>
+
           {/* Sound & Notifications Controls Button */}
           <button
             className="rpg-btn-leaderboard rpg-btn-sound-controls"
@@ -2637,12 +2684,33 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
         {/* Attack Circular Action Button */}
         <button
-          className="rpg-btn-attack-circle"
+          className={`rpg-btn-attack-circle ${showTutorial && tutorialScene === "E" ? "is-tutorial-highlighted" : ""}`}
           onClick={() => setShowAttackChoiceModal(true)}
           type="button"
+          style={
+            showTutorial && tutorialScene === "E"
+              ? {
+                  boxShadow: "0 0 20px #facc15, 0 0 40px #ea580c",
+                  zIndex: 70,
+                }
+              : undefined
+          }
         >
           Attack
         </button>
+
+        {/* Dynamic Camera Zoom Viewport for Tutorial Cutscenes */}
+        <div
+          className="landscape-camera-viewport"
+          style={{
+            position: "absolute",
+            inset: 0,
+            transform: tutorialCameraTransform,
+            transformOrigin: "center center",
+            transition: "transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)",
+            pointerEvents: showTutorial ? "none" : "auto",
+          }}
+        >
 
         {/* Floating Mob-Style Boss HP Bar (With Humorous Boss Name Above, HP % Inside, Adjustable Size) */}
         <div
@@ -2750,7 +2818,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         />
 
         {/* Layer 5: Section 3 & 5 - Grounded Village & Anchored Village HP Bar with Humorous Town Name */}
-        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 5, transform: `translate(${layerTransforms.village?.x || 0}px, ${layerTransforms.village?.y || 0}px) scale(${layerTransforms.village?.scale || 1})`, display: layerTransforms.village?.visible !== false ? "block" : "none" }}>
+        <div
+          className={showTutorial && tutorialScene === "A" ? "tutorial-assembling-village" : ""}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 5, transform: `translate(${layerTransforms.village?.x || 0}px, ${layerTransforms.village?.y || 0}px) scale(${layerTransforms.village?.scale || 1})`, display: layerTransforms.village?.visible !== false ? "block" : "none" }}
+        >
           <LandscapeVillage
             villageHpPercent={effectiveVillageHp}
             villageName={funnyVillageName}
@@ -2762,7 +2833,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         </div>
 
         {/* Layer 6: Section 8 - Daily Goblins Wave System (1 per active player) */}
-        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 6, transform: `translate(${layerTransforms.goblins?.x || 0}px, ${layerTransforms.goblins?.y || 0}px) scale(${layerTransforms.goblins?.scale || 1})`, display: layerTransforms.goblins?.visible !== false ? "block" : "none" }}>
+        <div
+          className={showTutorial && tutorialScene === "B" ? "tutorial-assembling-goblins" : ""}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 6, transform: `translate(${layerTransforms.goblins?.x || 0}px, ${layerTransforms.goblins?.y || 0}px) scale(${layerTransforms.goblins?.scale || 1})`, display: layerTransforms.goblins?.visible !== false ? "block" : "none" }}
+        >
           <LandscapeGoblins goblins={goblins} />
         </div>
 
@@ -2773,6 +2847,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
         {/* Layer 8: Section 1 - Medieval Dragon Visuals & Wings */}
         <div
+          className={showTutorial && tutorialScene === "B" ? "tutorial-assembling-dragon" : ""}
           style={{
             position: "absolute",
             inset: 0,
@@ -2808,6 +2883,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             isVictory={defeated}
           />
         </div>
+      </div>
 
         {/* Layer 10: Bottom-Middle Plant vs Zombies Style Deadline Progress Bar (Flat Style, No Shadow, No Outline) */}
         <div
@@ -5581,6 +5657,82 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             </button>
           </div>
         </div>
+      )}
+
+      {/* First-Time Entry Choice Modal (Skip Tutorial vs Start Tutorial) */}
+      {showTutorialChoice && !showTutorial && (
+        <div className="rpg-modal-overlay" style={{ zIndex: 60 }}>
+          <div
+            className="rpg-parchment-modal"
+            style={{ maxWidth: "480px", textAlign: "center", animation: "tutorialPopIn 0.35s ease forwards" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="rpg-modal-header" style={{ justifyContent: "center" }}>
+              <h2>Welcome to the Realm!</h2>
+            </div>
+            <div className="rpg-modal-body" style={{ display: "grid", gap: "16px", padding: "16px 20px" }}>
+              <div style={{ fontSize: "2.5rem" }}>🏰⚔️🐉</div>
+              <p style={{ margin: 0, fontSize: "0.9rem", color: "#f1f5f9", lineHeight: 1.5 }}>
+                Would you like a quick 1-minute visual walkthrough on defending the village, daily goblins, and defeating <strong>{funnyBossName}</strong>?
+              </p>
+              <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "8px" }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem("rpg_tutorial_seen", "true");
+                    }
+                    setShowTutorialChoice(false);
+                  }}
+                  style={{
+                    padding: "8px 18px",
+                    borderRadius: "8px",
+                    background: "#334155",
+                    color: "#cbd5e1",
+                    border: "none",
+                    fontSize: "0.85rem",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  Skip Tutorial
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowTutorialChoice(false);
+                    setTutorialScene("A");
+                    setShowTutorial(true);
+                  }}
+                  style={{
+                    padding: "8px 24px",
+                    borderRadius: "8px",
+                    background: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)",
+                    color: "#ffffff",
+                    border: "none",
+                    fontSize: "0.85rem",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    boxShadow: "0 4px 14px rgba(2, 132, 199, 0.4)",
+                  }}
+                >
+                  Start Tutorial ➜
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Interactive Visual Novel Cutscene Tutorial Overlay */}
+      {showTutorial && (
+        <LandscapeTutorial
+          isOpen={showTutorial}
+          onClose={() => setShowTutorial(false)}
+          villageName={funnyVillageName}
+          bossName={funnyBossName}
+          onSceneChange={(sc) => setTutorialScene(sc)}
+        />
       )}
     </section>
   );
