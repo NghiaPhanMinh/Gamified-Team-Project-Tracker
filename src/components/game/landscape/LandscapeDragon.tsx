@@ -255,7 +255,7 @@ export function LandscapeDragon({
   }, [layerOrder, customShapes]);
 
   // Build individual element props (coordinates, select handles, drag handles, fills)
-  function getShapeProps(shapeId: string, defaultFill?: string, defaultStroke?: string, defaultStrokeWidth?: number, group?: string) {
+  function getShapeProps(shapeId: string, defaultFill?: string, defaultStroke?: string, defaultStrokeWidth?: number) {
     const isSelected = selectedPart === shapeId;
     const offset = offsets[shapeId] || { x: 0, y: 0, rotate: 0, scale: 1 };
     const scaleVal = offset.scale ?? 1;
@@ -306,10 +306,19 @@ export function LandscapeDragon({
       aria-label={`Epic Rigged Western Red Dragon (${bossHpPercent}% HP left)`}
     >
       <style>{`
+        @keyframes dragon-slain-fall {
+          0% { transform: translateY(0) rotate(0deg); opacity: 0.95; }
+          30% { transform: translateY(25px) rotate(8deg); opacity: 0.8; }
+          60% { transform: translateY(55px) rotate(16deg) scale(0.92); opacity: 0.6; }
+          100% { transform: translateY(75px) rotate(22deg) scale(0.85); opacity: 0.35; }
+        }
         @keyframes dragon-ghost-soul {
           0% { transform: translateY(0) scale(0.8); opacity: 0; }
-          50% { transform: translateY(-25px) scale(1.1); opacity: 0.85; }
-          100% { transform: translateY(-50px) scale(1.3); opacity: 0; }
+          50% { transform: translateY(-30px) scale(1.1); opacity: 0.85; }
+          100% { transform: translateY(-65px) scale(1.3); opacity: 0; }
+        }
+        .dragon-defeated-anim {
+          animation: dragon-slain-fall 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
       `}</style>
       <svg
@@ -318,30 +327,25 @@ export function LandscapeDragon({
         height="100%"
         style={{ pointerEvents: (onSelectPart ? "auto" : "none") as any }}
       >
-        {/* Dragon Group anchored on Far-Right End - Fully intact, transparent ghostlike entity when dead */}
+        {/* Dragon Group anchored on Far-Right End */}
         <g
           transform={`translate(${dragonX}, 130)`}
-          className="dragon-group"
-          style={{
-            opacity: isDefeated ? 0.35 : 1,
-            filter: isDefeated ? "drop-shadow(0 0 16px rgba(96, 165, 250, 0.9)) brightness(1.25)" : "none",
-            transition: "opacity 0.6s ease, filter 0.6s ease",
-          }}
+          className={`dragon-group ${isDefeated ? "dragon-defeated-anim" : ""}`}
         >
           {/* Defeated Ghost Soul and Slayed Indicator */}
           {isDefeated && (
             <g transform="translate(100, -20)" style={{ animation: "dragon-ghost-soul 3s ease-in-out infinite", pointerEvents: "none" }}>
-              <text x="0" y="0" fill="#93c5fd" fontSize="18" fontWeight="900" fontFamily="var(--font-heading), sans-serif" textAnchor="middle" opacity="0.9">
-                Ghost Dragon
+              <text x="0" y="0" fill="#94a3b8" fontSize="18" fontWeight="900" fontFamily="var(--font-heading), sans-serif" textAnchor="middle" opacity="0.85">
+                Slayed Boss
               </text>
-              <polygon points="0,-15 5,-5 15,0 5,5 0,15 -5,5 -15,0 -5,-5" fill="#38bdf8" opacity="0.8" />
-              <polygon points="-25,-25 -15,-20 -20,-10" fill="#60a5fa" opacity="0.7" />
-              <polygon points="25,-30 20,-15 35,-20" fill="#93c5fd" opacity="0.7" />
+              <polygon points="0,-15 5,-5 15,0 5,5 0,15 -5,5 -15,0 -5,-5" fill="#38bdf8" opacity="0.7" />
+              <polygon points="-25,-25 -15,-20 -20,-10" fill="#facc15" opacity="0.6" />
+              <polygon points="25,-30 20,-15 35,-20" fill="#f43f5e" opacity="0.6" />
             </g>
           )}
 
           {/* Dragon Ground Shadow (Grounded directly under dragon body/feet, never cropped) */}
-          <g transform="translate(85, 180)" style={{ opacity: isDefeated ? 0.15 : 1 }}>
+          <g transform="translate(85, 180)">
             {!isDefeated && animationsEnabled && (
               <animateTransform
                 attributeName="transform"
@@ -386,35 +390,36 @@ export function LandscapeDragon({
 
                 switch (shape.type) {
                   case "path":
-                    element = <path d={geom} {...getShapeProps(shape.id, shape.defaultFill, undefined, undefined, shape.group)} />;
+                    element = <path d={geom} {...getShapeProps(shape.id, shape.defaultFill)} />;
                     break;
                   case "polygon":
-                    element = <polygon points={geom} {...getShapeProps(shape.id, shape.defaultFill, undefined, undefined, shape.group)} />;
+                    element = <polygon points={geom} {...getShapeProps(shape.id, shape.defaultFill)} />;
                     break;
                   case "circle":
-                    element = <circle cx={shape.cx} cy={shape.cy} r={shape.r} {...getShapeProps(shape.id, shape.defaultFill, undefined, undefined, shape.group)} />;
+                    element = <circle cx={shape.cx} cy={shape.cy} r={shape.r} {...getShapeProps(shape.id, shape.defaultFill)} />;
                     break;
                   case "ellipse":
-                    element = <ellipse cx={shape.cx} cy={shape.cy} rx={shape.rx} ry={shape.ry} {...getShapeProps(shape.id, shape.defaultFill, undefined, undefined, shape.group)} />;
+                    element = <ellipse cx={shape.cx} cy={shape.cy} rx={shape.rx} ry={shape.ry} {...getShapeProps(shape.id, shape.defaultFill)} />;
                     break;
                   case "rect":
-                    element = <rect x={shape.x} y={shape.y} width={shape.width} height={shape.height} rx={shape.rx} ry={shape.ry} {...getShapeProps(shape.id, shape.defaultFill, undefined, undefined, shape.group)} />;
+                    element = <rect x={shape.x} y={shape.y} width={shape.width} height={shape.height} rx={shape.rx} ry={shape.ry} {...getShapeProps(shape.id, shape.defaultFill)} />;
                     break;
                   default:
                     return null;
                 }
 
-                // Wrap element inside Wing Flapping animation transform if needed (Disabled when defeated)
+                // Wrap element inside Wing Flapping animation transform if needed
                 if (shape.group === "backWing") {
                   element = (
-                    <g>
-                      {!isDefeated && animationsEnabled && (
+                    <g transform-origin="120 110">
+                      {animationsEnabled && (
                         <animateTransform
                           attributeName="transform"
                           type="rotate"
-                          values="0 120 110; -45 120 110; 15 120 110; 0 120 110"
+                          values="0; -45; 15; 0"
                           dur="1.8s"
                           repeatCount="indefinite"
+                          additive="sum"
                         />
                       )}
                       {element}
@@ -422,14 +427,15 @@ export function LandscapeDragon({
                   );
                 } else if (shape.group === "frontWing") {
                   element = (
-                    <g>
-                      {!isDefeated && animationsEnabled && (
+                    <g transform-origin="110 115">
+                      {animationsEnabled && (
                         <animateTransform
                           attributeName="transform"
                           type="rotate"
-                          values="0 110 115; 45 110 115; -15 110 115; 0 110 115"
+                          values="0; 45; -15; 0"
                           dur="1.8s"
                           repeatCount="indefinite"
+                          additive="sum"
                         />
                       )}
                       {element}
@@ -449,33 +455,6 @@ export function LandscapeDragon({
                   tx += shape.x ?? 0;
                   ty += shape.y ?? 0;
                   baseRot += (shape as any).rotate ?? 0;
-                }
-
-                // Anatomical slayed/collapsed posture per body part group
-                if (isDefeated) {
-                  if (shape.group === "headNeck") {
-                    tx -= 35;
-                    ty += 85;
-                    baseRot += 38;
-                  } else if (shape.group === "frontWing") {
-                    tx -= 22;
-                    ty += 65;
-                    baseRot += 62;
-                  } else if (shape.group === "backWing") {
-                    tx += 25;
-                    ty += 60;
-                    baseRot -= 55;
-                  } else if (shape.group === "frontLeg" || shape.group === "frontArm" || shape.group === "frontClaw") {
-                    tx -= 18;
-                    ty += 55;
-                    baseRot -= 28;
-                  } else if (shape.group === "tail") {
-                    tx += 25;
-                    ty += 45;
-                    baseRot += 22;
-                  } else {
-                    ty += 45;
-                  }
                 }
 
                 const baseTransform = `translate(${tx}, ${ty}) rotate(${((offset.rotate ?? 0) + baseRot)}) scale(${scaleVal})`;

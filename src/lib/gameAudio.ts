@@ -10,7 +10,7 @@ class GameAudioEngine {
   private bgmGain: GainNode | null = null;
 
   private isMuted: boolean = false;
-  private masterVolume: number = 0.30; // Naturally set to 30% default
+  private masterVolume: number = 0.30; // 30% default master volume naturally
   private isBgmPlaying: boolean = false;
   private bgmIntervalId: any = null;
   private ambientRoarIntervalId: any = null;
@@ -30,8 +30,6 @@ class GameAudioEngine {
       const savedVol = localStorage.getItem("rpg_sound_volume");
       if (savedVol !== null) {
         this.masterVolume = Math.max(0, Math.min(1, parseFloat(savedVol)));
-      } else {
-        this.masterVolume = 0.30; // 30% default
       }
     }
   }
@@ -47,8 +45,8 @@ class GameAudioEngine {
         this.bgmGain = this.ctx.createGain();
 
         this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : this.masterVolume, this.ctx.currentTime);
-        this.sfxGain.gain.setValueAtTime(0.30, this.ctx.currentTime); // Master sound effect naturally set to 30%
-        this.bgmGain.gain.setValueAtTime(0.30, this.ctx.currentTime);
+        this.sfxGain.gain.setValueAtTime(0.70, this.ctx.currentTime);
+        this.bgmGain.gain.setValueAtTime(0.35, this.ctx.currentTime);
 
         this.sfxGain.connect(this.masterGain);
         this.bgmGain.connect(this.masterGain);
@@ -121,7 +119,7 @@ class GameAudioEngine {
   }
 
   // ============================================================================
-  // 2. MIGHTY LOW-BASS DRAGON ROAR (Acoustic Guttural Sub-Rumble & Cavern Roar)
+  // 2. MIGHTY LOW-BASS DRAGON ROAR (+100% Boosted Power Volume)
   // ============================================================================
   public playDragonRoar() {
     const ctx = this.initContext();
@@ -129,7 +127,7 @@ class GameAudioEngine {
 
     const now = ctx.currentTime;
 
-    // Layer 1: Deep Chest Sub-Rumble (48Hz down to 32Hz, lowpass filtered)
+    // Layer 1: Deep Chest Sub-Rumble (Boosted 100%)
     const subOsc = ctx.createOscillator();
     const subGain = ctx.createGain();
     subOsc.type = "triangle";
@@ -137,7 +135,7 @@ class GameAudioEngine {
     subOsc.frequency.exponentialRampToValueAtTime(38, now + 1.8);
 
     subGain.gain.setValueAtTime(0, now);
-    subGain.gain.linearRampToValueAtTime(0.48, now + 0.15);
+    subGain.gain.linearRampToValueAtTime(0.96, now + 0.15); // +100% boost
     subGain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
 
     const subFilter = ctx.createBiquadFilter();
@@ -151,7 +149,7 @@ class GameAudioEngine {
     subOsc.start(now);
     subOsc.stop(now + 2.0);
 
-    // Layer 2: Guttural Throat Cavity Formant (Deep Acoustic Roar)
+    // Layer 2: Guttural Throat Cavity Formant (Boosted 100%)
     const throatOsc = ctx.createOscillator();
     const throatGain = ctx.createGain();
     throatOsc.type = "sawtooth";
@@ -165,7 +163,7 @@ class GameAudioEngine {
     formantFilter1.Q.setValueAtTime(3.5, now);
 
     throatGain.gain.setValueAtTime(0, now);
-    throatGain.gain.linearRampToValueAtTime(0.38, now + 0.18);
+    throatGain.gain.linearRampToValueAtTime(0.76, now + 0.18); // +100% boost
     throatGain.gain.exponentialRampToValueAtTime(0.001, now + 1.9);
 
     throatOsc.connect(formantFilter1);
@@ -175,14 +173,14 @@ class GameAudioEngine {
     throatOsc.start(now);
     throatOsc.stop(now + 2.0);
 
-    // Layer 3: Cavern Breath Air Blast (Brownian/Pink Noise through Lowpass)
+    // Layer 3: Cavern Breath Air Blast (Boosted 100%)
     const bufferSize = ctx.sampleRate * 2.0;
     const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = noiseBuffer.getChannelData(0);
     let lastOut = 0;
     for (let i = 0; i < bufferSize; i++) {
       const white = Math.random() * 2 - 1;
-      data[i] = (lastOut + 0.03 * white) / 1.03; // Soft pink/brown noise
+      data[i] = (lastOut + 0.03 * white) / 1.03;
       lastOut = data[i];
     }
 
@@ -197,7 +195,7 @@ class GameAudioEngine {
 
     const noiseGain = ctx.createGain();
     noiseGain.gain.setValueAtTime(0, now);
-    noiseGain.gain.linearRampToValueAtTime(0.32, now + 0.2);
+    noiseGain.gain.linearRampToValueAtTime(0.64, now + 0.2); // +100% boost
     noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.9);
 
     noiseSrc.connect(noiseFilter);
@@ -219,7 +217,7 @@ class GameAudioEngine {
     const now = ctx.currentTime;
     const loopGain = ctx.createGain();
     loopGain.gain.setValueAtTime(0, now);
-    loopGain.gain.linearRampToValueAtTime(0.28, now + 0.08); // +10% attack SFX volume
+    loopGain.gain.linearRampToValueAtTime(0.28, now + 0.08);
     loopGain.connect(this.sfxGain);
 
     const nodes: (AudioNode | OscillatorNode | AudioBufferSourceNode)[] = [];
@@ -227,7 +225,7 @@ class GameAudioEngine {
 
     if (spellType === "lightning" || spellType === "spark" || spellType === "all") {
       // =========================================================================
-      // 1. AUDIBLE TORRENTIAL RAIN AMBIANCE (Layered Downpour + Droplet Rush)
+      // 1. AUDIBLE TORRENTIAL RAIN AMBIANCE (Reduced rain volume another 30%)
       // =========================================================================
       const rainLength = Math.floor(ctx.sampleRate * 3.0);
       const rainBuffer = ctx.createBuffer(2, rainLength, ctx.sampleRate);
@@ -237,7 +235,6 @@ class GameAudioEngine {
       let lLast = 0;
       let rLast = 0;
       for (let i = 0; i < rainLength; i++) {
-        // Natural pink/brownian rain noise with droplet flutter
         const lWhite = Math.random() * 2 - 1;
         const rWhite = Math.random() * 2 - 1;
         const dropMod = 0.85 + 0.15 * Math.sin(i * 0.05);
@@ -259,7 +256,7 @@ class GameAudioEngine {
       rainFilter.Q.setValueAtTime(0.7, now);
 
       const rainGain = ctx.createGain();
-      rainGain.gain.setValueAtTime(0.19, now); // Reduced rain volume another 30%
+      rainGain.gain.setValueAtTime(0.20, now); // Reduced rain 30% further
 
       rainSrc.connect(rainFilter);
       rainFilter.connect(rainGain);

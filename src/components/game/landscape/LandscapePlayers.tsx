@@ -1,6 +1,3 @@
-import { useState, useEffect } from "react";
-import { gameAudio } from "../../../lib/gameAudio";
-
 type PlayerMember = {
   profileId: string;
   displayName: string;
@@ -13,22 +10,16 @@ type PlayerMember = {
 
 type LandscapePlayersProps = {
   members: PlayerMember[];
-  currentProfileId?: string;
-  onSelectElement?: (profileId: string, spellType: MageType) => void;
 };
 
 export type MageType = "lightning" | "fire" | "ice";
 
 export function getMageTheme(spellType?: string, profileId: string = "", index: number = 0) {
   let type: MageType = "lightning";
-  const normalized = (spellType || "").toLowerCase().trim();
-  if (normalized === "fire") {
-    type = "fire";
-  } else if (normalized === "ice" || normalized === "water") {
-    type = "ice";
-  } else if (normalized === "lightning" || normalized === "spark") {
-    type = "lightning";
-  } else {
+  if (spellType === "fire") type = "fire";
+  else if (spellType === "ice" || spellType === "water") type = "ice";
+  else if (spellType === "lightning") type = "lightning";
+  else {
     // Deterministic random elemental assignment based on player ID & index
     let hash = 0;
     for (let i = 0; i < profileId.length; i++) {
@@ -77,53 +68,11 @@ export function getMageTheme(spellType?: string, profileId: string = "", index: 
   }
 }
 
-export function LandscapePlayers({ members, currentProfileId, onSelectElement }: LandscapePlayersProps) {
-  const [activeMenuProfileId, setActiveMenuProfileId] = useState<string | null>(null);
-  const [localOverrides, setLocalOverrides] = useState<Record<string, MageType>>(() => {
-    try {
-      if (typeof window === "undefined") return {};
-      const saved: Record<string, MageType> = {};
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith("rpg_spell_")) {
-          const profId = key.replace("rpg_spell_", "");
-          const val = localStorage.getItem(key);
-          if (val === "lightning" || val === "fire" || val === "ice") {
-            saved[profId] = val as MageType;
-          }
-        }
-      }
-      return saved;
-    } catch {
-      return {};
-    }
-  });
-
+export function LandscapePlayers({ members }: LandscapePlayersProps) {
   const count = Math.max(1, members.length);
   const startX = 320;
   const availableWidth = 130;
   const spacing = Math.min(45, availableWidth / count);
-
-  const handleElementPick = (e: React.MouseEvent, profileId: string, type: MageType) => {
-    e.stopPropagation();
-    // Play preview sound chime only
-    if (type === "lightning") gameAudio.playLightning(1200);
-    else if (type === "fire") gameAudio.playFireBurn(1200);
-    else if (type === "ice") gameAudio.playFreeze();
-
-    // Optimistically update local outfit state immediately
-    setLocalOverrides((prev) => ({ ...prev, [profileId]: type }));
-    try {
-      if (typeof window !== "undefined") {
-        localStorage.setItem(`rpg_spell_${profileId}`, type);
-      }
-    } catch {}
-
-    if (onSelectElement) {
-      onSelectElement(profileId, type);
-    }
-    setActiveMenuProfileId(null);
-  };
 
   return (
     <div className="landscape-layer layer-7-players" aria-label="Party members roster">
@@ -132,18 +81,6 @@ export function LandscapePlayers({ members, currentProfileId, onSelectElement }:
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-3.5px); }
         }
-        @keyframes element-menu-pop {
-          0% { transform: translate(15px, 52px) scale(0.6); opacity: 0; }
-          100% { transform: translate(15px, 52px) scale(1); opacity: 1; }
-        }
-        .element-btn-circle {
-          cursor: pointer;
-          transition: transform 0.15s ease, filter 0.15s ease;
-        }
-        .element-btn-circle:hover {
-          transform: scale(1.25);
-          filter: brightness(1.25);
-        }
       `}</style>
       <svg viewBox="0 0 1000 400" width="100%" height="100%">
         <g>
@@ -151,10 +88,7 @@ export function LandscapePlayers({ members, currentProfileId, onSelectElement }:
             const offsetX = startX + index * spacing;
             const offsetY = 265 + (index % 2) * 12;
             const active = member.isActiveToday;
-            const effectiveSpellType = localOverrides[member.profileId] || member.spellType;
-            const mage = getMageTheme(effectiveSpellType, member.profileId, index);
-            const isMe = currentProfileId ? member.profileId === currentProfileId : index === 0;
-            const isMenuOpen = activeMenuProfileId === member.profileId;
+            const mage = getMageTheme(member.spellType, member.profileId, index);
 
             return (
               <g
@@ -163,12 +97,6 @@ export function LandscapePlayers({ members, currentProfileId, onSelectElement }:
                 className={`player-character ${member.isAttacking ? "is-attacking" : ""}`}
                 role="img"
                 aria-label={`${member.displayName} (${mage.name}, ${active ? "Active today" : "Idle"})`}
-                style={{ cursor: "pointer", pointerEvents: "auto" }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveMenuProfileId(isMenuOpen ? null : member.profileId);
-                  gameAudio.playTing();
-                }}
               >
                 {/* 1. Ground Shadow */}
                 <ellipse cx="15" cy="46" rx="14" ry="4.5" fill="rgba(0,0,0,0.22)" stroke="none" />
@@ -182,8 +110,8 @@ export function LandscapePlayers({ members, currentProfileId, onSelectElement }:
                     height="15"
                     rx="7.5"
                     fill="#0f172a"
-                    stroke={isMe ? "#38bdf8" : mage.ribbon}
-                    strokeWidth={isMe ? 2 : 1.5}
+                    stroke={mage.ribbon}
+                    strokeWidth="1.5"
                   />
                   <text
                     x="0"
@@ -196,9 +124,6 @@ export function LandscapePlayers({ members, currentProfileId, onSelectElement }:
                   >
                     {member.displayName.slice(0, 7)}
                   </text>
-                  {isMe && (
-                    <polygon points="0,-16 -3,-20 3,-20" fill="#38bdf8" />
-                  )}
                 </g>
 
                 {/* 3. Mage Avatar with Idle Floating / Breathing Animation */}
@@ -224,13 +149,19 @@ export function LandscapePlayers({ members, currentProfileId, onSelectElement }:
                   <circle cx="17" cy="18" r="0.9" fill="#0f172a" stroke="none" />
 
                   {/* Conical Wizard Hat */}
+                  {/* Hat Brim */}
                   <ellipse cx="15" cy="14" rx="13" ry="3.5" fill={mage.hat} stroke="none" />
+                  {/* Hat Cone */}
                   <polygon points="7,14 15,0 23,14" fill={mage.hat} stroke="none" />
+                  {/* Curved Tip */}
                   <polygon points="14,2 15,0 18,2 20,4" fill={mage.hat} stroke="none" />
+                  {/* Hat Ribbon */}
                   <rect x="9" y="11.5" width="12" height="2.5" fill={mage.ribbon} stroke="none" />
 
                   {/* Wizard Staff */}
+                  {/* Staff Wood Pole */}
                   <line x1="28" y1="45" x2="28" y2="9" stroke="#78350f" strokeWidth="2" strokeLinecap="round" />
+                  {/* Crystal Claws */}
                   <polygon points="26,11 28,7 30,11" fill="#b45309" stroke="none" />
 
                   {/* Elemental Staff Crystal Head */}
@@ -253,86 +184,6 @@ export function LandscapePlayers({ members, currentProfileId, onSelectElement }:
                     </g>
                   )}
                 </g>
-
-                {/* 4. POP-OUT ELEMENT SWITCHER MENU (3 Circles: ⚡, 🔥, ❄️) directly under player */}
-                {isMenuOpen && (
-                  <g
-                    style={{
-                      animation: "element-menu-pop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
-                      pointerEvents: "auto",
-                    }}
-                  >
-                    {/* Background Capsule Pill */}
-                    <rect
-                      x="-38"
-                      y="-12"
-                      width="76"
-                      height="24"
-                      rx="12"
-                      fill="#fffded"
-                      stroke="#101517"
-                      strokeWidth="2"
-                      style={{ filter: "drop-shadow(2px 2px 0 #101517)" }}
-                    />
-
-                    {/* 1. Lightning Circle Button (⚡) */}
-                    <g
-                      className="element-btn-circle"
-                      transform="translate(-24, 0)"
-                      onClick={(e) => handleElementPick(e, member.profileId, "lightning")}
-                    >
-                      <circle
-                        cx="0"
-                        cy="0"
-                        r="8.5"
-                        fill="#1e3a8a"
-                        stroke={mage.type === "lightning" ? "#fff73f" : "#101517"}
-                        strokeWidth={mage.type === "lightning" ? "2.2" : "1.5"}
-                      />
-                      <text x="0" y="3.5" textAnchor="middle" fontSize="9" fill="#fff73f" fontWeight="900">
-                        ⚡
-                      </text>
-                    </g>
-
-                    {/* 2. Fire Circle Button (🔥) */}
-                    <g
-                      className="element-btn-circle"
-                      transform="translate(0, 0)"
-                      onClick={(e) => handleElementPick(e, member.profileId, "fire")}
-                    >
-                      <circle
-                        cx="0"
-                        cy="0"
-                        r="8.5"
-                        fill="#991b1b"
-                        stroke={mage.type === "fire" ? "#feaa01" : "#101517"}
-                        strokeWidth={mage.type === "fire" ? "2.2" : "1.5"}
-                      />
-                      <text x="0" y="3.5" textAnchor="middle" fontSize="9" fill="#feaa01" fontWeight="900">
-                        🔥
-                      </text>
-                    </g>
-
-                    {/* 3. Ice Circle Button (❄️) */}
-                    <g
-                      className="element-btn-circle"
-                      transform="translate(24, 0)"
-                      onClick={(e) => handleElementPick(e, member.profileId, "ice")}
-                    >
-                      <circle
-                        cx="0"
-                        cy="0"
-                        r="8.5"
-                        fill="#0369a1"
-                        stroke={mage.type === "ice" ? "#ff8ae7" : "#101517"}
-                        strokeWidth={mage.type === "ice" ? "2.2" : "1.5"}
-                      />
-                      <text x="0" y="3.5" textAnchor="middle" fontSize="9" fill="#bae6fd" fontWeight="900">
-                        ❄️
-                      </text>
-                    </g>
-                  </g>
-                )}
               </g>
             );
           })}

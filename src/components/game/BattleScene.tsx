@@ -1072,33 +1072,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const deleteProjectPermanently = useMutation(api.projects.deletePermanently);
   const claimTaskMutation = useMutation(api.tasks.claimTask);
   const createTaskMutation = useMutation(api.tasks.createTask);
-  const updateCharacterMutation = useMutation((api as any).teams.updateCharacter);
-
-  // Local Spell Type Switcher state
-  const [localSpellType, setLocalSpellType] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("rpg_user_spell_type");
-  });
-
-  const handleSelectElement = async (profileId: string, newSpellType: "lightning" | "fire" | "ice") => {
-    setLocalSpellType(newSpellType);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("rpg_user_spell_type", newSpellType);
-      localStorage.setItem(`rpg_spell_${profileId}`, newSpellType);
-    }
-    const currentMember = state?.members.find((m) => m.profileId === profileId);
-
-    try {
-      if (workspace?.project?.teamId) {
-        await updateCharacterMutation({
-          teamId: workspace.project.teamId,
-          fill: currentMember?.characterFill || "#FF8AE7",
-          outline: currentMember?.characterOutline || "#121F25",
-          spellType: newSpellType,
-        });
-      }
-    } catch {}
-  };
 
   // Quest Board States
   const [showQuestBoardModal, setShowQuestBoardModal] = useState(false);
@@ -1164,34 +1137,16 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [layerTransforms, setLayerTransforms] = useState<Record<string, { x: number; y: number; scale: number; visible: boolean }>>(() => {
     try {
       const saved = localStorage.getItem("layer_transforms_config");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // Ensure default alignment without stale 50px goblin shift
-        const defaults = {
-          sky: { x: 0, y: 0, scale: 1.05, visible: true },
-          terrain: { x: 0, y: -4, scale: 1.05, visible: true },
-          village: { x: 0, y: 0, scale: 1, visible: true },
-          goblins: { x: 0, y: 0, scale: 1, visible: true },
-          players: { x: 0, y: 0, scale: 1, visible: true },
-          dragon: { x: 0, y: 0, scale: 1, visible: true },
-          fx: { x: 0, y: 0, scale: 1, visible: true },
-        };
-        return {
-          ...defaults,
-          ...parsed,
-          goblins: { x: 0, y: 0, scale: 1, visible: true, ...(parsed.goblins || {}) },
-          fx: { x: 0, y: 0, scale: 1, visible: true, ...(parsed.fx || {}) },
-        };
-      }
+      if (saved) return JSON.parse(saved);
     } catch {}
     return {
       sky: { x: 0, y: 0, scale: 1.05, visible: true },
       terrain: { x: 0, y: -4, scale: 1.05, visible: true },
       village: { x: 0, y: 0, scale: 1, visible: true },
-      goblins: { x: 0, y: 0, scale: 1, visible: true },
+      goblins: { x: 50, y: 0, scale: 1, visible: true },
       players: { x: 0, y: 0, scale: 1, visible: true },
       dragon: { x: 0, y: 0, scale: 1, visible: true },
-      fx: { x: 0, y: 0, scale: 1, visible: true },
+      fx: { x: 0, y: 0, scale: 1.15, visible: true },
     };
   });
 
@@ -1500,6 +1455,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     return 1.15;
   });
 
+  const [testGoblinTargetIndex, setTestGoblinTargetIndex] = useState<number | null>(null);
+
   // Direct Shape Drag and Drop
   const [draggingShapeId, setDraggingShapeId] = useState<string | null>(null);
   const dragShapeStart = useRef({ mouseX: 0, mouseY: 0, shapeX: 0, shapeY: 0 });
@@ -1794,13 +1751,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       const currentMember = state?.members[Math.max(0, memberIndex)];
       const mageInfo = getMageTheme(currentMember?.spellType, currentMember?.profileId, Math.max(0, memberIndex));
       const targetCoords = getGoblinCoordinates(Math.max(0, memberIndex));
-
-      if (currentMember?.profileId) {
-        setTestDeadGoblins((prev) => ({
-          ...prev,
-          [currentMember.profileId]: true,
-        }));
-      }
 
       setLocalAttack({
         id: `goblin_atk_${Date.now()}`,
@@ -2111,7 +2061,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     attackerName: string;
     damage: number;
     spellType?: string;
-    target?: "goblin" | "dragon" | "all";
+    target?: "goblin" | "dragon";
     targetX?: number;
     targetY?: number;
   } | null>(null);
@@ -2146,12 +2096,26 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
   const combinedActiveEvent = useMemo(() => {
     if (testActiveSpell) {
+      if (testGoblinTargetIndex !== null && state?.members?.[testGoblinTargetIndex]) {
+        const coords = getGoblinCoordinates(testGoblinTargetIndex);
+        return {
+          id: "test-goblin-spell-" + testActiveSpell + "-" + (state?.events?.length ?? 0),
+          attackerName: "Layout Admin",
+          damage: 999,
+          spellType: testActiveSpell,
+          target: "goblin" as const,
+          targetX: coords.x,
+          targetY: coords.y,
+        };
+      }
       return {
         id: "test-spell-" + testActiveSpell + "-" + (state?.events?.length ?? 0),
         attackerName: "Layout Admin",
         damage: 999,
         spellType: testActiveSpell,
-        target: "all" as const,
+        target: "dragon" as const,
+        targetX: 750,
+        targetY: 175,
       };
     }
     if (localAttack) return localAttack;
@@ -2167,7 +2131,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       };
     }
     return null;
-  }, [testActiveSpell, localAttack, activeEvent, state?.events?.length]);
+  }, [testActiveSpell, testGoblinTargetIndex, localAttack, activeEvent, state?.events?.length, state?.members]);
 
   const goblins = useMemo(() => {
     if (!state) return [];
@@ -2190,11 +2154,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       displayName: member.displayName,
       characterFill: member.characterFill,
       characterOutline: member.characterOutline,
-      spellType: (member.profileId === state.currentProfileId && localSpellType) ? localSpellType : member.spellType,
+      spellType: member.spellType,
       isActiveToday: member.hasSubmittedToday,
       isAttacking: (combinedActiveEvent?.attackerName === member.displayName || activeEvent?.attackerProfileId === member.profileId),
     }));
-  }, [state, activeEvent, combinedActiveEvent, localSpellType]);
+  }, [state, activeEvent, combinedActiveEvent]);
 
   // All Project Tasks for In-Canvas Quest Board (Active first, Completed sent to end)
   const questTasks: QuestTask[] = useMemo(() => {
@@ -2845,13 +2809,9 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           <LandscapeGoblins goblins={goblins} />
         </div>
 
-        {/* Layer 7: Section 6 - Party Members & Interactive Element Switcher */}
-        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "auto", zIndex: 12, transform: `translate(${layerTransforms.players?.x || 0}px, ${layerTransforms.players?.y || 0}px) scale(${layerTransforms.players?.scale || 1})`, display: layerTransforms.players?.visible !== false ? "block" : "none" }}>
-          <LandscapePlayers
-            members={players}
-            currentProfileId={state?.currentProfileId}
-            onSelectElement={handleSelectElement}
-          />
+        {/* Layer 7: Section 6 - Party Members & Deterministic Game ID Tags */}
+        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 7, transform: `translate(${layerTransforms.players?.x || 0}px, ${layerTransforms.players?.y || 0}px) scale(${layerTransforms.players?.scale || 1})`, display: layerTransforms.players?.visible !== false ? "block" : "none" }}>
+          <LandscapePlayers members={players} />
         </div>
 
         {/* Layer 8: Section 1 - Medieval Dragon Visuals & Wings */}
@@ -2889,7 +2849,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           <LandscapeFX
             activeEvent={combinedActiveEvent}
             isVictory={defeated}
-            goblins={goblins}
           />
         </div>
 
@@ -4426,33 +4385,21 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               <div style={{ display: "grid", gap: "10px" }}>
                 {/* Attack VFX trigger */}
                 <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155" }}>
-                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#38bdf8", textTransform: "uppercase" }}>Combat Attack Effects (Debug Spells & Monsters)</h5>
+                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#38bdf8", textTransform: "uppercase" }}>Combat Attack Effects (Debug All Monsters & Boss)</h5>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
                     <button type="button" style={{ padding: "6px", background: "#0284c7", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("lightning")}>
-                      ⚡ Lightning Spell
+                      Lightning Spell
                     </button>
                     <button type="button" style={{ padding: "6px", background: "#ea580c", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("fire")}>
-                      🔥 Fire Spell
+                      Fire Spell
                     </button>
                     <button type="button" style={{ padding: "6px", background: "#0d9488", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("ice")}>
-                      ❄️ Ice Spell
+                      Ice Spell
                     </button>
                     <button type="button" style={{ padding: "6px", background: "#7c3aed", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell("all")}>
                       ⚡🔥❄️ All Spells at Once
                     </button>
-                    <button
-                      type="button"
-                      style={{ padding: "6px", background: "#b91c1c", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }}
-                      onClick={() => {
-                        const map: Record<string, boolean> = {};
-                        state.members.forEach(m => { map[m.profileId] = true; });
-                        setTestDeadGoblins(map);
-                        setTestActiveSpell("lightning");
-                      }}
-                    >
-                      ⚡ Strike &amp; Slay Horde
-                    </button>
-                    <button type="button" style={{ padding: "6px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell(null)}>
+                    <button type="button" style={{ gridColumn: "1 / span 2", padding: "6px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestActiveSpell(null)}>
                       Clear Attack FX
                     </button>
                   </div>
@@ -4460,8 +4407,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
                 {/* Goblin Slaying */}
                 <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155" }}>
-                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#4ade80", textTransform: "uppercase" }}>Goblins Simulation (Individual &amp; Horde)</h5>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "8px" }}>
+                  <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#4ade80", textTransform: "uppercase" }}>Goblins Simulation</h5>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
                     <button
                       type="button"
                       style={{ padding: "6px", background: "#16a34a", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }}
@@ -4476,38 +4423,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                     <button type="button" style={{ padding: "6px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.7rem", fontWeight: "bold", cursor: "pointer" }} onClick={() => setTestDeadGoblins({})}>
                       Revive All Goblins
                     </button>
-                  </div>
-
-                  {/* Per-member goblin toggles */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                    {state.members.map((member, idx) => {
-                      const isDead = (testDeadGoblins[member.profileId] ?? false) || member.hasSubmittedToday;
-                      return (
-                        <div key={member.profileId} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1e293b", padding: "4px 8px", borderRadius: "4px", fontSize: "0.68rem" }}>
-                          <span>{member.displayName} (Goblin #{idx + 1})</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setTestDeadGoblins(prev => ({
-                                ...prev,
-                                [member.profileId]: !isDead,
-                              }));
-                            }}
-                            style={{
-                              padding: "2px 8px",
-                              borderRadius: "3px",
-                              border: "none",
-                              background: isDead ? "#3b82f6" : "#dc2626",
-                              color: "#fff",
-                              fontWeight: "bold",
-                              cursor: "pointer",
-                            }}
-                          >
-                            {isDead ? "Defeated (Click Revive)" : "Active (Click Slay)"}
-                          </button>
-                        </div>
-                      );
-                    })}
                   </div>
                 </div>
 
@@ -5101,6 +5016,67 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                       <span>Scale: {villageHpBarScale.toFixed(2)}x</span>
                       <input type="range" min="0.5" max="2.5" step="0.05" style={{ accentColor: "#86efac" }} value={villageHpBarScale} onChange={(e) => setVillageHpBarScale(parseFloat(e.target.value) || 1)} />
                     </label>
+                  </div>
+                </div>
+
+                {/* Goblin Attack & Ghost Testing Cheats */}
+                <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155", display: "grid", gap: "6px" }}>
+                  <div style={{ fontSize: "0.72rem", fontWeight: "bold", color: "#67e8f9" }}>Goblin Attack & Ghost Testing (Cosmetic Cheats)</div>
+                  <div style={{ fontSize: "0.68rem", color: "#94a3b8" }}>
+                    Test elemental strikes on specific goblins or toggle ghost states:
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                    {(state?.members || []).map((m, idx) => {
+                      const isGhost = (testDeadGoblins[m.profileId] ?? false) || m.hasSubmittedToday;
+                      return (
+                        <div key={m.profileId} style={{ background: "#1e293b", border: "1px solid #475569", borderRadius: "6px", padding: "6px", display: "flex", flexDirection: "column", gap: "4px", flex: "1 1 45%" }}>
+                          <span style={{ fontSize: "0.68rem", fontWeight: 800, color: "#fff" }}>
+                            #{idx + 1} {m.displayName} ({isGhost ? "Ghost 👻" : "Active 👹"})
+                          </span>
+                          <div style={{ display: "flex", gap: "4px" }}>
+                            <button
+                              type="button"
+                              style={{ padding: "2px 6px", fontSize: "0.62rem", borderRadius: "4px", background: "#38bdf8", color: "#0f172a", border: "none", fontWeight: 800, cursor: "pointer" }}
+                              onClick={() => {
+                                setTestGoblinTargetIndex(idx);
+                                setTestActiveSpell("lightning");
+                                setTestDeadGoblins(prev => ({ ...prev, [m.profileId]: true }));
+                                setTimeout(() => {
+                                  setTestActiveSpell(null);
+                                  setTestGoblinTargetIndex(null);
+                                }, 3000);
+                              }}
+                            >
+                              ⚡ Strike
+                            </button>
+                            <button
+                              type="button"
+                              style={{ padding: "2px 6px", fontSize: "0.62rem", borderRadius: "4px", background: "#f97316", color: "#fff", border: "none", fontWeight: 800, cursor: "pointer" }}
+                              onClick={() => {
+                                setTestGoblinTargetIndex(idx);
+                                setTestActiveSpell("fire");
+                                setTestDeadGoblins(prev => ({ ...prev, [m.profileId]: true }));
+                                setTimeout(() => {
+                                  setTestActiveSpell(null);
+                                  setTestGoblinTargetIndex(null);
+                                }, 3000);
+                              }}
+                            >
+                              🔥 Fire
+                            </button>
+                            <button
+                              type="button"
+                              style={{ padding: "2px 6px", fontSize: "0.62rem", borderRadius: "4px", background: "#a855f7", color: "#fff", border: "none", fontWeight: 800, cursor: "pointer" }}
+                              onClick={() => {
+                                setTestDeadGoblins(prev => ({ ...prev, [m.profileId]: !isGhost }));
+                              }}
+                            >
+                              👻 {isGhost ? "Revive" : "Slay"}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 

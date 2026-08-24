@@ -47,6 +47,10 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-3px); }
         }
+        @keyframes goblin-ghost-soul {
+          0%, 100% { transform: translateY(0) scale(1); opacity: 0.75; }
+          50% { transform: translateY(-7px) scale(1.08); opacity: 0.95; }
+        }
       `}</style>
       <svg viewBox="0 0 1000 400" width="100%" height="100%">
         {/* Right-center middle field face-off zone (x = 490px to 620px) grounded at baseline y = 270px */}
@@ -63,7 +67,7 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
                 transform={`translate(${offsetX}, ${offsetY})`}
                 className={`goblin-item ${isGhost ? "goblin-ghost-defeated" : "goblin-active-attacking"}`}
                 style={{
-                  opacity: isGhost ? 0.92 : 1,
+                  opacity: isGhost ? 0.75 : 1,
                   filter: isGhost ? "drop-shadow(0 0 6px #60a5fa)" : "none",
                 }}
                 role="img"
@@ -74,7 +78,7 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
 
                 {isGhost ? (
                   /* =========================================================================
-                     2. DEFEATED / FALLEN APART STATE (Head rolled off, body flat, spear dropped)
+                     2. DEFEATED / FALLEN APART STATE + FLOATING GHOST SOUL
                      ========================================================================= */
                   <g>
                     {/* Dropped Spear (Lying horizontally on the ground) */}
@@ -82,16 +86,16 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
                     <polygon points="3,37 9,34 9,40" fill="#cbd5e1" stroke="none" />
 
                     {/* Collapsed Torso / Body lying flat */}
-                    <polygon points="10,32 25,31 23,37 8,36" fill={clothingColor} stroke="none" />
+                    <polygon points="10,32 25,31 23,37 8,36" fill={clothingColor} opacity="0.5" stroke="none" />
 
                     {/* Detached Arms */}
-                    <polygon points="4,34 0,38 3,39 7,35" fill="#a3e635" stroke="none" />
-                    <polygon points="26,33 31,36 30,38 25,35" fill="#a3e635" stroke="none" />
+                    <polygon points="4,34 0,38 3,39 7,35" fill="#a3e635" opacity="0.5" stroke="none" />
+                    <polygon points="26,33 31,36 30,38 25,35" fill="#a3e635" opacity="0.5" stroke="none" />
 
                     {/* Rolled Head (Fallen to the side) */}
-                    <circle cx="-2" cy="33" r="6.5" fill="#bef264" stroke="none" />
-                    <polygon points="-7,32 -14,28 -6,35" fill="#65a30d" stroke="none" />
-                    <polygon points="3,32 10,29 4,36" fill="#65a30d" stroke="none" />
+                    <circle cx="-2" cy="33" r="6.5" fill="#bef264" opacity="0.5" stroke="none" />
+                    <polygon points="-7,32 -14,28 -6,35" fill="#65a30d" opacity="0.5" stroke="none" />
+                    <polygon points="3,32 10,29 4,36" fill="#65a30d" opacity="0.5" stroke="none" />
 
                     {/* Dead X Eyes */}
                     <line x1="-5" y1="31" x2="-3" y2="33" stroke="#38bdf8" strokeWidth="1.2" strokeLinecap="round" />
@@ -104,10 +108,19 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
                     <polygon points="12,28 18,22 22,30" fill="#bae6fd" opacity="0.85" stroke="none" />
                     <polygon points="28,30 34,25 36,32" fill="#38bdf8" opacity="0.75" stroke="none" />
 
-                    {/* Ghost Text */}
-                    <text x="15" y="-4" textAnchor="middle" fill="#93c5fd" fontSize="9" fontWeight="800">
-                      Slayed
-                    </text>
+                    {/* Ethereal Floating Ghost Soul */}
+                    <g style={{ animation: "goblin-ghost-soul 2.2s ease-in-out infinite" }}>
+                      {/* Ghost Tail & Body */}
+                      <path d="M 9,15 Q 15,0 21,15 Q 24,24 15,24 Q 6,24 9,15 Z" fill="#93c5fd" opacity="0.65" />
+                      <circle cx="15" cy="8" r="5" fill="#bae6fd" opacity="0.85" />
+                      {/* Spectral Eyes */}
+                      <circle cx="13.5" cy="7.5" r="1" fill="#1e3a8a" />
+                      <circle cx="16.5" cy="7.5" r="1" fill="#1e3a8a" />
+                      {/* Ghost Text Label */}
+                      <text x="15" y="-3" textAnchor="middle" fill="#60a5fa" fontSize="8.5" fontWeight="900" style={{ letterSpacing: "0.03em" }}>
+                        👻 Ghost
+                      </text>
+                    </g>
                   </g>
                 ) : (
                   /* =========================================================================
