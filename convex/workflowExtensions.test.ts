@@ -204,7 +204,7 @@ describe("extended project workflows", () => {
   it("enforces the Free platform generation allowance on backend records", async () => {
     const database = convexTest(schema, modules);
     const { owner, projectId } = await setupProject(database);
-    expect(await owner.asUser.query(api.aiUsage.getProjectUsage, { projectId })).toMatchObject({ tier: "free", limit: null, used: 0, platformGenerationAvailable: true });
+    expect(await owner.asUser.query(api.aiUsage.getProjectUsage, { projectId })).toMatchObject({ tier: "free", limit: 2, used: 0, platformGenerationAvailable: true });
     const reservationId = await database.mutation(internal.aiUsage.reservePlatformGeneration, { projectId, profileId: owner.profileId });
     await database.mutation(internal.aiUsage.finishPlatformGeneration, { usageId: reservationId, success: false, model: "failed" });
     await database.run((ctx) => ctx.db.insert("aiUsage", {

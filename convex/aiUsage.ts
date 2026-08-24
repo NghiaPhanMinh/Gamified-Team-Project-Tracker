@@ -8,7 +8,7 @@ import { requireTeamMember, requireUserProfile } from "./lib/auth";
 export type SubscriptionTier = "free" | "plus" | "pro";
 
 export const TIER_ENTITLEMENTS = {
-  free: { platformPlanGenerationsPerProject: null, advancedAi: true, priorityRouting: true },
+  free: { platformPlanGenerationsPerProject: 2, advancedAi: false, priorityRouting: false },
   plus: { platformPlanGenerationsPerProject: null, advancedAi: true, priorityRouting: true },
   pro: { platformPlanGenerationsPerProject: null, advancedAi: true, priorityRouting: true },
 } as const;
