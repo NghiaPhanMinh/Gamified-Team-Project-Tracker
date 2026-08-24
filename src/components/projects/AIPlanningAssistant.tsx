@@ -226,13 +226,47 @@ export function AIPlanningAssistant({
         </label>
         <div>
           <span>{brief.length}/8000</span>
-          <button
-            className="primary-button"
-            type="submit"
-            disabled={isGenerating || workspace.project.status === "archived"}
-          >
-            {isGenerating ? "Building a draft…" : draft ? "Regenerate Plan" : <><Zap size={15} style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "4px" }} /> Generate AI Plan</>}
-          </button>
+          {(workspace.tasks?.length ?? 0) > 0 ? (
+            <Link
+              to="/subscription"
+              className="primary-button"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                textDecoration: "none",
+                background: "var(--color-pink)",
+                color: "#101517",
+                fontWeight: 800,
+              }}
+            >
+              <CreditCard size={15} /> Subscription to Regenerate
+            </Link>
+          ) : (
+            <button
+              className="primary-button"
+              type="submit"
+              disabled={isGenerating || workspace.project.status === "archived"}
+            >
+              {isGenerating ? (
+                "Building a draft…"
+              ) : draft ? (
+                "Regenerate Plan"
+              ) : (
+                <>
+                  <Zap
+                    size={15}
+                    style={{
+                      display: "inline-block",
+                      verticalAlign: "-2px",
+                      marginRight: "4px",
+                    }}
+                  />{" "}
+                  Generate AI Plan
+                </>
+              )}
+            </button>
+          )}
         </div>
       </form>
       {error ? <p className="form-error ai-error" role="alert">{error}</p> : null}
