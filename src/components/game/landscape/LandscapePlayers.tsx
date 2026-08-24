@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { gameAudio } from "../../../lib/gameAudio";
 
 type PlayerMember = {
@@ -14,17 +14,21 @@ type PlayerMember = {
 type LandscapePlayersProps = {
   members: PlayerMember[];
   currentProfileId?: string;
-  onSelectElement?: (spellType: MageType) => void;
+  onSelectElement?: (profileId: string, spellType: MageType) => void;
 };
 
 export type MageType = "lightning" | "fire" | "ice";
 
 export function getMageTheme(spellType?: string, profileId: string = "", index: number = 0) {
   let type: MageType = "lightning";
-  if (spellType === "fire") type = "fire";
-  else if (spellType === "ice" || spellType === "water") type = "ice";
-  else if (spellType === "lightning" || spellType === "spark") type = "lightning";
-  else {
+  const normalized = (spellType || "").toLowerCase().trim();
+  if (normalized === "fire") {
+    type = "fire";
+  } else if (normalized === "ice" || normalized === "water") {
+    type = "ice";
+  } else if (normalized === "lightning" || normalized === "spark") {
+    type = "lightning";
+  } else {
     // Deterministic random elemental assignment based on player ID & index
     let hash = 0;
     for (let i = 0; i < profileId.length; i++) {
@@ -38,55 +42,85 @@ export function getMageTheme(spellType?: string, profileId: string = "", index: 
     return {
       type,
       name: "Lightning Mage",
-      robePrimary: "#312e81",
-      trim: "#facc15",
-      hat: "#1e1b4b",
-      ribbon: "#fde047",
-      orbCore: "#fde047",
-      orbAccent: "#67e8f9",
-      glowColor: "#fde047",
+      robePrimary: "#1e3a8a",
+      trim: "#4ca0fe",
+      hat: "#172554",
+      ribbon: "#fff73f",
+      orbCore: "#fff73f",
+      orbAccent: "#4ca0fe",
+      glowColor: "#fff73f",
     };
   } else if (type === "fire") {
     return {
       type,
       name: "Fire Mage",
       robePrimary: "#991b1b",
-      trim: "#f97316",
+      trim: "#feaa01",
       hat: "#450a0a",
-      ribbon: "#fbbf24",
-      orbCore: "#ef4444",
-      orbAccent: "#fde047",
-      glowColor: "#f97316",
+      ribbon: "#feaa01",
+      orbCore: "#fd39e4",
+      orbAccent: "#fff73f",
+      glowColor: "#feaa01",
     };
   } else {
     return {
       type,
       name: "Ice Mage",
-      robePrimary: "#38bdf8",
-      trim: "#ffffff",
-      hat: "#0284c7",
-      ribbon: "#ff8ae7",
-      orbCore: "#ffffff",
-      orbAccent: "#38bdf8",
-      glowColor: "#38bdf8",
+      robePrimary: "#0369a1",
+      trim: "#ff8ae7",
+      hat: "#0c4a6e",
+      ribbon: "#fffded",
+      orbCore: "#4ca0fe",
+      orbAccent: "#ffffff",
+      glowColor: "#ff8ae7",
     };
   }
 }
 
 export function LandscapePlayers({ members, currentProfileId, onSelectElement }: LandscapePlayersProps) {
   const [activeMenuProfileId, setActiveMenuProfileId] = useState<string | null>(null);
+  const [localOverrides, setLocalOverrides] = useState<Record<string, MageType>>(() => {
+    try {
+      if (typeof window === "undefined") return {};
+      const saved: Record<string, MageType> = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("rpg_spell_")) {
+          const profId = key.replace("rpg_spell_", "");
+          const val = localStorage.getItem(key);
+          if (val === "lightning" || val === "fire" || val === "ice") {
+            saved[profId] = val as MageType;
+          }
+        }
+      }
+      return saved;
+    } catch {
+      return {};
+    }
+  });
 
   const count = Math.max(1, members.length);
   const startX = 320;
   const availableWidth = 130;
   const spacing = Math.min(45, availableWidth / count);
 
-  const handleElementPick = (e: React.MouseEvent, type: MageType) => {
+  const handleElementPick = (e: React.MouseEvent, profileId: string, type: MageType) => {
     e.stopPropagation();
-    gameAudio.playTing();
+    // Play preview sound chime only
+    if (type === "lightning") gameAudio.playLightning(1200);
+    else if (type === "fire") gameAudio.playFireBurn(1200);
+    else if (type === "ice") gameAudio.playFreeze();
+
+    // Optimistically update local outfit state immediately
+    setLocalOverrides((prev) => ({ ...prev, [profileId]: type }));
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`rpg_spell_${profileId}`, type);
+      }
+    } catch {}
 
     if (onSelectElement) {
-      onSelectElement(type);
+      onSelectElement(profileId, type);
     }
     setActiveMenuProfileId(null);
   };
@@ -107,8 +141,8 @@ export function LandscapePlayers({ members, currentProfileId, onSelectElement }:
           transition: transform 0.15s ease, filter 0.15s ease;
         }
         .element-btn-circle:hover {
-          transform: scale(1.22);
-          filter: brightness(1.2);
+          transform: scale(1.25);
+          filter: brightness(1.25);
         }
       `}</style>
       <svg viewBox="0 0 1000 400" width="100%" height="100%">
@@ -117,7 +151,8 @@ export function LandscapePlayers({ members, currentProfileId, onSelectElement }:
             const offsetX = startX + index * spacing;
             const offsetY = 265 + (index % 2) * 12;
             const active = member.isActiveToday;
-            const mage = getMageTheme(member.spellType, member.profileId, index);
+            const effectiveSpellType = localOverrides[member.profileId] || member.spellType;
+            const mage = getMageTheme(effectiveSpellType, member.profileId, index);
             const isMe = currentProfileId ? member.profileId === currentProfileId : index === 0;
             const isMenuOpen = activeMenuProfileId === member.profileId;
 
@@ -128,12 +163,11 @@ export function LandscapePlayers({ members, currentProfileId, onSelectElement }:
                 className={`player-character ${member.isAttacking ? "is-attacking" : ""}`}
                 role="img"
                 aria-label={`${member.displayName} (${mage.name}, ${active ? "Active today" : "Idle"})`}
-                style={{ cursor: isMe ? "pointer" : "default" }}
-                onClick={() => {
-                  if (isMe) {
-                    setActiveMenuProfileId(isMenuOpen ? null : member.profileId);
-                    gameAudio.playTing();
-                  }
+                style={{ cursor: "pointer", pointerEvents: "auto" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveMenuProfileId(isMenuOpen ? null : member.profileId);
+                  gameAudio.playTing();
                 }}
               >
                 {/* 1. Ground Shadow */}
@@ -245,7 +279,7 @@ export function LandscapePlayers({ members, currentProfileId, onSelectElement }:
                     <g
                       className="element-btn-circle"
                       transform="translate(-24, 0)"
-                      onClick={(e) => handleElementPick(e, "lightning")}
+                      onClick={(e) => handleElementPick(e, member.profileId, "lightning")}
                     >
                       <circle
                         cx="0"
@@ -264,7 +298,7 @@ export function LandscapePlayers({ members, currentProfileId, onSelectElement }:
                     <g
                       className="element-btn-circle"
                       transform="translate(0, 0)"
-                      onClick={(e) => handleElementPick(e, "fire")}
+                      onClick={(e) => handleElementPick(e, member.profileId, "fire")}
                     >
                       <circle
                         cx="0"
@@ -283,7 +317,7 @@ export function LandscapePlayers({ members, currentProfileId, onSelectElement }:
                     <g
                       className="element-btn-circle"
                       transform="translate(24, 0)"
-                      onClick={(e) => handleElementPick(e, "ice")}
+                      onClick={(e) => handleElementPick(e, member.profileId, "ice")}
                     >
                       <circle
                         cx="0"

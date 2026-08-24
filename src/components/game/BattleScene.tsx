@@ -1080,13 +1080,13 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     return localStorage.getItem("rpg_user_spell_type");
   });
 
-  const handleSelectElement = async (newSpellType: "lightning" | "fire" | "ice") => {
+  const handleSelectElement = async (profileId: string, newSpellType: "lightning" | "fire" | "ice") => {
     setLocalSpellType(newSpellType);
     if (typeof window !== "undefined") {
       localStorage.setItem("rpg_user_spell_type", newSpellType);
+      localStorage.setItem(`rpg_spell_${profileId}`, newSpellType);
     }
-    const memberIndex = state?.members.findIndex((m) => m.profileId === state.currentProfileId) ?? 0;
-    const currentMember = state?.members[Math.max(0, memberIndex)];
+    const currentMember = state?.members.find((m) => m.profileId === profileId);
 
     try {
       if (workspace?.project?.teamId) {
@@ -1164,16 +1164,34 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [layerTransforms, setLayerTransforms] = useState<Record<string, { x: number; y: number; scale: number; visible: boolean }>>(() => {
     try {
       const saved = localStorage.getItem("layer_transforms_config");
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Ensure default alignment without stale 50px goblin shift
+        const defaults = {
+          sky: { x: 0, y: 0, scale: 1.05, visible: true },
+          terrain: { x: 0, y: -4, scale: 1.05, visible: true },
+          village: { x: 0, y: 0, scale: 1, visible: true },
+          goblins: { x: 0, y: 0, scale: 1, visible: true },
+          players: { x: 0, y: 0, scale: 1, visible: true },
+          dragon: { x: 0, y: 0, scale: 1, visible: true },
+          fx: { x: 0, y: 0, scale: 1, visible: true },
+        };
+        return {
+          ...defaults,
+          ...parsed,
+          goblins: { x: 0, y: 0, scale: 1, visible: true, ...(parsed.goblins || {}) },
+          fx: { x: 0, y: 0, scale: 1, visible: true, ...(parsed.fx || {}) },
+        };
+      }
     } catch {}
     return {
       sky: { x: 0, y: 0, scale: 1.05, visible: true },
       terrain: { x: 0, y: -4, scale: 1.05, visible: true },
       village: { x: 0, y: 0, scale: 1, visible: true },
-      goblins: { x: 50, y: 0, scale: 1, visible: true },
+      goblins: { x: 0, y: 0, scale: 1, visible: true },
       players: { x: 0, y: 0, scale: 1, visible: true },
       dragon: { x: 0, y: 0, scale: 1, visible: true },
-      fx: { x: 0, y: 0, scale: 1.15, visible: true },
+      fx: { x: 0, y: 0, scale: 1, visible: true },
     };
   });
 
@@ -2872,7 +2890,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             activeEvent={combinedActiveEvent}
             isVictory={defeated}
             goblins={goblins}
-            layerTransforms={layerTransforms}
           />
         </div>
 

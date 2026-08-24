@@ -272,24 +272,6 @@ export function LandscapeDragon({
         baseRot += customShapeObj.rotate ?? 0;
       }
     }
-
-    // Anatomical slayed posture: only head and wings remain resting on the shadow plane, other body pieces dissolve
-    let isVisibleWhenDead = group === "headNeck" || group === "frontWing" || group === "backWing";
-    if (isDefeated) {
-      if (group === "headNeck") {
-        tx -= 10;
-        ty += 52;
-        baseRot += 14;
-      } else if (group === "frontWing") {
-        tx -= 6;
-        ty += 42;
-        baseRot += 32;
-      } else if (group === "backWing") {
-        tx += 8;
-        ty += 38;
-        baseRot -= 24;
-      }
-    }
     
     return {
       fill: fills[shapeId] ?? defaultFill,
@@ -310,8 +292,6 @@ export function LandscapeDragon({
       style: {
         cursor: onSelectPart ? "pointer" : "inherit",
         pointerEvents: (onSelectPart ? "auto" : "none") as any,
-        opacity: isDefeated ? (isVisibleWhenDead ? (group === "headNeck" ? 0.95 : 0.6) : 0) : 1,
-        display: isDefeated && !isVisibleWhenDead ? "none" : "block",
       },
       stroke: isSelected ? "#ffd700" : defaultStroke,
       strokeWidth: isSelected ? 3 : defaultStrokeWidth,
@@ -338,25 +318,30 @@ export function LandscapeDragon({
         height="100%"
         style={{ pointerEvents: (onSelectPart ? "auto" : "none") as any }}
       >
-        {/* Dragon Group anchored on Far-Right End (Settles down into shadow plane when defeated) */}
+        {/* Dragon Group anchored on Far-Right End - Fully intact, transparent ghostlike entity when dead */}
         <g
-          transform={`translate(${dragonX}, ${isDefeated ? 150 : 130})`}
+          transform={`translate(${dragonX}, 130)`}
           className="dragon-group"
+          style={{
+            opacity: isDefeated ? 0.35 : 1,
+            filter: isDefeated ? "drop-shadow(0 0 16px rgba(96, 165, 250, 0.9)) brightness(1.25)" : "none",
+            transition: "opacity 0.6s ease, filter 0.6s ease",
+          }}
         >
           {/* Defeated Ghost Soul and Slayed Indicator */}
           {isDefeated && (
-            <g transform="translate(90, -25)" style={{ animation: "dragon-ghost-soul 3s ease-in-out infinite", pointerEvents: "none" }}>
-              <text x="0" y="0" fill="#94a3b8" fontSize="18" fontWeight="900" fontFamily="var(--font-heading), sans-serif" textAnchor="middle" opacity="0.85">
-                Slayed Boss
+            <g transform="translate(100, -20)" style={{ animation: "dragon-ghost-soul 3s ease-in-out infinite", pointerEvents: "none" }}>
+              <text x="0" y="0" fill="#93c5fd" fontSize="18" fontWeight="900" fontFamily="var(--font-heading), sans-serif" textAnchor="middle" opacity="0.9">
+                Ghost Dragon
               </text>
-              <polygon points="0,-15 5,-5 15,0 5,5 0,15 -5,5 -15,0 -5,-5" fill="#38bdf8" opacity="0.7" />
-              <polygon points="-25,-25 -15,-20 -20,-10" fill="#facc15" opacity="0.6" />
-              <polygon points="25,-30 20,-15 35,-20" fill="#f43f5e" opacity="0.6" />
+              <polygon points="0,-15 5,-5 15,0 5,5 0,15 -5,5 -15,0 -5,-5" fill="#38bdf8" opacity="0.8" />
+              <polygon points="-25,-25 -15,-20 -20,-10" fill="#60a5fa" opacity="0.7" />
+              <polygon points="25,-30 20,-15 35,-20" fill="#93c5fd" opacity="0.7" />
             </g>
           )}
 
-          {/* Dragon Ground Shadow Plane */}
-          <g transform={`translate(85, ${isDefeated ? 165 : 180})`}>
+          {/* Dragon Ground Shadow (Grounded directly under dragon body/feet, never cropped) */}
+          <g transform="translate(85, 180)" style={{ opacity: isDefeated ? 0.15 : 1 }}>
             {!isDefeated && animationsEnabled && (
               <animateTransform
                 attributeName="transform"
@@ -367,7 +352,7 @@ export function LandscapeDragon({
                 additive="sum"
               />
             )}
-            <ellipse cx="0" cy="0" rx={isDefeated ? 115 : 105} ry={isDefeated ? 26 : 22} fill="rgba(0,0,0,0.28)" stroke="none" />
+            <ellipse cx="0" cy="0" rx="105" ry="22" fill="rgba(0,0,0,0.22)" stroke="none" />
           </g>
 
           {/* Hovering animation tag */}
@@ -575,18 +560,6 @@ export function LandscapeDragon({
                   </g>
                 );
               })}
-
-              {/* Slayed Boss Dead X X Eyes directly over the resting skull */}
-              {isDefeated && (
-                <g transform="translate(18, 56) rotate(14)" style={{ pointerEvents: "none" }}>
-                  {/* Left X Eye */}
-                  <line x1="-10" y1="-5" x2="-2" y2="3" stroke="#67e8f9" strokeWidth="3" strokeLinecap="round" />
-                  <line x1="-2" y1="-5" x2="-10" y2="3" stroke="#67e8f9" strokeWidth="3" strokeLinecap="round" />
-                  {/* Right X Eye */}
-                  <line x1="8" y1="-5" x2="16" y2="3" stroke="#67e8f9" strokeWidth="3" strokeLinecap="round" />
-                  <line x1="16" y1="-5" x2="8" y2="3" stroke="#67e8f9" strokeWidth="3" strokeLinecap="round" />
-                </g>
-              )}
             </g>
           </g>
         </g>
