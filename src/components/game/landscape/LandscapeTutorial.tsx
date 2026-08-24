@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ArrowRight,
   ArrowLeft,
@@ -6,6 +6,12 @@ import {
   CheckCircle2,
   Swords,
   Zap,
+  Move,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  ChevronDown,
+  RefreshCw,
 } from "lucide-react";
 import { gameAudio } from "../../../lib/gameAudio";
 import { LandscapeSky } from "./LandscapeSky";
@@ -41,6 +47,45 @@ export function LandscapeTutorial({
   layerOrder = [],
 }: LandscapeTutorialProps) {
   const [step, setStep] = useState<TutorialStep>(1);
+
+  // User adjustable positions for Village HP Bar and Dragon (persisted in localStorage)
+  const [villageHpOffset, setVillageHpOffset] = useState(() => {
+    if (typeof window === "undefined") return { x: 0, y: 0 };
+    try {
+      const saved = localStorage.getItem("rpg_tut_village_hp_pos");
+      return saved ? JSON.parse(saved) : { x: 0, y: 0 };
+    } catch {
+      return { x: 0, y: 0 };
+    }
+  });
+
+  const [dragonOffset, setDragonOffset] = useState(() => {
+    if (typeof window === "undefined") return { x: -28, y: -2 };
+    try {
+      const saved = localStorage.getItem("rpg_tut_dragon_pos");
+      return saved ? JSON.parse(saved) : { x: -28, y: -2 };
+    } catch {
+      return { x: -28, y: -2 };
+    }
+  });
+
+  const [showNudgePanel, setShowNudgePanel] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("rpg_tut_village_hp_pos", JSON.stringify(villageHpOffset));
+      } catch {}
+    }
+  }, [villageHpOffset]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("rpg_tut_dragon_pos", JSON.stringify(dragonOffset));
+      } catch {}
+    }
+  }, [dragonOffset]);
 
   if (!isOpen) return null;
 
@@ -107,12 +152,13 @@ export function LandscapeTutorial({
             height: "100%",
             pointerEvents: "none",
             zIndex: 2,
-            transform: "translateX(360px)",
+            transform: "translateX(35.5%)",
           }}
         >
           <LandscapeVillage
             villageHpPercent={100}
             villageName={villageName}
+            villageHpBarPos={{ x: villageHpOffset.x - 355, y: villageHpOffset.y - 10 }}
           />
         </div>
       )}
@@ -178,7 +224,7 @@ export function LandscapeTutorial({
             height: "100%",
             pointerEvents: "none",
             zIndex: 3,
-            transform: "translateX(-230px)",
+            transform: `translate(${dragonOffset.x}%, ${dragonOffset.y}%)`,
           }}
         >
           <LandscapeDragon
@@ -200,8 +246,8 @@ export function LandscapeTutorial({
         <div
           style={{
             position: "absolute",
-            left: "50%",
-            top: "55px",
+            left: `calc(50% + ${(dragonOffset.x + 28) * 6}px)`,
+            top: `calc(55px + ${dragonOffset.y * 3}px)`,
             transform: "translateX(-50%)",
             display: "flex",
             flexDirection: "column",
@@ -340,7 +386,7 @@ export function LandscapeTutorial({
         </div>
       )}
 
-      {/* TOP BAR (Step indicator & Skip) */}
+      {/* TOP BAR (Step indicator, Nudge tool toggle, and Skip) */}
       <div
         style={{
           position: "relative",
@@ -387,24 +433,144 @@ export function LandscapeTutorial({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleFinish}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {/* Position Fine-Tuning Nudge Toggle */}
+          {(step === 1 || step === 3) && (
+            <button
+              type="button"
+              onClick={() => setShowNudgePanel(!showNudgePanel)}
+              style={{
+                background: showNudgePanel ? "#fff73f" : "#fffded",
+                border: "2px solid #101517",
+                boxShadow: "2px 2px 0 #101517",
+                color: "#101517",
+                fontSize: "0.72rem",
+                fontWeight: 900,
+                padding: "4px 10px",
+                borderRadius: "8px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+              title="Fine-tune position"
+            >
+              <Move size={12} />
+              <span>{showNudgePanel ? "Close Nudge" : "Adjust Position"}</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={handleFinish}
+            style={{
+              background: "#fffded",
+              border: "2px solid #101517",
+              boxShadow: "2px 2px 0 #101517",
+              color: "#101517",
+              fontSize: "0.75rem",
+              fontWeight: 800,
+              padding: "4px 12px",
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+          >
+            Skip Tutorial ✕
+          </button>
+        </div>
+      </div>
+
+      {/* FLOATING POSITION NUDGE CONTROLS (WHEN ADJUST POSITION IS OPEN) */}
+      {showNudgePanel && (step === 1 || step === 3) && (
+        <div
           style={{
+            position: "absolute",
+            top: "54px",
+            right: "16px",
+            zIndex: 45,
             background: "#fffded",
             border: "2px solid #101517",
-            boxShadow: "2px 2px 0 #101517",
-            color: "#101517",
-            fontSize: "0.75rem",
+            boxShadow: "3px 3px 0 #101517",
+            borderRadius: "10px",
+            padding: "8px 12px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "6px",
+            fontSize: "0.72rem",
             fontWeight: 800,
-            padding: "4px 12px",
-            borderRadius: "8px",
-            cursor: "pointer",
+            color: "#101517",
           }}
         >
-          Skip Tutorial ✕
-        </button>
-      </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>Nudge {step === 1 ? "Village Bar" : "Dragon"}</span>
+            <button
+              type="button"
+              onClick={() => {
+                if (step === 1) setVillageHpOffset({ x: 0, y: 0 });
+                if (step === 3) setDragonOffset({ x: -28, y: -2 });
+              }}
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "2px",
+                fontSize: "0.68rem",
+                fontWeight: 700,
+                color: "#64748b",
+              }}
+            >
+              <RefreshCw size={11} /> Reset
+            </button>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>
+            <button
+              type="button"
+              onClick={() => {
+                if (step === 1) setVillageHpOffset((p: any) => ({ ...p, x: p.x - 5 }));
+                if (step === 3) setDragonOffset((p: any) => ({ ...p, x: p.x - 1 }));
+              }}
+              style={{ padding: "4px 8px", borderRadius: "4px", border: "1.5px solid #101517", background: "#fff", cursor: "pointer" }}
+            >
+              <ChevronLeft size={13} />
+            </button>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              <button
+                type="button"
+                onClick={() => {
+                  if (step === 1) setVillageHpOffset((p: any) => ({ ...p, y: p.y - 5 }));
+                  if (step === 3) setDragonOffset((p: any) => ({ ...p, y: p.y - 1 }));
+                }}
+                style={{ padding: "4px 8px", borderRadius: "4px", border: "1.5px solid #101517", background: "#fff", cursor: "pointer" }}
+              >
+                <ChevronUp size={13} />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (step === 1) setVillageHpOffset((p: any) => ({ ...p, y: p.y + 5 }));
+                  if (step === 3) setDragonOffset((p: any) => ({ ...p, y: p.y + 1 }));
+                }}
+                style={{ padding: "4px 8px", borderRadius: "4px", border: "1.5px solid #101517", background: "#fff", cursor: "pointer" }}
+              >
+                <ChevronDown size={13} />
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (step === 1) setVillageHpOffset((p: any) => ({ ...p, x: p.x + 5 }));
+                if (step === 3) setDragonOffset((p: any) => ({ ...p, x: p.x + 1 }));
+              }}
+              style={{ padding: "4px 8px", borderRadius: "4px", border: "1.5px solid #101517", background: "#fff", cursor: "pointer" }}
+            >
+              <ChevronRight size={13} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* SINGLE COMPACT BOTTOM CARD (Clean, Uncluttered) */}
       <div

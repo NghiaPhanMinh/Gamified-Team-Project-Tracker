@@ -257,7 +257,7 @@ class GameAudioEngine {
       rainFilter.Q.setValueAtTime(0.7, now);
 
       const rainGain = ctx.createGain();
-      rainGain.gain.setValueAtTime(0.52, now); // Clearly audible rushing rainfall
+      rainGain.gain.setValueAtTime(0.40, now); // -20% adjusted rain volume
 
       rainSrc.connect(rainFilter);
       rainFilter.connect(rainGain);
@@ -273,8 +273,7 @@ class GameAudioEngine {
       const elecData = elecBuffer.getChannelData(0);
       for (let i = 0; i < elecLength; i++) {
         const raw = Math.random() * 2 - 1;
-        // Violent multi-kV electric spark crackle
-        const pulse = Math.random() > 0.93 ? (Math.random() > 0.5 ? 2.2 : -2.2) : raw * 0.4;
+        const pulse = Math.random() > 0.93 ? (Math.random() > 0.5 ? 2.4 : -2.4) : raw * 0.45;
         elecData[i] = pulse;
       }
       const elecSrc = ctx.createBufferSource();
@@ -287,7 +286,7 @@ class GameAudioEngine {
       elecBand.Q.setValueAtTime(3.2, now);
 
       const elecGain = ctx.createGain();
-      elecGain.gain.setValueAtTime(0.46, now);
+      elecGain.gain.setValueAtTime(0.50, now);
 
       elecSrc.connect(elecBand);
       elecBand.connect(elecGain);
@@ -311,8 +310,8 @@ class GameAudioEngine {
           const white = Math.random() * 2 - 1;
           bOut = (bOut + 0.06 * white) / 1.06;
           // Initial supersonic pressure crack (0-40ms) + deep rolling acoustic reverberation
-          const sonicCrack = 3.2 * Math.exp(-i / (this.ctx.sampleRate * 0.025));
-          const lowRumble = 1.2 * Math.exp(-i / (this.ctx.sampleRate * 0.75));
+          const sonicCrack = 4.5 * Math.exp(-i / (this.ctx.sampleRate * 0.025));
+          const lowRumble = 1.6 * Math.exp(-i / (this.ctx.sampleRate * 0.75));
           blastChannel[i] = bOut * (sonicCrack + lowRumble);
         }
         const blastSrc = this.ctx.createBufferSource();
@@ -320,12 +319,12 @@ class GameAudioEngine {
 
         const blastLp = this.ctx.createBiquadFilter();
         blastLp.type = "lowpass";
-        blastLp.frequency.setValueAtTime(380, strikeTime);
-        blastLp.frequency.exponentialRampToValueAtTime(50, strikeTime + 1.8);
+        blastLp.frequency.setValueAtTime(420, strikeTime);
+        blastLp.frequency.exponentialRampToValueAtTime(55, strikeTime + 1.8);
         blastLp.Q.setValueAtTime(0.8, strikeTime);
 
         const blastGain = this.ctx.createGain();
-        blastGain.gain.setValueAtTime(0.88, strikeTime);
+        blastGain.gain.setValueAtTime(1.20, strikeTime);
         blastGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 1.9);
 
         blastSrc.connect(blastLp);
@@ -352,7 +351,7 @@ class GameAudioEngine {
           arcFilter.Q.setValueAtTime(3.8, t);
 
           const arcGain = this.ctx!.createGain();
-          arcGain.gain.setValueAtTime(0.48, t);
+          arcGain.gain.setValueAtTime(0.55, t);
           arcGain.gain.exponentialRampToValueAtTime(0.001, t + 0.038);
 
           arcSrc.connect(arcFilter);
@@ -363,7 +362,7 @@ class GameAudioEngine {
       };
 
       playElectricThunderZap();
-      const timerThunder = setInterval(playElectricThunderZap, 1300);
+      const timerThunder = setInterval(playElectricThunderZap, 880); // More frequent thunder strikes (880ms cadence)
       timers.push(timerThunder);
     } else if (spellType === "ice" || spellType === "water") {
       // REALISTIC SUB-ZERO FREEZING & ICE CRACKING
