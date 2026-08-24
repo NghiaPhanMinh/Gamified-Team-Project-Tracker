@@ -2,9 +2,10 @@ export type MainSection =
   | "home"
   | "projects"
   | "profile"
-  | "subscription";
+  | "subscription"
+  | "resources";
 
-export type ProjectsView = "index" | "create" | "join" | "room" | "personal-tasks";
+export type ProjectsView = "index" | "create" | "join" | "room" | "personal-tasks" | "resources";
 
 export const MAIN_NAV_ITEMS: { id: MainSection; label: string; icon: string; path: string }[] = [
   { id: "home", label: "Home", icon: "⌂", path: "/home" },
@@ -16,6 +17,7 @@ export function getPathForSection(section: MainSection, view?: ProjectsView, roo
   if (section === "home") return "/home";
   if (section === "profile") return "/profile";
   if (section === "subscription") return "/subscription";
+  if (section === "resources" || view === "resources") return "/resources";
   if (section === "projects") {
     if (view === "create") return "/projects/create";
     if (view === "join") return "/projects/join";

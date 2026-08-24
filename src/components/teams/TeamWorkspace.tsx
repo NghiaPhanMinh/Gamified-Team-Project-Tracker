@@ -68,18 +68,6 @@ export function TeamWorkspace({
         currentProfileId={workspace.currentProfileId}
         requestedProjectTab="progress"
       />
-      <details className="room-tools">
-        <summary>Room tools · Framework library</summary>
-        <p>Browse every template or build a custom framework for future projects in this room.</p>
-        <FrameworkLibrary onDuplicate={setFrameworkSeed} />
-        <CustomFrameworkSection
-          teamId={selectedTeamId}
-          currentProfileId={workspace.currentProfileId}
-          currentRole={workspace.currentRole}
-          seed={frameworkSeed}
-          onSeedClosed={() => setFrameworkSeed(null)}
-        />
-      </details>
     </section>
   );
 }

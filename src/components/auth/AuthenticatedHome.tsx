@@ -2,7 +2,7 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { CheckSquare, FolderKanban, Home, ListChecks, Menu, UserRound } from "lucide-react";
+import { BookOpen, CheckSquare, FolderKanban, Home, ListChecks, Menu, UserRound } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { BrandLogo } from "../brand/BrandLogo";
@@ -64,6 +64,9 @@ export function AuthenticatedHome() {
     activeSection = "subscription";
   } else if (path.startsWith("/profile")) {
     activeSection = "profile";
+  } else if (path.startsWith("/resources") || path.startsWith("/projects/resources")) {
+    activeSection = "resources";
+    projectsView = "resources";
   } else if (path.startsWith("/projects/create")) {
     activeSection = "projects";
     projectsView = "create";
@@ -198,6 +201,18 @@ export function AuthenticatedHome() {
           >
             <CheckSquare size={18} aria-hidden="true" style={{ display: "inline-block", verticalAlign: "-3px" }} />
             <strong>My Tasks</strong>
+          </button>
+          <button
+            className={activeSection === "resources" || projectsView === "resources" ? "is-active sidebar-bottom-resources-button" : "sidebar-bottom-resources-button"}
+            type="button"
+            onClick={() => {
+              navigate("/resources");
+              setMobileMenuOpen(false);
+            }}
+            style={{ marginTop: "0.25rem" }}
+          >
+            <BookOpen size={18} aria-hidden="true" style={{ display: "inline-block", verticalAlign: "-3px" }} />
+            <strong>Resources</strong>
           </button>
         </nav>
       </aside>

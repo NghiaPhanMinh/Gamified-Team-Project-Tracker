@@ -8,6 +8,7 @@ import { PersonalTasks } from "../projects/PersonalTasks";
 import { ProjectOnboarding } from "../projects/ProjectOnboarding";
 import { TeamWorkspace } from "./TeamWorkspace";
 import { ProfileCenter } from "../profile/ProfileCenter";
+import { ResourcesPage } from "../resources/ResourcesPage";
 import { getGroupColor } from "../../lib/groupColors";
 
 type RoomSummary = {
@@ -104,6 +105,10 @@ export function TeamSystem({
 
   if (activeSection === "profile") {
     return <ProfileCenter />;
+  }
+
+  if (activeSection === "resources" || projectsView === "resources") {
+    return <ResourcesPage />;
   }
 
   if (projectsView === "create" || projectsView === "join") {

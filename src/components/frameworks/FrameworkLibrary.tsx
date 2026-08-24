@@ -7,7 +7,7 @@ import {
 import { MAYLAMDI_FRAMEWORK_COLORS } from "../../lib/brandPalette";
 
 type FrameworkLibraryProps = {
-  onDuplicate: (framework: BuiltInFramework) => void;
+  onDuplicate?: (framework: BuiltInFramework) => void;
 };
 
 export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
@@ -166,8 +166,9 @@ export function FrameworkLibrary({ onDuplicate }: FrameworkLibraryProps) {
             to rename, reorder, or extend the phases.
           </span>
           <button
+            className="primary-button"
             type="button"
-            onClick={() => onDuplicate(selectedFramework)}
+            onClick={() => onDuplicate?.(selectedFramework)}
           >
             Copy and customise
           </button>
