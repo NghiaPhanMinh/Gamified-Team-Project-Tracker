@@ -88,8 +88,28 @@ export const getState = query({
     const startOfToday = new Date().setHours(0, 0, 0, 0);
     const isOverdue = project.deadline ? new Date(`${project.deadline}T23:59:59Z`).getTime() < nowMs : false;
 
-    // Deflect missed task damage to Village HP pool
-    let villageCurrentHp = villageMaxHp - missedTasksDamage;
+    // Calculate unslayed goblin penalty from past days (3% village HP per unslayed goblin per player)
+    const launchTime = project.launchedAt ? new Date(project.launchedAt).getTime() : (project.startDate ? new Date(project.startDate).getTime() : nowMs);
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const daysSinceLaunch = Math.max(0, Math.floor((startOfToday - new Date(launchTime).setHours(0,0,0,0)) / msPerDay));
+    
+    let totalMissedGoblinDays = 0;
+    if (daysSinceLaunch > 0) {
+      for (const member of memberships) {
+        const memberPostDays = new Set(
+          dailyPosts
+            .filter((p) => p.authorProfileId === member.profileId && p.createdAt < startOfToday)
+            .map((p) => new Date(p.createdAt).toISOString().split("T")[0])
+        );
+        const memberDaysActive = Math.min(daysSinceLaunch, Math.max(0, Math.floor((startOfToday - new Date(member.joinedAt || launchTime).setHours(0,0,0,0)) / msPerDay)));
+        const missedDays = Math.max(0, memberDaysActive - memberPostDays.size);
+        totalMissedGoblinDays += missedDays;
+      }
+    }
+    const goblinDamagePenalty = Math.round(totalMissedGoblinDays * (villageMaxHp * 0.03));
+
+    // Deflect missed task damage & unslayed goblin penalties to Village HP pool
+    let villageCurrentHp = villageMaxHp - missedTasksDamage - goblinDamagePenalty;
     if (isOverdue) {
       villageCurrentHp = Math.min(villageCurrentHp, Math.round(villageMaxHp * 0.2));
     }
@@ -126,15 +146,9 @@ export const getState = query({
         (task) => task.status !== "verified" && task.status !== "completed",
       ).length,
       members: memberships.map((member) => {
-        const hasValidDailyToday = dailyPosts.some(
+        // Goblin kill is STRICTLY from submitting Daily Proof today (1 per day)
+        const hasSubmittedToday = dailyPosts.some(
           (p) => p.authorProfileId === member.profileId && p.createdAt >= startOfToday,
-        );
-        const hasSubmittedToday = hasValidDailyToday || uniqueEvents.some(
-          (event) => event.attackerProfileId === member.profileId && event.createdAt >= startOfToday,
-        ) || tasks.some(
-          (task) => (task.primaryOwnerProfileId === member.profileId || task.collaboratorProfileIds.includes(member.profileId)) &&
-            (task.status === "submitted" || task.status === "verified" || task.status === "completed") &&
-            task.updatedAt >= startOfToday,
         );
         const memberDamage = memberDamageMap.get(member.profileId) ?? 0;
         const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;

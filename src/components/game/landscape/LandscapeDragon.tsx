@@ -307,18 +307,18 @@ export function LandscapeDragon({
     >
       <style>{`
         @keyframes dragon-slain-fall {
-          0% { transform: translateY(0) rotate(0deg); opacity: 0.95; }
-          30% { transform: translateY(25px) rotate(8deg); opacity: 0.8; }
-          60% { transform: translateY(55px) rotate(16deg) scale(0.92); opacity: 0.6; }
-          100% { transform: translateY(75px) rotate(22deg) scale(0.85); opacity: 0.35; }
+          0% { transform: translateY(0); opacity: 0.95; }
+          50% { transform: translateY(12px); opacity: 0.7; }
+          100% { transform: translateY(20px); opacity: 0.55; }
         }
         @keyframes dragon-ghost-soul {
-          0% { transform: translateY(0) scale(0.8); opacity: 0; }
-          50% { transform: translateY(-30px) scale(1.1); opacity: 0.85; }
-          100% { transform: translateY(-65px) scale(1.3); opacity: 0; }
+          0% { transform: translateY(0) scale(0.85); opacity: 0; }
+          50% { transform: translateY(-25px) scale(1.05); opacity: 0.85; }
+          100% { transform: translateY(-55px) scale(1.2); opacity: 0; }
         }
         .dragon-defeated-anim {
-          animation: dragon-slain-fall 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+          animation: dragon-slain-fall 2s ease-in-out forwards;
+          filter: drop-shadow(0 0 10px #60a5fa);
         }
       `}</style>
       <svg
@@ -330,19 +330,20 @@ export function LandscapeDragon({
         {/* Dragon Group anchored on Far-Right End */}
         <g
           transform={`translate(${dragonX}, 130)`}
-          className={`dragon-group ${isDefeated ? "dragon-defeated-anim" : ""}`}
+          className="dragon-group"
         >
-          {/* Defeated Ghost Soul and Slayed Indicator */}
-          {isDefeated && (
-            <g transform="translate(100, -20)" style={{ animation: "dragon-ghost-soul 3s ease-in-out infinite", pointerEvents: "none" }}>
-              <text x="0" y="0" fill="#94a3b8" fontSize="18" fontWeight="900" fontFamily="var(--font-heading), sans-serif" textAnchor="middle" opacity="0.85">
-                Slayed Boss
-              </text>
-              <polygon points="0,-15 5,-5 15,0 5,5 0,15 -5,5 -15,0 -5,-5" fill="#38bdf8" opacity="0.7" />
-              <polygon points="-25,-25 -15,-20 -20,-10" fill="#facc15" opacity="0.6" />
-              <polygon points="25,-30 20,-15 35,-20" fill="#f43f5e" opacity="0.6" />
-            </g>
-          )}
+          <g className={isDefeated ? "dragon-defeated-anim" : ""}>
+            {/* Defeated Ghost Soul and Slayed Indicator */}
+            {isDefeated && (
+              <g transform="translate(100, -20)" style={{ animation: "dragon-ghost-soul 3s ease-in-out infinite", pointerEvents: "none" }}>
+                <text x="0" y="0" fill="#94a3b8" fontSize="18" fontWeight="900" fontFamily="var(--font-heading), sans-serif" textAnchor="middle" opacity="0.85">
+                  Slayed Boss
+                </text>
+                <polygon points="0,-15 5,-5 15,0 5,5 0,15 -5,5 -15,0 -5,-5" fill="#38bdf8" opacity="0.7" />
+                <polygon points="-25,-25 -15,-20 -20,-10" fill="#facc15" opacity="0.6" />
+                <polygon points="25,-30 20,-15 35,-20" fill="#f43f5e" opacity="0.6" />
+              </g>
+            )}
 
           {/* Dragon Ground Shadow (Grounded directly under dragon body/feet, never cropped) */}
           <g transform="translate(85, 180)">
@@ -542,6 +543,7 @@ export function LandscapeDragon({
             </g>
           </g>
         </g>
+      </g>
       </svg>
     </div>
   );
