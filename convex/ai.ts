@@ -189,20 +189,22 @@ type GeneratedAiPlan = ValidatedAiPlan & {
 
 function planningPrompts(brief: string, context: AiPlanningContext) {
   const systemPrompt = [
-    "You are MayLamDi's expert AI Project Architect for team projects.",
-    "CRITICAL REQUIREMENT: Analyze the user's project brief deeply and generate CONCRETE, HIGHLY SPECIFIC, DOMAIN-TAILORED deliverables.",
-    "ABSOLUTELY BAN GENERIC TASK TITLES. Do NOT output generic titles like 'Research requirements', 'UI Design', 'Backend setup', 'Testing', 'Project Overview', 'Implementation', or 'Task 1'.",
-    "EVERY task title MUST specify the exact technical asset, deliverable, or component (e.g. 'Figma Component Tokens & Responsive Dashboard Layout', 'Convex Realtime Schema & Team Member Mutations', 'Vitest Unit Suite for Project Lobby & Allocation Flow').",
-    "DEEP BRIEF PARSING: Extract explicit technologies, frameworks, features, design specifications, and deliverables mentioned or implied in the user's brief.",
-    "TASK DESCRIPTIONS: Every task description MUST include 3 concrete sub-items: (1) Deliverable Specs, (2) Acceptance Criteria, and (3) Risk / Edge Case to verify.",
-    "SKILL-BASED ALLOCATION: Match tasks to member profile skills precisely. Explain the allocation rationale in 'allocationExplanation'.",
-    "MILESTONES: Generate 2-4 key project milestones connected to phase IDs and project due dates.",
+    "You are MayLamDi's Lead AI Technical Architect.",
+    "CHAIN-OF-THOUGHT STEP 1: Dissect the user's project brief to extract domain-specific deliverables, technical stack requirements, assets, and explicit features.",
+    "CHAIN-OF-THOUGHT STEP 2: Map each deliverable into 2-3 concrete tasks. NEVER repeat generic phase names in task titles (e.g. DO NOT name tasks 'Phase 1: Research', 'Design UI', 'Backend setup', 'Testing & QA').",
+    "FEW-SHOT EXAMPLES OF GREAT CONCRETE TASK TITLES vs BANNED GENERIC TITLES:",
+    "- BAD: 'UI Design' -> GOOD: 'Figma Token Specs & Mobile Dashboard Responsive Wireframes'",
+    "- BAD: 'Backend setup' -> GOOD: 'Convex Realtime Database Schema & Team Member Mutations'",
+    "- BAD: 'Research & Planning' -> GOOD: 'Technical Architecture Spec & API Data Schema Review'",
+    "- BAD: 'Testing' -> GOOD: 'Vitest Unit Suite for Lobby State & Member Allocation Logic'",
+    "TASK DESCRIPTION STRUCTURE: Every task description MUST list 3 bullet points: (1) Deliverable Specs, (2) Acceptance Criteria, and (3) Edge Case / Verification Step.",
+    "SKILL MATCHING: Assign tasks to member profile IDs matching their self-reported skills. Detail your decision in 'allocationExplanation'.",
     "BOUNDS & FORMAT: Use supplied phase IDs and member profile IDs. Ensure non-overlapping task dates within project bounds.",
     "Return ONLY the requested structured JSON matching the plan schema.",
   ].join(" ");
 
   const userPrompt = JSON.stringify({
-    request: "Analyze the project brief deeply, extract domain deliverables, and generate specific, non-generic tasks allocated to assembled team members.",
+    request: "Perform deep brief analysis, extract concrete technical deliverables, and assign tasks to assembled team members based on their skills.",
     brief,
     project: context.project,
     currentFramework: context.project.frameworkName,
@@ -285,7 +287,8 @@ async function requestPlan(input: {
           ? { response_format: { type: "json_schema", json_schema: planSchema } }
           : {}),
         temperature: 0.2,
-        max_completion_tokens: 6_000,
+        max_tokens: 1_800,
+        max_completion_tokens: 1_800,
       }),
     });
     const body = (await response.json().catch(() => ({}))) as OpenRouterResponse;
