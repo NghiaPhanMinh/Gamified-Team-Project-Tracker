@@ -1126,6 +1126,12 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [testActiveSpell, setTestActiveSpell] = useState<"lightning" | "fire" | "ice" | "all" | null>(null);
   const [testOverdueOverride, setTestOverdueOverride] = useState<boolean | null>(null);
 
+  // Boss = Tasks & Village Scaling Mechanics Testing
+  const [testExtraTasksCount, setTestExtraTasksCount] = useState<number>(0);
+  const [testSimulatedOnTimeDamage, setTestSimulatedOnTimeDamage] = useState<number>(0);
+  const [testSimulatedMissedDamage, setTestSimulatedMissedDamage] = useState<number>(0);
+  const [testExtraPlayerCount, setTestExtraPlayerCount] = useState<number>(0);
+
   // Canvas Layer Transforms (All 10 layers customizable in Layout Admin)
   const [layerTransforms, setLayerTransforms] = useState<Record<string, { x: number; y: number; scale: number; visible: boolean }>>(() => {
     try {
@@ -2405,10 +2411,25 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     return <section className="battle-loading" aria-busy="true">Preparing the battle scene…</section>;
   }
 
-  const rawRemainingHp = testDragonHpOverride !== null ? testDragonHpOverride : state.remainingHp;
-  const hpPercent = state.maximumHp === 0 ? 100 : Math.round((rawRemainingHp / state.maximumHp) * 100);
-  const defeated = state.maximumHp > 0 && rawRemainingHp === 0;
-  const effectiveVillageHp = testVillageHpOverride !== null ? testVillageHpOverride : state.villageHpPercent;
+  const TASK_HP_UNIT = 50;
+  const effectiveTaskCount = Math.max(1, (workspace?.tasks?.length ?? 1) + testExtraTasksCount);
+  const computedMaxBossHp = Math.max(50, state.maximumHp + (testExtraTasksCount * TASK_HP_UNIT));
+
+  const baseRemainingHp = state.remainingHp + (testExtraTasksCount * TASK_HP_UNIT) - testSimulatedOnTimeDamage;
+  const rawRemainingHp = testDragonHpOverride !== null
+    ? testDragonHpOverride
+    : Math.max(0, Math.min(computedMaxBossHp, baseRemainingHp));
+
+  const hpPercent = computedMaxBossHp === 0 ? 100 : Math.round((rawRemainingHp / computedMaxBossHp) * 100);
+  const defeated = computedMaxBossHp > 0 && rawRemainingHp === 0;
+
+  // Village Max HP scales with team size: 100 + (10 * number of players)
+  const teamMemberCount = Math.max(1, (state.members?.length ?? 1) + testExtraPlayerCount);
+  const villageMaxHp = 100 + (10 * teamMemberCount);
+  const baseVillageCurrentHp = Math.max(0, Math.round((state.villageHpPercent / 100) * villageMaxHp) - testSimulatedMissedDamage);
+  const computedVillageHpPercent = Math.max(0, Math.min(100, Math.round((baseVillageCurrentHp / villageMaxHp) * 100)));
+
+  const effectiveVillageHp = testVillageHpOverride !== null ? testVillageHpOverride : computedVillageHpPercent;
   const optionalMetrics = state as typeof state & OptionalBattleMetrics;
 
   const damageClearedFraction = (100 - hpPercent) / 100;
@@ -2661,8 +2682,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             role="progressbar"
             aria-label="Boss health"
             aria-valuemin={0}
-            aria-valuemax={state.maximumHp}
-            aria-valuenow={state.remainingHp}
+            aria-valuemax={computedMaxBossHp}
+            aria-valuenow={rawRemainingHp}
             style={{
               width: `${dragonHpBarWidth}px`,
               height: `${dragonHpBarHeight}px`,
@@ -2702,7 +2723,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 pointerEvents: "none",
               }}
             >
-              {rawRemainingHp} / {state.maximumHp} HP ({hpPercent}%)
+              {rawRemainingHp} / {computedMaxBossHp} HP ({hpPercent}%)
             </span>
           </div>
         </div>
@@ -4378,6 +4399,91 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   </div>
                 </div>
 
+                {/* Task Mechanics & Two-Way Damage Simulation */}
+                <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155", display: "grid", gap: "8px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <h5 style={{ margin: 0, fontSize: "0.72rem", color: "#38bdf8", textTransform: "uppercase" }}>
+                      1. Boss HP = Tasks &amp; 2-Way Damage
+                    </h5>
+                    <span style={{ fontSize: "0.65rem", color: "#94a3b8" }}>
+                      Boss: {rawRemainingHp}/{computedMaxBossHp} HP | Village: {effectiveVillageHp}% ({baseVillageCurrentHp}/{villageMaxHp} HP)
+                    </span>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                    <button
+                      type="button"
+                      style={{ padding: "6px", background: "#0284c7", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.68rem", fontWeight: "bold", cursor: "pointer" }}
+                      onClick={() => {
+                        setTestExtraTasksCount(p => p + 1);
+                        gameAudio.playTing();
+                      }}
+                    >
+                      +1 Task Created (+50 Boss HP)
+                    </button>
+                    <button
+                      type="button"
+                      style={{ padding: "6px", background: "#334155", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.68rem", fontWeight: "bold", cursor: "pointer" }}
+                      onClick={() => setTestExtraTasksCount(p => Math.max(-5, p - 1))}
+                    >
+                      -1 Task Removed (-50 Boss HP)
+                    </button>
+
+                    <button
+                      type="button"
+                      style={{ padding: "6px", background: "#16a34a", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.68rem", fontWeight: "bold", cursor: "pointer" }}
+                      onClick={() => {
+                        setTestSimulatedOnTimeDamage(p => p + 50);
+                        setLocalAttack({
+                          id: `sim_ontime_${Date.now()}`,
+                          attackerName: "Adventurer",
+                          damage: 50,
+                          spellType: "lightning",
+                          target: "dragon",
+                          targetX: 750,
+                          targetY: 175,
+                        });
+                        gameAudio.playTing();
+                      }}
+                    >
+                      Finish On-Time (-50 Boss HP)
+                    </button>
+
+                    <button
+                      type="button"
+                      style={{ padding: "6px", background: "#dc2626", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.68rem", fontWeight: "bold", cursor: "pointer" }}
+                      onClick={() => {
+                        setTestSimulatedMissedDamage(p => p + 50);
+                        setShowGoblinAttackAlert(true);
+                      }}
+                    >
+                      Miss Deadline (Deflect to Village!)
+                    </button>
+                  </div>
+
+                  <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "4px", borderTop: "1px solid #1e293b", paddingTop: "6px" }}>
+                    <button
+                      type="button"
+                      style={{ flex: 1, padding: "5px", background: "#8b5cf6", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.68rem", fontWeight: "bold", cursor: "pointer" }}
+                      onClick={() => setTestExtraPlayerCount(p => p + 1)}
+                    >
+                      +1 Player Joined (+10 Village Max HP)
+                    </button>
+                    <button
+                      type="button"
+                      style={{ padding: "5px 8px", background: "#475569", color: "#fff", border: "none", borderRadius: "4px", fontSize: "0.68rem", fontWeight: "bold", cursor: "pointer" }}
+                      onClick={() => {
+                        setTestExtraTasksCount(0);
+                        setTestSimulatedOnTimeDamage(0);
+                        setTestSimulatedMissedDamage(0);
+                        setTestExtraPlayerCount(0);
+                      }}
+                    >
+                      Reset Mechanics
+                    </button>
+                  </div>
+                </div>
+
                 {/* Deadline Simulation */}
                 <div style={{ background: "#0f172a", padding: "10px", borderRadius: "6px", border: "1px solid #334155" }}>
                   <h5 style={{ margin: "0 0 8px 0", fontSize: "0.72rem", color: "#a855f7", textTransform: "uppercase" }}>Deadline &amp; End Game Screen</h5>
@@ -4398,6 +4504,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                         setTestDeadGoblins({});
                         setTestActiveSpell(null);
                         setTestOverdueOverride(null);
+                        setTestExtraTasksCount(0);
+                        setTestSimulatedOnTimeDamage(0);
+                        setTestSimulatedMissedDamage(0);
+                        setTestExtraPlayerCount(0);
                       }}
                     >
                       Reset All Cheats

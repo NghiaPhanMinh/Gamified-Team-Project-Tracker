@@ -20,16 +20,20 @@ export const getState = query({
     const requiredTasks = tasks.filter((task) => task.required);
     const activeTasks = requiredTasks.length > 0 ? requiredTasks : tasks;
     const userCount = Math.max(1, memberships.length);
+    const TASK_BASE_HP = 50;
 
-    // Dynamic Dragon Maximum HP: Adapts directly to the sum of task damage (default 50 HP per task)
-    const totalTaskDamage = activeTasks.reduce((sum, task) => sum + (task.damage ?? 50), 0);
+    // 1. Boss HP = Tasks: Every task created adds a fixed amount to the Dragon's total HP (More tasks = bigger dragon)
+    const taskList = activeTasks.length > 0 ? activeTasks : tasks;
+    const totalTaskDamage = taskList.length > 0
+      ? taskList.reduce((sum, task) => sum + (task.damage ?? TASK_BASE_HP), 0)
+      : 100;
     const maximumHp = Math.max(50, totalTaskDamage);
     const hpSharePerPlayer = Math.max(1, Math.round(maximumHp / userCount));
 
     // Map each task's damage contribution
     const taskDamageMap = new Map<string, number>();
-    for (const task of activeTasks) {
-      taskDamageMap.set(task._id, task.damage ?? 50);
+    for (const task of taskList) {
+      taskDamageMap.set(task._id, task.damage ?? TASK_BASE_HP);
     }
 
     const appliedTaskIds = new Set<string>();
@@ -39,21 +43,23 @@ export const getState = query({
       return true;
     });
 
-    // Track damage dealt per user based on verified / completed task damage
+    // 2. Task damage reflects both ways:
+    // - Finish task on time -> Dragon loses that task's HP value
+    // - Miss task deadline -> Damage is deflected to the Village (one-time penalty for that task)
     const memberDamageMap = new Map<string, number>();
 
     for (const event of uniqueEvents) {
       const attackerId = event.attackerProfileId;
-      const damageForTask = event.damage ?? taskDamageMap.get(event.taskId) ?? 50;
+      const damageForTask = event.damage ?? taskDamageMap.get(event.taskId) ?? TASK_BASE_HP;
       const current = memberDamageMap.get(attackerId) ?? 0;
       memberDamageMap.set(attackerId, current + damageForTask);
     }
 
     const eventTaskIds = new Set(uniqueEvents.map((e) => e.taskId));
-    for (const task of activeTasks) {
+    for (const task of taskList) {
       if ((task.status === "completed" || task.status === "verified") && !eventTaskIds.has(task._id)) {
         const ownerId = task.primaryOwnerProfileId;
-        const damageForTask = taskDamageMap.get(task._id) ?? 50;
+        const damageForTask = taskDamageMap.get(task._id) ?? TASK_BASE_HP;
         const current = memberDamageMap.get(ownerId) ?? 0;
         memberDamageMap.set(ownerId, current + damageForTask);
       }
@@ -61,6 +67,36 @@ export const getState = query({
 
     const rawDamageDealt = [...memberDamageMap.values()].reduce((sum, val) => sum + val, 0);
     const damageDealt = Math.min(maximumHp, rawDamageDealt);
+    const remainingHp = Math.max(0, maximumHp - damageDealt);
+
+    // 3. Village Max HP scales with team size: 100 + (10 * number of players)
+    const villageMaxHp = 100 + (10 * userCount);
+
+    const nowMs = Date.now();
+    let missedTasksDamage = 0;
+    let overdueTaskCount = 0;
+
+    for (const task of taskList) {
+      const isCompleted = task.status === "completed" || task.status === "verified";
+      const isMissed = !isCompleted && task.dueDate && new Date(`${task.dueDate}T23:59:59Z`).getTime() < nowMs;
+      if (isMissed) {
+        missedTasksDamage += (task.damage ?? TASK_BASE_HP);
+        overdueTaskCount++;
+      }
+    }
+
+    const startOfToday = new Date().setHours(0, 0, 0, 0);
+    const isOverdue = project.deadline ? new Date(`${project.deadline}T23:59:59Z`).getTime() < nowMs : false;
+
+    // Deflect missed task damage to Village HP pool
+    let villageCurrentHp = villageMaxHp - missedTasksDamage;
+    if (isOverdue) {
+      villageCurrentHp = Math.min(villageCurrentHp, Math.round(villageMaxHp * 0.2));
+    }
+    villageCurrentHp = Math.max(0, Math.min(villageMaxHp, villageCurrentHp));
+    const villageHpPercent = (maximumHp === 0 || remainingHp === 0)
+      ? 100
+      : Math.round((villageCurrentHp / villageMaxHp) * 100);
 
     const profileIds = new Set([
       ...memberships.map((member) => member.profileId),
@@ -69,22 +105,6 @@ export const getState = query({
     const profiles = await Promise.all([...profileIds].map((profileId) => ctx.db.get(profileId)));
     const profileById = new Map(profiles.filter(Boolean).map((item) => [item!._id, item!]));
     const taskById = new Map(tasks.map((task) => [task._id, task]));
-
-    const startOfToday = new Date().setHours(0, 0, 0, 0);
-    const isOverdue = project.deadline ? new Date(`${project.deadline}T23:59:59Z`).getTime() < Date.now() : false;
-    const overdueTaskCount = requiredTasks.filter(
-      (task) => task.status !== "verified" && task.status !== "completed" && task.dueDate && new Date(`${task.dueDate}T23:59:59Z`).getTime() < Date.now(),
-    ).length;
-
-    const villageHpPercent = (maximumHp === 0 || maximumHp - damageDealt <= 0)
-      ? 100
-      : isOverdue
-      ? 20
-      : overdueTaskCount > 0
-      ? Math.max(25, 100 - overdueTaskCount * 25)
-      : 100;
-
-    const remainingHp = Math.max(0, maximumHp - damageDealt);
 
     return {
       project: {
