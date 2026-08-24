@@ -396,11 +396,7 @@ export function AIPlanningAssistant({
             </div>
             <p className="ai-model-note">Generated through a free AI route. This draft is not saved.</p>
           </details>
-          <section className="ai-adjust-plan" aria-labelledby="ai-adjust-title">
-            <div><h4 id="ai-adjust-title">Adjust Plan</h4><p>Describe one change and generate a fresh, fully validated draft.</p></div>
-            <textarea maxLength={1500} value={adjustment} onChange={(event) => setAdjustment(event.target.value)} placeholder="For example: reduce the plan to eight tasks and keep testing in week three." />
-            <button className="secondary-button" type="button" disabled={isGenerating || !adjustment.trim()} onClick={() => void handleAdjustment()}>{isGenerating ? "Revising…" : "Generate adjusted draft"}</button>
-          </section>
+
           <div className="ai-save-actions-hero">
             <div className="ai-save-notice">
               <strong style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
