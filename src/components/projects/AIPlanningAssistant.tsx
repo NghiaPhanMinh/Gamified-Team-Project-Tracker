@@ -40,6 +40,7 @@ export function AIPlanningAssistant({
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasAutoStartedRef = useRef(false);
   const byokActive = getByokSession() !== null;
+  const isLeader = workspace.canManageProject || workspace.isTeamOwner;
 
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingSeconds, setLoadingSeconds] = useState(0);
@@ -220,55 +221,68 @@ export function AIPlanningAssistant({
             minLength={3}
             maxLength={8000}
             value={brief}
+            readOnly={!isLeader}
             onChange={(event) => setBrief(event.target.value)}
-            placeholder="Paste the assignment requirements, deliverables, audience, constraints, and assessment criteria…"
+            placeholder={isLeader ? "Paste the assignment requirements, deliverables, audience, constraints, and assessment criteria…" : "The room leader will enter the project brief here."}
           />
         </label>
         <div>
           <span>{brief.length}/8000</span>
-          {(workspace.tasks?.length ?? 0) > 0 ? (
-            <Link
-              to="/subscription"
-              className="primary-button"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.4rem",
-                textDecoration: "none",
-                background: "var(--color-pink)",
-                color: "#101517",
-                fontWeight: 800,
-              }}
-            >
-              <CreditCard size={15} /> Subscription to Regenerate
-            </Link>
-          ) : (
-            <button
-              className="primary-button"
-              type="submit"
-              disabled={isGenerating || workspace.project.status === "archived"}
-            >
-              {isGenerating ? (
-                "Building a draft…"
-              ) : draft ? (
-                "Regenerate Plan"
-              ) : (
-                <>
-                  <Zap
-                    size={15}
-                    style={{
-                      display: "inline-block",
-                      verticalAlign: "-2px",
-                      marginRight: "4px",
-                    }}
-                  />{" "}
-                  Generate AI Plan
-                </>
-              )}
-            </button>
-          )}
+          {isLeader ? (
+            (workspace.tasks?.length ?? 0) > 0 ? (
+              <Link
+                to="/subscription"
+                className="primary-button"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.4rem",
+                  textDecoration: "none",
+                  background: "var(--color-pink)",
+                  color: "#101517",
+                  fontWeight: 800,
+                }}
+              >
+                <CreditCard size={15} /> Subscription to Regenerate
+              </Link>
+            ) : (
+              <button
+                className="primary-button"
+                type="submit"
+                disabled={isGenerating || workspace.project.status === "archived"}
+              >
+                {isGenerating ? (
+                  "Building a draft…"
+                ) : draft ? (
+                  "Regenerate Plan"
+                ) : (
+                  <>
+                    <Zap
+                      size={15}
+                      style={{
+                        display: "inline-block",
+                        verticalAlign: "-2px",
+                        marginRight: "4px",
+                      }}
+                    />{" "}
+                    Generate AI Plan
+                  </>
+                )}
+              </button>
+            )
+          ) : null}
         </div>
       </form>
+      {!isLeader && !draft && (workspace.tasks?.length ?? 0) === 0 ? (
+        <div className="member-waiting-card" style={{ margin: "1.25rem 0", padding: "1.25rem", borderRadius: "16px", background: "color-mix(in srgb, var(--color-yellow) 12%, var(--color-surface))", border: "2px solid var(--color-yellow)", color: "var(--color-text)" }}>
+          <strong style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "1.05rem", marginBottom: "0.3rem" }}>
+            <Clock size={18} style={{ color: "var(--color-yellow)", flexShrink: 0 }} /> Waiting for Room Leader to Generate AI Plan...
+          </strong>
+          <p style={{ margin: 0, fontSize: "0.9rem", opacity: 0.9 }}>
+            The room leader is preparing the project brief and generating task allocations. You will see the draft preview right here as soon as it is generated!
+          </p>
+        </div>
+      ) : null}
       {error ? <p className="form-error ai-error" role="alert">{error}</p> : null}
       {retryNotice ? <p className="ai-retry-notice" role="status">{retryNotice}</p> : null}
 
@@ -453,17 +467,23 @@ export function AIPlanningAssistant({
             <p className="ai-model-note">Generated through a free AI route. This draft is not saved.</p>
           </details>
 
-          <div className="ai-save-actions-hero">
-            <div className="ai-save-notice">
-              <strong style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                <Sparkles size={18} style={{ color: "var(--color-pink)" }} /> Ready to Launch Your Project?
-              </strong>
-              <p>Clicking confirm saves all AI generated tasks, assigns team responsibilities, and unlocks the Battle Board, Tasks, and Progress tabs!</p>
+          {isLeader ? (
+            <div className="ai-save-actions-hero">
+              <div className="ai-save-notice">
+                <strong style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                  <Sparkles size={18} style={{ color: "var(--color-pink)" }} /> Ready to Launch Your Project?
+                </strong>
+                <p>Clicking confirm saves all AI generated tasks, assigns team responsibilities, and unlocks the Battle Board, Tasks, and Progress tabs!</p>
+              </div>
+              <button className="primary-button hero-save-plan-button" type="button" disabled={isGenerating} onClick={() => void handleSavePlan()}>
+                {isGenerating ? <><Rocket size={18} style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "6px" }} /> Saving &amp; Launching Project…</> : <><CheckCircle2 size={18} style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "6px" }} /> Confirm &amp; Save Plan</>}
+              </button>
             </div>
-            <button className="primary-button hero-save-plan-button" type="button" disabled={isGenerating} onClick={() => void handleSavePlan()}>
-              {isGenerating ? <><Rocket size={18} style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "6px" }} /> Saving &amp; Launching Project…</> : <><CheckCircle2 size={18} style={{ display: "inline-block", verticalAlign: "-2px", marginRight: "6px" }} /> Confirm &amp; Save Plan</>}
-            </button>
-          </div>
+          ) : (
+            <p className="ai-safety-note" style={{ marginTop: "1rem", textAlign: "center", fontWeight: 700 }}>
+              Viewing AI plan preview draft. Only the room leader can confirm and save this plan.
+            </p>
+          )}
           {saveMessage ? <p className="form-success" role="status" style={{ marginTop: "1rem", fontSize: "1.05rem", fontWeight: 800 }}>{saveMessage}</p> : null}
         </div>
       ) : null}

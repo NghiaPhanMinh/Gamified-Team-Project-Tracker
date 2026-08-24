@@ -47,6 +47,7 @@ const draft = {
 
 const workspace = {
   project: { _id: "project-1", description: "Create and test a complete interaction design prototype.", status: "active" },
+  canManageProject: true,
   phases: [{ _id: "phase-1", title: "Empathise" }],
   members: [{ profileId: "member-1", displayName: "anh quynh" }],
 };
