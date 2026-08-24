@@ -56,7 +56,7 @@ export function SubscriptionPage({ currentPlan }: { currentPlan: SubscriptionPla
 
   return (
     <section className="subscription-page-v2" aria-labelledby="subscription-page-title">
-      <div style={{ marginBottom: "1rem" }}>
+      <div style={{ marginBottom: "1.25rem" }}>
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -64,17 +64,19 @@ export function SubscriptionPage({ currentPlan }: { currentPlan: SubscriptionPla
           style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: "0.4rem",
-            padding: "0.5rem 1.1rem",
-            fontSize: "0.92rem",
-            background: "var(--color-surface)",
+            gap: "0.5rem",
+            padding: "0.6rem 1.25rem",
+            fontSize: "0.95rem",
+            background: "#ffe600",
+            color: "#101517",
             border: "2.5px solid #101517",
-            boxShadow: "3px 3px 0 #101517",
+            boxShadow: "4px 4px 0 #101517",
             cursor: "pointer",
-            fontWeight: 700,
+            fontWeight: 900,
+            borderRadius: "12px",
           }}
         >
-          <ArrowLeft size={16} /> Back to Project
+          <ArrowLeft size={18} strokeWidth={2.5} /> Back to Project
         </button>
       </div>
       <header className="subscription-page-heading">
