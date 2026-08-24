@@ -191,24 +191,22 @@ function planningPrompts(brief: string, context: AiPlanningContext) {
   const extractedDeliverables = extractDeliverablesFromBrief(brief, context.project.title);
 
   const systemPrompt = [
-    "You are MayLamDi's Lead AI Technical Architect.",
-    "CHAIN-OF-THOUGHT STEP 1: Dissect the user's project brief to extract domain-specific deliverables, technical stack requirements, assets, and explicit features.",
-    "CHAIN-OF-THOUGHT STEP 2: Map each deliverable into 2-3 concrete tasks. NEVER repeat generic phase names in task titles (e.g. DO NOT name tasks 'Phase 1: Research', 'Design UI', 'Backend setup', 'Testing & QA').",
-    "FEW-SHOT EXAMPLES OF GREAT CONCRETE TASK TITLES vs BANNED GENERIC TITLES:",
-    "- BAD: 'UI Design' -> GOOD: 'Figma Token Specs & Mobile Dashboard Responsive Wireframes'",
-    "- BAD: 'Backend setup' -> GOOD: 'Convex Realtime Database Schema & Team Member Mutations'",
-    "- BAD: 'Research & Planning' -> GOOD: 'Technical Architecture Spec & API Data Schema Review'",
-    "- BAD: 'Testing' -> GOOD: 'Vitest Unit Suite for Lobby State & Member Allocation Logic'",
-    "TASK DESCRIPTION STRUCTURE: Every task description MUST list 3 bullet points: (1) Deliverable Specs, (2) Acceptance Criteria, and (3) Edge Case / Verification Step.",
-    "SKILL MATCHING: Assign tasks to member profile IDs matching their self-reported skills. Detail your decision in 'allocationExplanation'.",
-    "BOUNDS & FORMAT: Use supplied phase IDs and member profile IDs. Ensure non-overlapping task dates within project bounds.",
-    "Return ONLY the requested structured JSON matching the plan schema.",
+    "You are MayLamDi's Fast AI Technical Architect.",
+    "HIGH-SPEED ASSIGNMENT TASK: Use the provided 'extractedBriefDeliverables' directly as the foundation for project task titles.",
+    "DO NOT INVENT GENERIC PLACEHOLDER TITLES (e.g. DO NOT output 'Research', 'UI Design', 'Backend', 'Testing'). Keep task titles strictly aligned with explicit brief deliverables.",
+    "SKILL ALLOCATION: Assign each deliverable to the team member profile ID whose self-reported skills match the task best. Provide a brief explanation in 'allocationExplanation'.",
+    "TASK DESCRIPTIONS: For each task, write a concise 2-sentence description covering (1) Deliverable Specs and (2) Verification Step.",
+    "Use supplied phase IDs and member profile IDs. Return ONLY valid structured JSON matching the schema.",
   ].join(" ");
 
   const userPrompt = JSON.stringify({
-    request: "Perform deep brief analysis, extract concrete technical deliverables, and assign tasks to assembled team members based on their skills.",
+    request: "Assign extracted brief deliverables to team members based on self-reported skills and workload balance.",
     brief,
-    extractedBriefDeliverables: extractedDeliverables.map((item: { title: string }) => item.title),
+    extractedBriefDeliverables: extractedDeliverables.map((item: { title: string; desc: string; skills: string[] }) => ({
+      title: item.title,
+      suggestedDescription: item.desc,
+      requiredSkills: item.skills,
+    })),
     project: context.project,
     currentFramework: context.project.frameworkName,
     phases: context.phases,
