@@ -5187,7 +5187,10 @@ footer {
     right: 10px;
   }
   .rpg-btn-layout-admin {
-    right: 120px !important;
+    right: 110px !important;
+  }
+  .rpg-btn-sound-controls {
+    right: 215px !important;
   }
   .rpg-btn-attack-circle {
     width: 54px;
@@ -5224,7 +5227,12 @@ footer {
     right: 8px;
   }
   .rpg-btn-layout-admin {
-    right: 105px !important;
+    right: 98px !important;
+  }
+  .rpg-btn-sound-controls {
+    right: 185px !important;
+    padding: 4px 7px;
+    font-size: 0.68rem;
   }
   .rpg-btn-attack-circle {
     width: 46px;
@@ -5984,6 +5992,45 @@ select option,
 
 .rpg-btn-leaderboard:active {
   transform: translateY(1px);
+}
+
+.rpg-sound-icon {
+  width: 14px;
+  height: 14px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.rpg-sound-icon i:nth-child(1) {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 4px;
+  height: 6px;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+.rpg-sound-icon i:nth-child(2) {
+  position: absolute;
+  left: 3px;
+  top: 2px;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 6px solid currentColor;
+}
+
+.rpg-sound-icon i:nth-child(3) {
+  position: absolute;
+  right: 0px;
+  top: 3px;
+  width: 3px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-radius: 0 4px 4px 0;
 }
 
 .rpg-btn-attack-circle {

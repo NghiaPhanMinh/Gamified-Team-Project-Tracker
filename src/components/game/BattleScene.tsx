@@ -29,6 +29,12 @@ import { LandscapeDragon, DRAGON_ORIGINAL_SHAPES, parseCoordinates } from "./lan
 import { LandscapeFX } from "./landscape/LandscapeFX";
 import { LandscapeQuestBoard, type QuestTask } from "./landscape/LandscapeQuestBoard";
 import { CharacterAvatar } from "../common/CharacterAvatar";
+import {
+  gameAudio,
+  sendWebNotification,
+  requestWebPushPermission,
+  areNotificationsEnabled,
+} from "../../lib/gameAudio";
 
 const BOSS_FUNNY_NAMES = [
   "Lord Procrastinax the Ever-Delaying",
@@ -1324,6 +1330,15 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [showDragonEditor, setShowDragonEditor] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
 
+  // Sound & Web Push Notification System State
+  const [showSoundSettingsModal, setShowSoundSettingsModal] = useState(false);
+  const [isAudioMuted, setIsAudioMuted] = useState(() => gameAudio.getMuted());
+  const [audioVolume, setAudioVolume] = useState(() => Math.round(gameAudio.getVolume() * 100));
+  const [isLofiBgmPlaying, setIsLofiBgmPlaying] = useState(() => gameAudio.isBgmActive());
+  const [hasPushGranted, setHasPushGranted] = useState(() => areNotificationsEnabled());
+  const [showGoblinAttackAlert, setShowGoblinAttackAlert] = useState(false);
+  const [taskDeadlineAlertTask, setTaskDeadlineAlertTask] = useState<QuestTask | null>(null);
+
   // Spawner states
   const [spawnerType, setSpawnerType] = useState<"circle" | "ellipse" | "rect" | "polygon" | "path">("circle");
   const [spawnerColor, setSpawnerColor] = useState("#b91c1c");
@@ -1726,6 +1741,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         targetX: targetCoords.x,
         targetY: targetCoords.y,
       });
+      gameAudio.playTing();
+      gameAudio.playHeroicMelody();
       setGoblinText("");
       setGoblinImageInput("");
       setGoblinImageUrls([]);
@@ -1833,16 +1850,16 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         targetY: 175,
       });
 
-      // Reset state and close modal
+      gameAudio.playTing();
+      setShowBossModal(false);
       setSelectedTaskId(null);
       setEvidenceNote("");
       setEvidenceUrl("");
       setEvidenceFile(null);
       setSelectedReviewerId("");
       setUploadProgress(0);
-      setShowBossModal(false);
     } catch (err) {
-      setBossError(getErrorMessage(err, "Failed to submit evidence."));
+      setBossError(getErrorMessage(err, "Failed to submit task proof."));
     } finally {
       setIsSubmittingTask(false);
     }
@@ -2138,6 +2155,78 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     return questTasks.filter((t) => t.isMine && !t.isCompleted).length;
   }, [questTasks]);
 
+  // Periodic Web Push Notification and Task/Goblin Reminder Engine
+  useEffect(() => {
+    const checkReminders = () => {
+      const projectName = workspace?.project?.title || state?.project?.title || "Realm Quest";
+      const now = new Date();
+      const currentHour = now.getHours();
+      const nowMs = now.getTime();
+
+      const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
+      const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+      // 1. Goblin Daily Reminder (Every 6h + at 11:00 PM / 23:00)
+      const lastGoblinReminder = parseInt(localStorage.getItem("rpg_last_goblin_reminder") || "0", 10);
+      const is11PM = currentHour === 23;
+      const isDue6Hours = nowMs - lastGoblinReminder >= SIX_HOURS_MS;
+
+      const currentMember = state?.members?.find((m) => m.profileId === state?.currentProfileId);
+      const hasSubmittedToday = Boolean(currentMember?.hasSubmittedToday);
+
+      if (!hasSubmittedToday && (is11PM || isDue6Hours)) {
+        localStorage.setItem("rpg_last_goblin_reminder", String(nowMs));
+        sendWebNotification(
+          `${projectName}: Village Under Attack!`,
+          "village is under attack, submit everyday progress now to defend from goblin",
+          "fanfare"
+        );
+        setShowGoblinAttackAlert(true);
+      }
+
+      // 2. Task Deadline Reminder (Incomplete tasks due within 24 hours)
+      const lastDeadlineReminder = parseInt(localStorage.getItem("rpg_last_deadline_reminder") || "0", 10);
+      if (nowMs - lastDeadlineReminder >= SIX_HOURS_MS) {
+        const userPendingTasks = questTasks.filter((t) => t.isMine && !t.isCompleted && t.dueDate);
+        const nearDeadlineTask = userPendingTasks.find((t) => {
+          const dueMs = new Date(`${t.dueDate}T23:59:59Z`).getTime();
+          const diff = dueMs - nowMs;
+          return diff > 0 && diff <= ONE_DAY_MS;
+        });
+
+        if (nearDeadlineTask) {
+          localStorage.setItem("rpg_last_deadline_reminder", String(nowMs));
+          sendWebNotification(
+            `${projectName}: Task Deadline Due Soon!`,
+            "Task deadline due soon please submit to deal damage to the boss.",
+            "roar"
+          );
+          setTaskDeadlineAlertTask(nearDeadlineTask);
+        }
+      }
+    };
+
+    checkReminders();
+    const interval = setInterval(checkReminders, 60000);
+    return () => clearInterval(interval);
+  }, [workspace?.project?.title, state?.project?.title, state?.members, state?.currentProfileId, questTasks]);
+
+  // Attack Elemental Sound Effects Trigger
+  useEffect(() => {
+    const spell = testActiveSpell || combinedActiveEvent?.spellType;
+    if (spell) {
+      if (spell === "lightning" || spell === "spark" || spell === "all") {
+        gameAudio.playLightning(1600);
+      }
+      if (spell === "fire" || spell === "all") {
+        gameAudio.playFireBurn(1600);
+      }
+      if (spell === "ice" || spell === "water" || spell === "all") {
+        gameAudio.playFreeze();
+      }
+    }
+  }, [testActiveSpell, combinedActiveEvent]);
+
   // Pending Quests requiring peer review by current user or final creator approval
   const pendingReviews = useMemo(() => {
     if (!workspace?.tasks) return [];
@@ -2177,6 +2266,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           comment: reviewComment.trim() || (decision === "approved" ? "Approved by peer reviewer." : "Changes requested."),
         });
       }
+      gameAudio.playTing();
       setReviewingTaskId(null);
       setReviewComment("");
     } catch (err) {
@@ -2191,6 +2281,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     setClaimQuestError(null);
     try {
       await claimTaskMutation({ taskId: task._id });
+      gameAudio.playTing();
       setSelectedQuestTask(null);
     } catch (err) {
       setClaimQuestError(getErrorMessage(err, "Failed to claim quest."));
@@ -2203,11 +2294,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     e.preventDefault();
     const isRoomOwner = workspace?.project?.creatorProfileId === state?.currentProfileId;
     if (!isRoomOwner) {
-      setCreateQuestError("Only the room owner can post new quests.");
+      setCreateQuestError("Only the room owner can create new tasks.");
       return;
     }
     if (!newQuestTitle.trim()) {
-      setCreateQuestError("Please provide a quest title.");
+      setCreateQuestError("Please provide a task title.");
       return;
     }
     const defaultPhase = workspace?.phases?.[0];
@@ -2251,11 +2342,12 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         assignmentState: isOpen ? "open" : "assigned",
       });
 
+      gameAudio.playTing();
       setShowCreateQuestModal(false);
       setNewQuestTitle("");
       setNewQuestDesc("");
     } catch (err) {
-      setCreateQuestError(getErrorMessage(err, "Failed to create quest."));
+      setCreateQuestError(getErrorMessage(err, "Failed to create task."));
     } finally {
       setIsCreatingQuest(false);
     }
@@ -2485,6 +2577,19 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         >
           <span className="rpg-control-icon rpg-layout-icon" aria-hidden="true"><i /><i /><i /><i /></span>
           Layout Admin
+        </button>
+
+        {/* Sound & Notifications Controls Button (Pure vector / typography, No Emoji) */}
+        <button
+          className="rpg-btn-leaderboard rpg-btn-sound-controls"
+          style={{ right: "350px" }}
+          onClick={() => setShowSoundSettingsModal(true)}
+          type="button"
+        >
+          <span className="rpg-control-icon rpg-sound-icon" aria-hidden="true">
+            <i /><i /><i />
+          </span>
+          {isAudioMuted ? "Sound: Muted" : "Sound & Music"}
         </button>
 
         {/* Attack Circular Action Button */}
@@ -4881,6 +4986,371 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          IN-APP ANIMATED GOBLIN ATTACK ALERT BANNER
+         ========================================================================= */}
+      {showGoblinAttackAlert && (
+        <div
+          style={{
+            position: "fixed",
+            top: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 9999,
+            background: "#dc2626",
+            color: "#ffffff",
+            border: "3px solid #101517",
+            borderRadius: "14px",
+            padding: "12px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "14px",
+            maxWidth: "92%",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+          }}
+        >
+          <div style={{ width: "36px", height: "36px", background: "#fef08a", borderRadius: "50%", border: "2px solid #101517", display: "grid", placeItems: "center", fontWeight: 900, color: "#101517", flexShrink: 0 }}>
+            !
+          </div>
+          <div style={{ display: "grid", gap: "2px" }}>
+            <span style={{ fontWeight: 900, fontSize: "0.95rem", letterSpacing: "0.02em" }}>
+              {workspace?.project?.title || state?.project?.title || "Realm"}: Village is under attack!
+            </span>
+            <span style={{ fontSize: "0.82rem", opacity: 0.95 }}>
+              Submit everyday progress now to defend from goblin!
+            </span>
+          </div>
+          <div style={{ display: "flex", gap: "8px", marginLeft: "auto" }}>
+            <button
+              type="button"
+              className="rpg-modern-btn is-primary"
+              style={{ padding: "6px 12px", fontSize: "0.8rem", whiteSpace: "nowrap" }}
+              onClick={() => {
+                setShowGoblinAttackAlert(false);
+                setShowGoblinModal(true);
+              }}
+            >
+              Defend Village
+            </button>
+            <button
+              type="button"
+              className="rpg-modern-btn is-secondary"
+              style={{ padding: "6px 10px", fontSize: "0.8rem" }}
+              onClick={() => setShowGoblinAttackAlert(false)}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          IN-APP TASK DEADLINE ALERT BANNER
+         ========================================================================= */}
+      {taskDeadlineAlertTask && (
+        <div
+          style={{
+            position: "fixed",
+            top: "84px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 9999,
+            background: "#ea580c",
+            color: "#ffffff",
+            border: "3px solid #101517",
+            borderRadius: "14px",
+            padding: "12px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "14px",
+            maxWidth: "92%",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+          }}
+        >
+          <div style={{ width: "36px", height: "36px", background: "#fef08a", borderRadius: "50%", border: "2px solid #101517", display: "grid", placeItems: "center", fontWeight: 900, color: "#101517", flexShrink: 0 }}>
+            !
+          </div>
+          <div style={{ display: "grid", gap: "2px" }}>
+            <span style={{ fontWeight: 900, fontSize: "0.95rem", letterSpacing: "0.02em" }}>
+              {workspace?.project?.title || state?.project?.title || "Realm"}: Task Deadline Due Soon!
+            </span>
+            <span style={{ fontSize: "0.82rem", opacity: 0.95 }}>
+              Task "{taskDeadlineAlertTask.title}" deadline due soon please submit to deal damage to the boss.
+            </span>
+          </div>
+          <div style={{ display: "flex", gap: "8px", marginLeft: "auto" }}>
+            <button
+              type="button"
+              className="rpg-modern-btn is-boss"
+              style={{ padding: "6px 12px", fontSize: "0.8rem", whiteSpace: "nowrap" }}
+              onClick={() => {
+                const targetId = taskDeadlineAlertTask._id;
+                setTaskDeadlineAlertTask(null);
+                setSelectedTaskId(targetId);
+                setShowBossModal(true);
+              }}
+            >
+              Submit Proof
+            </button>
+            <button
+              type="button"
+              className="rpg-modern-btn is-secondary"
+              style={{ padding: "6px 10px", fontSize: "0.8rem" }}
+              onClick={() => setTaskDeadlineAlertTask(null)}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          SOUND SETTINGS & WEB PUSH NOTIFICATION MODAL
+         ========================================================================= */}
+      {showSoundSettingsModal && (
+        <div className="rpg-modal-backdrop" onClick={() => setShowSoundSettingsModal(false)}>
+          <div className="rpg-modern-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "560px", maxHeight: "90vh", overflowY: "auto" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 className="rpg-modern-title" style={{ fontSize: "1.25rem" }}>Sound & Notifications</h3>
+              <button
+                type="button"
+                onClick={() => setShowSoundSettingsModal(false)}
+                style={{ background: "#ef4444", color: "#fff", border: "2px solid #101517", borderRadius: "8px", width: "28px", height: "28px", display: "grid", placeItems: "center", cursor: "pointer", fontWeight: 900 }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* 1. Master Audio & Volume Slider */}
+            <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "10px", padding: "14px", display: "grid", gap: "10px", marginTop: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 900, color: "#101517" }}>Master Audio</h4>
+                  <p style={{ margin: "2px 0 0 0", fontSize: "0.76rem", color: "#64748b" }}>Control game volume and sound effects</p>
+                </div>
+                <button
+                  type="button"
+                  className={`rpg-modern-btn ${isAudioMuted ? "is-secondary" : "is-primary"}`}
+                  style={{ padding: "6px 14px", fontSize: "0.8rem", background: isAudioMuted ? "#fee2e2" : undefined, color: isAudioMuted ? "#b91c1c" : undefined }}
+                  onClick={() => {
+                    const newMuted = !isAudioMuted;
+                    setIsAudioMuted(newMuted);
+                    gameAudio.setMuted(newMuted);
+                  }}
+                >
+                  {isAudioMuted ? "Unmute All Sound" : "Mute All Sound"}
+                </button>
+              </div>
+
+              {/* Volume Slider */}
+              <div style={{ display: "grid", gap: "4px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", fontWeight: 800 }}>
+                  <span>Master Volume</span>
+                  <span>{isAudioMuted ? "Muted (0%)" : `${audioVolume}%`}</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={isAudioMuted ? 0 : audioVolume}
+                  disabled={isAudioMuted}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value, 10) || 0;
+                    setAudioVolume(val);
+                    gameAudio.setVolume(val / 100);
+                    if (isAudioMuted && val > 0) {
+                      setIsAudioMuted(false);
+                      gameAudio.setMuted(false);
+                    }
+                  }}
+                  style={{ width: "100%", accentColor: "#0284c7" }}
+                />
+              </div>
+            </div>
+
+            {/* 2. Medieval Chill Lo-Fi Background Music */}
+            <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "10px", padding: "14px", display: "grid", gap: "8px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 900, color: "#101517" }}>Medieval Chill Lo-Fi BGM</h4>
+                  <p style={{ margin: "2px 0 0 0", fontSize: "0.76rem", color: "#64748b" }}>Procedurally generated acoustic lute & harp lo-fi progression</p>
+                </div>
+                <button
+                  type="button"
+                  className={`rpg-modern-btn ${isLofiBgmPlaying ? "is-secondary" : "is-primary"}`}
+                  style={{ padding: "6px 14px", fontSize: "0.8rem" }}
+                  onClick={() => {
+                    if (isLofiBgmPlaying) {
+                      gameAudio.stopMedievalLofiBgm();
+                      setIsLofiBgmPlaying(false);
+                    } else {
+                      gameAudio.startMedievalLofiBgm();
+                      setIsLofiBgmPlaying(true);
+                    }
+                  }}
+                >
+                  {isLofiBgmPlaying ? "Pause Lo-Fi Music" : "Play Lo-Fi Music"}
+                </button>
+              </div>
+              <p style={{ margin: 0, fontSize: "0.74rem", color: "#475569" }}>
+                Ambient dragon roar periodically echoes in the realm every 60 seconds while music is active.
+              </p>
+            </div>
+
+            {/* 3. Web Push Notifications & Task Reminders */}
+            <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "10px", padding: "14px", display: "grid", gap: "12px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 900, color: "#101517" }}>Task & Daily Goblin Reminders</h4>
+                  <p style={{ margin: "2px 0 0 0", fontSize: "0.76rem", color: "#64748b" }}>Browser push notifications and periodic alarms</p>
+                </div>
+                <button
+                  type="button"
+                  className={`rpg-modern-btn ${hasPushGranted ? "is-secondary" : "is-primary"}`}
+                  style={{ padding: "6px 14px", fontSize: "0.8rem", background: hasPushGranted ? "#dcfce7" : undefined, color: hasPushGranted ? "#15803d" : undefined }}
+                  onClick={async () => {
+                    const granted = await requestWebPushPermission();
+                    setHasPushGranted(granted);
+                    if (granted) {
+                      sendWebNotification(
+                        `${workspace?.project?.title || "Realm"}: Notifications Enabled!`,
+                        "You will now receive periodic task reminders and goblin defense alerts.",
+                        "ting"
+                      );
+                    }
+                  }}
+                >
+                  {hasPushGranted ? "Push Active" : "Enable Push Notifications"}
+                </button>
+              </div>
+
+              {/* Goblin Reminder Info */}
+              <div style={{ background: "rgba(220,38,38,0.06)", border: "1.5px solid #ef4444", borderRadius: "8px", padding: "10px", display: "grid", gap: "6px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.82rem", fontWeight: 900, color: "#991b1b" }}>
+                    Daily Goblin Defense (Every 6h + 11:00 PM)
+                  </span>
+                  <button
+                    type="button"
+                    className="rpg-modern-btn is-primary"
+                    style={{ padding: "4px 8px", fontSize: "0.72rem" }}
+                    onClick={() => {
+                      sendWebNotification(
+                        `${workspace?.project?.title || "Realm"}: Village Under Attack!`,
+                        "village is under attack, submit everyday progress now to defend from goblin",
+                        "fanfare"
+                      );
+                      setShowGoblinAttackAlert(true);
+                    }}
+                  >
+                    Test Goblin Alarm
+                  </button>
+                </div>
+                <span style={{ fontSize: "0.75rem", color: "#7f1d1d" }}>
+                  Plays a 3.5s Heroic Melody and triggers: "village is under attack, submit everyday progress now to defend from goblin"
+                </span>
+              </div>
+
+              {/* Task Deadline Reminder Info */}
+              <div style={{ background: "rgba(234,88,12,0.06)", border: "1.5px solid #ea580c", borderRadius: "8px", padding: "10px", display: "grid", gap: "6px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.82rem", fontWeight: 900, color: "#9a3412" }}>
+                    Task Deadline Due Soon (1 Day Before Due Date)
+                  </span>
+                  <button
+                    type="button"
+                    className="rpg-modern-btn is-boss"
+                    style={{ padding: "4px 8px", fontSize: "0.72rem" }}
+                    onClick={() => {
+                      sendWebNotification(
+                        `${workspace?.project?.title || "Realm"}: Task Deadline Due Soon!`,
+                        "Task deadline due soon please submit to deal damage to the boss.",
+                        "roar"
+                      );
+                      const mockTask = questTasks.find(t => t.isMine && !t.isCompleted) || questTasks[0] || {
+                        _id: "test" as any,
+                        title: "Sample Critical Quest",
+                        dueDate: "Tomorrow",
+                      };
+                      setTaskDeadlineAlertTask(mockTask as any);
+                    }}
+                  >
+                    Test Deadline Alarm
+                  </button>
+                </div>
+                <span style={{ fontSize: "0.75rem", color: "#7c2d12" }}>
+                  Plays Dragon Roar and triggers: "Task deadline due soon please submit to deal damage to the boss."
+                </span>
+              </div>
+            </div>
+
+            {/* 4. Sound Effects Testing Board */}
+            <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "10px", padding: "14px", display: "grid", gap: "8px" }}>
+              <h4 style={{ margin: 0, fontSize: "0.88rem", fontWeight: 900, color: "#101517" }}>Sound Effects Palette</h4>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px" }}>
+                <button
+                  type="button"
+                  className="rpg-modern-btn is-secondary"
+                  style={{ padding: "6px", fontSize: "0.74rem" }}
+                  onClick={() => gameAudio.playTing()}
+                >
+                  Submit Ting
+                </button>
+                <button
+                  type="button"
+                  className="rpg-modern-btn is-secondary"
+                  style={{ padding: "6px", fontSize: "0.74rem" }}
+                  onClick={() => gameAudio.playDragonRoar()}
+                >
+                  Dragon Roar
+                </button>
+                <button
+                  type="button"
+                  className="rpg-modern-btn is-secondary"
+                  style={{ padding: "6px", fontSize: "0.74rem" }}
+                  onClick={() => gameAudio.playHeroicMelody()}
+                >
+                  Heroic Fanfare
+                </button>
+                <button
+                  type="button"
+                  className="rpg-modern-btn is-secondary"
+                  style={{ padding: "6px", fontSize: "0.74rem" }}
+                  onClick={() => gameAudio.playLightning(1600)}
+                >
+                  Lightning Spell
+                </button>
+                <button
+                  type="button"
+                  className="rpg-modern-btn is-secondary"
+                  style={{ padding: "6px", fontSize: "0.74rem" }}
+                  onClick={() => gameAudio.playFreeze()}
+                >
+                  Ice Freeze
+                </button>
+                <button
+                  type="button"
+                  className="rpg-modern-btn is-secondary"
+                  style={{ padding: "6px", fontSize: "0.74rem" }}
+                  onClick={() => gameAudio.playFireBurn(1600)}
+                >
+                  Fire Burn
+                </button>
+              </div>
+            </div>
+
+            <button
+              className="rpg-modern-btn is-secondary"
+              type="button"
+              style={{ marginTop: "4px" }}
+              onClick={() => setShowSoundSettingsModal(false)}
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
