@@ -1663,6 +1663,7 @@ select:focus-visible {
 .framework-picker-card {
   flex: 1 1 180px;
   min-width: 160px;
+  max-width: 210px;
   --framework-accent: var(--color-blue);
   display: grid;
   align-content: space-between;
