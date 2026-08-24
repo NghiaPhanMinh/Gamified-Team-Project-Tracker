@@ -2420,6 +2420,24 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const funnyBossName = useMemo(() => getFunnyName(BOSS_FUNNY_NAMES, state?.project._id || "boss"), [state?.project._id]);
   const funnyVillageName = useMemo(() => getFunnyName(VILLAGE_FUNNY_NAMES, state?.project._id || "village"), [state?.project._id]);
 
+  const tutorialCameraTransform = useMemo(() => {
+    if (!showTutorial) return undefined;
+    switch (tutorialScene) {
+      case "A":
+        return "scale(1.55) translate(16%, -4%)";
+      case "B":
+        return "scale(1.05) translate(0%, 0%)";
+      case "C":
+        return "scale(1.85) translate(-4%, -14%)";
+      case "D":
+        return "scale(1.6) translate(-22%, 4%)";
+      case "E":
+        return "scale(1.08) translate(8%, -5%)";
+      default:
+        return undefined;
+    }
+  }, [showTutorial, tutorialScene]);
+
   if (state === undefined) {
     return <section className="battle-loading" aria-busy="true">Preparing the battle scene…</section>;
   }
@@ -2447,24 +2465,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
   const damageClearedFraction = (100 - hpPercent) / 100;
   const dragonX = 730 + damageClearedFraction * 60;
-
-  const tutorialCameraTransform = useMemo(() => {
-    if (!showTutorial) return undefined;
-    switch (tutorialScene) {
-      case "A":
-        return "scale(1.55) translate(16%, -4%)";
-      case "B":
-        return "scale(1.05) translate(0%, 0%)";
-      case "C":
-        return "scale(1.85) translate(-4%, -14%)";
-      case "D":
-        return "scale(1.6) translate(-22%, 4%)";
-      case "E":
-        return "scale(1.08) translate(8%, -5%)";
-      default:
-        return undefined;
-    }
-  }, [showTutorial, tutorialScene]);
 
   // Post-Deadline End-Game Screen (Overrides active game scene when deadline is reached)
   if ((testOverdueOverride !== null ? testOverdueOverride : state.isOverdue) && !viewBattleSceneOverride) {

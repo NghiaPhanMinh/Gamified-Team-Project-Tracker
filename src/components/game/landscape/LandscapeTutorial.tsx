@@ -33,26 +33,24 @@ export function LandscapeTutorial({
   const [scene, setScene] = useState<TutorialSceneId>("A");
   const [animKey, setAnimKey] = useState<number>(0);
 
-  useEffect(() => {
-    if (isOpen) {
-      setAnimKey((prev) => prev + 1);
-      onSceneChange?.(scene);
-    }
-  }, [isOpen, scene, onSceneChange]);
-
   if (!isOpen) return null;
 
-  const handleNext = () => {
+  const goToScene = (nextScene: TutorialSceneId) => {
     gameAudio.playTing();
-    if (scene === "A") setScene("B");
-    else if (scene === "B") setScene("C");
-    else if (scene === "C") setScene("D");
-    else if (scene === "D") setScene("E");
+    setScene(nextScene);
+    setAnimKey((prev) => prev + 1);
+    onSceneChange?.(nextScene);
+  };
+
+  const handleNext = () => {
+    if (scene === "A") goToScene("B");
+    else if (scene === "B") goToScene("C");
+    else if (scene === "C") goToScene("D");
+    else if (scene === "D") goToScene("E");
   };
 
   const handleRestart = () => {
-    gameAudio.playTing();
-    setScene("A");
+    goToScene("A");
   };
 
   const handleFinish = () => {
