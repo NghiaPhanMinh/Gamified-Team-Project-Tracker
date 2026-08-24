@@ -225,26 +225,39 @@ class GameAudioEngine {
 
     if (spellType === "lightning" || spellType === "spark" || spellType === "all") {
       // =========================================================================
-      // 1. CONTINUOUS THUNDERSTORM RAIN AMBIANCE
+      // 1. AUDIBLE TORRENTIAL RAIN AMBIANCE (Layered Downpour + Droplet Rush)
       // =========================================================================
-      const rainBuffer = ctx.createBuffer(1, ctx.sampleRate * 2.5, ctx.sampleRate);
-      const rainData = rainBuffer.getChannelData(0);
-      let rainLast = 0;
-      for (let i = 0; i < rainData.length; i++) {
-        const white = Math.random() * 2 - 1;
-        rainData[i] = (rainLast + 0.08 * white) / 1.08; // Realistic rainfall
-        rainLast = rainData[i];
+      const rainLength = Math.floor(ctx.sampleRate * 3.0);
+      const rainBuffer = ctx.createBuffer(2, rainLength, ctx.sampleRate);
+      const leftRain = rainBuffer.getChannelData(0);
+      const rightRain = rainBuffer.getChannelData(1);
+
+      let lLast = 0;
+      let rLast = 0;
+      for (let i = 0; i < rainLength; i++) {
+        // Natural pink/brownian rain noise with droplet flutter
+        const lWhite = Math.random() * 2 - 1;
+        const rWhite = Math.random() * 2 - 1;
+        const dropMod = 0.85 + 0.15 * Math.sin(i * 0.05);
+
+        lLast = (lLast + 0.12 * lWhite) / 1.12;
+        rLast = (rLast + 0.12 * rWhite) / 1.12;
+
+        leftRain[i] = (lLast * 0.7 + lWhite * 0.3) * dropMod;
+        rightRain[i] = (rLast * 0.7 + rWhite * 0.3) * dropMod;
       }
+
       const rainSrc = ctx.createBufferSource();
       rainSrc.buffer = rainBuffer;
       rainSrc.loop = true;
 
       const rainFilter = ctx.createBiquadFilter();
-      rainFilter.type = "lowpass";
-      rainFilter.frequency.setValueAtTime(1600, now);
+      rainFilter.type = "bandpass";
+      rainFilter.frequency.setValueAtTime(1400, now);
+      rainFilter.Q.setValueAtTime(0.7, now);
 
       const rainGain = ctx.createGain();
-      rainGain.gain.setValueAtTime(0.22, now);
+      rainGain.gain.setValueAtTime(0.52, now); // Clearly audible rushing rainfall
 
       rainSrc.connect(rainFilter);
       rainFilter.connect(rainGain);
@@ -253,103 +266,94 @@ class GameAudioEngine {
       nodes.push(rainSrc, rainFilter, rainGain);
 
       // =========================================================================
-      // 2. CONSTANT HIGH-VOLTAGE CONTINUOUS ELECTROCUTION SIZZLE (KZZZZZT-BZZZT)
+      // 2. CONTINUOUS HIGH-VOLTAGE ELECTROCUTION SIZZLE (Violent Arc Fry)
       // =========================================================================
-      const elecLength = Math.floor(ctx.sampleRate * 2.5);
+      const elecLength = Math.floor(ctx.sampleRate * 2.0);
       const elecBuffer = ctx.createBuffer(1, elecLength, ctx.sampleRate);
       const elecData = elecBuffer.getChannelData(0);
-      let lastElec = 0;
       for (let i = 0; i < elecLength; i++) {
         const raw = Math.random() * 2 - 1;
-        // Intermittent arcing discharge pulses & harsh electric buzz
-        const arcMod = (Math.sin(i * 0.12) > 0.4 ? 1.4 : 0.6) * (Math.sin(i * 0.003) > -0.2 ? 1.0 : 0.3);
-        const spark = Math.random() > 0.96 ? (Math.random() > 0.5 ? 1.8 : -1.8) : 0;
-        lastElec = (lastElec + 0.35 * (raw + spark)) / 1.35;
-        elecData[i] = lastElec * arcMod;
+        // Violent multi-kV electric spark crackle
+        const pulse = Math.random() > 0.93 ? (Math.random() > 0.5 ? 2.2 : -2.2) : raw * 0.4;
+        elecData[i] = pulse;
       }
       const elecSrc = ctx.createBufferSource();
       elecSrc.buffer = elecBuffer;
       elecSrc.loop = true;
 
-      const elecFilter = ctx.createBiquadFilter();
-      elecFilter.type = "bandpass";
-      elecFilter.frequency.setValueAtTime(2200, now);
-      elecFilter.Q.setValueAtTime(2.8, now);
-
-      const elecFilter2 = ctx.createBiquadFilter();
-      elecFilter2.type = "highpass";
-      elecFilter2.frequency.setValueAtTime(800, now);
+      const elecBand = ctx.createBiquadFilter();
+      elecBand.type = "bandpass";
+      elecBand.frequency.setValueAtTime(2600, now);
+      elecBand.Q.setValueAtTime(3.2, now);
 
       const elecGain = ctx.createGain();
-      elecGain.gain.setValueAtTime(0.38, now);
+      elecGain.gain.setValueAtTime(0.46, now);
 
-      elecSrc.connect(elecFilter);
-      elecFilter.connect(elecFilter2);
-      elecFilter2.connect(elecGain);
+      elecSrc.connect(elecBand);
+      elecBand.connect(elecGain);
       elecGain.connect(loopGain);
       elecSrc.start(now);
-      nodes.push(elecSrc, elecFilter, elecFilter2, elecGain);
+      nodes.push(elecSrc, elecBand, elecGain);
 
       // =========================================================================
-      // 3. EXPLOSIVE REALISTIC THUNDERCLAP & ACOUSTIC SHOCKWAVE (Zero bouncy sine)
+      // 3. EXPLOSIVE REALISTIC THUNDERCLAP (Deep Sonic Boom + Low Rolling Rumble)
       // =========================================================================
       const playElectricThunderZap = () => {
         if (!this.ctx || !this.activeSpellLoop) return;
         const strikeTime = this.ctx.currentTime;
 
         // --- A. SHARP BROADBAND THUNDERCLAP CRACK (Sonic Boom) ---
-        const blastLength = Math.floor(this.ctx.sampleRate * 1.8);
+        const blastLength = Math.floor(this.ctx.sampleRate * 2.0);
         const blastBuffer = this.ctx.createBuffer(1, blastLength, this.ctx.sampleRate);
         const blastChannel = blastBuffer.getChannelData(0);
         let bOut = 0;
         for (let i = 0; i < blastLength; i++) {
           const white = Math.random() * 2 - 1;
-          bOut = (bOut + 0.05 * white) / 1.05;
-          // Fast explosive crack at 0ms followed by heavy acoustic low-frequency rumble
-          const initialCrack = 2.4 * Math.exp(-i / (this.ctx.sampleRate * 0.035));
-          const rollingRumble = 0.9 * Math.exp(-i / (this.ctx.sampleRate * 0.65));
-          blastChannel[i] = bOut * (initialCrack + rollingRumble);
+          bOut = (bOut + 0.06 * white) / 1.06;
+          // Initial supersonic pressure crack (0-40ms) + deep rolling acoustic reverberation
+          const sonicCrack = 3.2 * Math.exp(-i / (this.ctx.sampleRate * 0.025));
+          const lowRumble = 1.2 * Math.exp(-i / (this.ctx.sampleRate * 0.75));
+          blastChannel[i] = bOut * (sonicCrack + lowRumble);
         }
         const blastSrc = this.ctx.createBufferSource();
         blastSrc.buffer = blastBuffer;
 
         const blastLp = this.ctx.createBiquadFilter();
         blastLp.type = "lowpass";
-        blastLp.frequency.setValueAtTime(450, strikeTime);
-        blastLp.frequency.exponentialRampToValueAtTime(65, strikeTime + 1.6);
-        blastLp.Q.setValueAtTime(0.7, strikeTime);
+        blastLp.frequency.setValueAtTime(380, strikeTime);
+        blastLp.frequency.exponentialRampToValueAtTime(50, strikeTime + 1.8);
+        blastLp.Q.setValueAtTime(0.8, strikeTime);
 
         const blastGain = this.ctx.createGain();
-        blastGain.gain.setValueAtTime(0.75, strikeTime);
-        blastGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 1.7);
+        blastGain.gain.setValueAtTime(0.88, strikeTime);
+        blastGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 1.9);
 
         blastSrc.connect(blastLp);
         blastLp.connect(blastGain);
         blastGain.connect(loopGain);
         blastSrc.start(strikeTime);
 
-        // --- B. MULTI-SPARK ARC DISCHARGE BURSTS (Electrocution arcs) ---
-        const burstTimes = [0, 0.03, 0.08, 0.15, 0.22, 0.31];
+        // --- B. RAPID MULTI-STAGE ARCS (Target Electrocuting Bursts) ---
+        const burstTimes = [0, 0.02, 0.06, 0.12, 0.19, 0.28, 0.38];
         burstTimes.forEach((delay, idx) => {
           const t = strikeTime + delay;
-          const arcLength = Math.floor(this.ctx!.sampleRate * 0.05);
+          const arcLength = Math.floor(this.ctx!.sampleRate * 0.04);
           const arcBuf = this.ctx!.createBuffer(1, arcLength, this.ctx!.sampleRate);
           const arcData = arcBuf.getChannelData(0);
           for (let i = 0; i < arcLength; i++) {
-            const raw = Math.random() * 2 - 1;
-            arcData[i] = raw * Math.exp(-i / (this.ctx!.sampleRate * 0.015));
+            arcData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx!.sampleRate * 0.012));
           }
           const arcSrc = this.ctx!.createBufferSource();
           arcSrc.buffer = arcBuf;
 
           const arcFilter = this.ctx!.createBiquadFilter();
           arcFilter.type = "bandpass";
-          arcFilter.frequency.setValueAtTime(1800 + idx * 350, t);
-          arcFilter.Q.setValueAtTime(3.5, t);
+          arcFilter.frequency.setValueAtTime(2000 + idx * 300, t);
+          arcFilter.Q.setValueAtTime(3.8, t);
 
           const arcGain = this.ctx!.createGain();
-          arcGain.gain.setValueAtTime(0.42, t);
-          arcGain.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
+          arcGain.gain.setValueAtTime(0.48, t);
+          arcGain.gain.exponentialRampToValueAtTime(0.001, t + 0.038);
 
           arcSrc.connect(arcFilter);
           arcFilter.connect(arcGain);
@@ -359,7 +363,7 @@ class GameAudioEngine {
       };
 
       playElectricThunderZap();
-      const timerThunder = setInterval(playElectricThunderZap, 1400);
+      const timerThunder = setInterval(playElectricThunderZap, 1300);
       timers.push(timerThunder);
     } else if (spellType === "ice" || spellType === "water") {
       // REALISTIC SUB-ZERO FREEZING & ICE CRACKING
