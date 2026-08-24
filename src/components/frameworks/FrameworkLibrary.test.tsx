@@ -17,7 +17,6 @@ describe("FrameworkLibrary", () => {
     fireEvent.click(screen.getByRole("button", { name: /View phase details/i }));
     expect(screen.getByText("Empathise")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /View all frameworks/i }));
     fireEvent.click(
       screen.getByRole("button", { name: /Academic Research/i }),
     );
@@ -38,7 +37,6 @@ describe("FrameworkLibrary", () => {
 
   it("keeps all built-in cards persistently coloured and numbered", () => {
     const { container } = render(<FrameworkLibrary onDuplicate={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: /View all frameworks/i }));
 
     const cards = [...container.querySelectorAll<HTMLElement>(".framework-picker-card")];
     expect(cards).toHaveLength(7);

@@ -16,7 +16,6 @@ export function FrameworkLibrary({ onDuplicate, hideHeader = false }: FrameworkL
     BUILT_IN_FRAMEWORKS[0].id,
   );
   const [query, setQuery] = useState("");
-  const [viewAll, setViewAll] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const selectedFramework =
     BUILT_IN_FRAMEWORKS.find(
@@ -36,7 +35,7 @@ export function FrameworkLibrary({ onDuplicate, hideHeader = false }: FrameworkL
     const needle = query.trim().toLowerCase();
     return needle === "" || [framework.name, framework.shortName, ...framework.disciplines].some((value) => value.toLowerCase().includes(needle));
   });
-  const visibleFrameworks = viewAll || query.trim() ? matchingFrameworks : matchingFrameworks.slice(0, 3);
+  const visibleFrameworks = matchingFrameworks;
 
   return (
     <section className="framework-library" aria-labelledby="framework-title">
@@ -59,10 +58,7 @@ export function FrameworkLibrary({ onDuplicate, hideHeader = false }: FrameworkL
 
       <div className="framework-library-controls">
         <label><span>Search frameworks or disciplines</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="UX, agile, research…" /></label>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          {hideHeader ? <span className="version-badge" style={{ margin: 0 }}>{BUILT_IN_FRAMEWORKS.length} templates</span> : null}
-          <button className="secondary-button" type="button" onClick={() => setViewAll((current) => !current)}>{viewAll ? "Show recommendations" : "View all frameworks"}</button>
-        </div>
+        <span className="version-badge" style={{ margin: 0 }}>{BUILT_IN_FRAMEWORKS.length} templates</span>
       </div>
       <div
         className="framework-picker"

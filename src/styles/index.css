@@ -1647,15 +1647,22 @@ select:focus-visible {
 }
 
 .framework-picker {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(9rem, 1fr));
-  gap: 0.7rem;
-  margin: 2rem 0 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin: 1.5rem 0 1.5rem;
   padding: 0.3rem 0.3rem 0.7rem;
-  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.framework-picker::-webkit-scrollbar {
+  display: none;
 }
 
 .framework-picker-card {
+  flex: 1 1 180px;
+  min-width: 160px;
   --framework-accent: var(--color-blue);
   display: grid;
   align-content: space-between;
