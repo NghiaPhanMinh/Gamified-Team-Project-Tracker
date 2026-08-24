@@ -4378,6 +4378,8 @@ footer {
   border-right: 3px solid var(--color-text);
   background: var(--color-surface);
   transition: width 180ms ease, transform 180ms ease;
+  overflow-y: auto;
+  max-height: calc(100vh - var(--app-header-height));
 }
 
 .app-sidebar nav { display: grid; gap: .45rem; }
@@ -4710,7 +4712,8 @@ footer {
 }
 
 /* Guided journey and simplified information architecture */
-.sidebar-room-tree { display: grid; margin: -.35rem 0 .35rem 1.15rem; padding-left: .55rem; border-left: 2px solid color-mix(in srgb, var(--color-text) 28%, transparent); }
+.sidebar-room-tree { display: grid; margin: -.35rem 0 .35rem 1.15rem; padding-left: .55rem; border-left: 2px solid color-mix(in srgb, var(--color-text) 28%, transparent); gap: .2rem; }
+.sidebar-projects-scroll { display: grid; gap: .2rem; max-height: 260px; overflow-y: auto; padding-right: 2px; }
 .app-sidebar .sidebar-room-tree .is-room { min-height: 38px; padding: .38rem .55rem; border-radius: 10px; font-size: .82rem; }
 .app-sidebar .sidebar-room-tree .is-room span { font-family: monospace; opacity: .55; }
 .sidebar-collapsed .sidebar-room-tree { display: none; }

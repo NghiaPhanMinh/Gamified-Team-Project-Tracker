@@ -176,20 +176,22 @@ export function AuthenticatedHome() {
             </button>
           ))}
           <div className="sidebar-room-tree" aria-label="Project rooms">
-            {availableRooms.map((room, index) => (
-              <button
-                key={room._id}
-                className={activeSection === "projects" && projectsView === "room" && activeRoomId === room._id ? "is-active is-room is-project-room" : "is-room is-project-room"}
-                type="button"
-                style={{ "--group-color": getGroupColor(index) } as CSSProperties}
-                onClick={() => openProjects("room", room._id)}
-              >
-                <span className="project-color-marker" aria-hidden="true" /><strong>{room.name}</strong>
-              </button>
-            ))}
             <button className={projectsView === "personal-tasks" ? "is-active is-room" : "is-room"} type="button" onClick={() => openProjects("personal-tasks")}>
-              <span aria-hidden="true">└</span><strong>My Tasks</strong>
+              <span aria-hidden="true">📋</span><strong>My Tasks</strong>
             </button>
+            <div className="sidebar-projects-scroll">
+              {availableRooms.map((room, index) => (
+                <button
+                  key={room._id}
+                  className={activeSection === "projects" && projectsView === "room" && activeRoomId === room._id ? "is-active is-room is-project-room" : "is-room is-project-room"}
+                  type="button"
+                  style={{ "--group-color": getGroupColor(index) } as CSSProperties}
+                  onClick={() => openProjects("room", room._id)}
+                >
+                  <span className="project-color-marker" aria-hidden="true" /><strong>{room.name}</strong>
+                </button>
+              ))}
+            </div>
           </div>
         </nav>
       </aside>
