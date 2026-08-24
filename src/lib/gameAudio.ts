@@ -253,98 +253,113 @@ class GameAudioEngine {
       nodes.push(rainSrc, rainFilter, rainGain);
 
       // =========================================================================
-      // 2. HIGH-VOLTAGE ELECTRIC ZAPPING & THUNDER CRACKLE (Zero bouncing sine)
+      // 2. CONSTANT HIGH-VOLTAGE CONTINUOUS ELECTROCUTION SIZZLE (KZZZZZT-BZZZT)
+      // =========================================================================
+      const elecLength = Math.floor(ctx.sampleRate * 2.5);
+      const elecBuffer = ctx.createBuffer(1, elecLength, ctx.sampleRate);
+      const elecData = elecBuffer.getChannelData(0);
+      let lastElec = 0;
+      for (let i = 0; i < elecLength; i++) {
+        const raw = Math.random() * 2 - 1;
+        // Intermittent arcing discharge pulses & harsh electric buzz
+        const arcMod = (Math.sin(i * 0.12) > 0.4 ? 1.4 : 0.6) * (Math.sin(i * 0.003) > -0.2 ? 1.0 : 0.3);
+        const spark = Math.random() > 0.96 ? (Math.random() > 0.5 ? 1.8 : -1.8) : 0;
+        lastElec = (lastElec + 0.35 * (raw + spark)) / 1.35;
+        elecData[i] = lastElec * arcMod;
+      }
+      const elecSrc = ctx.createBufferSource();
+      elecSrc.buffer = elecBuffer;
+      elecSrc.loop = true;
+
+      const elecFilter = ctx.createBiquadFilter();
+      elecFilter.type = "bandpass";
+      elecFilter.frequency.setValueAtTime(2200, now);
+      elecFilter.Q.setValueAtTime(2.8, now);
+
+      const elecFilter2 = ctx.createBiquadFilter();
+      elecFilter2.type = "highpass";
+      elecFilter2.frequency.setValueAtTime(800, now);
+
+      const elecGain = ctx.createGain();
+      elecGain.gain.setValueAtTime(0.38, now);
+
+      elecSrc.connect(elecFilter);
+      elecFilter.connect(elecFilter2);
+      elecFilter2.connect(elecGain);
+      elecGain.connect(loopGain);
+      elecSrc.start(now);
+      nodes.push(elecSrc, elecFilter, elecFilter2, elecGain);
+
+      // =========================================================================
+      // 3. EXPLOSIVE REALISTIC THUNDERCLAP & ACOUSTIC SHOCKWAVE (Zero bouncy sine)
       // =========================================================================
       const playElectricThunderZap = () => {
         if (!this.ctx || !this.activeSpellLoop) return;
         const strikeTime = this.ctx.currentTime;
 
-        // --- A. MULTI-BURST ELECTRIC ARC DISCHARGES (KZZZT-ZAP-ZZZAP) ---
-        const burstTimes = [0, 0.04, 0.09, 0.16, 0.23];
-        burstTimes.forEach((delay, idx) => {
-          const t = strikeTime + delay;
-          const arcLength = Math.floor(this.ctx!.sampleRate * 0.06);
-          const arcBuf = this.ctx!.createBuffer(1, arcLength, this.ctx!.sampleRate);
-          const arcData = arcBuf.getChannelData(0);
-          for (let i = 0; i < arcLength; i++) {
-            // Irregular electric spark noise with high-frequency micro-pulses
-            const mod = Math.sin(i * 0.45) > 0.3 ? 1 : -0.7;
-            arcData[i] = (Math.random() * 2 - 1) * mod * Math.exp(-i / (this.ctx!.sampleRate * 0.018));
-          }
-          const arcSrc = this.ctx!.createBufferSource();
-          arcSrc.buffer = arcBuf;
-
-          const arcFilter = this.ctx!.createBiquadFilter();
-          arcFilter.type = "bandpass";
-          arcFilter.frequency.setValueAtTime(1400 + idx * 300, t);
-          arcFilter.Q.setValueAtTime(2.2, t);
-
-          const arcGain = this.ctx!.createGain();
-          arcGain.gain.setValueAtTime(0.32, t);
-          arcGain.gain.exponentialRampToValueAtTime(0.001, t + 0.055);
-
-          arcSrc.connect(arcFilter);
-          arcFilter.connect(arcGain);
-          arcGain.connect(loopGain);
-          arcSrc.start(t);
-        });
-
-        // --- B. CONTINUOUS VOLTAGE SIZZLE & IONIZATION SNAP (0.0s - 0.45s) ---
-        const sizzleOsc = this.ctx.createOscillator();
-        const sizzleGain = this.ctx.createGain();
-        sizzleOsc.type = "sawtooth";
-        sizzleOsc.frequency.setValueAtTime(320, strikeTime);
-        sizzleOsc.frequency.linearRampToValueAtTime(880, strikeTime + 0.15);
-        sizzleOsc.frequency.exponentialRampToValueAtTime(240, strikeTime + 0.38);
-
-        const sizzleFilter = this.ctx.createBiquadFilter();
-        sizzleFilter.type = "bandpass";
-        sizzleFilter.frequency.setValueAtTime(1200, strikeTime);
-        sizzleFilter.Q.setValueAtTime(3.0, strikeTime);
-
-        sizzleGain.gain.setValueAtTime(0, strikeTime);
-        sizzleGain.gain.linearRampToValueAtTime(0.28, strikeTime + 0.03);
-        sizzleGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 0.4);
-
-        sizzleOsc.connect(sizzleFilter);
-        sizzleFilter.connect(sizzleGain);
-        sizzleGain.connect(loopGain);
-        sizzleOsc.start(strikeTime);
-        sizzleOsc.stop(strikeTime + 0.42);
-
-        // --- C. SHARP REALISTIC THUNDERCLAP (Broadband impact + rolling acoustic rumble) ---
-        const blastLength = Math.floor(this.ctx.sampleRate * 1.5);
+        // --- A. SHARP BROADBAND THUNDERCLAP CRACK (Sonic Boom) ---
+        const blastLength = Math.floor(this.ctx.sampleRate * 1.8);
         const blastBuffer = this.ctx.createBuffer(1, blastLength, this.ctx.sampleRate);
         const blastChannel = blastBuffer.getChannelData(0);
         let bOut = 0;
         for (let i = 0; i < blastLength; i++) {
           const white = Math.random() * 2 - 1;
-          bOut = (bOut + 0.04 * white) / 1.04;
-          // Fast sharp acoustic impact decaying into low rumble
-          const env = 0.85 * Math.exp(-i / (this.ctx.sampleRate * 0.05)) + 0.4 * Math.exp(-i / (this.ctx.sampleRate * 0.6));
-          blastChannel[i] = bOut * env * 3.8;
+          bOut = (bOut + 0.05 * white) / 1.05;
+          // Fast explosive crack at 0ms followed by heavy acoustic low-frequency rumble
+          const initialCrack = 2.4 * Math.exp(-i / (this.ctx.sampleRate * 0.035));
+          const rollingRumble = 0.9 * Math.exp(-i / (this.ctx.sampleRate * 0.65));
+          blastChannel[i] = bOut * (initialCrack + rollingRumble);
         }
         const blastSrc = this.ctx.createBufferSource();
         blastSrc.buffer = blastBuffer;
 
         const blastLp = this.ctx.createBiquadFilter();
         blastLp.type = "lowpass";
-        blastLp.frequency.setValueAtTime(160, strikeTime);
-        blastLp.frequency.exponentialRampToValueAtTime(50, strikeTime + 1.4);
-        blastLp.Q.setValueAtTime(0.5, strikeTime);
+        blastLp.frequency.setValueAtTime(450, strikeTime);
+        blastLp.frequency.exponentialRampToValueAtTime(65, strikeTime + 1.6);
+        blastLp.Q.setValueAtTime(0.7, strikeTime);
 
         const blastGain = this.ctx.createGain();
-        blastGain.gain.setValueAtTime(0.65, strikeTime + 0.01);
-        blastGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 1.45);
+        blastGain.gain.setValueAtTime(0.75, strikeTime);
+        blastGain.gain.exponentialRampToValueAtTime(0.001, strikeTime + 1.7);
 
         blastSrc.connect(blastLp);
         blastLp.connect(blastGain);
         blastGain.connect(loopGain);
-        blastSrc.start(strikeTime + 0.01);
+        blastSrc.start(strikeTime);
+
+        // --- B. MULTI-SPARK ARC DISCHARGE BURSTS (Electrocution arcs) ---
+        const burstTimes = [0, 0.03, 0.08, 0.15, 0.22, 0.31];
+        burstTimes.forEach((delay, idx) => {
+          const t = strikeTime + delay;
+          const arcLength = Math.floor(this.ctx!.sampleRate * 0.05);
+          const arcBuf = this.ctx!.createBuffer(1, arcLength, this.ctx!.sampleRate);
+          const arcData = arcBuf.getChannelData(0);
+          for (let i = 0; i < arcLength; i++) {
+            const raw = Math.random() * 2 - 1;
+            arcData[i] = raw * Math.exp(-i / (this.ctx!.sampleRate * 0.015));
+          }
+          const arcSrc = this.ctx!.createBufferSource();
+          arcSrc.buffer = arcBuf;
+
+          const arcFilter = this.ctx!.createBiquadFilter();
+          arcFilter.type = "bandpass";
+          arcFilter.frequency.setValueAtTime(1800 + idx * 350, t);
+          arcFilter.Q.setValueAtTime(3.5, t);
+
+          const arcGain = this.ctx!.createGain();
+          arcGain.gain.setValueAtTime(0.42, t);
+          arcGain.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
+
+          arcSrc.connect(arcFilter);
+          arcFilter.connect(arcGain);
+          arcGain.connect(loopGain);
+          arcSrc.start(t);
+        });
       };
 
       playElectricThunderZap();
-      const timerThunder = setInterval(playElectricThunderZap, 1500); // 1.5s cadence
+      const timerThunder = setInterval(playElectricThunderZap, 1400);
       timers.push(timerThunder);
     } else if (spellType === "ice" || spellType === "water") {
       // REALISTIC SUB-ZERO FREEZING & ICE CRACKING

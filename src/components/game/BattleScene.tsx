@@ -2838,7 +2838,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           />
         </div>
 
-        {/* Layer 10: Bottom-Middle Plant vs Zombies Style Deadline Progress Bar (Flat Style, No Shadow, No Outline) */}
+        {/* Layer 10: Bottom-Middle Plant vs Zombies Style Deadline Progress Bar */}
         <div
           className="pvz-deadline-progress-container"
           style={{
@@ -2849,12 +2849,14 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             zIndex: 25,
             width: `clamp(240px, ${pvzBarOffset.width}px, 600px)`,
             background: "#fffded",
-            borderRadius: "8px",
-            padding: "5px 12px 6px 12px",
+            border: "3px solid #101517",
+            boxShadow: "4px 4px 0 rgba(16, 21, 23, 0.72)",
+            borderRadius: "12px",
+            padding: "6px 14px 8px 14px",
             display: pvzBarOffset.visible ? "flex" : "none",
             flexDirection: "column",
             alignItems: "center",
-            gap: "3px",
+            gap: "4px",
             userSelect: "none",
             pointerEvents: "auto",
           }}
@@ -2864,22 +2866,22 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           aria-valuemax={100}
           aria-label={`Project timeline: ${daysRemaining} days remaining`}
         >
-          {/* Top Info Header (No Emoji, No Shadow) */}
+          {/* Top Info Header (No Emoji) */}
           <div
             style={{
               width: "100%",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              fontSize: "0.68rem",
-              fontWeight: 800,
+              fontSize: "0.72rem",
+              fontWeight: 900,
               fontFamily: "var(--font-heading), sans-serif",
               letterSpacing: "0.02em",
               color: "#101517",
             }}
           >
             <span>DAY {daysPassed} / {totalDays}</span>
-            <span style={{ color: daysRemaining <= 3 ? "#dc2626" : "#17a738", fontWeight: 800 }}>
+            <span style={{ color: daysRemaining <= 3 ? "#dc2626" : "#17a738", fontWeight: 900 }}>
               {daysRemaining === 0 ? "DEADLINE TODAY" : `${daysRemaining} DAYS REMAINING`}
             </span>
           </div>
@@ -2889,13 +2891,14 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             style={{
               position: "relative",
               width: "100%",
-              height: "10px",
+              height: "12px",
               background: "#e2e8f0",
-              borderRadius: "4px",
+              border: "2px solid #101517",
+              borderRadius: "6px",
               overflow: "visible",
             }}
           >
-            {/* Flat Solid Green Fill (No Gradient, No Shadow) */}
+            {/* Flat Solid Green Fill */}
             <div
               style={{
                 width: `${progressPercent}%`,
