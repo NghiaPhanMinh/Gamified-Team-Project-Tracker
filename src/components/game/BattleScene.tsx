@@ -902,6 +902,7 @@ function QuestCardHoverItem({
   onDetails,
 }: QuestCardHoverItemProps) {
   const [hovered, setHovered] = useState(false);
+  const isCompleted = Boolean(task.isCompleted || task.status === "completed" || task.status === "verified");
 
   return (
     <div
@@ -921,37 +922,62 @@ function QuestCardHoverItem({
         justifyContent: "center",
         minHeight: hovered ? "115px" : "72px",
         boxSizing: "border-box",
-        transition: "background-color 0.15s ease, min-height 0.15s ease",
+        opacity: isCompleted ? (hovered ? 0.75 : 0.3) : 1,
+        transition: "background-color 0.15s ease, min-height 0.15s ease, opacity 0.15s ease",
       }}
     >
-      {/* Task Name (Big & Boldest) */}
-      <h4
-        style={{
-          margin: 0,
-          fontSize: "1.05rem",
-          fontWeight: 900,
-          color: "#101517",
-          lineHeight: "1.25",
-          display: "-webkit-box",
-          WebkitLineClamp: hovered ? 3 : 2,
-          WebkitBoxOrient: "vertical",
-          overflow: "hidden",
-        }}
-      >
-        {task.title}
-      </h4>
+      {/* Top Header Row: Task Name & Assignee */}
+      <div style={{ paddingRight: "65px" }}>
+        <h4
+          style={{
+            margin: 0,
+            fontSize: "1.05rem",
+            fontWeight: 900,
+            color: "#101517",
+            lineHeight: "1.25",
+            display: "-webkit-box",
+            WebkitLineClamp: hovered ? 3 : 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            textDecoration: isCompleted ? "line-through" : "none",
+          }}
+        >
+          {task.title}
+        </h4>
 
-      {/* Owner Name Under */}
-      <div
+        {/* Owner Name Under */}
+        <div
+          style={{
+            fontSize: "0.78rem",
+            fontWeight: 700,
+            color: task.isOpen ? "#dc2626" : "#475569",
+            marginTop: "4px",
+          }}
+        >
+          {task.isOpen ? "Unassigned" : `By: ${task.assigneeName}`}
+        </div>
+      </div>
+
+      {/* Bottom Right Corner Status Badge (Green Completed / Red Incomplete) */}
+      <span
         style={{
-          fontSize: "0.78rem",
-          fontWeight: 700,
-          color: task.isOpen ? "#dc2626" : "#475569",
-          marginTop: "4px",
+          position: "absolute",
+          bottom: "10px",
+          right: "12px",
+          fontSize: "0.68rem",
+          fontWeight: 900,
+          color: isCompleted ? "#16a34a" : "#dc2626",
+          background: isCompleted ? "#dcfce7" : "#fee2e2",
+          border: `1px solid ${isCompleted ? "#22c55e" : "#ef4444"}`,
+          padding: "1.5px 6px",
+          borderRadius: "4px",
+          letterSpacing: "0.02em",
+          pointerEvents: "none",
+          textTransform: "capitalize",
         }}
       >
-        {task.isOpen ? "Unassigned" : `By: ${task.assigneeName}`}
-      </div>
+        {isCompleted ? "Completed" : "Incomplete"}
+      </span>
 
       {/* Details & Actions Revealed on Hover */}
       {hovered && (
@@ -963,6 +989,7 @@ function QuestCardHoverItem({
             gap: "8px",
             marginTop: "8px",
             paddingTop: "8px",
+            paddingRight: "80px",
             borderTop: "1px solid rgba(16,21,23,0.12)",
           }}
         >
@@ -970,7 +997,7 @@ function QuestCardHoverItem({
             Due: {task.dueDate || "No date"}
           </span>
           <div style={{ display: "flex", gap: "4px" }}>
-            {task.isOpen ? (
+            {!isCompleted && task.isOpen ? (
               <button
                 className="rpg-modern-btn is-primary"
                 type="button"
@@ -983,7 +1010,7 @@ function QuestCardHoverItem({
               >
                 {isClaimingQuest ? "Claiming..." : "Claim Task"}
               </button>
-            ) : task.isMine ? (
+            ) : !isCompleted && task.isMine ? (
               <button
                 className="rpg-modern-btn is-boss"
                 type="button"
@@ -997,7 +1024,7 @@ function QuestCardHoverItem({
               </button>
             ) : (
               <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b" }}>
-                Click for details
+                {isCompleted ? "Done" : "Click for details"}
               </span>
             )}
           </div>
@@ -2084,20 +2111,26 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     }));
   }, [state, activeEvent, combinedActiveEvent]);
 
-  // Active Project Tasks for In-Canvas Quest Board
+  // All Project Tasks for In-Canvas Quest Board (Active first, Completed sent to end)
   const questTasks: QuestTask[] = useMemo(() => {
     if (!workspace?.tasks) return [];
     return workspace.tasks
-      .filter((t) => t.status !== "verified" && t.status !== "completed")
       .map((t) => {
         const assignee = workspace.members.find((m) => m?.profileId === t.primaryOwnerProfileId);
         const isOpen = Boolean(t.isOpenForClaiming || !t.primaryOwnerProfileId);
+        const isCompleted = t.status === "verified" || t.status === "completed";
         return {
           ...t,
           assigneeName: isOpen ? "No one" : (assignee?.displayName ?? "No one"),
           isMine: t.primaryOwnerProfileId === state?.currentProfileId,
           isOpen,
+          isCompleted,
         };
+      })
+      .sort((a, b) => {
+        if (a.isCompleted && !b.isCompleted) return 1;
+        if (!a.isCompleted && b.isCompleted) return -1;
+        return 0;
       });
   }, [workspace?.tasks, workspace?.members, state?.currentProfileId]);
 
@@ -2164,6 +2197,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
 
   async function handleCreateQuestSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const isRoomOwner = workspace?.project?.creatorProfileId === state?.currentProfileId;
+    if (!isRoomOwner) {
+      setCreateQuestError("Only the room owner can post new quests.");
+      return;
+    }
     if (!newQuestTitle.trim()) {
       setCreateQuestError("Please provide a quest title.");
       return;
@@ -3286,7 +3324,12 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   type="button"
                   style={{ padding: "6px 12px", fontSize: "0.8rem", boxShadow: "none" }}
                   onClick={() => {
-                    setCreateQuestError(null);
+                    const isRoomOwner = workspace?.project?.creatorProfileId === state?.currentProfileId;
+                    if (!isRoomOwner) {
+                      setCreateQuestError("Only the room owner can post new quests.");
+                    } else {
+                      setCreateQuestError(null);
+                    }
                     setShowCreateQuestModal(true);
                   }}
                 >
@@ -3826,119 +3869,134 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
               </button>
             </div>
 
-            <form onSubmit={handleCreateQuestSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {createQuestError && (
-                <div style={{ padding: "8px 12px", background: "#fee2e2", border: "2px solid #ef4444", borderRadius: "8px", color: "#b91c1c", fontSize: "0.82rem", fontWeight: 800 }}>
-                  {createQuestError}
+            {workspace?.project?.creatorProfileId !== state?.currentProfileId ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px", marginTop: "14px" }}>
+                <div style={{ padding: "12px 14px", background: "#fee2e2", border: "2px solid #ef4444", borderRadius: "8px", color: "#b91c1c", fontSize: "0.88rem", fontWeight: 800 }}>
+                  Only the room owner can post new quests to the board.
                 </div>
-              )}
-
-              <div>
-                <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
-                  Quest Title *
-                </label>
-                <input
-                  type="text"
-                  className="rpg-modern-input"
-                  value={newQuestTitle}
-                  onChange={(e) => setNewQuestTitle(e.target.value)}
-                  placeholder="e.g., Build navigation header, Fix auth bug..."
-                  required
-                />
+                <button
+                  className="rpg-modern-btn is-secondary"
+                  type="button"
+                  onClick={() => setShowCreateQuestModal(false)}
+                >
+                  Close
+                </button>
               </div>
-
-              <div>
-                <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
-                  Description
-                </label>
-                <textarea
-                  className="rpg-modern-textarea"
-                  rows={3}
-                  value={newQuestDesc}
-                  onChange={(e) => setNewQuestDesc(e.target.value)}
-                  placeholder="Provide details about what needs to be done..."
-                />
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
-                    Project Phase
-                  </label>
-                  <select
-                    className="rpg-modern-select"
-                    value={newQuestPhaseId}
-                    onChange={(e) => setNewQuestPhaseId(e.target.value)}
-                  >
-                    {(workspace?.phases ?? []).map((p) => (
-                      <option key={p._id} value={p._id}>
-                        {p.title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            ) : (
+              <form onSubmit={handleCreateQuestSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {createQuestError && (
+                  <div style={{ padding: "8px 12px", background: "#fee2e2", border: "2px solid #ef4444", borderRadius: "8px", color: "#b91c1c", fontSize: "0.82rem", fontWeight: 800 }}>
+                    {createQuestError}
+                  </div>
+                )}
 
                 <div>
                   <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
-                    Due Date
+                    Quest Title *
                   </label>
                   <input
-                    type="date"
+                    type="text"
                     className="rpg-modern-input"
-                    value={newQuestDueDate}
-                    onChange={(e) => setNewQuestDueDate(e.target.value)}
+                    value={newQuestTitle}
+                    onChange={(e) => setNewQuestTitle(e.target.value)}
+                    placeholder="e.g., Build navigation header, Fix auth bug..."
                     required
                   />
                 </div>
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
-                    Assignee (Hero)
-                  </label>
-                  <select
-                    className="rpg-modern-select"
-                    value={newQuestAssignee}
-                    onChange={(e) => setNewQuestAssignee(e.target.value)}
-                  >
-                    <option value="">-- Open for Anyone to Claim --</option>
-                    {(workspace?.members ?? []).map((m) => (
-                      <option key={m.profileId} value={m.profileId}>
-                        {m.displayName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
 
                 <div>
                   <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
-                    Difficulty / Weight (1-5)
+                    Description
                   </label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={5}
-                    className="rpg-modern-input"
-                    value={newQuestWeight}
-                    onChange={(e) => setNewQuestWeight(Number(e.target.value))}
+                  <textarea
+                    className="rpg-modern-textarea"
+                    rows={3}
+                    value={newQuestDesc}
+                    onChange={(e) => setNewQuestDesc(e.target.value)}
+                    placeholder="Provide details about what needs to be done..."
                   />
                 </div>
-              </div>
 
-              <button
-                className="rpg-modern-btn is-primary"
-                type="submit"
-                disabled={isCreatingQuest}
-                style={{ marginTop: "6px", boxShadow: "none" }}
-              >
-                {isCreatingQuest ? "Posting Quest..." : "Post Quest to Board"}
-              </button>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                      Project Phase
+                    </label>
+                    <select
+                      className="rpg-modern-select"
+                      value={newQuestPhaseId}
+                      onChange={(e) => setNewQuestPhaseId(e.target.value)}
+                    >
+                      {(workspace?.phases ?? []).map((p) => (
+                        <option key={p._id} value={p._id}>
+                          {p.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              <button className="rpg-modern-btn is-secondary" type="button" onClick={() => setShowCreateQuestModal(false)}>
-                Cancel
-              </button>
-            </form>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                      Due Date
+                    </label>
+                    <input
+                      type="date"
+                      className="rpg-modern-input"
+                      value={newQuestDueDate}
+                      onChange={(e) => setNewQuestDueDate(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                      Assignee (Hero)
+                    </label>
+                    <select
+                      className="rpg-modern-select"
+                      value={newQuestAssignee}
+                      onChange={(e) => setNewQuestAssignee(e.target.value)}
+                    >
+                      <option value="">-- Open for Anyone to Claim --</option>
+                      {(workspace?.members ?? []).map((m) => (
+                        <option key={m.profileId} value={m.profileId}>
+                          {m.displayName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, marginBottom: "4px" }}>
+                      Difficulty / Weight (1-5)
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={5}
+                      className="rpg-modern-input"
+                      value={newQuestWeight}
+                      onChange={(e) => setNewQuestWeight(Number(e.target.value))}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  className="rpg-modern-btn is-primary"
+                  type="submit"
+                  disabled={isCreatingQuest}
+                  style={{ marginTop: "6px", boxShadow: "none" }}
+                >
+                  {isCreatingQuest ? "Posting Quest..." : "Post Quest to Board"}
+                </button>
+
+                <button className="rpg-modern-btn is-secondary" type="button" onClick={() => setShowCreateQuestModal(false)}>
+                  Cancel
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}

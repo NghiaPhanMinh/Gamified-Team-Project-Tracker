@@ -5,6 +5,7 @@ export type QuestTask = Doc<"tasks"> & {
   assigneeName?: string;
   isMine?: boolean;
   isOpen?: boolean;
+  isCompleted?: boolean;
 };
 
 type LandscapeQuestBoardProps = {
