@@ -4778,10 +4778,12 @@ footer {
 .personal-task-groups, .personal-task-list { display: grid; gap: 1rem; }
 .personal-task-group > header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
 .personal-task-group h2 { margin: 0; }
-.personal-task-card { padding: 1rem; border: 1px solid color-mix(in srgb, var(--color-text) 30%, transparent); border-radius: 15px; background: var(--color-page); color: var(--color-text); }
+.personal-task-card { padding: 1.25rem; border: 1px solid color-mix(in srgb, var(--color-text) 30%, transparent); border-radius: 18px; background: var(--color-page); color: var(--color-text); }
 .personal-task-card > div:first-child { display: flex; justify-content: space-between; gap: .75rem; }
-.personal-task-card dl { display: flex; gap: 1.5rem; }
-.personal-task-card dl div { display: grid; }
+.personal-task-card dl { display: flex; flex-wrap: wrap; gap: 1.5rem; margin: .85rem 0 1rem 0; padding-bottom: .6rem; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent); }
+.personal-task-card dl div { display: grid; gap: .15rem; }
+.personal-task-card .personal-task-actions { margin: 1rem 0 1.25rem 0; padding: .2rem 0; gap: .85rem; }
+.personal-task-card .task-evidence-panel { margin-top: 1.25rem; }
 .waiting-label { display: inline-flex; align-items: center; padding: .5rem .75rem; border-radius: 999px; background: color-mix(in srgb, var(--color-pink) 45%, transparent); font-weight: 800; }
 .open-project-header { position: relative; }
 .overview-compact-actions { justify-content: flex-end; margin: -.45rem 0 .75rem; }
