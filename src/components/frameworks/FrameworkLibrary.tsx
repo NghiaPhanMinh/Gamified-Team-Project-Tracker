@@ -21,6 +21,8 @@ export function FrameworkLibrary({ onDuplicate, hideHeader = false }: FrameworkL
     BUILT_IN_FRAMEWORKS.find(
       (framework) => framework.id === selectedFrameworkId,
     ) ?? BUILT_IN_FRAMEWORKS[0];
+  const selectedFrameworkIndex = BUILT_IN_FRAMEWORKS.findIndex((item) => item.id === selectedFramework.id);
+  const selectedFrameworkColor = MAYLAMDI_FRAMEWORK_COLORS[selectedFrameworkIndex];
   const phaseNames = useMemo(
     () =>
       new Map(
@@ -90,6 +92,7 @@ export function FrameworkLibrary({ onDuplicate, hideHeader = false }: FrameworkL
 
       <article
         className={`framework-preview framework-accent-${selectedFramework.accent}`}
+        style={{ "--framework-accent": selectedFrameworkColor } as CSSProperties}
       >
         <header>
           <div>
