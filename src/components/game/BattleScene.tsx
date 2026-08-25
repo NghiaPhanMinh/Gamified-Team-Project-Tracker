@@ -1297,12 +1297,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [showDragonEditor, setShowDragonEditor] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
 
-  // Interactive Cutscene Tutorial State
-  const [showTutorial, setShowTutorial] = useState(false);
-  const [showTutorialChoice, setShowTutorialChoice] = useState<boolean>(() => {
+  // Interactive Cutscene Tutorial State (Directly inside game screen for new players)
+  const [showTutorial, setShowTutorial] = useState<boolean>(() => {
     try {
       if (typeof window === "undefined") return false;
-      return localStorage.getItem(`rpg_tut_choice_${projectId}`) === null;
+      return localStorage.getItem("rpg_tutorial_seen") === null;
     } catch {
       return false;
     }
@@ -5968,100 +5967,6 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             >
               Close
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* First-Time Entry Choice Modal (Skip Tutorial vs Start Tutorial) */}
-      {showTutorialChoice && !showTutorial && (
-        <div className="rpg-modal-overlay" style={{ zIndex: 60 }}>
-          <div
-            style={{
-              maxWidth: "460px",
-              width: "90%",
-              textAlign: "center",
-              background: "#fffded",
-              border: "3px solid #101517",
-              boxShadow: "6px 6px 0 #101517",
-              borderRadius: "16px",
-              padding: "24px 20px",
-              animation: "tutorialPopIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
-              color: "#101517",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ fontSize: "2.8rem", marginBottom: "8px" }}>🏰⚔️🐉</div>
-            <h2
-              style={{
-                margin: "0 0 8px 0",
-                fontSize: "1.3rem",
-                fontWeight: 900,
-                fontFamily: "var(--font-heading), sans-serif",
-                color: "#101517",
-              }}
-            >
-              Welcome to the Realm!
-            </h2>
-            <p
-              style={{
-                margin: "0 0 20px 0",
-                fontSize: "0.88rem",
-                color: "#334155",
-                lineHeight: 1.45,
-                fontWeight: 600,
-              }}
-            >
-              Would you like a quick 1-minute visual walkthrough on defending your village, daily goblins, and defeating <strong>{funnyBossName}</strong>?
-            </p>
-            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-              <button
-                type="button"
-                className="rpg-modern-btn is-secondary"
-                onClick={() => {
-                  if (typeof window !== "undefined") {
-                    localStorage.setItem(`rpg_tut_choice_${projectId}`, "true");
-                    localStorage.setItem("rpg_tutorial_seen", "true");
-                  }
-                  setShowTutorialChoice(false);
-                }}
-                style={{
-                  padding: "8px 18px",
-                  borderRadius: "8px",
-                  border: "2px solid #101517",
-                  boxShadow: "3px 3px 0 #101517",
-                  fontSize: "0.85rem",
-                  fontWeight: 800,
-                  cursor: "pointer",
-                }}
-              >
-                Skip Tutorial
-              </button>
-              <button
-                type="button"
-                className="rpg-modern-btn is-primary"
-                onClick={() => {
-                  if (typeof window !== "undefined") {
-                    localStorage.setItem(`rpg_tut_choice_${projectId}`, "true");
-                    localStorage.setItem("rpg_tutorial_seen", "true");
-                  }
-                  setShowTutorialChoice(false);
-                  setShowTutorial(true);
-                }}
-                style={{
-                  padding: "8px 24px",
-                  borderRadius: "8px",
-                  background: "#fff73f",
-                  color: "#101517",
-                  border: "2px solid #101517",
-                  boxShadow: "3px 3px 0 #101517",
-                  fontSize: "0.85rem",
-                  fontWeight: 900,
-                  cursor: "pointer",
-                }}
-              >
-                Start Tutorial ➜
-              </button>
-            </div>
           </div>
         </div>
       )}
