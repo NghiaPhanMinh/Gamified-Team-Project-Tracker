@@ -1,3 +1,5 @@
+import { ConvexError } from "convex/values";
+
 const BUILT_IN_FRAMEWORK_IDS = new Set([
   "design-nonlinear",
   "marketing-campaign",
@@ -32,7 +34,7 @@ function normaliseText(value: string, label: string, maxLength: number) {
   const normalised = value.trim().replace(/\s+/g, " ");
 
   if (normalised.length > maxLength) {
-    throw new Error(`${label} must be ${maxLength} characters or fewer.`);
+    throw new ConvexError(`${label} must be ${maxLength} characters or fewer for optimal AI assistance.`);
   }
 
   return normalised;
@@ -47,118 +49,132 @@ export function validateProjectDetails(input: {
   const title = normaliseText(input.title, "Project title", 100);
   const description = normaliseText(
     input.description,
-    "Project description",
-    1_500,
+    "Project brief",
+    500,
   );
 
   if (title.length < 2) {
-    throw new Error("Project title must contain at least 2 characters.");
+    throw new ConvexError("Project title must contain at least 2 characters.");
+  }
+
+  if (description.length < 20) {
+    throw new ConvexError(
+      "Project brief must be at least 20 characters describing what you are making, who it is for, and what needs to be delivered.",
+    );
   }
 
   const startDate = input.startDate ?? new Date().toISOString().slice(0, 10);
 
   if (!ISO_DATE_PATTERN.test(startDate) || !ISO_DATE_PATTERN.test(input.deadline)) {
-    throw new Error("Project dates must use the YYYY-MM-DD format.");
+    throw new ConvexError("Dates must be valid YYYY-MM-DD values.");
   }
 
   if (input.deadline < startDate) {
-    throw new Error("Project deadline cannot be before the start date.");
+    throw new ConvexError("Project deadline cannot be before the start date.");
   }
 
-  return {
-    title,
-    description,
-    startDate,
-    deadline: input.deadline,
-  };
-}
-
-export function validateBuiltInFramework(
-  frameworkId: string,
-  frameworkName: string,
-  phases: ProjectPhaseInput[],
-) {
-  if (!BUILT_IN_FRAMEWORK_IDS.has(frameworkId)) {
-    throw new Error("Choose a recognised MayLamDi framework.");
-  }
-
-  return {
-    frameworkName: normaliseText(frameworkName, "Framework name", 100),
-    phases: validateProjectPhases(phases),
-  };
+  return { title, description, startDate, deadline: input.deadline };
 }
 
 export function validateProjectPhases(phases: ProjectPhaseInput[]) {
   if (phases.length < 1 || phases.length > 20) {
-    throw new Error("A project must contain between 1 and 20 phases.");
+    throw new ConvexError("Projects must contain between 1 and 20 phases.");
   }
 
-  const keys = phases.map((phase) =>
-    normaliseText(phase.key, "Phase key", 80),
-  );
-  const keySet = new Set(keys);
+  const phaseKeys = new Set<string>();
 
-  if (keySet.size !== keys.length || keys.some((key) => key.length === 0)) {
-    throw new Error("Project phase keys must be present and unique.");
-  }
-
-  return phases.map((phase, index) => {
-    const dependencyKeys = [...new Set(phase.dependencyKeys)];
-
-    if (
-      dependencyKeys.some(
-        (dependencyKey) =>
-          !keySet.has(dependencyKey) || dependencyKey === keys[index],
-      )
-    ) {
-      throw new Error("Every phase dependency must reference another phase.");
+  const validated = phases.map((phase, index) => {
+    if (!phase.key.trim()) {
+      throw new ConvexError(`Phase ${index + 1} is missing a key.`);
     }
 
+    if (phaseKeys.has(phase.key)) {
+      throw new ConvexError(`Phase key "${phase.key}" is duplicated.`);
+    }
+
+    phaseKeys.add(phase.key);
+
     return {
-      key: keys[index],
-      name: normaliseText(phase.name, "Phase name", 100),
+      key: phase.key,
+      name: normaliseText(phase.name, `Phase ${index + 1} name`, 80),
       description: normaliseText(
         phase.description,
-        "Phase description",
-        800,
+        `Phase ${index + 1} description`,
+        500,
       ),
-      canOverlap: phase.canOverlap,
-      dependencyKeys,
-      reviewCheckpoint: phase.reviewCheckpoint,
+      canOverlap: Boolean(phase.canOverlap),
+      dependencyKeys: Array.from(new Set(phase.dependencyKeys)),
+      reviewCheckpoint: Boolean(phase.reviewCheckpoint),
     };
   });
+
+  validated.forEach((phase) => {
+    phase.dependencyKeys.forEach((dependencyKey) => {
+      if (!phaseKeys.has(dependencyKey)) {
+        throw new ConvexError(
+          `Phase "${phase.name}" depends on non-existent phase "${dependencyKey}".`,
+        );
+      }
+
+      if (dependencyKey === phase.key) {
+        throw new ConvexError(`Phase "${phase.name}" cannot depend on itself.`);
+      }
+    });
+  });
+
+  return validated;
 }
 
-export function validateMemberPlanning(input: ProjectMemberInput) {
-  const skills = [...new Set(input.skills.map((skill) => skill.trim()))]
-    .filter(Boolean)
-    .slice(0, 20)
-    .map((skill) => normaliseText(skill, "Skill", 60));
-  const availability = normaliseText(
-    input.availability,
-    "Availability",
-    300,
-  );
-  const preferences = normaliseText(
-    input.preferences,
-    "Preferences",
-    300,
+export function validateFrameworkSelection(input: {
+  frameworkType: "none" | "built_in" | "custom";
+  frameworkName: string;
+  builtInFrameworkId?: string;
+  customFrameworkId?: string;
+}) {
+  const frameworkName = normaliseText(
+    input.frameworkName,
+    "Framework name",
+    80,
   );
 
-  if (
-    input.weeklyCapacity !== undefined &&
-    (!Number.isFinite(input.weeklyCapacity) ||
-      input.weeklyCapacity < 0 ||
-      input.weeklyCapacity > 168)
-  ) {
-    throw new Error("Weekly capacity must be between 0 and 168 hours.");
+  if (input.frameworkType === "built_in") {
+    if (
+      !input.builtInFrameworkId ||
+      !BUILT_IN_FRAMEWORK_IDS.has(input.builtInFrameworkId)
+    ) {
+      throw new ConvexError("Select a supported built-in framework template.");
+    }
   }
 
   return {
-    skills,
-    availability,
-    currentWorkload: input.currentWorkload,
-    preferences,
-    weeklyCapacity: input.weeklyCapacity,
+    frameworkType: input.frameworkType,
+    frameworkName,
+    builtInFrameworkId: input.builtInFrameworkId,
+    customFrameworkId: input.customFrameworkId,
+  };
+}
+
+export function validateBuiltInFramework(
+  builtInFrameworkId?: string,
+  frameworkName?: string,
+  phases?: ProjectPhaseInput[],
+) {
+  if (!builtInFrameworkId || !BUILT_IN_FRAMEWORK_IDS.has(builtInFrameworkId)) {
+    throw new ConvexError("Select a supported built-in framework template.");
+  }
+  const validatedPhases = phases ? validateProjectPhases(phases) : [];
+  return {
+    frameworkName: frameworkName?.trim() || "Built-in Framework",
+    phases: validatedPhases,
+  };
+}
+
+export function validateMemberPlanning(member: ProjectMemberInput) {
+  return {
+    skills: member.skills ?? [],
+    availability: member.availability?.trim() ?? "",
+    currentWorkload: member.currentWorkload ?? "medium",
+    preferences: member.preferences?.trim() ?? "",
+    weeklyCapacity: member.weeklyCapacity,
   };
 }

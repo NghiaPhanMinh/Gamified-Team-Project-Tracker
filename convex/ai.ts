@@ -219,8 +219,16 @@ function planningPrompts(brief: string, context: AiPlanningContext) {
 
 function cleanBrief(value: string) {
   const brief = value.trim();
-  if (brief.length < 3) throw new Error("Please enter a brief describing your project (at least 3 characters).");
-  if (brief.length > 8_000) throw new Error("Keep the AI project brief to 8,000 characters or fewer.");
+  if (brief.length < 20) {
+    throw new ConvexError(
+      "Please enter a project brief answering what you are making, who it is for, and what needs to be delivered (at least 20 characters).",
+    );
+  }
+  if (brief.length > 500) {
+    throw new ConvexError(
+      "Keep the AI project brief to 500 characters or fewer for optimal AI generation.",
+    );
+  }
   return brief;
 }
 
