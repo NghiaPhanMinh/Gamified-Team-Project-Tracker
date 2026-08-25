@@ -209,4 +209,96 @@ export const getBugLogs = query({
   },
 });
 
+export const getActiveRoomsAndMembers = query({
+  args: {},
+  handler: async (ctx) => {
+    const teams = await ctx.db.query("teams").collect();
+
+    const activeRooms = await Promise.all(
+      teams.map(async (team) => {
+        const members = await ctx.db
+          .query("teamMembers")
+          .withIndex("by_team", (q) => q.eq("teamId", team._id))
+          .collect();
+
+        const projects = await ctx.db
+          .query("projects")
+          .withIndex("by_team_and_updated", (q) => q.eq("teamId", team._id))
+          .order("desc")
+          .take(5);
+
+        const primaryProject = projects[0];
+
+        return {
+          teamId: team._id,
+          teamName: team.name,
+          joinCode: team.joinCode,
+          memberCount: members.length,
+          projectTitle: primaryProject?.title ?? "Chưa đặt tên dự án",
+          projectBrief: primaryProject?.description ?? "Chưa nhập nội dung Brief",
+          projectStatus: primaryProject?.status ?? "planning",
+          frameworkName: primaryProject?.frameworkName ?? "Standard",
+          createdAt: team.createdAt,
+          updatedAt: team.updatedAt,
+        };
+      }),
+    );
+
+    return activeRooms.sort((a, b) => b.updatedAt - a.updatedAt);
+  },
+});
+
+export const getLastUserLocations = query({
+  args: {},
+  handler: async (ctx) => {
+    const events = await ctx.db
+      .query("userTelemetryEvents")
+      .withIndex("by_created_at")
+      .order("desc")
+      .take(100);
+
+    const sessionLastMap = new Map<
+      string,
+      {
+        sessionId: string;
+        profileId?: string;
+        displayName?: string;
+        lastFlow: string;
+        lastStepIndex: number;
+        lastStepName: string;
+        lastEventType: string;
+        lastErrorMessage?: string;
+        lastSeenAt: number;
+      }
+    >();
+
+    for (const event of events) {
+      if (!sessionLastMap.has(event.sessionId)) {
+        let displayName = undefined;
+        if (event.profileId) {
+          const profile = await ctx.db.get(event.profileId);
+          if (profile) {
+            displayName = profile.displayName;
+          }
+        }
+
+        sessionLastMap.set(event.sessionId, {
+          sessionId: event.sessionId,
+          profileId: event.profileId,
+          displayName,
+          lastFlow: event.flowName,
+          lastStepIndex: event.stepIndex,
+          lastStepName: event.stepName,
+          lastEventType: event.eventType,
+          lastErrorMessage: event.errorMessage,
+          lastSeenAt: event.createdAt,
+        });
+      }
+    }
+
+    return Array.from(sessionLastMap.values()).slice(0, 20);
+  },
+});
+
+
 

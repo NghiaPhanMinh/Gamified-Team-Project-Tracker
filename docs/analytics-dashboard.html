@@ -17,11 +17,7 @@
       --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: var(--font-family);
@@ -31,10 +27,7 @@
       min-height: 100vh;
     }
 
-    .container {
-      max-width: 1150px;
-      margin: 0 auto;
-    }
+    .container { max-width: 1180px; margin: 0 auto; }
 
     header {
       background: var(--color-card);
@@ -50,253 +43,106 @@
       gap: 1rem;
     }
 
-    .brand-title {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
+    .brand-title { display: flex; align-items: center; gap: 0.75rem; }
     .logo-badge {
       background: var(--color-yellow);
       border: 2px solid var(--color-ink);
-      width: 44px;
-      height: 44px;
+      width: 44px; height: 44px;
       border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      font-size: 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 1.2rem;
       box-shadow: 2px 2px 0px var(--color-ink);
     }
 
-    h1 {
-      font-size: 1.6rem;
-      font-weight: 900;
-      line-height: 1.2;
-    }
+    h1 { font-size: 1.6rem; font-weight: 900; line-height: 1.2; }
 
     .status-bar {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      background: var(--color-bg);
-      border: 2px solid var(--color-ink);
-      padding: 0.5rem 1rem;
-      border-radius: 30px;
-      font-size: 0.85rem;
-      font-weight: 800;
+      display: flex; align-items: center; gap: 0.75rem;
+      background: var(--color-bg); border: 2px solid var(--color-ink);
+      padding: 0.5rem 1rem; border-radius: 30px; font-size: 0.85rem; font-weight: 800;
     }
 
     .live-dot {
-      width: 10px;
-      height: 10px;
-      background-color: var(--color-green);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--color-green);
+      width: 10px; height: 10px; background-color: var(--color-green);
+      border-radius: 50%; box-shadow: 0 0 8px var(--color-green);
       animation: pulse 1.5s infinite;
     }
 
     @keyframes pulse {
-      0% { opacity: 0.4; }
-      50% { opacity: 1; }
-      100% { opacity: 0.4; }
+      0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; }
     }
 
     .controls-btn {
       background: var(--color-yellow);
       border: 2px solid var(--color-ink);
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
-      font-weight: 800;
-      font-size: 0.85rem;
-      cursor: pointer;
+      padding: 0.5rem 1rem; border-radius: 10px;
+      font-weight: 800; font-size: 0.85rem; cursor: pointer;
       box-shadow: 2px 2px 0px var(--color-ink);
-      transition: transform 0.1s;
-      text-decoration: none;
-      color: var(--color-ink);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .controls-btn:active {
-      transform: translate(2px, 2px);
-      box-shadow: none;
+      text-decoration: none; color: var(--color-ink);
+      display: inline-flex; align-items: center; gap: 0.4rem;
     }
 
     .grid-summary {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.25rem;
-      margin-bottom: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.25rem; margin-bottom: 2rem;
     }
 
     .card {
       background: var(--color-card);
       border: 3px solid var(--color-ink);
-      border-radius: 16px;
-      padding: 1.5rem;
+      border-radius: 16px; padding: 1.25rem;
       box-shadow: 4px 4px 0px var(--color-ink);
     }
 
-    .card-kicker {
-      font-size: 0.75rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      color: var(--color-muted);
-      letter-spacing: 0.5px;
-    }
-
-    .card-stat {
-      font-size: 2.2rem;
-      font-weight: 900;
-      margin-top: 0.3rem;
-    }
+    .card-kicker { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--color-muted); }
+    .card-stat { font-size: 2rem; font-weight: 900; margin-top: 0.3rem; }
 
     .section-title {
-      font-size: 1.3rem;
-      font-weight: 900;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      font-size: 1.25rem; font-weight: 900; margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
     }
 
-    .funnel-container {
-      display: grid;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
+    .funnel-container { display: grid; gap: 1rem; margin-bottom: 2rem; }
 
     .step-card {
-      background: var(--color-card);
-      border: 2px solid var(--color-ink);
-      border-radius: 12px;
-      padding: 1.25rem;
-      box-shadow: 3px 3px 0px var(--color-ink);
+      background: var(--color-card); border: 2px solid var(--color-ink);
+      border-radius: 12px; padding: 1.25rem; box-shadow: 3px 3px 0px var(--color-ink);
     }
 
-    .step-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.6rem;
-    }
+    .step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+    .step-title { display: flex; align-items: center; gap: 0.6rem; font-weight: 900; font-size: 1.05rem; }
+    .step-number { background: var(--color-ink); color: #fff; border-radius: 50%; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; }
 
-    .step-title {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-weight: 900;
-      font-size: 1.05rem;
-    }
-
-    .step-number {
-      background: var(--color-ink);
-      color: #fff;
-      border-radius: 50%;
-      width: 26px;
-      height: 26px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-    }
-
-    .badge-group {
-      display: flex;
-      gap: 0.75rem;
-      font-size: 0.85rem;
-      font-weight: 800;
-    }
-
+    .badge-group { display: flex; gap: 0.75rem; font-size: 0.85rem; font-weight: 800; }
     .badge-success { color: #17A738; }
     .badge-exit { color: #e53e3e; }
 
-    .progress-bar-track {
-      width: 100%;
-      height: 14px;
-      background: #e2e8f0;
-      border-radius: 7px;
-      overflow: hidden;
-      display: flex;
-      border: 1px solid var(--color-ink);
-    }
+    .progress-bar-track { width: 100%; height: 14px; background: #e2e8f0; border-radius: 7px; overflow: hidden; display: flex; border: 1px solid var(--color-ink); }
+    .progress-fill-success { background: var(--color-green); height: 100%; }
+    .progress-fill-exit { background: var(--color-yellow); height: 100%; }
 
-    .progress-fill-success { background: var(--color-green); height: 100%; transition: width 0.4s ease; }
-    .progress-fill-exit { background: var(--color-yellow); height: 100%; transition: width 0.4s ease; }
-
-    .insights-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .skill-bar-row { margin-bottom: 0.75rem; }
-    .skill-label { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 800; margin-bottom: 0.25rem; }
-    .skill-track { width: 100%; height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; border: 1px solid var(--color-ink); }
-    .skill-fill-blue { background: var(--color-blue); height: 100%; }
-    .skill-fill-pink { background: var(--color-pink); height: 100%; }
-
-    /* Tables for Briefs & Bugs */
     .table-container {
-      background: var(--color-card);
-      border: 3px solid var(--color-ink);
-      border-radius: 16px;
-      padding: 1.25rem;
-      box-shadow: 4px 4px 0px var(--color-ink);
-      margin-bottom: 2rem;
-      overflow-x: auto;
+      background: var(--color-card); border: 3px solid var(--color-ink);
+      border-radius: 16px; padding: 1.25rem; box-shadow: 4px 4px 0px var(--color-ink);
+      margin-bottom: 2rem; overflow-x: auto;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.88rem;
-    }
-
-    th, td {
-      padding: 0.75rem 1rem;
-      text-align: left;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    th {
-      background: var(--color-bg);
-      font-weight: 900;
-      border-bottom: 2px solid var(--color-ink);
-      text-transform: uppercase;
-      font-size: 0.78rem;
-      letter-spacing: 0.5px;
-    }
-
-    tr:hover {
-      background: #f8f9fa;
-    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    th { background: var(--color-bg); font-weight: 900; border-bottom: 2px solid var(--color-ink); text-transform: uppercase; font-size: 0.78rem; }
+    tr:hover { background: #f8f9fa; }
 
     .tag-pill {
-      display: inline-block;
-      padding: 0.25rem 0.5rem;
-      border-radius: 6px;
-      font-weight: 800;
-      font-size: 0.75rem;
+      display: inline-block; padding: 0.25rem 0.5rem;
+      border-radius: 6px; font-weight: 800; font-size: 0.75rem;
       border: 1px solid var(--color-ink);
     }
 
     .external-analytics-banner {
-      background: #FF8AE722;
-      border: 3px solid var(--color-ink);
-      border-radius: 16px;
-      padding: 1.5rem;
-      box-shadow: 4px 4px 0px var(--color-ink);
-      margin-bottom: 2rem;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
+      background: #FF8AE722; border: 3px solid var(--color-ink);
+      border-radius: 16px; padding: 1.5rem; box-shadow: 4px 4px 0px var(--color-ink);
+      margin-bottom: 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;
     }
 
     footer { text-align: center; font-size: 0.85rem; color: var(--color-muted); margin-top: 2rem; font-weight: 700; }
@@ -311,7 +157,7 @@
         <div>
           <h1>MayLamDi — Real-Time Local Analytics & Bug Tracker</h1>
           <p style="color: var(--color-muted); font-size: 0.88rem; font-weight: 600; margin-top: 0.2rem;">
-            Theo Dõi Tiến Độ Người Dùng, Nhật Ký Brief & Báo Cáo Check Bug Live (Local Only)
+            Theo Dõi Phòng Đang Chạy, Vị Trí User Lần Cuối & Báo Cáo Check Bug Live (Local Only)
           </p>
         </div>
       </div>
@@ -346,15 +192,19 @@
     <!-- Top Summary Grid -->
     <div class="grid-summary">
       <div class="card">
-        <div class="card-kicker">Tổng Số Sự Kiện Telemetry</div>
+        <div class="card-kicker">Tổng Sự Kiện Tracking</div>
         <div class="card-stat" id="stat-total-events">...</div>
       </div>
       <div class="card" style="background: #1DD85115;">
-        <div class="card-kicker">Số Người Dùng Trong Hệ Thống</div>
-        <div class="card-stat" id="stat-total-users">...</div>
+        <div class="card-kicker">Số Phòng Đang Hoạt Động</div>
+        <div class="card-stat" id="stat-active-rooms">...</div>
       </div>
       <div class="card" style="background: #FFF73F33;">
-        <div class="card-kicker">Số Dự Án Đã Nhập Brief</div>
+        <div class="card-kicker">Tổng Số Người Dùng</div>
+        <div class="card-stat" id="stat-total-users">...</div>
+      </div>
+      <div class="card" style="background: #4CA0FE22;">
+        <div class="card-kicker">Số Brief Đã Ghi Nhận</div>
         <div class="card-stat" id="stat-total-briefs">...</div>
       </div>
       <div class="card" style="background: #FEAA0122;">
@@ -363,20 +213,61 @@
       </div>
     </div>
 
-    <!-- Section 1: Step Drop-off Funnel -->
+    <!-- Section 1: Active Rooms & Projects -->
+    <h2 class="section-title">🏠 Các Nhóm / Phòng Đang Hoạt Động (Active Teams & Rooms)</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Tên Phòng (Team Name)</th>
+            <th>Mã Join Code</th>
+            <th>Số Thành Viên</th>
+            <th>Dự Án (Project)</th>
+            <th>Trạng Thái</th>
+            <th>Nội Dung Brief Chi Tiết</th>
+            <th>Cập Nhật Lần Cuối</th>
+          </tr>
+        </thead>
+        <tbody id="rooms-tbody">
+          <tr><td colspan="7" style="text-align: center; color: var(--color-muted);">Đang tải danh sách phòng...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section 2: Last User Locations & Pages -->
+    <h2 class="section-title">📍 Vị Trí & Trang Cuối Cùng User Truy Cập (User Last Location Tracker)</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Thời Gian Sau Cùng</th>
+            <th>Người Dùng (User / Session)</th>
+            <th>Quy Trình (Flow)</th>
+            <th>Vị Trí Cuối Cùng (Last Step / Location)</th>
+            <th>Loại Tương Tác</th>
+            <th>Trạng Thái / Lỗi Rào Cản</th>
+          </tr>
+        </thead>
+        <tbody id="locations-tbody">
+          <tr><td colspan="6" style="text-align: center; color: var(--color-muted);">Đang tải vị trí người dùng...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section 3: Step Drop-off Funnel -->
     <h2 class="section-title">📊 Phân Tích Phễu Chuyển Đổi & Điểm Thoát Out Từng Bước (Project Creation Wizard)</h2>
     <div class="funnel-container" id="funnel-steps-list">
       <div style="padding: 2rem; text-align: center; font-weight: 700; color: var(--color-muted);">Đang kết nối dữ liệu từ Convex...</div>
     </div>
 
-    <!-- Section 2: Real-time Bug & Error Tracker -->
+    <!-- Section 4: Real-time Bug & Error Tracker -->
     <h2 class="section-title" style="color: #e53e3e;">🐛 Nhật Ký Check Bug & Lỗi Người Dùng Gặp Phải (Live Bug Log)</h2>
     <div class="table-container">
       <table>
         <thead>
           <tr>
             <th>Thời Gian</th>
-            <th>Quy Trình (Flow)</th>
+            <th>Quy Trình</th>
             <th>Bước Bị Lỗi (Step)</th>
             <th>Nội Dung Lỗi Chi Tiết (Error Message)</th>
             <th>Thời Gian Xử Lý</th>
@@ -388,8 +279,8 @@
       </table>
     </div>
 
-    <!-- Section 3: Project Briefs Log -->
-    <h2 class="section-title">📝 Danh Sách Brief Dự Án Thực Tế User Đã Nhập (Project Briefs Log)</h2>
+    <!-- Section 5: Project Briefs Log -->
+    <h2 class="section-title">📝 Nhật Ký Brief Dự Án Do Creator Nhập (Project Briefs Log)</h2>
     <div class="table-container">
       <table>
         <thead>
@@ -405,25 +296,6 @@
           <tr><td colspan="5" style="text-align: center; color: var(--color-muted);">Đang tải danh sách Brief...</td></tr>
         </tbody>
       </table>
-    </div>
-
-    <!-- Section 4: User Skill Tendencies & Team Affinity -->
-    <div class="insights-grid">
-      <!-- Top Skills -->
-      <div class="card">
-        <h2 class="section-title" style="font-size: 1.1rem;">📈 Xu Hướng Kỹ Năng (Skills)</h2>
-        <div id="skills-list-container">
-          <div style="color: var(--color-muted); font-size: 0.9rem;">Đang tải...</div>
-        </div>
-      </div>
-
-      <!-- Top Software -->
-      <div class="card">
-        <h2 class="section-title" style="font-size: 1.1rem;">🎨 Phần Mềm Sử Dụng Nổi Bật</h2>
-        <div id="software-list-container">
-          <div style="color: var(--color-muted); font-size: 0.9rem;">Đang tải...</div>
-        </div>
-      </div>
     </div>
 
     <footer>
@@ -463,15 +335,53 @@
       const insights = await fetchConvexQuery("telemetry:getUserInsightsAndTeamFit", {});
       const briefs = await fetchConvexQuery("telemetry:getRecentProjectBriefs", {});
       const bugs = await fetchConvexQuery("telemetry:getBugLogs", {});
+      const rooms = await fetchConvexQuery("telemetry:getActiveRoomsAndMembers", {});
+      const locations = await fetchConvexQuery("telemetry:getLastUserLocations", {});
 
-      updateUI(funnel, insights, briefs, bugs);
+      updateUI(funnel, insights, briefs, bugs, rooms, locations);
     }
 
-    function updateUI(funnel, insights, briefs, bugs) {
+    function updateUI(funnel, insights, briefs, bugs, rooms, locations) {
       document.getElementById("stat-total-events").textContent = funnel?.totalEvents ?? 0;
+      document.getElementById("stat-active-rooms").textContent = rooms?.length ?? 0;
       document.getElementById("stat-total-users").textContent = insights?.totalUsers ?? 0;
       document.getElementById("stat-total-briefs").textContent = briefs?.length ?? 0;
       document.getElementById("stat-total-bugs").textContent = bugs?.length ?? 0;
+
+      const roomsTbody = document.getElementById("rooms-tbody");
+      if (rooms && rooms.length) {
+        roomsTbody.innerHTML = rooms.map(r => `
+          <tr>
+            <td style="font-weight: 900; font-size: 0.95rem;">${r.teamName}</td>
+            <td><span class="tag-pill" style="background: #FEAA0133;">${r.joinCode}</span></td>
+            <td style="font-weight: 800; text-align: center;">👤 ${r.memberCount} thành viên</td>
+            <td style="font-weight: 800;">${r.projectTitle}</td>
+            <td><span class="tag-pill" style="background: #1DD85133;">${r.projectStatus}</span></td>
+            <td style="max-width: 320px; line-height: 1.4;">${r.projectBrief}</td>
+            <td style="font-weight: 700; color: var(--color-muted);">${formatTime(r.updatedAt)}</td>
+          </tr>
+        `).join("");
+      } else {
+        roomsTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--color-muted);">Chưa có phòng nào đang chạy.</td></tr>`;
+      }
+
+      const locTbody = document.getElementById("locations-tbody");
+      if (locations && locations.length) {
+        locTbody.innerHTML = locations.map(l => `
+          <tr>
+            <td style="font-weight: 700; color: var(--color-muted);">${formatTime(l.lastSeenAt)}</td>
+            <td style="font-weight: 900;">${l.displayName ? l.displayName : "Session: " + l.sessionId.slice(0, 12)}</td>
+            <td><span class="tag-pill" style="background: #FFF73F;">${l.lastFlow}</span></td>
+            <td style="font-weight: 800;">Step ${l.lastStepIndex} · ${l.lastStepName}</td>
+            <td><span class="tag-pill" style="background: #4CA0FE33;">${l.lastEventType}</span></td>
+            <td style="${l.lastErrorMessage ? 'color: #e53e3e; font-weight: 800;' : 'color: #17A738; font-weight: 700;'}">
+              ${l.lastErrorMessage ? '⚠️ ' + l.lastErrorMessage : '✓ Hoàn thành tốt'}
+            </td>
+          </tr>
+        `).join("");
+      } else {
+        locTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--color-muted);">Chưa có vị trí người dùng nào được ghi nhận.</td></tr>`;
+      }
 
       const funnelContainer = document.getElementById("funnel-steps-list");
       const steps = funnel?.funnelSteps?.length ? funnel.funnelSteps : [
@@ -536,45 +446,6 @@
       } else {
         briefTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--color-muted);">Chưa có brief dự án nào được tạo.</td></tr>`;
       }
-
-      const skillsContainer = document.getElementById("skills-list-container");
-      const skills = insights?.topSkills?.length ? insights.topSkills : [
-        { name: "UI/UX Design", count: 18, percentage: 82 },
-        { name: "React / Frontend", count: 14, percentage: 64 },
-        { name: "Research & Analysis", count: 11, percentage: 50 },
-        { name: "Content Writing", count: 8, percentage: 36 },
-      ];
-
-      skillsContainer.innerHTML = skills.map(skill => `
-        <div class="skill-bar-row">
-          <div class="skill-label">
-            <span>${skill.name}</span>
-            <span>${skill.count} users (${skill.percentage}%)</span>
-          </div>
-          <div class="skill-track">
-            <div class="skill-fill-blue" style="width: ${skill.percentage}%;"></div>
-          </div>
-        </div>
-      `).join("");
-
-      const softwareContainer = document.getElementById("software-list-container");
-      const software = insights?.topSoftware?.length ? insights.topSoftware : [
-        { name: "Figma", count: 16, percentage: 72 },
-        { name: "VS Code", count: 12, percentage: 54 },
-        { name: "Notion", count: 9, percentage: 40 },
-      ];
-
-      softwareContainer.innerHTML = software.map(sw => `
-        <div class="skill-bar-row">
-          <div class="skill-label">
-            <span>${sw.name}</span>
-            <span>${sw.count} users (${sw.percentage}%)</span>
-          </div>
-          <div class="skill-track">
-            <div class="skill-fill-pink" style="width: ${sw.percentage}%;"></div>
-          </div>
-        </div>
-      `).join("");
     }
 
     function toggleAutoRefresh() {
