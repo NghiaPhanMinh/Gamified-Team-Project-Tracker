@@ -18,8 +18,9 @@ import { LandscapeSky } from "./LandscapeSky";
 import { LandscapeTerrain } from "./LandscapeTerrain";
 import { LandscapeVillage } from "./LandscapeVillage";
 import { LandscapeDragon } from "./LandscapeDragon";
+import { LandscapeQuestBoard } from "./LandscapeQuestBoard";
 
-export type TutorialStep = 1 | 2 | 3 | 4;
+export type TutorialStep = 1 | 2 | 3 | 4 | 5 | 6;
 
 interface LandscapeTutorialProps {
   isOpen: boolean;
@@ -114,10 +115,14 @@ export function LandscapeTutorial({
     if (step === 1) goToStep(2);
     else if (step === 2) goToStep(3);
     else if (step === 3) goToStep(4);
+    else if (step === 4) goToStep(5);
+    else if (step === 5) goToStep(6);
   };
 
   const handleBack = () => {
-    if (step === 4) goToStep(3);
+    if (step === 6) goToStep(5);
+    else if (step === 5) goToStep(4);
+    else if (step === 4) goToStep(3);
     else if (step === 3) goToStep(2);
     else if (step === 2) goToStep(1);
   };
@@ -402,6 +407,50 @@ export function LandscapeTutorial({
         </div>
       )}
 
+      {/* STEP 5: ROOM CREATOR (QUEST BOARD CENTERED IN MIDDLE) */}
+      {step === 5 && (
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "38%",
+            transform: "translate(-50%, -50%) scale(1.65)",
+            zIndex: 15,
+            pointerEvents: "none",
+            animation: "tutorialPopIn 0.3s ease forwards",
+          }}
+        >
+          <LandscapeQuestBoard
+            hasNotification={true}
+            notificationCount={2}
+            tasksCount={5}
+            onOpenBoard={() => {}}
+          />
+        </div>
+      )}
+
+      {/* STEP 6: ROOM PARTICIPANT (QUEST BOARD CENTERED IN MIDDLE) */}
+      {step === 6 && (
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "38%",
+            transform: "translate(-50%, -50%) scale(1.65)",
+            zIndex: 15,
+            pointerEvents: "none",
+            animation: "tutorialPopIn 0.3s ease forwards",
+          }}
+        >
+          <LandscapeQuestBoard
+            hasNotification={false}
+            notificationCount={0}
+            tasksCount={5}
+            onOpenBoard={() => {}}
+          />
+        </div>
+      )}
+
       {/* TOP BAR (Step indicator, Nudge tool toggle, and Skip) */}
       <div
         style={{
@@ -429,14 +478,14 @@ export function LandscapeTutorial({
               borderRadius: "999px",
             }}
           >
-            Step {step} of 4
+            Step {step} of 6
           </span>
           <div style={{ display: "flex", gap: "5px" }}>
-            {([1, 2, 3, 4] as TutorialStep[]).map((s) => (
+            {([1, 2, 3, 4, 5, 6] as TutorialStep[]).map((s) => (
               <div
                 key={s}
                 style={{
-                  width: "22px",
+                  width: "18px",
                   height: "6px",
                   borderRadius: "3px",
                   border: "1.5px solid #101517",
@@ -680,6 +729,8 @@ export function LandscapeTutorial({
             {step === 2 && "2. Daily Goblins (1 Per Team Member)"}
             {step === 3 && `3. Dragon Boss (${bossName})`}
             {step === 4 && "4. How to Submit Proof & Attack"}
+            {step === 5 && "5. Room Creator (Edit & Create Tasks)"}
+            {step === 6 && "6. Room Participant (Tasks, Proof & Reviews)"}
           </span>
 
           {step === 1 && (
@@ -712,6 +763,38 @@ export function LandscapeTutorial({
               </span>
             </div>
           )}
+
+          {step === 5 && (
+            <span
+              style={{
+                background: "#fef08a",
+                border: "1.5px solid #101517",
+                fontSize: "0.68rem",
+                fontWeight: 900,
+                color: "#854d0e",
+                padding: "1px 8px",
+                borderRadius: "4px",
+              }}
+            >
+              👑 Owner Only
+            </span>
+          )}
+
+          {step === 6 && (
+            <span
+              style={{
+                background: "#bae6fd",
+                border: "1.5px solid #101517",
+                fontSize: "0.68rem",
+                fontWeight: 900,
+                color: "#0369a1",
+                padding: "1px 8px",
+                borderRadius: "4px",
+              }}
+            >
+              ⚔️ Team Flow
+            </span>
+          )}
         </div>
 
         {/* Concise Description */}
@@ -735,6 +818,12 @@ export function LandscapeTutorial({
 
           {step === 4 &&
             `Click the red ATTACK button anytime to choose between submitting Daily Proof (to slay your goblin) or Task Evidence (to damage the dragon).`}
+
+          {step === 5 &&
+            `As the Room Owner, only you have permission to create new tasks and edit existing AI-generated tasks directly from the Quest Board. Customize requirements, rubrics, deadlines, and dragon damage to match your course assignment!`}
+
+          {step === 6 &&
+            `Team participants click the Quest Board in the middle of the meadow to inspect their tasks, submit evidence of work to damage the dragon, peer-review teammate submissions under the 'Reviews' tab, and check daily team check-ins.`}
         </p>
 
         {/* Footer Navigation */}
@@ -765,7 +854,7 @@ export function LandscapeTutorial({
           </div>
 
           <div style={{ display: "flex", gap: "8px" }}>
-            {step < 4 ? (
+            {step < 6 ? (
               <button
                 type="button"
                 onClick={handleNext}
@@ -827,7 +916,7 @@ export function LandscapeTutorial({
                   }}
                 >
                   <CheckCircle2 size={14} />
-                  <span>Got it!</span>
+                  <span>Enter Realm ✓</span>
                 </button>
               </>
             )}

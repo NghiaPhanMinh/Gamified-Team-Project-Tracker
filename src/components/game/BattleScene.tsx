@@ -1021,6 +1021,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const deleteProjectPermanently = useMutation(api.projects.deletePermanently);
   const claimTaskMutation = useMutation(api.tasks.claimTask);
   const createTaskMutation = useMutation(api.tasks.createTask);
+  const editQuestTaskMutation = useMutation(api.tasks.editQuestTask);
 
   // Quest Board States
   const [showQuestBoardModal, setShowQuestBoardModal] = useState(false);
@@ -1029,6 +1030,17 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [showCreateQuestModal, setShowCreateQuestModal] = useState(false);
   const [isClaimingQuest, setIsClaimingQuest] = useState(false);
   const [claimQuestError, setClaimQuestError] = useState<string | null>(null);
+
+  // Task Editing (Owner Only)
+  const [editingTask, setEditingTask] = useState<QuestTask | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+  const [editDueDate, setEditDueDate] = useState("");
+  const [editAssignee, setEditAssignee] = useState<string>("");
+  const [editDamage, setEditDamage] = useState<number>(50);
+  const [editIsOpen, setEditIsOpen] = useState(false);
+  const [isSavingEditTask, setIsSavingEditTask] = useState(false);
+  const [editTaskError, setEditTaskError] = useState<string | null>(null);
 
   // Daily Feed query for Daily Proof Tab
   const dailyPosts = useQuery((api as any).daily.listForProject, { projectId });
@@ -1291,7 +1303,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [showTutorialChoice, setShowTutorialChoice] = useState<boolean>(() => {
     try {
       if (typeof window === "undefined") return false;
-      return localStorage.getItem("rpg_tutorial_seen") === null;
+      return localStorage.getItem(`rpg_tut_choice_${projectId}`) === null;
     } catch {
       return false;
     }
@@ -2346,6 +2358,65 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       setCreateQuestError(getErrorMessage(err, "Failed to create task."));
     } finally {
       setIsCreatingQuest(false);
+    }
+  }
+
+  function handleStartEditTask(task: QuestTask) {
+    setEditingTask(task);
+    setEditTitle(task.title);
+    setEditDesc(task.description || "");
+    setEditDueDate(task.dueDate || "");
+    setEditAssignee(task.isOpenForClaiming ? "" : (task.primaryOwnerProfileId || ""));
+    setEditDamage(task.damage || 50);
+    setEditIsOpen(Boolean(task.isOpenForClaiming));
+    setEditTaskError(null);
+  }
+
+  async function handleSaveEditTask() {
+    if (!editingTask) return;
+    if (!editTitle.trim()) {
+      setEditTaskError("Task title cannot be empty.");
+      return;
+    }
+    setIsSavingEditTask(true);
+    setEditTaskError(null);
+    try {
+      await editQuestTaskMutation({
+        taskId: editingTask._id,
+        title: editTitle.trim(),
+        description: editDesc.trim(),
+        dueDate: editDueDate || undefined,
+        primaryOwnerProfileId: editIsOpen ? undefined : (editAssignee ? (editAssignee as Id<"userProfiles">) : undefined),
+        damage: editDamage,
+        isOpenForClaiming: editIsOpen,
+      });
+      gameAudio.playTing();
+      setSelectedQuestTask((prev) =>
+        prev
+          ? {
+              ...prev,
+              title: editTitle.trim(),
+              description: editDesc.trim(),
+              dueDate: editDueDate,
+              damage: editDamage,
+              isOpen: editIsOpen,
+              isOpenForClaiming: editIsOpen,
+              primaryOwnerProfileId: editIsOpen
+                ? prev.primaryOwnerProfileId
+                : editAssignee
+                  ? (editAssignee as Id<"userProfiles">)
+                  : prev.primaryOwnerProfileId,
+              assigneeName: editIsOpen
+                ? "Unassigned"
+                : workspace?.members.find((m) => m?.profileId === editAssignee)?.displayName || prev.assigneeName,
+            }
+          : null,
+      );
+      setEditingTask(null);
+    } catch (err) {
+      setEditTaskError(getErrorMessage(err, "Failed to update task."));
+    } finally {
+      setIsSavingEditTask(false);
     }
   }
 
@@ -3958,139 +4029,340 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
       )}
 
       {/* =========================================================================
-          IN-CANVAS QUEST DETAILS MODAL (Condensed & Informative)
+          IN-CANVAS QUEST DETAILS MODAL (Condensed & Informative with Owner Edit Mode)
          ========================================================================= */}
       {selectedQuestTask && (
-        <div className="rpg-modal-backdrop" onClick={() => setSelectedQuestTask(null)}>
-          <div className="rpg-modern-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "480px" }}>
+        <div
+          className="rpg-modal-backdrop"
+          onClick={() => {
+            setSelectedQuestTask(null);
+            setEditingTask(null);
+          }}
+        >
+          <div
+            className="rpg-modern-modal-card"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: "490px" }}
+          >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
               <div>
-                <span style={{ display: "inline-block", padding: "2px 8px", background: "#fff73f", color: "#101517", border: "1.5px solid #101517", borderRadius: "6px", fontSize: "0.7rem", fontWeight: 900, marginBottom: "6px" }}>
-                  Quest Details
+                <span
+                  style={{
+                    display: "inline-block",
+                    padding: "2px 8px",
+                    background: "#fff73f",
+                    color: "#101517",
+                    border: "1.5px solid #101517",
+                    borderRadius: "6px",
+                    fontSize: "0.7rem",
+                    fontWeight: 900,
+                    marginBottom: "6px",
+                  }}
+                >
+                  {editingTask ? "Edit Quest (Owner Only)" : "Quest Details"}
                 </span>
-                <h3 className="rpg-modern-title" style={{ fontSize: "1.15rem" }}>{selectedQuestTask.title}</h3>
+                {!editingTask && (
+                  <h3 className="rpg-modern-title" style={{ fontSize: "1.15rem" }}>
+                    {selectedQuestTask.title}
+                  </h3>
+                )}
               </div>
-              <button
-                type="button"
-                onClick={() => setSelectedQuestTask(null)}
-                style={{ background: "#ef4444", color: "#fff", border: "2px solid #101517", borderRadius: "8px", width: "28px", height: "28px", display: "grid", placeItems: "center", cursor: "pointer", fontWeight: 900 }}
-              >
-                ✕
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                {!editingTask && workspace?.project?.creatorProfileId === state?.currentProfileId && (
+                  <button
+                    type="button"
+                    onClick={() => handleStartEditTask(selectedQuestTask)}
+                    className="rpg-modern-btn is-secondary"
+                    style={{ padding: "4px 10px", fontSize: "0.74rem", background: "#fef08a", color: "#854d0e" }}
+                    title="Edit this quest (Owner Only)"
+                  >
+                    ✏️ Edit Task
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedQuestTask(null);
+                    setEditingTask(null);
+                  }}
+                  style={{
+                    background: "#ef4444",
+                    color: "#fff",
+                    border: "2px solid #101517",
+                    borderRadius: "8px",
+                    width: "28px",
+                    height: "28px",
+                    display: "grid",
+                    placeItems: "center",
+                    cursor: "pointer",
+                    fontWeight: 900,
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             {claimQuestError && (
-              <div style={{ padding: "8px 12px", background: "#fee2e2", border: "2px solid #ef4444", borderRadius: "8px", color: "#b91c1c", fontSize: "0.82rem", fontWeight: 800 }}>
+              <div
+                style={{
+                  padding: "8px 12px",
+                  background: "#fee2e2",
+                  border: "2px solid #ef4444",
+                  borderRadius: "8px",
+                  color: "#b91c1c",
+                  fontSize: "0.82rem",
+                  fontWeight: 800,
+                }}
+              >
                 {claimQuestError}
               </div>
             )}
-
-            {/* Description */}
-            <div style={{ background: "rgba(16,21,23,0.05)", border: "2px solid #101517", borderRadius: "10px", padding: "12px", fontSize: "0.85rem", lineHeight: "1.5" }}>
-              {selectedQuestTask.description || "No description provided for this quest."}
-            </div>
-
-            {/* Quest Metadata */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-              <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "8px", padding: "8px 10px" }}>
-                <span style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, opacity: 0.7, textTransform: "uppercase" }}>Due Date</span>
-                <span style={{ fontSize: "0.84rem", fontWeight: 800 }}>{selectedQuestTask.dueDate || "No deadline"}</span>
+            {editTaskError && (
+              <div
+                style={{
+                  padding: "8px 12px",
+                  background: "#fee2e2",
+                  border: "2px solid #ef4444",
+                  borderRadius: "8px",
+                  color: "#b91c1c",
+                  fontSize: "0.82rem",
+                  fontWeight: 800,
+                }}
+              >
+                {editTaskError}
               </div>
-              <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "8px", padding: "8px 10px" }}>
-                <span style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, opacity: 0.7, textTransform: "uppercase" }}>Assigned Hero</span>
-                <span style={{ fontSize: "0.84rem", fontWeight: 800, color: selectedQuestTask.isOpen ? "#dc2626" : "#101517" }}>
-                  {selectedQuestTask.assigneeName}
-                </span>
-              </div>
-            </div>
+            )}
 
-            {/* Action Buttons */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
-              {selectedQuestTask.isOpen ? (
-                <button
-                  className="rpg-modern-btn is-primary"
-                  type="button"
-                  disabled={isClaimingQuest}
-                  onClick={() => handleClaimQuest(selectedQuestTask)}
-                >
-                  {isClaimingQuest ? "Claiming Quest..." : "Claim This Quest"}
-                </button>
-              ) : questBoardTab === "mine" ? (
-                (() => {
-                  const isInReview = Boolean(
-                    selectedQuestTask.status === "review" ||
-                    selectedQuestTask.status === "submitted" ||
-                    selectedQuestTask.status === "awaiting_creator"
-                  );
-                  const isCompleted = Boolean(
-                    selectedQuestTask.isCompleted ||
-                    selectedQuestTask.status === "completed" ||
-                    selectedQuestTask.status === "verified"
-                  );
-
-                  if (isInReview) {
-                    return (
-                      <div
-                        style={{
-                          background: "#fef3c7",
-                          border: "2px solid #f59e0b",
-                          borderRadius: "8px",
-                          padding: "10px 14px",
-                          color: "#92400e",
-                          fontWeight: 800,
-                          fontSize: "0.84rem",
-                          textAlign: "center",
-                        }}
-                      >
-                        ⏳ Status: In Review — Your proof has been submitted and is currently awaiting peer review.
-                      </div>
-                    );
-                  }
-
-                  if (isCompleted) {
-                    return (
-                      <div
-                        style={{
-                          background: "#dcfce7",
-                          border: "2px solid #16a34a",
-                          borderRadius: "8px",
-                          padding: "10px 14px",
-                          color: "#15803d",
-                          fontWeight: 800,
-                          fontSize: "0.84rem",
-                          textAlign: "center",
-                        }}
-                      >
-                        ✅ Status: Completed & Verified — The Dragon took damage!
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <button
-                      className="rpg-modern-btn is-boss"
-                      type="button"
-                      onClick={() => {
-                        setSelectedTaskId(selectedQuestTask._id);
-                        setSelectedQuestTask(null);
-                        setShowQuestBoardModal(false);
-                        setShowBossModal(true);
-                      }}
-                    >
-                      Submit Proof & Attack Dragon ➜
-                    </button>
-                  );
-                })()
-              ) : (
-                <div style={{ textAlign: "center", fontSize: "0.78rem", fontWeight: 700, opacity: 0.8, padding: "4px" }}>
-                  Currently assigned to {selectedQuestTask.assigneeName} · Status: {selectedQuestTask.status || "active"}
+            {editingTask ? (
+              /* INLINE OWNER EDIT FORM */
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "4px" }}>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 800, marginBottom: "3px" }}>
+                    Task Title:
+                  </label>
+                  <input
+                    type="text"
+                    className="rpg-modern-input"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    placeholder="Task title..."
+                  />
                 </div>
-              )}
 
-              <button className="rpg-modern-btn is-secondary" type="button" onClick={() => setSelectedQuestTask(null)}>
-                Close
-              </button>
-            </div>
+                <div>
+                  <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 800, marginBottom: "3px" }}>
+                    Description & Assignment Rubric:
+                  </label>
+                  <textarea
+                    className="rpg-modern-textarea"
+                    rows={3}
+                    value={editDesc}
+                    onChange={(e) => setEditDesc(e.target.value)}
+                    placeholder="Task instructions and criteria..."
+                  />
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.72rem", fontWeight: 800, marginBottom: "2px" }}>
+                      Due Date:
+                    </label>
+                    <input
+                      type="date"
+                      className="rpg-modern-input"
+                      value={editDueDate}
+                      onChange={(e) => setEditDueDate(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.72rem", fontWeight: 800, marginBottom: "2px" }}>
+                      Boss Damage (HP):
+                    </label>
+                    <input
+                      type="number"
+                      min={10}
+                      max={500}
+                      className="rpg-modern-input"
+                      value={editDamage}
+                      onChange={(e) => setEditDamage(parseInt(e.target.value, 10) || 50)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "0.72rem", fontWeight: 800, marginBottom: "2px" }}>
+                    Assignee Hero:
+                  </label>
+                  <select
+                    className="rpg-modern-input"
+                    value={editIsOpen ? "" : editAssignee}
+                    onChange={(e) => {
+                      if (!e.target.value) {
+                        setEditIsOpen(true);
+                        setEditAssignee("");
+                      } else {
+                        setEditIsOpen(false);
+                        setEditAssignee(e.target.value);
+                      }
+                    }}
+                  >
+                    <option value="">🎯 Open for Claiming (Unassigned)</option>
+                    {workspace?.members?.filter(Boolean).map((m: any) => (
+                      <option key={m.profileId} value={m.profileId}>
+                        ⚔️ {m.displayName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
+                  <button
+                    type="button"
+                    className="rpg-modern-btn is-primary"
+                    disabled={isSavingEditTask}
+                    onClick={handleSaveEditTask}
+                    style={{ flex: 1 }}
+                  >
+                    {isSavingEditTask ? "Saving..." : "Save Changes ✓"}
+                  </button>
+                  <button
+                    type="button"
+                    className="rpg-modern-btn is-secondary"
+                    disabled={isSavingEditTask}
+                    onClick={() => setEditingTask(null)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* REGULAR VIEW MODE */
+              <>
+                {/* Description */}
+                <div
+                  style={{
+                    background: "rgba(16,21,23,0.05)",
+                    border: "2px solid #101517",
+                    borderRadius: "10px",
+                    padding: "12px",
+                    fontSize: "0.85rem",
+                    lineHeight: "1.5",
+                  }}
+                >
+                  {selectedQuestTask.description || "No description provided for this quest."}
+                </div>
+
+                {/* Quest Metadata */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                  <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "8px", padding: "8px 10px" }}>
+                    <span style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, opacity: 0.7, textTransform: "uppercase" }}>Due Date</span>
+                    <span style={{ fontSize: "0.84rem", fontWeight: 800 }}>{selectedQuestTask.dueDate || "No deadline"}</span>
+                  </div>
+                  <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "8px", padding: "8px 10px" }}>
+                    <span style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, opacity: 0.7, textTransform: "uppercase" }}>Assigned Hero</span>
+                    <span style={{ fontSize: "0.84rem", fontWeight: 800, color: selectedQuestTask.isOpen ? "#dc2626" : "#101517" }}>
+                      {selectedQuestTask.assigneeName}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
+                  {selectedQuestTask.isOpen ? (
+                    <button
+                      className="rpg-modern-btn is-primary"
+                      type="button"
+                      disabled={isClaimingQuest}
+                      onClick={() => handleClaimQuest(selectedQuestTask)}
+                    >
+                      {isClaimingQuest ? "Claiming Quest..." : "Claim This Quest"}
+                    </button>
+                  ) : questBoardTab === "mine" ? (
+                    (() => {
+                      const isInReview = Boolean(
+                        selectedQuestTask.status === "review" ||
+                        selectedQuestTask.status === "submitted" ||
+                        selectedQuestTask.status === "awaiting_creator"
+                      );
+                      const isCompleted = Boolean(
+                        selectedQuestTask.isCompleted ||
+                        selectedQuestTask.status === "completed" ||
+                        selectedQuestTask.status === "verified"
+                      );
+
+                      if (isInReview) {
+                        return (
+                          <div
+                            style={{
+                              background: "#fef3c7",
+                              border: "2px solid #f59e0b",
+                              borderRadius: "8px",
+                              padding: "10px 14px",
+                              color: "#92400e",
+                              fontWeight: 800,
+                              fontSize: "0.84rem",
+                              textAlign: "center",
+                            }}
+                          >
+                            ⏳ Status: In Review — Your proof has been submitted and is currently awaiting peer review.
+                          </div>
+                        );
+                      }
+
+                      if (isCompleted) {
+                        return (
+                          <div
+                            style={{
+                              background: "#dcfce7",
+                              border: "2px solid #16a34a",
+                              borderRadius: "8px",
+                              padding: "10px 14px",
+                              color: "#15803d",
+                              fontWeight: 800,
+                              fontSize: "0.84rem",
+                              textAlign: "center",
+                            }}
+                          >
+                            ✅ Status: Completed & Verified — The Dragon took damage!
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <button
+                          className="rpg-modern-btn is-boss"
+                          type="button"
+                          onClick={() => {
+                            setSelectedTaskId(selectedQuestTask._id);
+                            setSelectedQuestTask(null);
+                            setShowQuestBoardModal(false);
+                            setShowBossModal(true);
+                          }}
+                        >
+                          Submit Proof & Attack Dragon ➜
+                        </button>
+                      );
+                    })()
+                  ) : (
+                    <div style={{ textAlign: "center", fontSize: "0.78rem", fontWeight: 700, opacity: 0.8, padding: "4px" }}>
+                      Currently assigned to {selectedQuestTask.assigneeName} · Status: {selectedQuestTask.status || "active"}
+                    </div>
+                  )}
+
+                  <button
+                    className="rpg-modern-btn is-secondary"
+                    type="button"
+                    onClick={() => {
+                      setSelectedQuestTask(null);
+                      setEditingTask(null);
+                    }}
+                  >
+                    Close
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -5764,6 +6036,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 className="rpg-modern-btn is-secondary"
                 onClick={() => {
                   if (typeof window !== "undefined") {
+                    localStorage.setItem(`rpg_tut_choice_${projectId}`, "true");
                     localStorage.setItem("rpg_tutorial_seen", "true");
                   }
                   setShowTutorialChoice(false);
@@ -5784,6 +6057,10 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                 type="button"
                 className="rpg-modern-btn is-primary"
                 onClick={() => {
+                  if (typeof window !== "undefined") {
+                    localStorage.setItem(`rpg_tut_choice_${projectId}`, "true");
+                    localStorage.setItem("rpg_tutorial_seen", "true");
+                  }
                   setShowTutorialChoice(false);
                   setShowTutorial(true);
                 }}

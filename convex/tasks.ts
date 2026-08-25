@@ -895,6 +895,78 @@ export const updateTask = mutation({
   },
 });
 
+export const editQuestTask = mutation({
+  args: {
+    taskId: v.id("tasks"),
+    title: v.string(),
+    description: v.string(),
+    dueDate: v.optional(v.string()),
+    primaryOwnerProfileId: v.optional(v.id("userProfiles")),
+    damage: v.optional(v.number()),
+    isOpenForClaiming: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const task = await ctx.db.get(args.taskId);
+    if (!task) throw new Error("Task not found.");
+    const { project, profile } = await requireProjectCreatorAccess(ctx, task.projectId);
+
+    const title = args.title.trim().replace(/\s+/g, " ");
+    if (title.length < 2 || title.length > 140) {
+      throw new Error("Task title must be between 2 and 140 characters.");
+    }
+    const description = args.description.trim();
+    if (description.length > 2000) {
+      throw new Error("Task description must be 2000 characters or fewer.");
+    }
+
+    const now = Date.now();
+    const patch: any = {
+      title,
+      description,
+      updatedAt: now,
+    };
+
+    if (args.dueDate) {
+      assertDateWithinProject(args.dueDate, project, "Task due date");
+      patch.dueDate = args.dueDate;
+    }
+    if (args.damage !== undefined) {
+      patch.damage = Math.max(10, Math.min(500, Math.round(args.damage)));
+    }
+    if (args.isOpenForClaiming !== undefined) {
+      patch.isOpenForClaiming = args.isOpenForClaiming;
+      if (args.isOpenForClaiming) {
+        patch.assignmentState = "open";
+      }
+    }
+    if (args.primaryOwnerProfileId) {
+      patch.primaryOwnerProfileId = args.primaryOwnerProfileId;
+      patch.assignmentState = "assigned";
+      patch.isOpenForClaiming = false;
+    }
+
+    await ctx.db.patch(task._id, patch);
+    await ctx.db.patch(project._id, { updatedAt: now });
+
+    await ctx.db.insert("activityLogs", {
+      teamId: project.teamId,
+      projectId: project._id,
+      actorProfileId: profile._id,
+      action: "task_updated",
+      metadata: {
+        projectId: project._id,
+        taskId: task._id,
+        taskTitle: title,
+        taskStatus: task.status,
+      },
+      createdAt: now,
+    });
+
+    await refreshProjectProgress(ctx, project, profile._id);
+    return task._id;
+  },
+});
+
 export const deleteTask = mutation({
   args: { taskId: v.id("tasks") },
   handler: async (ctx, args) => {
