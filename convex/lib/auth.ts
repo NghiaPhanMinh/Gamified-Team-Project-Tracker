@@ -1,6 +1,6 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import type { GenericQueryCtx, GenericMutationCtx } from "convex/server";
-import type { GenericId } from "convex/values";
+import { ConvexError, type GenericId } from "convex/values";
 
 import type { DataModel, Doc } from "../_generated/dataModel";
 
@@ -14,13 +14,13 @@ export async function requireAuthUser(
   const authUserId = await getAuthUserId(ctx);
 
   if (authUserId === null) {
-    throw new Error("Authentication required.");
+    throw new ConvexError("Authentication required. Please sign in.");
   }
 
   const authUser = await ctx.db.get(authUserId);
 
   if (authUser === null) {
-    throw new Error("Authenticated user record is missing.");
+    throw new ConvexError("Authenticated user record is missing.");
   }
 
   return authUser;
@@ -38,7 +38,7 @@ export async function requireUserProfile(
     .unique();
 
   if (profile === null) {
-    throw new Error("MayLamDi profile setup is required.");
+    throw new ConvexError("MayLamDi profile setup is required.");
   }
 
   return profile;
@@ -54,7 +54,9 @@ export async function requireCompleteUserProfile(
     profile.weeklyCapacity === undefined ||
     (profile.skills?.length ?? 0) + (profile.softwareSkills?.length ?? 0) === 0
   ) {
-    throw new Error("Complete and save your MayLamDi profile before creating or joining a project.");
+    throw new ConvexError(
+      "Complete and save your MayLamDi profile before creating or joining a project.",
+    );
   }
 
   return profile;
@@ -76,7 +78,7 @@ export async function requireTeamMember(
     .unique();
 
   if (membership === null) {
-    throw new Error("You do not have access to this team.");
+    throw new ConvexError("You do not have access to this team.");
   }
 
   return { membership, profile };
