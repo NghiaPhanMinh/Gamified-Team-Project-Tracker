@@ -19,11 +19,26 @@ type RoomSummary = {
   memberCount: number;
 };
 
+type ProjectSummary = {
+  _id: Id<"projects">;
+  teamId: Id<"teams">;
+  roomName: string;
+  title: string;
+  description: string;
+  frameworkName: string;
+  status: "planning" | "active" | "at_risk" | "overdue" | "completed" | "archived";
+  deadline: string;
+  memberCount: number;
+  canDelete: boolean;
+  updatedAt: number;
+};
+
 type TeamSystemProps = {
   profile: Doc<"userProfiles">;
   activeSection: MainSection;
   projectsView: ProjectsView;
   rooms: RoomSummary[];
+  projectCards: ProjectSummary[] | undefined;
   selectedRoomId: Id<"teams"> | null;
   onNavigateHome: () => void;
   onOpenProjects: (view: ProjectsView) => void;
@@ -93,13 +108,13 @@ export function TeamSystem({
   activeSection,
   projectsView,
   rooms,
+  projectCards,
   selectedRoomId,
   onNavigateHome,
   onOpenProjects,
   onOpenRoom,
 }: TeamSystemProps) {
   const personalTaskGroups = useQuery(api.tasks.listMineAcrossRooms);
-  const projectCards = useQuery(api.projects.listMineAcrossRooms);
   const deleteProject = useMutation(api.projects.deletePermanently);
   const [deleteTarget, setDeleteTarget] = useState<ProjectDeleteTarget | null>(null);
 
@@ -171,7 +186,7 @@ export function TeamSystem({
   }
 
   if (activeSection === "resources" || projectsView === "resources") {
-    return <ResourcesPage />;
+    return <ResourcesPage currentProfileId={profile._id} />;
   }
 
   if (projectsView === "create" || projectsView === "join") {

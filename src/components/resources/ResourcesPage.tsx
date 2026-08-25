@@ -4,11 +4,12 @@ import { api } from "../../../convex/_generated/api";
 import { FrameworkLibrary } from "../frameworks/FrameworkLibrary";
 import { CustomFrameworkSection } from "../frameworks/CustomFrameworkSection";
 import type { BuiltInFramework } from "../../data/frameworks";
+import type { Id } from "../../../convex/_generated/dataModel";
 
-export function ResourcesPage() {
+export function ResourcesPage({ currentProfileId }: { currentProfileId: Id<"userProfiles"> }) {
   const [frameworkSeed, setFrameworkSeed] = useState<BuiltInFramework | null>(null);
-  const rooms = useQuery(api.teams.listMine);
-  const activeRoomId = rooms?.[0]?._id;
+  const projects = useQuery(api.projects.listMineAcrossRooms);
+  const activeRoomId = projects?.[0]?.teamId;
 
   return (
     <section className="resources-page" aria-labelledby="resources-title" style={{ width: "100%", margin: "0 auto" }}>
@@ -35,7 +36,7 @@ export function ResourcesPage() {
           {activeRoomId ? (
             <CustomFrameworkSection
               teamId={activeRoomId}
-              currentProfileId={"" as any}
+              currentProfileId={currentProfileId}
               currentRole="owner"
               seed={frameworkSeed}
               onSeedClosed={() => setFrameworkSeed(null)}

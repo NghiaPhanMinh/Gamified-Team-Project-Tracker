@@ -45,7 +45,7 @@ async function setupProject(database: Database) {
       { profileId: member.profileId, skills: ["Testing"], availability: "", currentWorkload: "low", preferences: "" },
     ],
   });
-  return { owner, member, outsider, projectId };
+  return { owner, member, outsider, projectId, teamId };
 }
 
 describe("extended project workflows", () => {
@@ -203,6 +203,31 @@ describe("extended project workflows", () => {
     await expect(member.asUser.mutation(api.projects.deletePermanently, { projectId, confirmationName: "Workflow Project" })).rejects.toThrow(/room creator/i);
     await expect(owner.asUser.mutation(api.projects.deletePermanently, { projectId, confirmationName: "wrong name" })).rejects.toThrow(/exact project name/i);
     expect(await owner.asUser.query(api.projects.listForTeam, { teamId: (await owner.asUser.query(api.tasks.getWorkspace, { projectId })).project.teamId })).toHaveLength(1);
+  });
+
+  it("removes a deleted project from every reactive project list and persistent project storage", async () => {
+    const database = convexTest(schema, modules);
+    const { owner, member, projectId } = await setupProject(database);
+    const feedId = await database.run((ctx) => ctx.db.insert("dailyFeed", {
+      projectId,
+      authorProfileId: owner.profileId,
+      text: "Deletion regression evidence",
+      imageUrls: [],
+      wordCount: 3,
+      imageCount: 0,
+      isValid: true,
+      createdAt: Date.now(),
+    }));
+
+    await owner.asUser.mutation(api.projects.deletePermanently, {
+      projectId,
+      confirmationName: "Workflow Project",
+    });
+
+    expect(await owner.asUser.query(api.projects.listMineAcrossRooms, {})).toEqual([]);
+    expect(await member.asUser.query(api.projects.listMineAcrossRooms, {})).toEqual([]);
+    expect(await database.run((ctx) => ctx.db.get(projectId))).toBeNull();
+    expect(await database.run((ctx) => ctx.db.get(feedId))).toBeNull();
   });
 
   it("enforces the Free platform generation allowance on backend records", async () => {

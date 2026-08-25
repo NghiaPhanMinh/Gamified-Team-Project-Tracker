@@ -35,6 +35,7 @@ export function AuthenticatedHome() {
     (profile.skills?.length ?? 0) + (profile.softwareSkills?.length ?? 0) > 0;
 
   const rooms = useQuery(api.teams.listMine, profileComplete ? {} : "skip");
+  const projects = useQuery(api.projects.listMineAcrossRooms, profileComplete ? {} : "skip");
   const ensureProfile = useMutation(api.profiles.ensureCurrent);
   const hasRequestedProfile = useRef(false);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -88,6 +89,17 @@ export function AuthenticatedHome() {
     projectsView = "index";
   }
 
+  useEffect(() => {
+    if (
+      projectsView === "room" &&
+      selectedRoomId !== null &&
+      projects !== undefined &&
+      !projects.some((project) => project.teamId === selectedRoomId)
+    ) {
+      navigate("/projects", { replace: true });
+    }
+  }, [navigate, projects, projectsView, selectedRoomId]);
+
   if (profileError) {
     return (
       <main className="auth-state-page">
@@ -129,9 +141,18 @@ export function AuthenticatedHome() {
   }
 
   const availableRooms = rooms ?? [];
-  const activeRoomId = availableRooms.some((room) => room._id === selectedRoomId)
+  const availableProjects = projects ?? [];
+  const visibleRooms = projects === undefined
+    ? availableRooms
+    : availableRooms.filter((room) => availableProjects.some((project) => project.teamId === room._id));
+  const selectedRoomIsAvailable = visibleRooms.some((room) => room._id === selectedRoomId);
+  const activeRoomId = projects === undefined
     ? selectedRoomId
-    : (availableRooms[0]?._id ?? selectedRoomId);
+    : selectedRoomIsAvailable
+    ? selectedRoomId
+    : projectsView === "room"
+      ? null
+      : (visibleRooms[0]?._id ?? null);
 
   function openProjects(view: ProjectsView, roomId?: Id<"teams">) {
     const targetPath = getPathForSection("projects", view, roomId);
@@ -180,15 +201,15 @@ export function AuthenticatedHome() {
           ))}
           <div className="sidebar-room-tree" aria-label="Project rooms">
             <div className="sidebar-projects-scroll">
-              {availableRooms.map((room, index) => (
+              {availableProjects.map((project, index) => (
                 <button
-                  key={room._id}
-                  className={activeSection === "projects" && projectsView === "room" && activeRoomId === room._id ? "is-active is-room is-project-room" : "is-room is-project-room"}
+                  key={project._id}
+                  className={activeSection === "projects" && projectsView === "room" && activeRoomId === project.teamId ? "is-active is-room is-project-room" : "is-room is-project-room"}
                   type="button"
                   style={{ "--group-color": getGroupColor(index) } as CSSProperties}
-                  onClick={() => openProjects("room", room._id)}
+                  onClick={() => openProjects("room", project.teamId)}
                 >
-                  <span className="project-color-marker" aria-hidden="true" /><strong>{room.name}</strong>
+                  <span className="project-color-marker" aria-hidden="true" /><strong>{project.title}</strong>
                 </button>
               ))}
             </div>
@@ -226,7 +247,8 @@ export function AuthenticatedHome() {
               profile={profile}
               activeSection={activeSection}
               projectsView={projectsView}
-              rooms={availableRooms}
+              rooms={visibleRooms}
+              projectCards={projects}
               selectedRoomId={activeRoomId}
               onNavigateHome={() => navigate("/home")}
               onOpenProjects={(view) => openProjects(view)}

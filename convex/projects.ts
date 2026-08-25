@@ -534,7 +534,7 @@ export const deletePermanently = mutation({
     if (args.confirmationName.trim() !== project.title) {
       throw new Error("Type the exact project name to confirm permanent deletion.");
     }
-    const [tasks, milestones, phases, members, blocks, plans, votes, trades, usage, activity, combat] = await Promise.all([
+    const [tasks, milestones, phases, members, blocks, plans, votes, trades, usage, activity, combat, dailyFeed] = await Promise.all([
       ctx.db.query("tasks").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("milestones").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("phases").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
@@ -546,6 +546,7 @@ export const deletePermanently = mutation({
       ctx.db.query("aiUsage").withIndex("by_project_and_source", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("activityLogs").withIndex("by_project_and_time", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("combatEvents").withIndex("by_project_and_time", (q) => q.eq("projectId", project._id)).collect(),
+      ctx.db.query("dailyFeed").withIndex("by_project_and_time", (q) => q.eq("projectId", project._id)).collect(),
     ]);
     for (const task of tasks) {
       const [evidence, reviews] = await Promise.all([
@@ -559,7 +560,7 @@ export const deletePermanently = mutation({
       for (const review of reviews) await ctx.db.delete(review._id);
       await ctx.db.delete(task._id);
     }
-    for (const docs of [milestones, phases, members, blocks, votes, plans, trades, usage, activity, combat]) {
+    for (const docs of [milestones, phases, members, blocks, votes, plans, trades, usage, activity, combat, dailyFeed]) {
       for (const doc of docs) await ctx.db.delete(doc._id);
     }
     await ctx.db.delete(project._id);

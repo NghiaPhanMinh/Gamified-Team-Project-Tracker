@@ -1998,7 +1998,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
         projectId,
         confirmationName: deleteConfirmInput.trim(),
       });
-      window.location.reload();
+      setShowDeleteRoomModal(false);
     } catch (err) {
       setDeleteRoomError(getErrorMessage(err, "Failed to delete project room."));
     } finally {
