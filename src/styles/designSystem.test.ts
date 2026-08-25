@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import css from "./design-tokens.css?raw";
+import appCss from "./index.css?raw";
 
 describe("MayLamDi design-system contract", () => {
   it("uses the supplied light and dark surface tokens", () => {
@@ -132,5 +133,11 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain(".project-brief-details");
     expect(css).toContain(".project-brief-summary-meta");
     expect(css).toContain("grid-template-columns: 1fr");
+  });
+
+  it("keeps the required profile setup page vertically scrollable", () => {
+    expect(appCss).toContain(".profile-gate-shell");
+    expect(appCss).toContain("height: 100dvh");
+    expect(appCss).toContain("overflow-y: auto");
   });
 });

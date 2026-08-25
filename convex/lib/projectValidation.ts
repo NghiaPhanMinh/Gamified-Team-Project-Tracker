@@ -76,6 +76,16 @@ export function validateProjectDetails(input: {
   return { title, description, startDate, deadline: input.deadline };
 }
 
+export function validateTargetMemberCount(value?: number) {
+  if (value === undefined) return undefined;
+
+  if (!Number.isInteger(value) || value < 1 || value > 10) {
+    throw new ConvexError("Team size must be between 1 and 10 people.");
+  }
+
+  return value;
+}
+
 export function validateProjectPhases(phases: ProjectPhaseInput[]) {
   if (phases.length < 1 || phases.length > 20) {
     throw new ConvexError("Projects must contain between 1 and 20 phases.");

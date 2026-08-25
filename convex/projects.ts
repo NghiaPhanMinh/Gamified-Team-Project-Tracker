@@ -8,6 +8,7 @@ import {
   validateMemberPlanning,
   validateProjectDetails,
   validateProjectPhases,
+  validateTargetMemberCount,
 } from "./lib/projectValidation";
 
 const projectPhaseValidator = v.object({
@@ -194,6 +195,7 @@ export const create = mutation({
     const { profile } = await requireTeamMember(ctx, args.teamId);
     await requireCompleteUserProfile(ctx);
     const details = validateProjectDetails(args);
+    const targetMemberCount = validateTargetMemberCount(args.targetMemberCount);
     let frameworkName: string;
     let phases;
     let builtInFrameworkId: string | undefined;
@@ -304,7 +306,7 @@ export const create = mutation({
       setupMode: args.setupMode,
       taskCreationMode: args.taskCreationMode ?? args.setupMode,
       allocationStrategy: args.allocationStrategy ?? (args.setupMode === "ai" ? "ai" : "manual"),
-      targetMemberCount: args.targetMemberCount,
+      targetMemberCount,
       launchedAt: now,
       creatorProfileId: profile._id,
       createdAt: now,

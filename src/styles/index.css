@@ -5254,6 +5254,13 @@ footer {
 }
 
 /* Profile-first room flow, creator task controls, reviews, and meeting votes. */
+.profile-gate-shell {
+  height: 100dvh;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
 .profile-gate-content { width: min(100%, 1080px); margin: 0 auto; padding: calc(var(--app-header-height, 76px) + 1.5rem) 1rem 2rem; }
 .profile-setup-form, .profile-context-settings { display: grid; gap: 1rem; }
 .profile-basic-card { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem; border: 2px solid var(--color-text); border-radius: 20px; background: var(--color-surface); color: var(--color-text); }
@@ -8114,6 +8121,5 @@ button.maylamdi-button:active {
   border: 1.5px solid currentColor;
   border-radius: 0 2px 2px 0;
 }
-
 
 

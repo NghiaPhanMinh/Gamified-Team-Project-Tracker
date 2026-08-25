@@ -42,6 +42,24 @@ describe("ProjectOnboarding", () => {
     expect(screen.getByLabelText(/project name/i)).toHaveValue("Studio launch");
   });
 
+  it("offers a one-person room during project setup", () => {
+    render(
+      <ProjectOnboarding
+        mode="create"
+        currentProfileId={"profile-1" as Id<"userProfiles">}
+        onCancel={vi.fn()}
+        onRoomReady={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
+    const teamSize = screen.getByRole("combobox", { name: /team size/i });
+
+    expect(screen.getByRole("option", { name: "1 person" })).toHaveValue("1");
+    fireEvent.change(teamSize, { target: { value: "1" } });
+    expect(teamSize).toHaveValue("1");
+  });
+
   it("keeps the member flow to one code screen and reuses the saved profile", () => {
     render(
       <ProjectOnboarding

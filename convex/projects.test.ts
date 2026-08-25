@@ -96,6 +96,42 @@ async function createTeamWithMember(testDatabase: ProjectTestDatabase) {
 }
 
 describe("project creation foundation", () => {
+  it("creates a one-person project with only its creator", async () => {
+    const testDatabase = convexTest(schema, modules);
+    const owner = await addProfile(
+      testDatabase,
+      "Solo Owner",
+      "solo@example.com",
+    );
+    const teamId = await owner.asUser.mutation(api.teams.create, {
+      name: "Solo Project",
+    });
+
+    const projectId = await owner.asUser.mutation(api.projects.create, {
+      teamId,
+      title: "Solo Portfolio",
+      description: "Create and test a personal portfolio for assessment.",
+      startDate: "2026-08-25",
+      deadline: "2026-09-25",
+      frameworkType: "none",
+      frameworkName: "Flexible project",
+      phases: samplePhases(),
+      targetMemberCount: 1,
+    });
+
+    const saved = await testDatabase.run(async (ctx) => ({
+      project: await ctx.db.get(projectId),
+      members: await ctx.db
+        .query("projectMembers")
+        .withIndex("by_project", (query) => query.eq("projectId", projectId))
+        .collect(),
+    }));
+
+    expect(saved.project?.targetMemberCount).toBe(1);
+    expect(saved.members).toHaveLength(1);
+    expect(saved.members[0].profileId).toBe(owner.profileId);
+  });
+
   it("creates a persistent project, member plans, phases, and activity", async () => {
     const testDatabase = convexTest(schema, modules);
     const { owner, member, teamId } =
