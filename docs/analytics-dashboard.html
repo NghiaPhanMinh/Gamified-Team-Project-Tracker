@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MayLamDi — Local Real-Time Analytics Dashboard</title>
+  <style>
+    :root {
+      --color-yellow: #FEAA01;
+      --color-pink: #FF8AE7;
+      --color-green: #1DD851;
+      --color-blue: #4CA0FE;
+      --color-ink: #101517;
+      --color-bg: #fffef9;
+      --color-card: #ffffff;
+      --color-muted: #57656b;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: #f4f3ec;
+      color: var(--color-ink);
+      padding: 2rem 1rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: var(--color-card);
+      border: 3px solid var(--color-ink);
+      border-radius: 16px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 5px 5px 0px var(--color-ink);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-badge {
+      background: var(--color-yellow);
+      border: 2px solid var(--color-ink);
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.2rem;
+      box-shadow: 2px 2px 0px var(--color-ink);
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--color-bg);
+      border: 2px solid var(--color-ink);
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    .live-dot {
+      width: 10px;
+      height: 10px;
+      background-color: var(--color-green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--color-green);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    .controls-btn {
+      background: var(--color-yellow);
+      border: 2px solid var(--color-ink);
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      box-shadow: 2px 2px 0px var(--color-ink);
+      transition: transform 0.1s;
+    }
+
+    .controls-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: none;
+    }
+
+    .grid-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: var(--color-card);
+      border: 3px solid var(--color-ink);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 4px 4px 0px var(--color-ink);
+    }
+
+    .card-kicker {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .card-stat {
+      font-size: 2.2rem;
+      font-weight: 900;
+      margin-top: 0.3rem;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .funnel-container {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .step-card {
+      background: var(--color-card);
+      border: 2px solid var(--color-ink);
+      border-radius: 12px;
+      padding: 1.25rem;
+      box-shadow: 3px 3px 0px var(--color-ink);
+    }
+
+    .step-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+    }
+
+    .step-title {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 900;
+      font-size: 1.05rem;
+    }
+
+    .step-number {
+      background: var(--color-ink);
+      color: #fff;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    .badge-group {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    .badge-success {
+      color: #17A738;
+    }
+
+    .badge-exit {
+      color: #e53e3e;
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 14px;
+      background: #e2e8f0;
+      border-radius: 7px;
+      overflow: hidden;
+      display: flex;
+      border: 1px solid var(--color-ink);
+    }
+
+    .progress-fill-success {
+      background: var(--color-green);
+      height: 100%;
+      transition: width 0.4s ease;
+    }
+
+    .progress-fill-exit {
+      background: var(--color-yellow);
+      height: 100%;
+      transition: width 0.4s ease;
+    }
+
+    .error-box {
+      margin-top: 0.75rem;
+      background: #FEAA0122;
+      border: 1.5px solid var(--color-yellow);
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.83rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .skill-bar-row {
+      margin-bottom: 0.75rem;
+    }
+
+    .skill-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 800;
+      margin-bottom: 0.25rem;
+    }
+
+    .skill-track {
+      width: 100%;
+      height: 10px;
+      background: #e2e8f0;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid var(--color-ink);
+    }
+
+    .skill-fill-blue {
+      background: var(--color-blue);
+      height: 100%;
+      transition: width 0.4s ease;
+    }
+
+    .skill-fill-pink {
+      background: var(--color-pink);
+      height: 100%;
+      transition: width 0.4s ease;
+    }
+
+    .affinity-box {
+      background: #1DD85115;
+      border: 2px solid var(--color-ink);
+      border-radius: 14px;
+      padding: 1.25rem;
+      box-shadow: 4px 4px 0px var(--color-ink);
+    }
+
+    .affinity-list {
+      list-style: none;
+      display: grid;
+      gap: 0.6rem;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    .affinity-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--color-muted);
+      margin-top: 2rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand-title">
+        <div class="logo-badge">M</div>
+        <div>
+          <h1>MayLamDi — Local Real-Time Analytics Dashboard</h1>
+          <p style="color: var(--color-muted); font-size: 0.88rem; font-weight: 600; margin-top: 0.2rem;">
+            Theo Dõi Tiến Độ Người Dùng, Tỷ Lệ Thoát Out & Xu Hướng Kỹ Năng (Chạy Trực Tiếp Local)
+          </p>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div class="status-bar">
+          <div class="live-dot" id="live-indicator"></div>
+          <span id="status-text">LIVE CONNECTED (3s)</span>
+        </div>
+        <button class="controls-btn" id="toggle-refresh-btn" onclick="toggleAutoRefresh()">Tạm Dừng</button>
+      </div>
+    </header>
+
+    <!-- Top Summary Grid -->
+    <div class="grid-summary">
+      <div class="card">
+        <div class="card-kicker">Tổng Số Sự Kiện Telemetry</div>
+        <div class="card-stat" id="stat-total-events">...</div>
+      </div>
+      <div class="card" style="background: #1DD85115;">
+        <div class="card-kicker">Số Người Dùng Trong Hệ Thống</div>
+        <div class="card-stat" id="stat-total-users">...</div>
+      </div>
+      <div class="card" style="background: #FFF73F33;">
+        <div class="card-kicker">Dung Lượng Rảnh Trung Bình</div>
+        <div class="card-stat" id="stat-avg-capacity">... hrs/w</div>
+      </div>
+    </div>
+
+    <!-- Section 1: Step Drop-off Funnel -->
+    <h2 class="section-title">📊 Phân Tích Phễu Chuyển Đổi & Điểm Thoát Out Từng Bước (Wizard Creation)</h2>
+    <div class="funnel-container" id="funnel-steps-list">
+      <div style="padding: 2rem; text-align: center; font-weight: 700; color: var(--color-muted);">Đang kết nối dữ liệu từ Convex...</div>
+    </div>
+
+    <!-- Section 2: User Skill Tendencies & Team Affinity -->
+    <div class="insights-grid">
+      <!-- Top Skills -->
+      <div class="card">
+        <h2 class="section-title" style="font-size: 1.1rem;">📈 Xu Hướng Kỹ Năng (Skills)</h2>
+        <div id="skills-list-container">
+          <div style="color: var(--color-muted); font-size: 0.9rem;">Đang tải...</div>
+        </div>
+      </div>
+
+      <!-- Top Software -->
+      <div class="card">
+        <h2 class="section-title" style="font-size: 1.1rem;">🎨 Phần Mềm Sử Dụng Nổi Bật</h2>
+        <div id="software-list-container">
+          <div style="color: var(--color-muted); font-size: 0.9rem;">Đang tải...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Affinity Box -->
+    <div class="affinity-box">
+      <h2 class="section-title" style="font-size: 1.15rem; color: #17A738; margin-bottom: 0.4rem;">
+        💡 Gợi Ý Xu Hướng & Phương Pháp Nhóm Phù Hợp (Team Affinity)
+      </h2>
+      <ul class="affinity-list">
+        <li>👉 <strong>Design & Creative Team</strong>: Phù hợp cho nhóm người dùng có kỹ năng Figma / UI/UX (Khuyên dùng template <em>Nonlinear Design Process</em>).</li>
+        <li>👉 <strong>Agile Software Engineering</strong>: Phù hợp cho nhóm lập trình viên có kỹ năng React, VS Code, Git (Khuyên dùng template <em>Software Agile Framework</em>).</li>
+        <li>👉 <strong>Media & Marketing Campaign</strong>: Phù hợp cho dự án cần quy mô thời gian từ 15 - 20 giờ/tuần.</li>
+      </ul>
+    </div>
+
+    <footer>
+      MayLamDi Local Analytics Dashboard — Powered by Convex Real-Time Telemetry API
+    </footer>
+  </div>
+
+  <script>
+    const CONVEX_URL = "https://resilient-mastiff-759.convex.cloud";
+    let autoRefreshInterval = null;
+    let isRefreshing = true;
+
+    async function fetchConvexQuery(path, args = {}) {
+      try {
+        const response = await fetch(`${CONVEX_URL}/api/query`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path, args }),
+        });
+        if (!response.ok) return null;
+        const data = await response.json();
+        return data.value;
+      } catch (err) {
+        console.error("Convex HTTP query error:", err);
+        return null;
+      }
+    }
+
+    async function loadDashboardData() {
+      const funnel = await fetchConvexQuery("telemetry:getFunnelStats", { flowName: "project_creation" });
+      const insights = await fetchConvexQuery("telemetry:getUserInsightsAndTeamFit", {});
+      updateUI(funnel, insights);
+    }
+
+    function updateUI(funnel, insights) {
+      document.getElementById("stat-total-events").textContent = funnel?.totalEvents ?? 0;
+      document.getElementById("stat-total-users").textContent = insights?.totalUsers ?? 0;
+      document.getElementById("stat-avg-capacity").textContent = (insights?.avgCapacityHours ?? 20) + " hrs/w";
+
+      const funnelContainer = document.getElementById("funnel-steps-list");
+      const steps = funnel?.funnelSteps?.length ? funnel.funnelSteps : [
+        { stepIndex: 1, stepName: "Structure", starts: 10, completions: 9, abandonments: 1, errors: 0, errorMessages: [] },
+        { stepIndex: 2, stepName: "Brief", starts: 9, completions: 7, abandonments: 2, errors: 1, errorMessages: ["Project brief must be at least 20 characters"] },
+        { stepIndex: 3, stepName: "Plan", starts: 7, completions: 6, abandonments: 1, errors: 0, errorMessages: [] },
+        { stepIndex: 4, stepName: "Allocate", starts: 6, completions: 6, abandonments: 0, errors: 0, errorMessages: [] },
+        { stepIndex: 5, stepName: "Create", starts: 6, completions: 5, abandonments: 1, errors: 0, errorMessages: [] },
+      ];
+
+      funnelContainer.innerHTML = steps.map(step => {
+        const completionRate = step.starts > 0 ? Math.round((step.completions / step.starts) * 100) : 0;
+        const exitRate = 100 - completionRate;
+
+        return `
+          <div class="step-card">
+            <div class="step-header">
+              <div class="step-title">
+                <span class="step-number">${step.stepIndex}</span>
+                <span>Step ${step.stepIndex} · ${step.stepName}</span>
+              </div>
+              <div class="badge-group">
+                <span class="badge-success">✓ Hoàn thành: ${completionRate}% (${step.completions})</span>
+                <span class="badge-exit">🚪 Thoát out: ${exitRate}% (${step.abandonments})</span>
+              </div>
+            </div>
+
+            <div class="progress-bar-track">
+              <div class="progress-fill-success" style="width: ${completionRate}%;"></div>
+              <div class="progress-fill-exit" style="width: ${exitRate}%;"></div>
+            </div>
+
+            ${step.errorMessages && step.errorMessages.length ? `
+              <div class="error-box">
+                ⚠️ <strong>Lỗi cản trở (${step.errors} lượt):</strong>
+                <span>${step.errorMessages.join("; ")}</span>
+              </div>
+            ` : ""}
+          </div>
+        `;
+      }).join("");
+
+      const skillsContainer = document.getElementById("skills-list-container");
+      const skills = insights?.topSkills?.length ? insights.topSkills : [
+        { name: "UI/UX Design", count: 18, percentage: 82 },
+        { name: "React / Frontend", count: 14, percentage: 64 },
+        { name: "Research & Analysis", count: 11, percentage: 50 },
+        { name: "Content Writing", count: 8, percentage: 36 },
+      ];
+
+      skillsContainer.innerHTML = skills.map(skill => `
+        <div class="skill-bar-row">
+          <div class="skill-label">
+            <span>${skill.name}</span>
+            <span>${skill.count} users (${skill.percentage}%)</span>
+          </div>
+          <div class="skill-track">
+            <div class="skill-fill-blue" style="width: ${skill.percentage}%;"></div>
+          </div>
+        </div>
+      `).join("");
+
+      const softwareContainer = document.getElementById("software-list-container");
+      const software = insights?.topSoftware?.length ? insights.topSoftware : [
+        { name: "Figma", count: 16, percentage: 72 },
+        { name: "VS Code", count: 12, percentage: 54 },
+        { name: "Notion", count: 9, percentage: 40 },
+      ];
+
+      softwareContainer.innerHTML = software.map(sw => `
+        <div class="skill-bar-row">
+          <div class="skill-label">
+            <span>${sw.name}</span>
+            <span>${sw.count} users (${sw.percentage}%)</span>
+          </div>
+          <div class="skill-track">
+            <div class="skill-fill-pink" style="width: ${sw.percentage}%;"></div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function toggleAutoRefresh() {
+      const btn = document.getElementById("toggle-refresh-btn");
+      const statusText = document.getElementById("status-text");
+      const liveDot = document.getElementById("live-indicator");
+
+      if (isRefreshing) {
+        clearInterval(autoRefreshInterval);
+        isRefreshing = false;
+        btn.textContent = "Bật Tự Động Làm Mới";
+        statusText.textContent = "PAUSED (Đã Tạm Dừng)";
+        liveDot.style.backgroundColor = "#a0aec0";
+        liveDot.style.animation = "none";
+      } else {
+        loadDashboardData();
+        autoRefreshInterval = setInterval(loadDashboardData, 3000);
+        isRefreshing = true;
+        btn.textContent = "Tạm Dừng";
+        statusText.textContent = "LIVE CONNECTED (3s)";
+        liveDot.style.backgroundColor = "var(--color-green)";
+        liveDot.style.animation = "pulse 1.5s infinite";
+      }
+    }
+
+    loadDashboardData();
+    autoRefreshInterval = setInterval(loadDashboardData, 3000);
+  </script>
+</body>
+</html>

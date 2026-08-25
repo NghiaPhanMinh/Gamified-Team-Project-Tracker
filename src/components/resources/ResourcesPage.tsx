@@ -3,7 +3,6 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { FrameworkLibrary } from "../frameworks/FrameworkLibrary";
 import { CustomFrameworkSection } from "../frameworks/CustomFrameworkSection";
-import { AdminAnalyticsDashboard } from "../admin/AdminAnalyticsDashboard";
 import type { BuiltInFramework } from "../../data/frameworks";
 import type { Id } from "../../../convex/_generated/dataModel";
 
@@ -53,10 +52,6 @@ export function ResourcesPage({ currentProfileId }: { currentProfileId: Id<"user
               </div>
             </section>
           )}
-        </div>
-
-        <div id="admin-telemetry-section" style={{ paddingTop: "1.5rem", borderTop: "2px dashed color-mix(in srgb, var(--color-text) 22%, transparent)" }}>
-          <AdminAnalyticsDashboard />
         </div>
       </div>
     </section>
