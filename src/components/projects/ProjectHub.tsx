@@ -26,13 +26,12 @@ export function ProjectHub({
   const [openProjectId, setOpenProjectId] = useState<Id<"projects"> | null>(null);
   const [actionsProjectId, setActionsProjectId] = useState<Id<"projects"> | null>(null);
   const [renameValue, setRenameValue] = useState("");
-  const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const renameProject = useMutation(api.projects.rename);
   const setArchived = useMutation(api.projects.setArchived);
-  const deleteProject = useMutation(api.projects.deletePermanently);
+  const removeProject = useMutation(api.projects.removeFromMine);
   const selectedDefault = useRef(false);
 
   useEffect(() => {
@@ -45,7 +44,6 @@ export function ProjectHub({
   function revealActions(projectId: Id<"projects">, title: string) {
     setActionsProjectId(projectId);
     setRenameValue(title);
-    setDeleteConfirmation("");
     setError(null);
   }
 
@@ -122,8 +120,8 @@ export function ProjectHub({
                 <label><span>Rename</span><input maxLength={100} value={renameValue} onChange={(event) => setRenameValue(event.target.value)} /></label>
                 <button className="quiet-button" type="button" disabled={isSaving || !renameValue.trim()} onClick={() => void run(() => renameProject({ projectId: project._id, title: renameValue }))}>Save name</button>
                 <button className="quiet-button" type="button" disabled={isSaving} onClick={() => void run(() => setArchived({ projectId: project._id, archived: project.status !== "archived" }))}>{project.status === "archived" ? "Restore" : "Archive"}</button>
-                <label className="danger-confirm-field"><span>Type “{project.title}” to delete permanently</span><input value={deleteConfirmation} onChange={(event) => setDeleteConfirmation(event.target.value)} /></label>
-                <button className="danger-button" type="button" disabled={isSaving || deleteConfirmation !== project.title} onClick={() => void run(() => deleteProject({ projectId: project._id, confirmationName: deleteConfirmation }))}>Delete permanently</button>
+                <p>Removing this project changes only your account. Teammates keep the shared room and all project data.</p>
+                <button className="danger-button" type="button" disabled={isSaving} onClick={() => void run(() => removeProject({ projectId: project._id }))}>Remove from my account</button>
                 <button className="quiet-button" type="button" onClick={() => setActionsProjectId(null)}>Cancel</button>
               </div>
             ) : null}

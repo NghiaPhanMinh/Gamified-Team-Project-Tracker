@@ -793,11 +793,11 @@ type BattleResultBoardProps = {
   bossRemainingHp: number;
   bossMaximumHp: number;
   verifiedQuests: number;
-  canDeleteRoom: boolean;
+  canRemoveRoom: boolean;
   onDownloadContribution: () => void;
   onOpenLeaderboard: () => void;
   onViewBattle: () => void;
-  onDeleteRoom: () => void;
+  onRemoveRoom: () => void;
 };
 
 function BattleResultBoard({
@@ -808,11 +808,11 @@ function BattleResultBoard({
   bossRemainingHp,
   bossMaximumHp,
   verifiedQuests,
-  canDeleteRoom,
+  canRemoveRoom,
   onDownloadContribution,
   onOpenLeaderboard,
   onViewBattle,
-  onDeleteRoom,
+  onRemoveRoom,
 }: BattleResultBoardProps) {
   const isSuccess = variant === "success";
   const ResultIcon = isSuccess ? ShieldCheck : ShieldX;
@@ -878,12 +878,12 @@ function BattleResultBoard({
         </button>
       </div>
 
-      {canDeleteRoom && (
+      {canRemoveRoom && (
         <div className="battle-result-danger-zone">
-          <span>Room controls</span>
-          <button type="button" className="battle-result-delete" onClick={onDeleteRoom}>
+          <span>Personal controls</span>
+          <button type="button" className="battle-result-delete" onClick={onRemoveRoom}>
             <Trash2 size={18} strokeWidth={2} aria-hidden="true" />
-            Delete Party Room
+            Remove from my account
           </button>
         </div>
       )}
@@ -1018,7 +1018,7 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const addEvidence = useMutation(api.evidence.add);
   const chooseReviewer = useMutation(api.tasks.chooseReviewer);
   const submitForReview = useMutation(api.evidence.submitForReview);
-  const deleteProjectPermanently = useMutation(api.projects.deletePermanently);
+  const removeProjectFromMine = useMutation(api.projects.removeFromMine);
   const claimTaskMutation = useMutation(api.tasks.claimTask);
   const createTaskMutation = useMutation(api.tasks.createTask);
   const editQuestTaskMutation = useMutation(api.tasks.editQuestTask);
@@ -1127,9 +1127,8 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     localStorage.setItem("pvz_bar_config", JSON.stringify(pvzBarOffset));
   }, [pvzBarOffset]);
 
-  // Room Deletion & End Game states
+  // Personal room removal & end-game states
   const [showDeleteRoomModal, setShowDeleteRoomModal] = useState(false);
-  const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
   const [isDeletingRoom, setIsDeletingRoom] = useState(false);
   const [deleteRoomError, setDeleteRoomError] = useState<string | null>(null);
   const [viewBattleSceneOverride, setViewBattleSceneOverride] = useState(false);
@@ -1998,21 +1997,15 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
     doc.save(`${state.project.title.replace(/\s+/g, "_")}_Contribution_Dossier.pdf`);
   }
 
-  async function handleDeleteRoom() {
-    if (!state || deleteConfirmInput.trim() !== state.project.title.trim()) {
-      setDeleteRoomError("Please type the exact project title to confirm deletion.");
-      return;
-    }
+  async function handleRemoveRoom() {
+    if (!state) return;
     setIsDeletingRoom(true);
     setDeleteRoomError(null);
     try {
-      await deleteProjectPermanently({
-        projectId,
-        confirmationName: deleteConfirmInput.trim(),
-      });
+      await removeProjectFromMine({ projectId });
       setShowDeleteRoomModal(false);
     } catch (err) {
-      setDeleteRoomError(getErrorMessage(err, "Failed to delete project room."));
+      setDeleteRoomError(getErrorMessage(err, "Failed to remove the project from your account."));
     } finally {
       setIsDeletingRoom(false);
     }
@@ -2512,11 +2505,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           bossRemainingHp={rawRemainingHp}
           bossMaximumHp={state.maximumHp}
           verifiedQuests={verifiedQuestCount}
-          canDeleteRoom={workspace?.project?.creatorProfileId === state.currentProfileId}
+          canRemoveRoom={Boolean(workspace)}
           onDownloadContribution={generateContributionPdf}
           onOpenLeaderboard={() => setShowLeaderboardModal(true)}
           onViewBattle={() => setViewBattleSceneOverride(true)}
-          onDeleteRoom={() => setShowDeleteRoomModal(true)}
+          onRemoveRoom={() => setShowDeleteRoomModal(true)}
         />
 
         {/* Modals on End-Game screen */}
@@ -2579,28 +2572,18 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
           </div>
         )}
 
-        {/* Permanent Delete Room Confirmation Modal */}
+        {/* Account-only room removal confirmation modal */}
         {showDeleteRoomModal && (
           <div className="rpg-modal-overlay" onClick={() => setShowDeleteRoomModal(false)}>
             <div className="rpg-parchment-modal" style={{ maxWidth: "460px" }} onClick={(e) => e.stopPropagation()}>
               <div className="rpg-modal-header">
-                <h2>Delete Party Room</h2>
+                <h2>Remove from my account?</h2>
                 <button type="button" className="rpg-btn-close" onClick={() => setShowDeleteRoomModal(false)}>✕</button>
               </div>
               <div className="rpg-modal-body">
-                <p style={{ margin: "0 0 12px 0", fontSize: "0.9rem", color: "#fca5a5" }}>
-                  <strong>Warning:</strong> This will permanently delete this room, all tasks, milestones, evidence artifacts, and combat history.
+                <p style={{ margin: "0 0 12px 0", fontSize: "0.9rem", color: "#e2e8f0" }}>
+                  This removes <strong>{state.project.title}</strong> only from your account. Your teammates keep the room, tasks, milestones, evidence, and combat history.
                 </p>
-                <label style={{ display: "grid", gap: "6px", fontSize: "0.85rem", color: "#e2e8f0" }}>
-                  <span>Type <strong>{state.project.title}</strong> to confirm:</span>
-                  <input
-                    type="text"
-                    value={deleteConfirmInput}
-                    onChange={(e) => setDeleteConfirmInput(e.target.value)}
-                    placeholder={state.project.title}
-                    style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #64748b", background: "#1e293b", color: "#ffffff" }}
-                  />
-                </label>
                 {deleteRoomError && (
                   <p style={{ color: "#ef4444", fontSize: "0.8rem", margin: "8px 0 0 0" }}>{deleteRoomError}</p>
                 )}
@@ -2610,11 +2593,11 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
                   </button>
                   <button
                     type="button"
-                    disabled={isDeletingRoom || deleteConfirmInput.trim() !== state.project.title.trim()}
-                    onClick={handleDeleteRoom}
-                    style={{ padding: "8px 16px", borderRadius: "6px", background: "#b91c1c", color: "#fff", border: "none", fontWeight: "bold", cursor: "pointer", opacity: deleteConfirmInput.trim() === state.project.title.trim() ? 1 : 0.5 }}
+                    disabled={isDeletingRoom}
+                    onClick={handleRemoveRoom}
+                    style={{ padding: "8px 16px", borderRadius: "6px", background: "#b91c1c", color: "#fff", border: "none", fontWeight: "bold", cursor: "pointer" }}
                   >
-                    {isDeletingRoom ? "Deleting…" : "Permanently Delete"}
+                    {isDeletingRoom ? "Removing…" : "Remove from my account"}
                   </button>
                 </div>
               </div>

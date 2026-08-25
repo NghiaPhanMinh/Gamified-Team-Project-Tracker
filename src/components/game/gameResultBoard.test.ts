@@ -22,7 +22,8 @@ describe("shared end-of-game result board", () => {
     expect(battleSource).toContain("Download Contribution Dossier (PDF)");
     expect(battleSource).toContain("Final Leaderboard");
     expect(battleSource).toContain("View Battle Canvas");
-    expect(battleSource).toContain("Delete Party Room");
+    expect(battleSource).toContain("Remove from my account");
+    expect(battleSource).not.toContain("Delete Party Room");
     expect(battleSource).toContain("ShieldCheck");
     expect(battleSource).toContain("ShieldX");
     expect(battleSource).toContain("FileDown");

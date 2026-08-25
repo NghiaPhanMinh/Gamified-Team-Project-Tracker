@@ -205,14 +205,33 @@ export const joinByCode = mutation({
       throw new Error("No team uses that code. Check it and try again.");
     }
 
-    const existingMembership = await ctx.db
-      .query("teamMembers")
-      .withIndex("by_team_and_user", (query) =>
-        query.eq("teamId", team._id).eq("profileId", profile._id),
-      )
-      .unique();
+    const [existingMembership, projects] = await Promise.all([
+      ctx.db
+        .query("teamMembers")
+        .withIndex("by_team_and_user", (query) =>
+          query.eq("teamId", team._id).eq("profileId", profile._id),
+        )
+        .unique(),
+      ctx.db
+        .query("projects")
+        .withIndex("by_team_and_updated", (query) => query.eq("teamId", team._id))
+        .order("desc")
+        .take(50),
+    ]);
 
     if (existingMembership !== null) {
+      const projectIds = new Set(projects.map((project) => project._id));
+      const dismissals = await ctx.db
+        .query("projectDismissals")
+        .withIndex("by_user", (query) => query.eq("profileId", profile._id))
+        .collect();
+      const teamDismissals = dismissals.filter((dismissal) => projectIds.has(dismissal.projectId));
+
+      if (teamDismissals.length > 0) {
+        for (const dismissal of teamDismissals) await ctx.db.delete(dismissal._id);
+        return team._id;
+      }
+
       throw new Error("You are already a member of this team.");
     }
 
@@ -226,11 +245,6 @@ export const joinByCode = mutation({
       characterOutline: DEFAULT_CHARACTER_OUTLINE,
     });
 
-    const projects = await ctx.db
-      .query("projects")
-      .withIndex("by_team_and_updated", (query) => query.eq("teamId", team._id))
-      .order("desc")
-      .take(50);
     const activeProject = projects.find((project) => project.status !== "archived");
 
     if (activeProject) {

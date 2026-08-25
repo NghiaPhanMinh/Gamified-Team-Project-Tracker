@@ -206,6 +206,14 @@ export default defineSchema({
   })
     .index("by_team_and_status", ["teamId", "status"])
     .index("by_team_and_updated", ["teamId", "updatedAt"]),
+  projectDismissals: defineTable({
+    projectId: v.id("projects"),
+    profileId: v.id("userProfiles"),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["profileId"])
+    .index("by_project", ["projectId"])
+    .index("by_project_and_user", ["projectId", "profileId"]),
   projectMembers: defineTable({
     projectId: v.id("projects"),
     profileId: v.id("userProfiles"),

@@ -29,7 +29,6 @@ export type ProjectSummary = {
   status: "planning" | "active" | "at_risk" | "overdue" | "completed" | "archived";
   deadline: string;
   memberCount: number;
-  canDelete: boolean;
   updatedAt: number;
 };
 
@@ -45,7 +44,7 @@ type TeamSystemProps = {
   onOpenRoom: (roomId: Id<"teams">) => void;
 };
 
-type ProjectDeleteTarget = {
+type ProjectRemovalTarget = {
   projectId: Id<"projects">;
   projectTitle: string;
 };
@@ -54,12 +53,12 @@ export function ProjectIndexCard({
   project,
   colorIndex,
   onOpen,
-  onRequestDelete,
+  onRequestRemoval,
 }: {
   project: ProjectSummary;
   colorIndex: number;
   onOpen: () => void;
-  onRequestDelete: () => void;
+  onRequestRemoval: () => void;
 }) {
   return (
     <article className="project-index-card-shell" data-project-status={project.status}>
@@ -75,67 +74,54 @@ export function ProjectIndexCard({
         <span>{project.frameworkName}</span>
         <span>Open project →</span>
       </button>
-      {project.canDelete ? (
-        <button
-          className="project-index-delete-button"
-          type="button"
-          aria-label={`Delete ${project.title}`}
-          title="Delete project"
-          onClick={onRequestDelete}
-        >
-          <X aria-hidden="true" />
-        </button>
-      ) : null}
+      <button
+        className="project-index-delete-button"
+        type="button"
+        aria-label={`Remove ${project.title} from my account`}
+        title="Remove from my account"
+        onClick={onRequestRemoval}
+      >
+        <X aria-hidden="true" />
+      </button>
     </article>
   );
 }
 
-export function ProjectDeleteDialog({
+export function ProjectRemovalDialog({
   target,
   onCancel,
   onConfirm,
 }: {
-  target: ProjectDeleteTarget;
+  target: ProjectRemovalTarget;
   onCancel: () => void;
-  onConfirm: (confirmationName: string) => Promise<void>;
+  onConfirm: () => Promise<void>;
 }) {
-  const [confirmationName, setConfirmationName] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const matchesProjectName = confirmationName.trim() === target.projectTitle.trim();
 
-  async function confirmDeletion() {
-    if (!matchesProjectName || isDeleting) return;
+  async function confirmRemoval() {
+    if (isRemoving) return;
     setError(null);
-    setIsDeleting(true);
+    setIsRemoving(true);
     try {
-      await onConfirm(confirmationName);
+      await onConfirm();
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError, "The project could not be deleted."));
-      setIsDeleting(false);
+      setError(getErrorMessage(caughtError, "The project could not be removed from your account."));
+      setIsRemoving(false);
     }
   }
 
   return (
     <div className="project-delete-overlay" role="presentation">
       <section className="project-delete-dialog" role="dialog" aria-modal="true" aria-labelledby="project-delete-title">
-        <p className="kicker">Permanent action</p>
-        <h2 id="project-delete-title">Delete project?</h2>
-        <p>This will permanently remove the project and its related data. This cannot be undone.</p>
-        <label className="project-delete-confirmation">
-          <span>Type <strong>{target.projectTitle}</strong> to confirm</span>
-          <input
-            autoFocus
-            value={confirmationName}
-            onChange={(event) => setConfirmationName(event.target.value)}
-            aria-label="Project name confirmation"
-          />
-        </label>
+        <p className="kicker">Your project list</p>
+        <h2 id="project-delete-title">Remove {target.projectTitle}?</h2>
+        <p>This removes the project only from your account. Your teammates keep the room, tasks, files, progress, and shared history.</p>
         {error ? <p className="form-error" role="alert">{error}</p> : null}
         <div className="project-delete-actions">
-          <button className="quiet-button" type="button" disabled={isDeleting} onClick={onCancel}>Cancel</button>
-          <button className="danger-button" type="button" disabled={!matchesProjectName || isDeleting} onClick={() => void confirmDeletion()}>
-            {isDeleting ? "Deleting…" : "Delete project"}
+          <button className="quiet-button" type="button" disabled={isRemoving} onClick={onCancel}>Cancel</button>
+          <button className="danger-button" type="button" disabled={isRemoving} onClick={() => void confirmRemoval()}>
+            {isRemoving ? "Removing…" : "Remove from my account"}
           </button>
         </div>
       </section>
@@ -155,8 +141,8 @@ export function TeamSystem({
   onOpenRoom,
 }: TeamSystemProps) {
   const personalTaskGroups = useQuery(api.tasks.listMineAcrossRooms);
-  const deleteProject = useMutation(api.projects.deletePermanently);
-  const [deleteTarget, setDeleteTarget] = useState<ProjectDeleteTarget | null>(null);
+  const removeProject = useMutation(api.projects.removeFromMine);
+  const [removalTarget, setRemovalTarget] = useState<ProjectRemovalTarget | null>(null);
 
   if (activeSection === "home") {
     const nextTask = personalTaskGroups
@@ -269,7 +255,7 @@ export function TeamSystem({
               project={project}
               colorIndex={index}
               onOpen={() => onOpenRoom(project.teamId)}
-              onRequestDelete={() => setDeleteTarget({ projectId: project._id, projectTitle: project.title })}
+              onRequestRemoval={() => setRemovalTarget({ projectId: project._id, projectTitle: project.title })}
             />
           ))}
           {rooms
@@ -290,14 +276,14 @@ export function TeamSystem({
             ))}
         </div>
       ) : null}
-      {deleteTarget ? (
-        <ProjectDeleteDialog
-          key={deleteTarget.projectId}
-          target={deleteTarget}
-          onCancel={() => setDeleteTarget(null)}
-          onConfirm={async (confirmationName) => {
-            await deleteProject({ projectId: deleteTarget.projectId, confirmationName });
-            setDeleteTarget(null);
+      {removalTarget ? (
+        <ProjectRemovalDialog
+          key={removalTarget.projectId}
+          target={removalTarget}
+          onCancel={() => setRemovalTarget(null)}
+          onConfirm={async () => {
+            await removeProject({ projectId: removalTarget.projectId });
+            setRemovalTarget(null);
           }}
         />
       ) : null}

@@ -6,7 +6,7 @@ import authenticatedHomeSource from "../auth/AuthenticatedHome.tsx?raw";
 import battleSceneSource from "../game/BattleScene.tsx?raw";
 import resourcesSource from "../resources/ResourcesPage.tsx?raw";
 import teamSystemSource from "./TeamSystem.tsx?raw";
-import { ProjectDeleteDialog, ProjectIndexCard, type ProjectSummary } from "./TeamSystem";
+import { ProjectRemovalDialog, ProjectIndexCard, type ProjectSummary } from "./TeamSystem";
 
 const projectStatuses: ProjectSummary["status"][] = [
   "planning",
@@ -17,7 +17,7 @@ const projectStatuses: ProjectSummary["status"][] = [
   "archived",
 ];
 
-function projectForStatus(status: ProjectSummary["status"], canDelete: boolean): ProjectSummary {
+function projectForStatus(status: ProjectSummary["status"]): ProjectSummary {
   return {
     _id: `project-${status}` as Id<"projects">,
     teamId: "team-1" as Id<"teams">,
@@ -28,43 +28,34 @@ function projectForStatus(status: ProjectSummary["status"], canDelete: boolean):
     status,
     deadline: "2026-08-31",
     memberCount: 4,
-    canDelete,
     updatedAt: 1,
   };
 }
 
-describe("project deletion dialog", () => {
+describe("personal project removal dialog", () => {
   afterEach(cleanup);
 
-  it("requires the exact project name before confirming permanent deletion", async () => {
+  it("clearly confirms that removal affects only the current account", async () => {
     const onCancel = vi.fn();
     const onConfirm = vi.fn().mockResolvedValue(undefined);
     render(
-      <ProjectDeleteDialog
+      <ProjectRemovalDialog
         target={{ projectId: "project-1" as Id<"projects">, projectTitle: "Studio Prototype" }}
         onCancel={onCancel}
         onConfirm={onConfirm}
       />,
     );
 
-    const deleteButton = screen.getByRole("button", { name: "Delete project" });
-    expect(deleteButton).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Remove from my account" }));
 
-    fireEvent.change(screen.getByLabelText("Project name confirmation"), { target: { value: "Studio" } });
-    expect(deleteButton).toBeDisabled();
-
-    fireEvent.change(screen.getByLabelText("Project name confirmation"), { target: { value: "Studio Prototype" } });
-    expect(deleteButton).toBeEnabled();
-    fireEvent.click(deleteButton);
-
-    await waitFor(() => expect(onConfirm).toHaveBeenCalledWith("Studio Prototype"));
-    expect(screen.getByText(/cannot be undone/i)).toBeInTheDocument();
+    await waitFor(() => expect(onConfirm).toHaveBeenCalledOnce());
+    expect(screen.getByText(/teammates keep the room, tasks, files, progress, and shared history/i)).toBeInTheDocument();
   });
 
   it("keeps cancellation separate from the destructive action", () => {
     const onCancel = vi.fn();
     render(
-      <ProjectDeleteDialog
+      <ProjectRemovalDialog
         target={{ projectId: "project-2" as Id<"projects">, projectTitle: "Research Sprint" }}
         onCancel={onCancel}
         onConfirm={vi.fn().mockResolvedValue(undefined)}
@@ -75,19 +66,18 @@ describe("project deletion dialog", () => {
     expect(onCancel).toHaveBeenCalledOnce();
   });
 
-  it("keeps the dialog open and reports an error when backend deletion fails", async () => {
+  it("keeps the dialog open and reports an error when account removal fails", async () => {
     render(
-      <ProjectDeleteDialog
-        target={{ projectId: "project-3" as Id<"projects">, projectTitle: "Failed Delete" }}
+      <ProjectRemovalDialog
+        target={{ projectId: "project-3" as Id<"projects">, projectTitle: "Failed Removal" }}
         onCancel={vi.fn()}
-        onConfirm={vi.fn().mockRejectedValue(new Error("Deletion was rejected"))}
+        onConfirm={vi.fn().mockRejectedValue(new Error("Removal was rejected"))}
       />,
     );
 
-    fireEvent.change(screen.getByLabelText("Project name confirmation"), { target: { value: "Failed Delete" } });
-    fireEvent.click(screen.getByRole("button", { name: "Delete project" }));
+    fireEvent.click(screen.getByRole("button", { name: "Remove from my account" }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("Deletion was rejected");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Removal was rejected");
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
@@ -103,38 +93,23 @@ describe("project deletion dialog", () => {
   });
 });
 
-describe("project card delete visibility", () => {
+describe("project card personal removal visibility", () => {
   afterEach(cleanup);
 
-  it.each(projectStatuses)("shows the delete X for an authorised %s project", (status) => {
-    const onRequestDelete = vi.fn();
-    const project = projectForStatus(status, true);
+  it.each(projectStatuses)("shows the account-removal X for every member on a %s project", (status) => {
+    const onRequestRemoval = vi.fn();
+    const project = projectForStatus(status);
 
     render(
       <ProjectIndexCard
         project={project}
         colorIndex={0}
         onOpen={vi.fn()}
-        onRequestDelete={onRequestDelete}
+        onRequestRemoval={onRequestRemoval}
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: `Delete ${project.title}` }));
-    expect(onRequestDelete).toHaveBeenCalledOnce();
-  });
-
-  it.each(projectStatuses)("hides the delete X from an unauthorised member for a %s project", (status) => {
-    const project = projectForStatus(status, false);
-
-    render(
-      <ProjectIndexCard
-        project={project}
-        colorIndex={0}
-        onOpen={vi.fn()}
-        onRequestDelete={vi.fn()}
-      />,
-    );
-
-    expect(screen.queryByRole("button", { name: `Delete ${project.title}` })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: `Remove ${project.title} from my account` }));
+    expect(onRequestRemoval).toHaveBeenCalledOnce();
   });
 });

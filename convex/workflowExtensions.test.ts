@@ -193,22 +193,64 @@ describe("extended project workflows", () => {
     expect(updated.tasks[0]).toMatchObject({ primaryOwnerProfileId: member.profileId, acceptanceStatus: "accepted" });
   });
 
-  it("requires project-owner authority and exact-name confirmation for deletion", async () => {
+  it("keeps permanent shared-data deletion restricted to the project creator", async () => {
     const database = convexTest(schema, modules);
     const { owner, member, projectId } = await setupProject(database);
-    const statuses = ["planning", "active", "at_risk", "overdue", "completed", "archived"] as const;
-
-    for (const status of statuses) {
-      await database.run((ctx) => ctx.db.patch(projectId, { status }));
-      const ownerProjects = await owner.asUser.query(api.projects.listMineAcrossRooms, {});
-      const memberProjects = await member.asUser.query(api.projects.listMineAcrossRooms, {});
-      expect(ownerProjects[0]).toMatchObject({ _id: projectId, status, canDelete: true });
-      expect(memberProjects[0]).toMatchObject({ _id: projectId, status, canDelete: false });
-    }
-
     await expect(member.asUser.mutation(api.projects.deletePermanently, { projectId, confirmationName: "Workflow Project" })).rejects.toThrow(/room creator/i);
     await expect(owner.asUser.mutation(api.projects.deletePermanently, { projectId, confirmationName: "wrong name" })).rejects.toThrow(/exact project name/i);
     expect(await owner.asUser.query(api.projects.listForTeam, { teamId: (await owner.asUser.query(api.tasks.getWorkspace, { projectId })).project.teamId })).toHaveLength(1);
+  });
+
+  it("removes a project only from the requesting member's account", async () => {
+    const database = convexTest(schema, modules);
+    const { owner, member, projectId } = await setupProject(database);
+    const workspace = await owner.asUser.query(api.tasks.getWorkspace, { projectId });
+    await owner.asUser.mutation(api.tasks.createTask, {
+      projectId,
+      phaseId: workspace.phases[0]._id,
+      title: "Member-owned test task",
+      description: "Confirm personal task lists follow account-only project removal.",
+      primaryOwnerProfileId: member.profileId,
+      collaboratorProfileIds: [],
+      weight: 1,
+      required: true,
+      startDate: "2026-08-02",
+      dueDate: "2026-08-20",
+      requiresReview: false,
+    });
+    expect(await member.asUser.query(api.tasks.listMineAcrossRooms, {})).toHaveLength(1);
+
+    await member.asUser.mutation(api.projects.removeFromMine, { projectId });
+
+    expect(await member.asUser.query(api.projects.listMineAcrossRooms, {})).toEqual([]);
+    expect(await member.asUser.query(api.tasks.listMineAcrossRooms, {})).toEqual([]);
+    expect(await owner.asUser.query(api.projects.listMineAcrossRooms, {})).toEqual([
+      expect.objectContaining({ _id: projectId, title: "Workflow Project" }),
+    ]);
+    expect(await database.run((ctx) => ctx.db.get(projectId))).not.toBeNull();
+    expect(await database.run((ctx) => ctx.db
+      .query("projectMembers")
+      .withIndex("by_project", (query) => query.eq("projectId", projectId))
+      .collect())).toHaveLength(2);
+  });
+
+  it("lets the room owner remove their own view while teammates keep the shared project", async () => {
+    const database = convexTest(schema, modules);
+    const { owner, member, projectId, teamId } = await setupProject(database);
+
+    await owner.asUser.mutation(api.projects.removeFromMine, { projectId });
+
+    expect(await owner.asUser.query(api.projects.listMineAcrossRooms, {})).toEqual([]);
+    expect(await member.asUser.query(api.projects.listMineAcrossRooms, {})).toEqual([
+      expect.objectContaining({ _id: projectId, title: "Workflow Project" }),
+    ]);
+    expect(await database.run((ctx) => ctx.db.get(projectId))).not.toBeNull();
+
+    const team = await owner.asUser.query(api.teams.getWorkspace, { teamId });
+    await owner.asUser.mutation(api.teams.joinByCode, { code: team.team.joinCode });
+    expect(await owner.asUser.query(api.projects.listMineAcrossRooms, {})).toEqual([
+      expect.objectContaining({ _id: projectId, title: "Workflow Project" }),
+    ]);
   });
 
   it("removes a deleted project from every reactive project list and persistent project storage", async () => {
@@ -224,6 +266,11 @@ describe("extended project workflows", () => {
       isValid: true,
       createdAt: Date.now(),
     }));
+    await member.asUser.mutation(api.projects.removeFromMine, { projectId });
+    const dismissal = await database.run((ctx) => ctx.db
+      .query("projectDismissals")
+      .withIndex("by_project_and_user", (query) => query.eq("projectId", projectId).eq("profileId", member.profileId))
+      .unique());
 
     await owner.asUser.mutation(api.projects.deletePermanently, {
       projectId,
@@ -234,6 +281,8 @@ describe("extended project workflows", () => {
     expect(await member.asUser.query(api.projects.listMineAcrossRooms, {})).toEqual([]);
     expect(await database.run((ctx) => ctx.db.get(projectId))).toBeNull();
     expect(await database.run((ctx) => ctx.db.get(feedId))).toBeNull();
+    expect(dismissal).not.toBeNull();
+    expect(await database.run((ctx) => ctx.db.get(dismissal!._id))).toBeNull();
   });
 
   it("enforces the Free platform generation allowance on backend records", async () => {

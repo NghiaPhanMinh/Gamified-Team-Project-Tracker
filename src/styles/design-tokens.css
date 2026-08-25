@@ -3248,7 +3248,7 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   overflow-wrap: anywhere;
 }
 
-/* Project index: the destructive control is explicit, owner-only, and
+/* Project index: personal removal is available to every member and remains
  * independent from the card's primary open action. */
 .project-index-card-shell {
   position: relative;

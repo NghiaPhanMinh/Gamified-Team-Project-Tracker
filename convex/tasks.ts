@@ -383,10 +383,17 @@ export const listMineAcrossRooms = query({
   args: {},
   handler: async (ctx) => {
     const profile = await requireUserProfile(ctx);
-    const roomMemberships = await ctx.db
-      .query("teamMembers")
-      .withIndex("by_user", (query) => query.eq("profileId", profile._id))
-      .collect();
+    const [roomMemberships, dismissals] = await Promise.all([
+      ctx.db
+        .query("teamMembers")
+        .withIndex("by_user", (query) => query.eq("profileId", profile._id))
+        .collect(),
+      ctx.db
+        .query("projectDismissals")
+        .withIndex("by_user", (query) => query.eq("profileId", profile._id))
+        .collect(),
+    ]);
+    const dismissedProjectIds = new Set(dismissals.map((dismissal) => dismissal.projectId));
     const groups = [];
 
     for (const membership of roomMemberships) {
@@ -399,6 +406,7 @@ export const listMineAcrossRooms = query({
         .take(50);
 
       for (const project of projects) {
+        if (dismissedProjectIds.has(project._id)) continue;
         if (project.status === "archived") continue;
         const projectMembership = await ctx.db
           .query("projectMembers")
@@ -1284,4 +1292,3 @@ export const releaseOverdueTask = mutation({
     return task._id;
   },
 });
-

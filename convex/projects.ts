@@ -36,12 +36,21 @@ export const listMineAcrossRooms = query({
   args: {},
   handler: async (ctx) => {
     const profile = await requireUserProfile(ctx);
-    const memberships = await ctx.db
-      .query("teamMembers")
-      .withIndex("by_user", (indexQuery) =>
-        indexQuery.eq("profileId", profile._id),
-      )
-      .collect();
+    const [memberships, dismissals] = await Promise.all([
+      ctx.db
+        .query("teamMembers")
+        .withIndex("by_user", (indexQuery) =>
+          indexQuery.eq("profileId", profile._id),
+        )
+        .collect(),
+      ctx.db
+        .query("projectDismissals")
+        .withIndex("by_user", (indexQuery) =>
+          indexQuery.eq("profileId", profile._id),
+        )
+        .collect(),
+    ]);
+    const dismissedProjectIds = new Set(dismissals.map((dismissal) => dismissal.projectId));
 
     const groupedProjects = await Promise.all(
       memberships.map(async (membership) => {
@@ -66,25 +75,51 @@ export const listMineAcrossRooms = query({
           return [];
         }
 
-        return projects.map((project) => ({
-          _id: project._id,
-          teamId: team._id,
-          roomName: team.name,
-          title: project.title,
-          description: project.description,
-          frameworkName: project.frameworkName,
-          status: project.status,
-          deadline: project.deadline,
-          memberCount: members.length,
-          canDelete: project.creatorProfileId === profile._id,
-          updatedAt: project.updatedAt,
-        }));
+        return projects
+          .filter((project) => !dismissedProjectIds.has(project._id))
+          .map((project) => ({
+            _id: project._id,
+            teamId: team._id,
+            roomName: team.name,
+            title: project.title,
+            description: project.description,
+            frameworkName: project.frameworkName,
+            status: project.status,
+            deadline: project.deadline,
+            memberCount: members.length,
+            updatedAt: project.updatedAt,
+          }));
       }),
     );
 
     return groupedProjects
       .flat()
       .sort((first, second) => second.updatedAt - first.updatedAt);
+  },
+});
+
+export const removeFromMine = mutation({
+  args: { projectId: v.id("projects") },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("This project no longer exists.");
+    const { profile } = await requireTeamMember(ctx, project.teamId);
+    const existing = await ctx.db
+      .query("projectDismissals")
+      .withIndex("by_project_and_user", (query) =>
+        query.eq("projectId", project._id).eq("profileId", profile._id),
+      )
+      .unique();
+
+    if (existing === null) {
+      await ctx.db.insert("projectDismissals", {
+        projectId: project._id,
+        profileId: profile._id,
+        createdAt: Date.now(),
+      });
+    }
+
+    return project._id;
   },
 });
 
@@ -534,7 +569,7 @@ export const deletePermanently = mutation({
     if (args.confirmationName.trim() !== project.title) {
       throw new Error("Type the exact project name to confirm permanent deletion.");
     }
-    const [tasks, milestones, phases, members, blocks, plans, votes, trades, usage, activity, combat, dailyFeed] = await Promise.all([
+    const [tasks, milestones, phases, members, blocks, plans, votes, trades, usage, activity, combat, dailyFeed, dismissals] = await Promise.all([
       ctx.db.query("tasks").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("milestones").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("phases").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
@@ -547,6 +582,7 @@ export const deletePermanently = mutation({
       ctx.db.query("activityLogs").withIndex("by_project_and_time", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("combatEvents").withIndex("by_project_and_time", (q) => q.eq("projectId", project._id)).collect(),
       ctx.db.query("dailyFeed").withIndex("by_project_and_time", (q) => q.eq("projectId", project._id)).collect(),
+      ctx.db.query("projectDismissals").withIndex("by_project", (q) => q.eq("projectId", project._id)).collect(),
     ]);
     for (const task of tasks) {
       const [evidence, reviews] = await Promise.all([
@@ -560,7 +596,7 @@ export const deletePermanently = mutation({
       for (const review of reviews) await ctx.db.delete(review._id);
       await ctx.db.delete(task._id);
     }
-    for (const docs of [milestones, phases, members, blocks, votes, plans, trades, usage, activity, combat, dailyFeed]) {
+    for (const docs of [milestones, phases, members, blocks, votes, plans, trades, usage, activity, combat, dailyFeed, dismissals]) {
       for (const doc of docs) await ctx.db.delete(doc._id);
     }
     await ctx.db.delete(project._id);
