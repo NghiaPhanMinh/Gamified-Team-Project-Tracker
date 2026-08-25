@@ -307,13 +307,14 @@
   </div>
 
   <script>
-    const CONVEX_URL = "https://resilient-mastiff-759.convex.cloud";
+    const HTTP_API_URL = "https://resilient-mastiff-759.convex.site/api/telemetry/dashboard";
+    const CLOUD_QUERY_URL = "https://resilient-mastiff-759.convex.cloud/api/query";
     let autoRefreshInterval = null;
     let isRefreshing = true;
 
     async function fetchConvexQuery(path, args = {}) {
       try {
-        const response = await fetch(`${CONVEX_URL}/api/query`, {
+        const response = await fetch(CLOUD_QUERY_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ path, args }),
@@ -334,6 +335,18 @@
     }
 
     async function loadDashboardData() {
+      try {
+        const res = await fetch(HTTP_API_URL);
+        if (res.ok) {
+          const data = await res.json();
+          updateUI(data.funnel, data.insights, data.briefs, data.bugs, data.rooms, data.locations);
+          return;
+        }
+      } catch (err) {
+        console.warn("HTTP CORS endpoint fetch error, attempting fallback...", err);
+      }
+
+      // Fallback
       const funnel = await fetchConvexQuery("telemetry:getFunnelStats", { flowName: "project_creation" });
       const insights = await fetchConvexQuery("telemetry:getUserInsightsAndTeamFit", {});
       const briefs = await fetchConvexQuery("telemetry:getRecentProjectBriefs", {});
@@ -345,14 +358,12 @@
     }
 
     function updateUI(funnel, insights, briefs, bugs, rooms, locations) {
-      // Summary Stats
       document.getElementById("stat-total-events").textContent = funnel?.totalEvents ?? 0;
       document.getElementById("stat-active-rooms").textContent = rooms?.length ?? 0;
       document.getElementById("stat-total-users").textContent = insights?.totalUsers ?? 0;
       document.getElementById("stat-total-briefs").textContent = briefs?.length ?? 0;
       document.getElementById("stat-total-bugs").textContent = bugs?.length ?? 0;
 
-      // 1. Active Rooms & Projects
       const roomsTbody = document.getElementById("rooms-tbody");
       if (rooms && rooms.length) {
         roomsTbody.innerHTML = rooms.map(r => `
@@ -370,7 +381,6 @@
         roomsTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--color-muted);">Chưa có phòng nào đang chạy.</td></tr>`;
       }
 
-      // 2. Last User Locations
       const locTbody = document.getElementById("locations-tbody");
       if (locations && locations.length) {
         locTbody.innerHTML = locations.map(l => `
@@ -389,15 +399,8 @@
         locTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--color-muted);">Chưa có vị trí người dùng nào được ghi nhận.</td></tr>`;
       }
 
-      // 3. Funnel Steps
       const funnelContainer = document.getElementById("funnel-steps-list");
-      const steps = funnel?.funnelSteps?.length ? funnel.funnelSteps : [
-        { stepIndex: 1, stepName: "Structure", starts: 10, completions: 9, abandonments: 1, errors: 0, errorMessages: [] },
-        { stepIndex: 2, stepName: "Brief", starts: 9, completions: 7, abandonments: 2, errors: 1, errorMessages: ["Project brief must be at least 20 characters"] },
-        { stepIndex: 3, stepName: "Plan", starts: 7, completions: 6, abandonments: 1, errors: 0, errorMessages: [] },
-        { stepIndex: 4, stepName: "Allocate", starts: 6, completions: 6, abandonments: 0, errors: 0, errorMessages: [] },
-        { stepIndex: 5, stepName: "Create", starts: 6, completions: 5, abandonments: 1, errors: 0, errorMessages: [] },
-      ];
+      const steps = funnel?.funnelSteps?.length ? funnel.funnelSteps : [];
 
       funnelContainer.innerHTML = steps.map(step => {
         const completionRate = step.starts > 0 ? Math.round((step.completions / step.starts) * 100) : 0;
@@ -424,7 +427,6 @@
         `;
       }).join("");
 
-      // 4. Bug Logs Table
       const bugTbody = document.getElementById("bug-logs-tbody");
       if (bugs && bugs.length) {
         bugTbody.innerHTML = bugs.map(bug => `
@@ -440,7 +442,6 @@
         bugTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #17A738; font-weight: 800;">🎉 Chưa ghi nhận bug hay lỗi cản trở nào từ phía người dùng!</td></tr>`;
       }
 
-      // 5. Project Briefs Table
       const briefTbody = document.getElementById("briefs-logs-tbody");
       if (briefs && briefs.length) {
         briefTbody.innerHTML = briefs.map(b => `

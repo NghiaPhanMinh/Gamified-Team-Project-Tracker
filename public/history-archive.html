@@ -216,12 +216,13 @@
   </div>
 
   <script>
-    const CONVEX_URL = "https://resilient-mastiff-759.convex.cloud";
+    const ARCHIVE_API_URL = "https://resilient-mastiff-759.convex.site/api/telemetry/archive";
+    const CLOUD_QUERY_URL = "https://resilient-mastiff-759.convex.cloud/api/query";
     let fullArchiveData = null;
 
     async function fetchConvexQuery(path, args = {}) {
       try {
-        const response = await fetch(`${CONVEX_URL}/api/query`, {
+        const response = await fetch(CLOUD_QUERY_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ path, args }),
@@ -242,6 +243,17 @@
     }
 
     async function loadArchiveData() {
+      try {
+        const res = await fetch(ARCHIVE_API_URL);
+        if (res.ok) {
+          fullArchiveData = await res.json();
+          updateArchiveUI(fullArchiveData);
+          return;
+        }
+      } catch (err) {
+        console.warn("Archive HTTP fetch error, attempting fallback...", err);
+      }
+
       fullArchiveData = await fetchConvexQuery("telemetry:getHistoricalArchive", {});
       updateArchiveUI(fullArchiveData);
     }

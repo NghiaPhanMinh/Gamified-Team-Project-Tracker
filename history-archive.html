@@ -216,12 +216,13 @@
   </div>
 
   <script>
-    const CONVEX_URL = "https://resilient-mastiff-759.convex.cloud";
+    const ARCHIVE_API_URL = "https://resilient-mastiff-759.convex.site/api/telemetry/archive";
+    const CLOUD_QUERY_URL = "https://resilient-mastiff-759.convex.cloud/api/query";
     let fullArchiveData = null;
 
     async function fetchConvexQuery(path, args = {}) {
       try {
-        const response = await fetch(`${CONVEX_URL}/api/query`, {
+        const response = await fetch(CLOUD_QUERY_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ path, args }),
@@ -242,6 +243,17 @@
     }
 
     async function loadArchiveData() {
+      try {
+        const res = await fetch(ARCHIVE_API_URL);
+        if (res.ok) {
+          fullArchiveData = await res.json();
+          updateArchiveUI(fullArchiveData);
+          return;
+        }
+      } catch (err) {
+        console.warn("Archive HTTP fetch error, attempting fallback...", err);
+      }
+
       fullArchiveData = await fetchConvexQuery("telemetry:getHistoricalArchive", {});
       updateArchiveUI(fullArchiveData);
     }
@@ -252,7 +264,6 @@
       document.getElementById("stat-archived-events").textContent = archive?.totalEvents ?? 0;
       document.getElementById("stat-archived-users").textContent = archive?.totalUsers ?? 0;
 
-      // 1. Render Archived Rooms Table
       const roomsTbody = document.getElementById("archived-rooms-tbody");
       if (archive?.teams?.length) {
         roomsTbody.innerHTML = archive.teams.map(t => {
@@ -273,7 +284,6 @@
         roomsTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--color-muted);">Chưa có dữ liệu phòng nào được lưu trữ.</td></tr>`;
       }
 
-      // 2. Render Archived Briefs Table
       const briefsTbody = document.getElementById("archived-briefs-tbody");
       if (archive?.projects?.length) {
         briefsTbody.innerHTML = archive.projects.map(p => `
