@@ -88,10 +88,28 @@ export const getState = query({
     const startOfToday = new Date().setHours(0, 0, 0, 0);
     const isOverdue = project.deadline ? new Date(`${project.deadline}T23:59:59Z`).getTime() < nowMs : false;
 
-    // Calculate unslayed goblin penalty from past days (3% village HP per unslayed goblin per player)
-    const launchTime = project.launchedAt ? new Date(project.launchedAt).getTime() : (project.startDate ? new Date(project.startDate).getTime() : nowMs);
+    // Goblin Deduction System Rework:
+    // goblinDamagePerMiss = (50% of Village Max HP) ÷ (total project days × total active players)
+    // Recalculates automatically any time the player count changes (someone joins or leaves),
+    // so the "worst case = exactly 50% HP lost if every goblin is ever missed" guarantee always stays accurate.
+    const launchTime = project.launchedAt
+      ? new Date(project.launchedAt).getTime()
+      : (project.startDate ? new Date(project.startDate).getTime() : nowMs);
+    const deadlineTime = project.deadline
+      ? new Date(`${project.deadline}T23:59:59Z`).getTime()
+      : (launchTime + 14 * 24 * 60 * 60 * 1000);
     const msPerDay = 24 * 60 * 60 * 1000;
-    const daysSinceLaunch = Math.max(0, Math.floor((startOfToday - new Date(launchTime).setHours(0,0,0,0)) / msPerDay));
+
+    // Total duration of project in days (minimum 1 day)
+    const totalProjectDays = Math.max(1, Math.ceil((deadlineTime - launchTime) / msPerDay));
+
+    // Total active players in project (recalculates automatically whenever player count changes)
+    const totalActivePlayers = Math.max(1, memberships.length);
+
+    // Dynamic goblin damage per miss
+    const goblinDamagePerMiss = (0.50 * villageMaxHp) / (totalProjectDays * totalActivePlayers);
+
+    const daysSinceLaunch = Math.max(0, Math.floor((startOfToday - new Date(launchTime).setHours(0, 0, 0, 0)) / msPerDay));
     
     let totalMissedGoblinDays = 0;
     if (daysSinceLaunch > 0) {
@@ -101,12 +119,15 @@ export const getState = query({
             .filter((p) => p.authorProfileId === member.profileId && p.createdAt < startOfToday)
             .map((p) => new Date(p.createdAt).toISOString().split("T")[0])
         );
-        const memberDaysActive = Math.min(daysSinceLaunch, Math.max(0, Math.floor((startOfToday - new Date(member.joinedAt || launchTime).setHours(0,0,0,0)) / msPerDay)));
+        const memberDaysActive = Math.min(
+          daysSinceLaunch,
+          Math.max(0, Math.floor((startOfToday - new Date(member.joinedAt || launchTime).setHours(0, 0, 0, 0)) / msPerDay))
+        );
         const missedDays = Math.max(0, memberDaysActive - memberPostDays.size);
         totalMissedGoblinDays += missedDays;
       }
     }
-    const goblinDamagePenalty = Math.round(totalMissedGoblinDays * (villageMaxHp * 0.03));
+    const goblinDamagePenalty = Math.round(totalMissedGoblinDays * goblinDamagePerMiss);
 
     // Deflect missed task damage & unslayed goblin penalties to Village HP pool
     let villageCurrentHp = villageMaxHp - missedTasksDamage - goblinDamagePenalty;
