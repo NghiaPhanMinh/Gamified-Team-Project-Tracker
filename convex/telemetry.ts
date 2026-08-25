@@ -300,5 +300,65 @@ export const getLastUserLocations = query({
   },
 });
 
+export const getHistoricalArchive = query({
+  args: {},
+  handler: async (ctx) => {
+    const teams = await ctx.db.query("teams").order("desc").collect();
+    const projects = await ctx.db.query("projects").order("desc").collect();
+    const telemetryEvents = await ctx.db
+      .query("userTelemetryEvents")
+      .order("desc")
+      .take(500);
+    const profiles = await ctx.db.query("userProfiles").collect();
+
+    const teamArchives = await Promise.all(
+      teams.map(async (team) => {
+        const members = await ctx.db
+          .query("teamMembers")
+          .withIndex("by_team", (q) => q.eq("teamId", team._id))
+          .collect();
+
+        const relatedProjects = projects.filter((p) => p.teamId === team._id);
+
+        return {
+          id: team._id,
+          name: team.name,
+          joinCode: team.joinCode,
+          memberCount: members.length,
+          projects: relatedProjects.map((p) => ({
+            id: p._id,
+            title: p.title,
+            description: p.description,
+            frameworkType: p.frameworkType,
+            frameworkName: p.frameworkName,
+            status: p.status,
+            createdAt: p.createdAt,
+          })),
+          createdAt: team.createdAt,
+          updatedAt: team.updatedAt,
+        };
+      }),
+    );
+
+    return {
+      teams: teamArchives,
+      projects: projects.map((p) => ({
+        id: p._id,
+        teamId: p.teamId,
+        title: p.title,
+        description: p.description,
+        frameworkType: p.frameworkType,
+        frameworkName: p.frameworkName,
+        status: p.status,
+        createdAt: p.createdAt,
+      })),
+      totalEvents: telemetryEvents.length,
+      totalUsers: profiles.length,
+      archivedAt: Date.now(),
+    };
+  },
+});
+
+
 
 
