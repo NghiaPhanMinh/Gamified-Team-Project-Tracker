@@ -478,4 +478,26 @@ export default defineSchema({
   })
     .index("by_project_and_time", ["projectId", "createdAt"])
     .index("by_project_author_and_time", ["projectId", "authorProfileId", "createdAt"]),
+  userTelemetryEvents: defineTable({
+    authUserId: v.optional(v.id("users")),
+    profileId: v.optional(v.id("userProfiles")),
+    sessionId: v.string(),
+    flowName: v.string(),
+    stepIndex: v.number(),
+    stepName: v.string(),
+    eventType: v.union(
+      v.literal("step_start"),
+      v.literal("step_complete"),
+      v.literal("step_abandon"),
+      v.literal("step_error"),
+      v.literal("action_click"),
+    ),
+    durationSeconds: v.optional(v.number()),
+    errorMessage: v.optional(v.string()),
+    metadata: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_flow_and_step", ["flowName", "stepIndex"])
+    .index("by_session_and_flow", ["sessionId", "flowName"])
+    .index("by_created_at", ["createdAt"]),
 });

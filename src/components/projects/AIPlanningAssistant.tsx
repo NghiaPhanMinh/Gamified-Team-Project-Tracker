@@ -10,6 +10,7 @@ import { getByokSession } from "../../lib/byokSession";
 import { friendlyAiError } from "../../lib/aiErrors";
 import { AI_RETRY_DELAYS_MS, isRetryablePlatformAiError } from "../../lib/aiRetry";
 import { trackEvent } from "../../lib/analytics";
+import { createTelemetryTracker } from "../../lib/telemetry";
 
 type Workspace = FunctionReturnType<typeof api.tasks.getWorkspace>;
 type AiPlan = FunctionReturnType<typeof api.ai.generateProjectPlan>;
@@ -29,6 +30,8 @@ export function AIPlanningAssistant({
   const generateProjectPlan = useAction(api.ai.generateProjectPlan);
   const generateProjectPlanWithKey = useAction(api.ai.generateProjectPlanWithKey);
   const savePlan = useMutation(api.aiDrafts.savePlan);
+  const logTelemetryEvent = useMutation(api.telemetry.logEvent);
+  const telemetry = createTelemetryTracker(logTelemetryEvent);
   const usage = useQuery(api.aiUsage.getProjectUsage, { projectId: workspace.project._id });
   const [brief, setBrief] = useState(workspace.project.description || workspace.project.title);
   const [draft, setDraft] = useState<AiPlan | null>(null);
@@ -104,6 +107,7 @@ export function AIPlanningAssistant({
     setRetryNotice(null);
     setIsGenerating(true);
 
+    telemetry.trackStepStart("ai_planning", 1, "Generate AI Plan");
     trackEvent("brief_submitted", {
       brief_length: briefText.length,
     });
@@ -118,10 +122,16 @@ export function AIPlanningAssistant({
         task_count: result.tasks.length,
         risk_count: result.risks.length,
       });
+      telemetry.trackStepComplete("ai_planning", 1, "Generate AI Plan", {
+        task_count: result.tasks.length,
+        risk_count: result.risks.length,
+      });
       setDraft(result);
       setSaveMessage(null);
     } catch (caughtError) {
-      setError(friendlyAiError(caughtError));
+      const friendlyMsg = friendlyAiError(caughtError);
+      setError(friendlyMsg);
+      telemetry.trackStepError("ai_planning", 1, "Generate AI Plan", friendlyMsg);
       setRetryNotice(null);
     } finally {
       setIsGenerating(false);

@@ -6,6 +6,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { BUILT_IN_FRAMEWORKS } from "../../data/frameworks";
 import { getErrorMessage } from "../../lib/errors";
 import { trackEvent } from "../../lib/analytics";
+import { createTelemetryTracker } from "../../lib/telemetry";
 import { MAYLAMDI_FRAMEWORK_COLORS, paletteColorAt } from "../../lib/brandPalette";
 
 type ProjectOnboardingProps = {
@@ -33,6 +34,8 @@ function dateAfter(days: number) {
   return date.toISOString().slice(0, 10);
 }
 
+const STEP_LABELS = ["Structure", "Brief", "Plan", "Allocate", "Create"];
+
 export function ProjectOnboarding({
   mode,
   currentProfileId,
@@ -43,6 +46,9 @@ export function ProjectOnboarding({
   const joinTeam = useMutation(api.teams.joinByCode);
   const createProject = useMutation(api.projects.create);
   const createCustomFramework = useMutation(api.customFrameworks.create);
+  const logTelemetryEvent = useMutation(api.telemetry.logEvent);
+  const telemetry = useMemo(() => createTelemetryTracker(logTelemetryEvent), [logTelemetryEvent]);
+
   const [step, setStep] = useState(1);
   const [frameworkChoice, setFrameworkChoice] = useState(BUILT_IN_FRAMEWORKS[0].id);
   const [showAllFrameworks, setShowAllFrameworks] = useState(false);
@@ -145,14 +151,28 @@ export function ProjectOnboarding({
     event.preventDefault();
     setError(null);
     const validationError = validateStep();
-    if (validationError) { setError(validationError); return; }
+    if (validationError) {
+      setError(validationError);
+      telemetry.trackStepError("project_creation", step, STEP_LABELS[step - 1], validationError);
+      return;
+    }
+    telemetry.trackStepComplete("project_creation", step, STEP_LABELS[step - 1], {
+      framework_choice: frameworkChoice,
+      brief_length: brief.length,
+      task_creation_mode: taskCreationMode,
+    });
     if (step === 2) {
       trackEvent("brief_submitted", {
         has_deadline: Boolean(deadline),
         target_member_count: Number(targetMemberCount),
       });
     }
-    if (step < 5) { setStep((current) => current + 1); return; }
+    if (step < 5) {
+      const nextStep = step + 1;
+      setStep(nextStep);
+      telemetry.trackStepStart("project_creation", nextStep, STEP_LABELS[nextStep - 1]);
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -210,7 +230,9 @@ export function ProjectOnboarding({
       }
       onRoomReady(teamId);
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError, "The room could not be created."));
+      const errorMsg = getErrorMessage(caughtError, "The room could not be created.");
+      setError(errorMsg);
+      telemetry.trackStepError("project_creation", 5, "Create", caughtError);
     } finally {
       setIsSaving(false);
     }
@@ -253,7 +275,22 @@ export function ProjectOnboarding({
   const stepLabels = ["Structure", "Brief", "Plan", "Allocate", "Create"];
   return (
     <section className="guided-flow" aria-labelledby="create-flow-title">
-      <button className="guided-back-link" type="button" onClick={step === 1 ? onCancel : () => { setStep((current) => current - 1); setError(null); }}>← Back</button>
+      <button
+        className="guided-back-link"
+        type="button"
+        onClick={() => {
+          if (step === 1) {
+            telemetry.trackStepAbandon("project_creation", 1, STEP_LABELS[0], "User cancelled at Step 1");
+            onCancel();
+          } else {
+            telemetry.trackStepAbandon("project_creation", step, STEP_LABELS[step - 1], "User went back to previous step");
+            setStep((current) => current - 1);
+            setError(null);
+          }
+        }}
+      >
+        ← Back
+      </button>
       <ol className="guided-stepper" aria-label="Create project progress">{stepLabels.map((label, index) => <li key={label} className={step === index + 1 ? "is-current" : step > index + 1 ? "is-complete" : ""}><span>{index + 1}</span><small>{label}</small></li>)}</ol>
       <form className="guided-card" onSubmit={handleCreate}>
         {step === 1 ? <>
