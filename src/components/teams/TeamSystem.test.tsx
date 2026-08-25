@@ -6,7 +6,32 @@ import authenticatedHomeSource from "../auth/AuthenticatedHome.tsx?raw";
 import battleSceneSource from "../game/BattleScene.tsx?raw";
 import resourcesSource from "../resources/ResourcesPage.tsx?raw";
 import teamSystemSource from "./TeamSystem.tsx?raw";
-import { ProjectDeleteDialog } from "./TeamSystem";
+import { ProjectDeleteDialog, ProjectIndexCard, type ProjectSummary } from "./TeamSystem";
+
+const projectStatuses: ProjectSummary["status"][] = [
+  "planning",
+  "active",
+  "at_risk",
+  "overdue",
+  "completed",
+  "archived",
+];
+
+function projectForStatus(status: ProjectSummary["status"], canDelete: boolean): ProjectSummary {
+  return {
+    _id: `project-${status}` as Id<"projects">,
+    teamId: "team-1" as Id<"teams">,
+    roomName: "Studio Team",
+    title: `${status} project`,
+    description: "Project card deletion regression fixture.",
+    frameworkName: "Nonlinear Design Process",
+    status,
+    deadline: "2026-08-31",
+    memberCount: 4,
+    canDelete,
+    updatedAt: 1,
+  };
+}
 
 describe("project deletion dialog", () => {
   afterEach(cleanup);
@@ -75,5 +100,41 @@ describe("project deletion dialog", () => {
     expect(teamSystemSource).not.toContain("const projectCards = useQuery(api.projects.listMineAcrossRooms)");
     expect(resourcesSource).toContain("api.projects.listMineAcrossRooms");
     expect([authenticatedHomeSource, battleSceneSource, teamSystemSource, resourcesSource].join("\n")).not.toContain("window.location.reload");
+  });
+});
+
+describe("project card delete visibility", () => {
+  afterEach(cleanup);
+
+  it.each(projectStatuses)("shows the delete X for an authorised %s project", (status) => {
+    const onRequestDelete = vi.fn();
+    const project = projectForStatus(status, true);
+
+    render(
+      <ProjectIndexCard
+        project={project}
+        colorIndex={0}
+        onOpen={vi.fn()}
+        onRequestDelete={onRequestDelete}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: `Delete ${project.title}` }));
+    expect(onRequestDelete).toHaveBeenCalledOnce();
+  });
+
+  it.each(projectStatuses)("hides the delete X from an unauthorised member for a %s project", (status) => {
+    const project = projectForStatus(status, false);
+
+    render(
+      <ProjectIndexCard
+        project={project}
+        colorIndex={0}
+        onOpen={vi.fn()}
+        onRequestDelete={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: `Delete ${project.title}` })).not.toBeInTheDocument();
   });
 });

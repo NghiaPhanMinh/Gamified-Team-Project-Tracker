@@ -3252,6 +3252,7 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
  * independent from the card's primary open action. */
 .project-index-card-shell {
   position: relative;
+  isolation: isolate;
   min-width: 0;
 }
 
@@ -3263,10 +3264,12 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
 
 .project-index-delete-button {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   top: var(--mld-space-3);
   right: var(--mld-space-3);
   display: grid;
+  visibility: visible;
+  opacity: 1;
   place-items: center;
   width: 36px;
   height: 36px;

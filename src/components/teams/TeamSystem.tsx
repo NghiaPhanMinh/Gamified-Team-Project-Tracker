@@ -19,7 +19,7 @@ type RoomSummary = {
   memberCount: number;
 };
 
-type ProjectSummary = {
+export type ProjectSummary = {
   _id: Id<"projects">;
   teamId: Id<"teams">;
   roomName: string;
@@ -49,6 +49,46 @@ type ProjectDeleteTarget = {
   projectId: Id<"projects">;
   projectTitle: string;
 };
+
+export function ProjectIndexCard({
+  project,
+  colorIndex,
+  onOpen,
+  onRequestDelete,
+}: {
+  project: ProjectSummary;
+  colorIndex: number;
+  onOpen: () => void;
+  onRequestDelete: () => void;
+}) {
+  return (
+    <article className="project-index-card-shell" data-project-status={project.status}>
+      <button
+        className="room-index-card room-index-card-colored project-index-card"
+        type="button"
+        style={{ "--group-color": getGroupColor(colorIndex) } as CSSProperties}
+        onClick={onOpen}
+      >
+        <span className="live-badge"><i aria-hidden="true" /> {project.status}</span>
+        <strong>{project.title}</strong>
+        <small>{project.roomName} · {project.memberCount} {project.memberCount === 1 ? "member" : "members"}</small>
+        <span>{project.frameworkName}</span>
+        <span>Open project →</span>
+      </button>
+      {project.canDelete ? (
+        <button
+          className="project-index-delete-button"
+          type="button"
+          aria-label={`Delete ${project.title}`}
+          title="Delete project"
+          onClick={onRequestDelete}
+        >
+          <X aria-hidden="true" />
+        </button>
+      ) : null}
+    </article>
+  );
+}
 
 export function ProjectDeleteDialog({
   target,
@@ -224,31 +264,13 @@ export function TeamSystem({
       ) : projectCards !== undefined ? (
         <div className="room-index-grid">
           {projectCards.map((project, index) => (
-            <article key={project._id} className="project-index-card-shell">
-              <button
-                className="room-index-card room-index-card-colored project-index-card"
-                type="button"
-                style={{ "--group-color": getGroupColor(index) } as CSSProperties}
-                onClick={() => onOpenRoom(project.teamId)}
-              >
-                <span className="live-badge"><i aria-hidden="true" /> {project.status}</span>
-                <strong>{project.title}</strong>
-                <small>{project.roomName} · {project.memberCount} {project.memberCount === 1 ? "member" : "members"}</small>
-                <span>{project.frameworkName}</span>
-                <span>Open project →</span>
-              </button>
-              {project.canDelete ? (
-                <button
-                  className="project-index-delete-button"
-                  type="button"
-                  aria-label={`Delete ${project.title}`}
-                  title="Delete project"
-                  onClick={() => setDeleteTarget({ projectId: project._id, projectTitle: project.title })}
-                >
-                  <X aria-hidden="true" />
-                </button>
-              ) : null}
-            </article>
+            <ProjectIndexCard
+              key={project._id}
+              project={project}
+              colorIndex={index}
+              onOpen={() => onOpenRoom(project.teamId)}
+              onRequestDelete={() => setDeleteTarget({ projectId: project._id, projectTitle: project.title })}
+            />
           ))}
           {rooms
             .filter((room) => !projectCards.some((project) => project.teamId === room._id))
