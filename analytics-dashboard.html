@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MayLamDi — Local Real-Time Analytics Dashboard</title>
+  <title>MayLamDi — Real-Time Local Analytics & Bug Tracker</title>
   <style>
     :root {
       --color-yellow: #FEAA01;
@@ -32,7 +32,7 @@
     }
 
     .container {
-      max-width: 1100px;
+      max-width: 1150px;
       margin: 0 auto;
     }
 
@@ -113,6 +113,11 @@
       cursor: pointer;
       box-shadow: 2px 2px 0px var(--color-ink);
       transition: transform 0.1s;
+      text-decoration: none;
+      color: var(--color-ink);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
     }
 
     .controls-btn:active {
@@ -122,7 +127,7 @@
 
     .grid-summary {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1.25rem;
       margin-bottom: 2rem;
     }
@@ -206,13 +211,8 @@
       font-weight: 800;
     }
 
-    .badge-success {
-      color: #17A738;
-    }
-
-    .badge-exit {
-      color: #e53e3e;
-    }
+    .badge-success { color: #17A738; }
+    .badge-exit { color: #e53e3e; }
 
     .progress-bar-track {
       width: 100%;
@@ -224,29 +224,8 @@
       border: 1px solid var(--color-ink);
     }
 
-    .progress-fill-success {
-      background: var(--color-green);
-      height: 100%;
-      transition: width 0.4s ease;
-    }
-
-    .progress-fill-exit {
-      background: var(--color-yellow);
-      height: 100%;
-      transition: width 0.4s ease;
-    }
-
-    .error-box {
-      margin-top: 0.75rem;
-      background: #FEAA0122;
-      border: 1.5px solid var(--color-yellow);
-      padding: 0.6rem 0.8rem;
-      border-radius: 8px;
-      font-size: 0.83rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
+    .progress-fill-success { background: var(--color-green); height: 100%; transition: width 0.4s ease; }
+    .progress-fill-exit { background: var(--color-yellow); height: 100%; transition: width 0.4s ease; }
 
     .insights-grid {
       display: grid;
@@ -255,68 +234,72 @@
       margin-bottom: 2rem;
     }
 
-    .skill-bar-row {
-      margin-bottom: 0.75rem;
+    .skill-bar-row { margin-bottom: 0.75rem; }
+    .skill-label { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .skill-track { width: 100%; height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; border: 1px solid var(--color-ink); }
+    .skill-fill-blue { background: var(--color-blue); height: 100%; }
+    .skill-fill-pink { background: var(--color-pink); height: 100%; }
+
+    /* Tables for Briefs & Bugs */
+    .table-container {
+      background: var(--color-card);
+      border: 3px solid var(--color-ink);
+      border-radius: 16px;
+      padding: 1.25rem;
+      box-shadow: 4px 4px 0px var(--color-ink);
+      margin-bottom: 2rem;
+      overflow-x: auto;
     }
 
-    .skill-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      font-weight: 800;
-      margin-bottom: 0.25rem;
-    }
-
-    .skill-track {
+    table {
       width: 100%;
-      height: 10px;
-      background: #e2e8f0;
-      border-radius: 5px;
-      overflow: hidden;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    th {
+      background: var(--color-bg);
+      font-weight: 900;
+      border-bottom: 2px solid var(--color-ink);
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      letter-spacing: 0.5px;
+    }
+
+    tr:hover {
+      background: #f8f9fa;
+    }
+
+    .tag-pill {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 0.75rem;
       border: 1px solid var(--color-ink);
     }
 
-    .skill-fill-blue {
-      background: var(--color-blue);
-      height: 100%;
-      transition: width 0.4s ease;
-    }
-
-    .skill-fill-pink {
-      background: var(--color-pink);
-      height: 100%;
-      transition: width 0.4s ease;
-    }
-
-    .affinity-box {
-      background: #1DD85115;
-      border: 2px solid var(--color-ink);
-      border-radius: 14px;
-      padding: 1.25rem;
+    .external-analytics-banner {
+      background: #FF8AE722;
+      border: 3px solid var(--color-ink);
+      border-radius: 16px;
+      padding: 1.5rem;
       box-shadow: 4px 4px 0px var(--color-ink);
-    }
-
-    .affinity-list {
-      list-style: none;
-      display: grid;
-      gap: 0.6rem;
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
-    }
-
-    .affinity-list li {
+      margin-bottom: 2rem;
       display: flex;
-      align-items: flex-start;
-      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
     }
 
-    footer {
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--color-muted);
-      margin-top: 2rem;
-      font-weight: 700;
-    }
+    footer { text-align: center; font-size: 0.85rem; color: var(--color-muted); margin-top: 2rem; font-weight: 700; }
   </style>
 </head>
 <body>
@@ -326,14 +309,14 @@
       <div class="brand-title">
         <div class="logo-badge">M</div>
         <div>
-          <h1>MayLamDi — Local Real-Time Analytics Dashboard</h1>
+          <h1>MayLamDi — Real-Time Local Analytics & Bug Tracker</h1>
           <p style="color: var(--color-muted); font-size: 0.88rem; font-weight: 600; margin-top: 0.2rem;">
-            Theo Dõi Tiến Độ Người Dùng, Tỷ Lệ Thoát Out & Xu Hướng Kỹ Năng (Chạy Trực Tiếp Local)
+            Theo Dõi Tiến Độ Người Dùng, Nhật Ký Brief & Báo Cáo Check Bug Live (Local Only)
           </p>
         </div>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
         <div class="status-bar">
           <div class="live-dot" id="live-indicator"></div>
           <span id="status-text">LIVE CONNECTED (3s)</span>
@@ -341,6 +324,24 @@
         <button class="controls-btn" id="toggle-refresh-btn" onclick="toggleAutoRefresh()">Tạm Dừng</button>
       </div>
     </header>
+
+    <!-- Top External Links Banner -->
+    <div class="external-analytics-banner">
+      <div>
+        <h3 style="font-size: 1.1rem; font-weight: 900; margin-bottom: 0.3rem;">🎥 Xem Quay Màn Hình Thao Tác & Analytics Từ Xa</h3>
+        <p style="font-size: 0.88rem; color: var(--color-muted); margin: 0;">
+          Truy cập nhanh Microsoft Clarity (Session Replays & Heatmaps) và Google Analytics 4 (Lưu lượng truy cập).
+        </p>
+      </div>
+      <div style="display: flex; gap: 0.75rem;">
+        <a class="controls-btn" href="https://clarity.microsoft.com" target="_blank" style="background: var(--color-pink);">
+          🎬 Microsoft Clarity
+        </a>
+        <a class="controls-btn" href="https://analytics.google.com" target="_blank" style="background: var(--color-yellow);">
+          📈 Google Analytics 4
+        </a>
+      </div>
+    </div>
 
     <!-- Top Summary Grid -->
     <div class="grid-summary">
@@ -353,18 +354,60 @@
         <div class="card-stat" id="stat-total-users">...</div>
       </div>
       <div class="card" style="background: #FFF73F33;">
-        <div class="card-kicker">Dung Lượng Rảnh Trung Bình</div>
-        <div class="card-stat" id="stat-avg-capacity">... hrs/w</div>
+        <div class="card-kicker">Số Dự Án Đã Nhập Brief</div>
+        <div class="card-stat" id="stat-total-briefs">...</div>
+      </div>
+      <div class="card" style="background: #FEAA0122;">
+        <div class="card-kicker">Lỗi / Bug Ghi Nhận</div>
+        <div class="card-stat" id="stat-total-bugs" style="color: #e53e3e;">...</div>
       </div>
     </div>
 
     <!-- Section 1: Step Drop-off Funnel -->
-    <h2 class="section-title">📊 Phân Tích Phễu Chuyển Đổi & Điểm Thoát Out Từng Bước (Wizard Creation)</h2>
+    <h2 class="section-title">📊 Phân Tích Phễu Chuyển Đổi & Điểm Thoát Out Từng Bước (Project Creation Wizard)</h2>
     <div class="funnel-container" id="funnel-steps-list">
       <div style="padding: 2rem; text-align: center; font-weight: 700; color: var(--color-muted);">Đang kết nối dữ liệu từ Convex...</div>
     </div>
 
-    <!-- Section 2: User Skill Tendencies & Team Affinity -->
+    <!-- Section 2: Real-time Bug & Error Tracker -->
+    <h2 class="section-title" style="color: #e53e3e;">🐛 Nhật Ký Check Bug & Lỗi Người Dùng Gặp Phải (Live Bug Log)</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Thời Gian</th>
+            <th>Quy Trình (Flow)</th>
+            <th>Bước Bị Lỗi (Step)</th>
+            <th>Nội Dung Lỗi Chi Tiết (Error Message)</th>
+            <th>Thời Gian Xử Lý</th>
+          </tr>
+        </thead>
+        <tbody id="bug-logs-tbody">
+          <tr><td colspan="5" style="text-align: center; color: var(--color-muted);">Đang tải danh sách lỗi...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section 3: Project Briefs Log -->
+    <h2 class="section-title">📝 Danh Sách Brief Dự Án Thực Tế User Đã Nhập (Project Briefs Log)</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Thời Gian</th>
+            <th>Tên Dự Án</th>
+            <th>Nội Dung Brief Chi Tiết</th>
+            <th>Độ Dài</th>
+            <th>Framework</th>
+          </tr>
+        </thead>
+        <tbody id="briefs-logs-tbody">
+          <tr><td colspan="5" style="text-align: center; color: var(--color-muted);">Đang tải danh sách Brief...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section 4: User Skill Tendencies & Team Affinity -->
     <div class="insights-grid">
       <!-- Top Skills -->
       <div class="card">
@@ -383,20 +426,8 @@
       </div>
     </div>
 
-    <!-- Team Affinity Box -->
-    <div class="affinity-box">
-      <h2 class="section-title" style="font-size: 1.15rem; color: #17A738; margin-bottom: 0.4rem;">
-        💡 Gợi Ý Xu Hướng & Phương Pháp Nhóm Phù Hợp (Team Affinity)
-      </h2>
-      <ul class="affinity-list">
-        <li>👉 <strong>Design & Creative Team</strong>: Phù hợp cho nhóm người dùng có kỹ năng Figma / UI/UX (Khuyên dùng template <em>Nonlinear Design Process</em>).</li>
-        <li>👉 <strong>Agile Software Engineering</strong>: Phù hợp cho nhóm lập trình viên có kỹ năng React, VS Code, Git (Khuyên dùng template <em>Software Agile Framework</em>).</li>
-        <li>👉 <strong>Media & Marketing Campaign</strong>: Phù hợp cho dự án cần quy mô thời gian từ 15 - 20 giờ/tuần.</li>
-      </ul>
-    </div>
-
     <footer>
-      MayLamDi Local Analytics Dashboard — Powered by Convex Real-Time Telemetry API
+      MayLamDi Local Analytics & Bug Dashboard — Powered by Convex Real-Time Telemetry API
     </footer>
   </div>
 
@@ -421,22 +452,29 @@
       }
     }
 
-    async function loadDashboardData() {
-      // 1. Fetch Funnel Stats
-      const funnel = await fetchConvexQuery("telemetry:getFunnelStats", { flowName: "project_creation" });
-      // 2. Fetch User Insights
-      const insights = await fetchConvexQuery("telemetry:getUserInsightsAndTeamFit", {});
-
-      updateUI(funnel, insights);
+    function formatTime(timestamp) {
+      if (!timestamp) return "Vừa xong";
+      const date = new Date(timestamp);
+      return date.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + " " + date.toLocaleDateString("vi-VN");
     }
 
-    function updateUI(funnel, insights) {
-      // Update top stats
+    async function loadDashboardData() {
+      const funnel = await fetchConvexQuery("telemetry:getFunnelStats", { flowName: "project_creation" });
+      const insights = await fetchConvexQuery("telemetry:getUserInsightsAndTeamFit", {});
+      const briefs = await fetchConvexQuery("telemetry:getRecentProjectBriefs", {});
+      const bugs = await fetchConvexQuery("telemetry:getBugLogs", {});
+
+      updateUI(funnel, insights, briefs, bugs);
+    }
+
+    function updateUI(funnel, insights, briefs, bugs) {
+      // Summary Stats
       document.getElementById("stat-total-events").textContent = funnel?.totalEvents ?? 0;
       document.getElementById("stat-total-users").textContent = insights?.totalUsers ?? 0;
-      document.getElementById("stat-avg-capacity").textContent = (insights?.avgCapacityHours ?? 20) + " hrs/w";
+      document.getElementById("stat-total-briefs").textContent = briefs?.length ?? 0;
+      document.getElementById("stat-total-bugs").textContent = bugs?.length ?? 0;
 
-      // Render Funnel Steps
+      // 1. Funnel Steps
       const funnelContainer = document.getElementById("funnel-steps-list");
       const steps = funnel?.funnelSteps?.length ? funnel.funnelSteps : [
         { stepIndex: 1, stepName: "Structure", starts: 10, completions: 9, abandonments: 1, errors: 0, errorMessages: [] },
@@ -467,18 +505,43 @@
               <div class="progress-fill-success" style="width: ${completionRate}%;"></div>
               <div class="progress-fill-exit" style="width: ${exitRate}%;"></div>
             </div>
-
-            ${step.errorMessages && step.errorMessages.length ? `
-              <div class="error-box">
-                ⚠️ <strong>Lỗi cản trở (${step.errors} lượt):</strong>
-                <span>${step.errorMessages.join("; ")}</span>
-              </div>
-            ` : ""}
           </div>
         `;
       }).join("");
 
-      // Render Top Skills
+      // 2. Bug Logs Table
+      const bugTbody = document.getElementById("bug-logs-tbody");
+      if (bugs && bugs.length) {
+        bugTbody.innerHTML = bugs.map(bug => `
+          <tr>
+            <td style="font-weight: 700; color: var(--color-muted);">${formatTime(bug.createdAt)}</td>
+            <td><span class="tag-pill" style="background: #FFF73F;">${bug.flowName}</span></td>
+            <td style="font-weight: 800;">Step ${bug.stepIndex} (${bug.stepName})</td>
+            <td style="color: #e53e3e; font-weight: 700;">⚠️ ${bug.errorMessage}</td>
+            <td>${bug.durationSeconds ? bug.durationSeconds + "s" : "N/A"}</td>
+          </tr>
+        `).join("");
+      } else {
+        bugTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #17A738; font-weight: 800;">🎉 Chưa ghi nhận bug hay lỗi cản trở nào từ phía người dùng!</td></tr>`;
+      }
+
+      // 3. Project Briefs Table
+      const briefTbody = document.getElementById("briefs-logs-tbody");
+      if (briefs && briefs.length) {
+        briefTbody.innerHTML = briefs.map(b => `
+          <tr>
+            <td style="font-weight: 700; color: var(--color-muted);">${formatTime(b.createdAt)}</td>
+            <td style="font-weight: 900;">${b.title}</td>
+            <td style="max-width: 450px; line-height: 1.4;">${b.description}</td>
+            <td><span class="tag-pill" style="background: #4CA0FE33;">${b.charCount} chars</span></td>
+            <td><span class="tag-pill" style="background: #FF8AE733;">${b.frameworkName || b.frameworkType}</span></td>
+          </tr>
+        `).join("");
+      } else {
+        briefTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--color-muted);">Chưa có brief dự án nào được tạo.</td></tr>`;
+      }
+
+      // 4. Skills & Software Lists
       const skillsContainer = document.getElementById("skills-list-container");
       const skills = insights?.topSkills?.length ? insights.topSkills : [
         { name: "UI/UX Design", count: 18, percentage: 82 },
@@ -499,7 +562,6 @@
         </div>
       `).join("");
 
-      // Render Top Software
       const softwareContainer = document.getElementById("software-list-container");
       const software = insights?.topSoftware?.length ? insights.topSoftware : [
         { name: "Figma", count: 16, percentage: 72 },
@@ -543,7 +605,6 @@
       }
     }
 
-    // Initial Load & Start Polling
     loadDashboardData();
     autoRefreshInterval = setInterval(loadDashboardData, 3000);
   </script>

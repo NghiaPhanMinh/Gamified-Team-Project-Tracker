@@ -171,3 +171,42 @@ export const getUserInsightsAndTeamFit = query({
   },
 });
 
+export const getRecentProjectBriefs = query({
+  args: {},
+  handler: async (ctx) => {
+    const projects = await ctx.db.query("projects").order("desc").take(20);
+    return projects.map((p) => ({
+      id: p._id,
+      title: p.title,
+      description: p.description,
+      frameworkType: p.frameworkType,
+      frameworkName: p.frameworkName,
+      charCount: p.description?.length ?? 0,
+      createdAt: p.createdAt,
+    }));
+  },
+});
+
+export const getBugLogs = query({
+  args: {},
+  handler: async (ctx) => {
+    const errorEvents = await ctx.db
+      .query("userTelemetryEvents")
+      .withIndex("by_created_at")
+      .order("desc")
+      .filter((q) => q.eq(q.field("eventType"), "step_error"))
+      .take(30);
+
+    return errorEvents.map((event) => ({
+      id: event._id,
+      flowName: event.flowName,
+      stepIndex: event.stepIndex,
+      stepName: event.stepName,
+      errorMessage: event.errorMessage ?? "Unknown error",
+      durationSeconds: event.durationSeconds,
+      createdAt: event.createdAt,
+    }));
+  },
+});
+
+
