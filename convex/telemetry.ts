@@ -119,3 +119,55 @@ export const getFunnelStats = query({
     };
   },
 });
+
+export const getUserInsightsAndTeamFit = query({
+  args: {},
+  handler: async (ctx) => {
+    const profiles = await ctx.db.query("userProfiles").collect();
+    const totalUsers = profiles.length;
+
+    const skillCounts: Record<string, number> = {};
+    const softwareCounts: Record<string, number> = {};
+    let totalCapacity = 0;
+    let capacityCount = 0;
+
+    for (const profile of profiles) {
+      if (profile.skills) {
+        for (const skill of profile.skills) {
+          const s = skill.trim();
+          if (s) skillCounts[s] = (skillCounts[s] || 0) + 1;
+        }
+      }
+      if (profile.softwareSkills) {
+        for (const sw of profile.softwareSkills) {
+          const s = sw.trim();
+          if (s) softwareCounts[s] = (softwareCounts[s] || 0) + 1;
+        }
+      }
+      if (profile.weeklyCapacity) {
+        totalCapacity += profile.weeklyCapacity;
+        capacityCount += 1;
+      }
+    }
+
+    const topSkills = Object.entries(skillCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([name, count]) => ({ name, count, percentage: Math.round((count / Math.max(1, totalUsers)) * 100) }));
+
+    const topSoftware = Object.entries(softwareCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([name, count]) => ({ name, count, percentage: Math.round((count / Math.max(1, totalUsers)) * 100) }));
+
+    const avgCapacityHours = capacityCount > 0 ? Math.round((totalCapacity / capacityCount) * 10) / 10 : 20;
+
+    return {
+      totalUsers,
+      topSkills,
+      topSoftware,
+      avgCapacityHours,
+    };
+  },
+});
+
