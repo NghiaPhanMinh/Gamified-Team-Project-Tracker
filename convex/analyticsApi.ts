@@ -1,6 +1,9 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare const process: any;
+
 export const getUnifiedAnalytics = query({
   args: {
     timeframe: v.optional(v.string()), // "7d", "14d", "30d", "90d"
@@ -31,8 +34,9 @@ export const getUnifiedAnalytics = query({
     const recentTelemetry = telemetryEvents.filter((e) => e.createdAt >= cutoff);
 
     // GA4 & Clarity connection status (server-side environment check)
-    const ga4Connected = Boolean(process.env.GA_PROPERTY_ID && process.env.GA_PRIVATE_KEY);
-    const clarityConnected = Boolean(process.env.CLARITY_PROJECT_ID && process.env.CLARITY_API_TOKEN);
+    const envObj = typeof process !== "undefined" && process.env ? process.env : {};
+    const ga4Connected = Boolean(envObj.GA_PROPERTY_ID && envObj.GA_PRIVATE_KEY);
+    const clarityConnected = Boolean(envObj.CLARITY_PROJECT_ID && envObj.CLARITY_API_TOKEN);
 
     // 2. Compute Overview Metrics
     const totalUsers = Math.max(profiles.length, 1);
