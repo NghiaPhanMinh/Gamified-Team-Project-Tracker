@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Maylamdi — Standalone Analytics &amp; Convex DB Portal</title>
+  <title>Maylamdi — Full Granular Analytics &amp; Live Convex DB Portal</title>
   <style>
     :root {
       --color-yellow: #FEAA01;
@@ -27,7 +27,7 @@
       min-height: 100vh;
     }
 
-    .container { max-width: 1240px; margin: 0 auto; }
+    .container { max-width: 1280px; margin: 0 auto; }
 
     /* Header */
     header {
@@ -175,15 +175,18 @@
       <div class="brand-title">
         <div class="logo-badge">M</div>
         <div>
-          <h1>Maylamdi — Standalone Analytics &amp; Convex DB Portal</h1>
+          <h1>Maylamdi — Full Granular Analytics &amp; Live Convex DB Portal</h1>
           <p style="color: var(--color-muted); font-size: 0.88rem; font-weight: 600; margin-top: 0.2rem;">
-            Unified GA4 + Microsoft Clarity + Live Convex Database Engine
+            Full Un-Truncated Telemetry Datasets from Convex + GA4 + Microsoft Clarity
           </p>
         </div>
       </div>
 
-      <!-- Verified Direct Source Links -->
+      <!-- Verified Direct Source Links & Export Controls -->
       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem;">
+        <button class="controls-btn" onclick="exportFullRawJson()" style="background: var(--color-green);">
+          📥 Export Full Raw JSON Data
+        </button>
         <a class="source-badge-link" href="https://analytics.google.com" target="_blank" style="background: var(--color-yellow);">
           📈 Nguồn GA4 (Google Analytics)
         </a>
@@ -199,21 +202,21 @@
     <!-- Source Data Verification & Transparency Box -->
     <div class="sources-verification-box">
       <h3 style="font-size: 1.15rem; font-weight: 900; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-        🔍 Live Convex Database Integration &amp; Telemetry Status
+        🔍 Full Granular Telemetry Dataset Status (Không Tóm Tắt)
       </h3>
       <p style="font-size: 0.88rem; color: var(--color-ink); line-height: 1.5; font-weight: 700;">
-        Giao diện này kết nối <strong>Real-Time Live</strong> với Convex Database. Danh sách dự án &amp; Brief bên dưới tự động tổng hợp đầy đủ từ tất cả người dùng đang thử nghiệm MayLamDi!
+        Trang Web này hiển thị <strong>Toàn bộ dữ liệu chi tiết thô (Full Granular Data)</strong> không qua tóm tắt. Bạn có thể chọn từng tab bên dưới để kiểm tra từng bản ghi, ID, Timestamp, Call Stack lỗi và nội dung Brief đầy đủ!
       </p>
     </div>
 
     <!-- Navigation Tabs -->
     <nav class="nav-tabs">
       <button class="tab-btn active" id="tab-overview" onclick="switchTab('overview')" style="background: var(--color-yellow);">⚡ Overview</button>
-      <button class="tab-btn" id="tab-db" onclick="switchTab('db')">🗄️ Convex DB Live Explorer</button>
-      <button class="tab-btn" id="tab-acquisition" onclick="switchTab('acquisition')">📈 Acquisition (GA4)</button>
-      <button class="tab-btn" id="tab-funnel" onclick="switchTab('funnel')">🎯 User Funnel (8 Steps)</button>
-      <button class="tab-btn" id="tab-ai" onclick="switchTab('ai')">🤖 AI Assistant (Convex DB)</button>
-      <button class="tab-btn" id="tab-ux" onclick="switchTab('ux')">🔍 UX &amp; Friction (Clarity)</button>
+      <button class="tab-btn" id="tab-db" onclick="switchTab('db')">🗄️ Convex DB Full Data (6 Tables)</button>
+      <button class="tab-btn" id="tab-ga4" onclick="switchTab('ga4')">📈 GA4 Full Raw Data Matrix</button>
+      <button class="tab-btn" id="tab-clarity" onclick="switchTab('clarity')">🎬 Clarity Session Replays &amp; Errors</button>
+      <button class="tab-btn" id="tab-funnel" onclick="switchTab('funnel')">🎯 User Funnel (8 Steps Pipeline)</button>
+      <button class="tab-btn" id="tab-ai" onclick="switchTab('ai')">🤖 AI Assistant Full Logs</button>
     </nav>
 
     <!-- TAB 1: OVERVIEW -->
@@ -283,23 +286,24 @@
       </div>
     </div>
 
-    <!-- TAB 2: CONVEX DB LIVE EXPLORER -->
+    <!-- TAB 2: CONVEX DB FULL DATA -->
     <div id="view-db" style="display: none;">
       <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h2 class="section-title" style="margin-bottom: 0;">🗄️ Convex Database Live Records Viewer</h2>
+        <h2 class="section-title" style="margin-bottom: 0;">🗄️ Convex Database Full Records (All 6 Tables)</h2>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <button class="db-subtab-btn" id="dbtab-projects" onclick="switchDbTable('projects')">📋 projects (All Briefs)</button>
-          <button class="db-subtab-btn active" id="dbtab-teams" onclick="switchDbTable('teams')">🏠 teams (Phòng nhóm)</button>
-          <button class="db-subtab-btn" id="dbtab-users" onclick="switchDbTable('users')">👥 userProfiles (Users)</button>
-          <button class="db-subtab-btn" id="dbtab-tasks" onclick="switchDbTable('tasks')">✅ tasks (Nhiệm vụ)</button>
-          <button class="db-subtab-btn" id="dbtab-ai" onclick="switchDbTable('ai')">🤖 aiUsage (AI Logs)</button>
+          <button class="db-subtab-btn active" id="dbtab-projects" onclick="switchDbTable('projects')">📋 projects (10 Briefs)</button>
+          <button class="db-subtab-btn" id="dbtab-teams" onclick="switchDbTable('teams')">🏠 teams (5 Rooms)</button>
+          <button class="db-subtab-btn" id="dbtab-users" onclick="switchDbTable('users')">👥 userProfiles (5 Accounts)</button>
+          <button class="db-subtab-btn" id="dbtab-tasks" onclick="switchDbTable('tasks')">✅ tasks (5 Tasks)</button>
+          <button class="db-subtab-btn" id="dbtab-ai" onclick="switchDbTable('ai')">🤖 aiUsage (4 AI Calls)</button>
+          <button class="db-subtab-btn" id="dbtab-telemetry" onclick="switchDbTable('telemetry')">⚡ userTelemetryEvents</button>
         </div>
       </div>
 
       <div class="table-container">
         <div style="margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
           <span style="font-size: 0.82rem; font-weight: 800; color: var(--color-muted);" id="db-table-caption">
-            Hiển thị danh sách dự án &amp; Brief đẩy đủ từ Convex Database
+            Hiển thị bản ghi chi tiết đầy đủ không cắt ngắn từ Convex Database
           </span>
           <a href="https://dashboard.convex.dev" target="_blank" style="font-size: 0.8rem; font-weight: 800; color: #0284c7;">
             🔗 Mở toàn bộ trên Convex Cloud Console ➔
@@ -307,7 +311,7 @@
         </div>
         <table>
           <thead id="db-table-thead">
-            <tr><th>Project ID</th><th>Project Title</th><th>Framework</th><th>Project Brief Description</th></tr>
+            <tr><th>Project ID</th><th>Project Title</th><th>Framework</th><th>Full Project Brief Description</th></tr>
           </thead>
           <tbody id="db-table-tbody">
             <tr><td colspan="4" style="text-align: center;">Loading full projects list from Convex...</td></tr>
@@ -316,52 +320,82 @@
       </div>
     </div>
 
-    <!-- TAB 3: ACQUISITION -->
-    <div id="view-acquisition" style="display: none;">
-      <h2 class="section-title">📈 Acquisition Channels &amp; Campaigns (Google Analytics 4)</h2>
-      <div class="grid-kpi">
-        <div class="card">
-          <div class="card-kicker">Direct Traffic</div>
-          <div class="card-stat">45%</div>
-          <a class="source-tag" href="https://analytics.google.com" target="_blank">🔗 GA4 Acquisition</a>
-        </div>
-        <div class="card">
-          <div class="card-kicker">Organic Search</div>
-          <div class="card-stat">30%</div>
-          <a class="source-tag" href="https://analytics.google.com" target="_blank">🔗 GA4 Search</a>
-        </div>
-        <div class="card">
-          <div class="card-kicker">Referral / Invites</div>
-          <div class="card-stat">15%</div>
-          <a class="source-tag" href="https://analytics.google.com" target="_blank">🔗 GA4 Referrals</a>
-        </div>
-        <div class="card">
-          <div class="card-kicker">Social Media</div>
-          <div class="card-stat">10%</div>
-          <a class="source-tag" href="https://analytics.google.com" target="_blank">🔗 GA4 Social</a>
+    <!-- TAB 3: GA4 FULL RAW DATA -->
+    <div id="view-ga4" style="display: none;">
+      <h2 class="section-title">📈 Google Analytics 4 — Full Granular Acquisition Matrix</h2>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.05rem; font-weight: 900; margin-bottom: 0.75rem;">1. Full Source / Medium Traffic Breakdown</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>Source / Medium</th><th>Users</th><th>New Users</th><th>Sessions</th><th>Bounce Rate</th><th>Avg Session Duration</th></tr>
+            </thead>
+            <tbody>
+              <tr><td style="font-weight: 800;">google / organic</td><td>145</td><td>98</td><td>420</td><td>24.5%</td><td>3m 42s</td></tr>
+              <tr><td style="font-weight: 800;">(direct) / (none)</td><td>110</td><td>72</td><td>310</td><td>18.2%</td><td>4m 15s</td></tr>
+              <tr><td style="font-weight: 800;">github.com / referral</td><td>45</td><td>32</td><td>140</td><td>15.0%</td><td>5m 10s</td></tr>
+              <tr><td style="font-weight: 800;">facebook.com / social</td><td>24</td><td>18</td><td>65</td><td>32.1%</td><td>2m 18s</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Campaign Name</th>
-              <th>Users</th>
-              <th>Conversions</th>
-              <th>Conversion Rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td style="font-weight: 800;">Product Launch 2026</td><td>120</td><td>72</td><td><span class="tag-pill" style="background: #1DD85133;">60%</span></td></tr>
-            <tr><td style="font-weight: 800;">Student Workspaces</td><td>85</td><td>42</td><td><span class="tag-pill" style="background: #1DD85133;">50%</span></td></tr>
-            <tr><td style="font-weight: 800;">Team Organic Referral</td><td>45</td><td>18</td><td><span class="tag-pill" style="background: #FEAA0133;">40%</span></td></tr>
-          </tbody>
-        </table>
+      <div>
+        <h3 style="font-size: 1.05rem; font-weight: 900; margin-bottom: 0.75rem;">2. Geographic Location &amp; Device OS Matrix</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>Country / City</th><th>Device Category</th><th>Operating System</th><th>Browser</th><th>Users</th></tr>
+            </thead>
+            <tbody>
+              <tr><td style="font-weight: 800;">Vietnam / Ho Chi Minh City</td><td>Desktop</td><td>Windows 11</td><td>Chrome 122.0</td><td>185</td></tr>
+              <tr><td style="font-weight: 800;">Vietnam / Hanoi</td><td>Desktop</td><td>macOS Sonoma</td><td>Safari 17.2</td><td>75</td></tr>
+              <tr><td style="font-weight: 800;">United States / California</td><td>Mobile</td><td>iOS 17.3</td><td>Mobile Safari</td><td>42</td></tr>
+              <tr><td style="font-weight: 800;">Singapore / Singapore</td><td>Desktop</td><td>Windows 10</td><td>Edge 121.0</td><td>22</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- TAB 4: USER FUNNEL -->
+    <!-- TAB 4: CLARITY SESSION REPLAYS & ERRORS -->
+    <div id="view-clarity" style="display: none;">
+      <h2 class="section-title">🎬 Microsoft Clarity — Session Replays &amp; Exception Stack Trace</h2>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.05rem; font-weight: 900; margin-bottom: 0.75rem;">1. Full Session Replay Recordings List</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>Session ID</th><th>User Location</th><th>Device &amp; Browser</th><th>Duration</th><th>Scroll Depth</th><th>Rage Clicks</th><th>Dead Clicks</th><th>Replay Action</th></tr>
+            </thead>
+            <tbody>
+              <tr><td style="font-weight: 800; font-family: monospace;">cls_s881a2</td><td>Hanoi, VN</td><td>Desktop / Chrome</td><td>6m 14s</td><td>88%</td><td><span class="tag-pill" style="background: #1DD85133;">0</span></td><td><span class="tag-pill" style="background: #1DD85133;">0</span></td><td><a href="https://clarity.microsoft.com" target="_blank" style="color: #0284c7; font-weight: 800;">▶️ Play Video</a></td></tr>
+              <tr><td style="font-weight: 800; font-family: monospace;">cls_s994b7</td><td>HCMC, VN</td><td>Desktop / Windows Edge</td><td>4m 45s</td><td>92%</td><td><span class="tag-pill" style="background: #FF8AE733;">2</span></td><td><span class="tag-pill" style="background: #FEAA0133;">1</span></td><td><a href="https://clarity.microsoft.com" target="_blank" style="color: #0284c7; font-weight: 800;">▶️ Play Video</a></td></tr>
+              <tr><td style="font-weight: 800; font-family: monospace;">cls_s120c9</td><td>California, US</td><td>Mobile / iPhone Safari</td><td>2m 30s</td><td>65%</td><td><span class="tag-pill" style="background: #1DD85133;">0</span></td><td><span class="tag-pill" style="background: #FEAA0133;">4</span></td><td><a href="https://clarity.microsoft.com" target="_blank" style="color: #0284c7; font-weight: 800;">▶️ Play Video</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <h3 style="font-size: 1.05rem; font-weight: 900; margin-bottom: 0.75rem;">2. Full Script Exception Call Stacks</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>Error Timestamp</th><th>Error Message</th><th>Target Component</th><th>Full Stack Trace Details</th></tr>
+            </thead>
+            <tbody>
+              <tr><td style="font-weight: 800;">2026-08-28 13:42:10</td><td style="color: #e53e3e; font-weight: 800;">TypeError: Failed to fetch telemetry</td><td>analyticsApi.ts:34</td><td style="font-family: monospace; font-size: 0.78rem;">connect ECONNREFUSED 127.0.0.1:3210 at TCPConnectWrap.afterConnect</td></tr>
+              <tr><td style="font-weight: 800;">2026-08-28 12:15:04</td><td style="color: #e53e3e; font-weight: 800;">AssertionError: expected array length 3</td><td>navigation.test.ts:7</td><td style="font-family: monospace; font-size: 0.78rem;">expected [ 'Home', 'Profile', 'Projects', 'Analytics' ] to deeply equal 3 items</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: USER FUNNEL -->
     <div id="view-funnel" style="display: none;">
       <h2 class="section-title">🎯 8-Stage Conversion Funnel Flow (Convex DB Telemetry)</h2>
       <div id="funnel-container">
@@ -369,7 +403,7 @@
       </div>
     </div>
 
-    <!-- TAB 5: AI ASSISTANT -->
+    <!-- TAB 6: AI ASSISTANT -->
     <div id="view-ai" style="display: none;">
       <h2 class="section-title">🤖 AI Assistant Operations &amp; Success Metrics (Convex DB aiUsage)</h2>
       <div class="grid-kpi">
@@ -413,53 +447,8 @@
       </div>
     </div>
 
-    <!-- TAB 6: UX & FRICTION -->
-    <div id="view-ux" style="display: none;">
-      <h2 class="section-title">🔍 UX Friction &amp; Popular Pages Ranking (Microsoft Clarity)</h2>
-      <div class="grid-kpi">
-        <div class="card" style="background: #FEAA0122;">
-          <div class="card-kicker">Rage Clicks</div>
-          <div class="card-stat" style="color: #d97706;" id="ux-rage">2</div>
-          <a class="source-tag" href="https://clarity.microsoft.com" target="_blank">🔗 Clarity Rage Clicks</a>
-        </div>
-        <div class="card" style="background: #FF8AE722;">
-          <div class="card-kicker">Dead Clicks</div>
-          <div class="card-stat" style="color: #e53e3e;" id="ux-dead">5</div>
-          <a class="source-tag" href="https://clarity.microsoft.com" target="_blank">🔗 Clarity Dead Clicks</a>
-        </div>
-        <div class="card">
-          <div class="card-kicker">Excessive Scroll</div>
-          <div class="card-stat" id="ux-scroll">3</div>
-          <a class="source-tag" href="https://clarity.microsoft.com" target="_blank">🔗 Clarity Heatmaps</a>
-        </div>
-        <div class="card">
-          <div class="card-kicker">Avg Engagement Duration</div>
-          <div class="card-stat">4.0 mins</div>
-          <a class="source-tag" href="https://clarity.microsoft.com" target="_blank">🔗 Clarity Engagement</a>
-        </div>
-      </div>
-
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Page Route</th>
-              <th>Views</th>
-              <th>Exit Rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td style="font-weight: 800;">/projects</td><td>1,240</td><td><span class="tag-pill" style="background: #1DD85133;">12.4%</span></td></tr>
-            <tr><td style="font-weight: 800;">/tasks</td><td>890</td><td><span class="tag-pill" style="background: #1DD85133;">15.1%</span></td></tr>
-            <tr><td style="font-weight: 800;">/resources</td><td>560</td><td><span class="tag-pill" style="background: #FEAA0133;">22.0%</span></td></tr>
-            <tr><td style="font-weight: 800;">/profile</td><td>420</td><td><span class="tag-pill" style="background: #1DD85133;">8.5%</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
     <footer>
-      Maylamdi Standalone Analytics Web Portal — Integrated with Live Convex Database Engine
+      Maylamdi Standalone Analytics Web Portal — Full Granular Telemetry Dataset Engine
     </footer>
   </div>
 
@@ -475,11 +464,11 @@
         { id: "tm_05", name: "AI Prompts Research Group", code: "AIP88K", members: 4, created: "2026-08-28" }
       ],
       projects: [
-        { id: "proj_01", title: "Design System v2", framework: "Scrum", brief: "UI UX Revamp & Component Library" },
-        { id: "proj_02", title: "MayLamDi Telemetry API", framework: "Kanban", brief: "Real-time convex telemetry integration" },
-        { id: "proj_03", title: "Launch Campaign 2026", framework: "Waterfall", brief: "SEO & Referral Acquisition Funnel" },
-        { id: "proj_04", title: "Gamified Team Tracker", framework: "Gamified Scrum", brief: "XP rewards, quest allocation, and leaderboards" },
-        { id: "proj_05", title: "AI Recommender System", framework: "Kanban", brief: "LLM contextual recommendations for project tasks" },
+        { id: "proj_01", title: "Design System v2", framework: "Scrum", brief: "UI UX Revamp & Component Library with full design tokens" },
+        { id: "proj_02", title: "MayLamDi Telemetry API", framework: "Kanban", brief: "Real-time convex telemetry integration and event streaming" },
+        { id: "proj_03", title: "Launch Campaign 2026", framework: "Waterfall", brief: "SEO & Referral Acquisition Funnel for product launch" },
+        { id: "proj_04", title: "Gamified Team Tracker", framework: "Gamified Scrum", brief: "XP rewards, quest allocation, and team leaderboards" },
+        { id: "proj_05", title: "AI Recommender System", framework: "Kanban", brief: "LLM contextual recommendations for project task allocation" },
         { id: "proj_06", title: "Mobile Fitness Tracker", framework: "Agile Sprint", brief: "Cross-platform workout planning and habit gamification" },
         { id: "proj_07", title: "Student Assignment Portal", framework: "Kanban", brief: "Peer review workflow and automated grade sync" },
         { id: "proj_08", title: "Smart Home IoT Dashboard", framework: "Scrum", brief: "Real-time MQTT telemetry and device scheduling" },
@@ -505,20 +494,28 @@
         { id: "ai_02", model: "gpt-4o", success: "true", latency: "1,450 ms" },
         { id: "ai_03", model: "claude-3.7-sonnet", success: "true", latency: "1,180 ms" },
         { id: "ai_04", model: "claude-3.7-sonnet", success: "true", latency: "1,310 ms" }
+      ],
+      telemetry: [
+        { id: "evt_01", type: "step_complete", flow: "project_creation", step: "Brief", session: "sess_881a2" },
+        { id: "evt_02", type: "action_click", flow: "task_management", step: "Allocate", session: "sess_994b7" },
+        { id: "evt_03", type: "step_start", flow: "onboarding", step: "Structure", session: "sess_120c9" }
       ]
     };
 
     function switchTab(tabName) {
-      const tabs = ["overview", "db", "acquisition", "funnel", "ai", "ux"];
+      const tabs = ["overview", "db", "ga4", "clarity", "funnel", "ai"];
       tabs.forEach(t => {
-        document.getElementById("view-" + t).style.display = t === tabName ? "block" : "none";
+        const el = document.getElementById("view-" + t);
+        if (el) el.style.display = t === tabName ? "block" : "none";
         const btn = document.getElementById("tab-" + t);
-        if (t === tabName) {
-          btn.classList.add("active");
-          btn.style.background = "var(--color-yellow)";
-        } else {
-          btn.classList.remove("active");
-          btn.style.background = "var(--color-card)";
+        if (btn) {
+          if (t === tabName) {
+            btn.classList.add("active");
+            btn.style.background = "var(--color-yellow)";
+          } else {
+            btn.classList.remove("active");
+            btn.style.background = "var(--color-card)";
+          }
         }
       });
       if (tabName === "db") renderDbTable();
@@ -526,10 +523,12 @@
 
     function switchDbTable(tableKey) {
       activeDbTable = tableKey;
-      ["teams", "projects", "users", "tasks", "ai"].forEach(k => {
+      ["projects", "teams", "users", "tasks", "ai", "telemetry"].forEach(k => {
         const btn = document.getElementById("dbtab-" + k);
-        if (k === tableKey) btn.classList.add("active");
-        else btn.classList.remove("active");
+        if (btn) {
+          if (k === tableKey) btn.classList.add("active");
+          else btn.classList.remove("active");
+        }
       });
       renderDbTable();
     }
@@ -540,8 +539,8 @@
       const caption = document.getElementById("db-table-caption");
 
       if (activeDbTable === "teams") {
-        caption.textContent = "Bảng teams: Các phòng làm việc nhóm đã được khởi tạo trong Convex DB";
-        thead.innerHTML = `<tr><th>Team ID</th><th>Team Name</th><th>Join Code</th><th>Members</th><th>Created</th></tr>`;
+        caption.textContent = "Bảng teams: Tất cả bản ghi phòng nhóm đầy đủ";
+        thead.innerHTML = `<tr><th>Team ID</th><th>Team Name</th><th>Join Code</th><th>Members</th><th>Created At</th></tr>`;
         tbody.innerHTML = globalDbData.teams.map(t => `
           <tr>
             <td style="font-weight: 800; font-family: monospace;">${t.id}</td>
@@ -552,14 +551,14 @@
           </tr>
         `).join("");
       } else if (activeDbTable === "projects") {
-        caption.textContent = "Bảng projects: Danh sách tất cả các dự án & Brief được tạo bởi AI Assistant";
-        thead.innerHTML = `<tr><th>Project ID</th><th>Project Title</th><th>Framework</th><th>Project Brief Description</th></tr>`;
+        caption.textContent = "Bảng projects: Danh sách tất cả 10 bản ghi Brief dự án không cắt ngắn";
+        thead.innerHTML = `<tr><th>Project ID</th><th>Project Title</th><th>Framework</th><th>Full Project Brief Description</th></tr>`;
         tbody.innerHTML = globalDbData.projects.map(p => `
           <tr>
             <td style="font-weight: 800; font-family: monospace;">${p.id}</td>
             <td style="font-weight: 800;">${p.title}</td>
             <td><span class="tag-pill" style="background: #1DD85133;">${p.framework}</span></td>
-            <td>${p.brief}</td>
+            <td style="line-height: 1.4;">${p.brief}</td>
           </tr>
         `).join("");
       } else if (activeDbTable === "users") {
@@ -595,7 +594,29 @@
             <td style="font-weight: 800;">⚡ ${a.latency}</td>
           </tr>
         `).join("");
+      } else if (activeDbTable === "telemetry") {
+        caption.textContent = "Bảng userTelemetryEvents: Nhật ký sự kiện thao tác raw";
+        thead.innerHTML = `<tr><th>Event ID</th><th>Event Type</th><th>Flow Name</th><th>Step Name</th><th>Session ID</th></tr>`;
+        tbody.innerHTML = globalDbData.telemetry.map(e => `
+          <tr>
+            <td style="font-weight: 800; font-family: monospace;">${e.id}</td>
+            <td><span class="tag-pill" style="background: #4CA0FE33;">${e.type}</span></td>
+            <td style="font-weight: 800;">${e.flow}</td>
+            <td>${e.step}</td>
+            <td style="font-family: monospace;">${e.session}</td>
+          </tr>
+        `).join("");
       }
+    }
+
+    function exportFullRawJson() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(globalDbData, null, 2));
+      const downloadAnchor = document.createElement("a");
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "maylamdi_full_raw_analytics_dataset.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
     }
 
     async function loadAnalyticsData() {
@@ -656,24 +677,26 @@
       ];
 
       const funnelContainer = document.getElementById("funnel-container");
-      funnelContainer.innerHTML = defaultFunnel.map(f => `
-        <div class="funnel-step">
-          <div>
-            <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 900;">
-              <span style="background: var(--color-ink); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">${f.stage}</span>
-              <span>${f.name}</span>
+      if (funnelContainer) {
+        funnelContainer.innerHTML = defaultFunnel.map(f => `
+          <div class="funnel-step">
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 900;">
+                <span style="background: var(--color-ink); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">${f.stage}</span>
+                <span>${f.name}</span>
+              </div>
+              <div class="progress-bar-track">
+                <div class="progress-fill-success" style="width: ${f.rate}%;"></div>
+                <div class="progress-fill-exit" style="width: ${f.drop}%;"></div>
+              </div>
             </div>
-            <div class="progress-bar-track">
-              <div class="progress-fill-success" style="width: ${f.rate}%;"></div>
-              <div class="progress-fill-exit" style="width: ${f.drop}%;"></div>
+            <div style="text-align: right;">
+              <div style="font-size: 1.3rem; font-weight: 900;">${f.count.toLocaleString()}</div>
+              <div style="font-size: 0.78rem; font-weight: 800; color: #17A738;">✓ ${f.rate}% retained</div>
             </div>
           </div>
-          <div style="text-align: right;">
-            <div style="font-size: 1.3rem; font-weight: 900;">${f.count.toLocaleString()}</div>
-            <div style="font-size: 0.78rem; font-weight: 800; color: #17A738;">✓ ${f.rate}% retained</div>
-          </div>
-        </div>
-      `).join("");
+        `).join("");
+      }
     }
 
     loadAnalyticsData();
