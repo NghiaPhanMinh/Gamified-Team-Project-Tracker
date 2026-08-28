@@ -16,7 +16,6 @@ import { getGroupColor } from "../../lib/groupColors";
 import { normalizeSubscriptionPlan } from "../../lib/subscription";
 
 import { ActivityCenter } from "../teams/ActivityCenter";
-import { AnalyticsDashboard } from "../analytics/AnalyticsDashboard";
 
 export function AuthenticatedHome() {
   const { signOut } = useAuthActions();
@@ -62,8 +61,6 @@ export function AuthenticatedHome() {
 
   if (path.startsWith("/subscription")) {
     activeSection = "subscription";
-  } else if (path.startsWith("/analytics")) {
-    activeSection = "analytics";
   } else if (path.startsWith("/profile")) {
     activeSection = "profile";
   } else if (path.startsWith("/resources") || path.startsWith("/projects/resources")) {
@@ -243,8 +240,6 @@ export function AuthenticatedHome() {
         <div className="content-container">
           {activeSection === "subscription" ? (
             <SubscriptionPage currentPlan={currentPlan} />
-          ) : activeSection === "analytics" ? (
-            <AnalyticsDashboard />
           ) : (
             <TeamSystem
               profile={profile}
