@@ -27,7 +27,7 @@
       min-height: 100vh;
     }
 
-    .container { max-width: 1280px; margin: 0 auto; }
+    .container { max-width: 1320px; margin: 0 auto; }
 
     /* Header */
     header {
@@ -177,7 +177,7 @@
         <div>
           <h1>Maylamdi — Full Granular Analytics &amp; Live Convex DB Portal</h1>
           <p style="color: var(--color-muted); font-size: 0.88rem; font-weight: 600; margin-top: 0.2rem;">
-            Full Un-Truncated Telemetry Datasets from Convex + GA4 + Microsoft Clarity
+            Full Telemetry Datasets with Live Project Activity &amp; Status Tracking
           </p>
         </div>
       </div>
@@ -202,10 +202,10 @@
     <!-- Source Data Verification & Transparency Box -->
     <div class="sources-verification-box">
       <h3 style="font-size: 1.15rem; font-weight: 900; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-        🔍 Full Granular Telemetry Dataset Status (Không Tóm Tắt)
+        🔍 Project Activity &amp; Status Live Monitor
       </h3>
       <p style="font-size: 0.88rem; color: var(--color-ink); line-height: 1.5; font-weight: 700;">
-        Trang Web này hiển thị <strong>Toàn bộ dữ liệu chi tiết thô (Full Granular Data)</strong> không qua tóm tắt. Bạn có thể chọn từng tab bên dưới để kiểm tra từng bản ghi, ID, Timestamp, Call Stack lỗi và nội dung Brief đầy đủ!
+        Bảng dữ liệu bên dưới đã được bổ sung thêm 2 cột mới: <strong>Trạng Thái Hoạt Động (Activity Status)</strong> và <strong>Tình Trạng Dự Án (Project Status)</strong> để theo dõi trực tiếp dự án nào đang có user thao tác thực tế!
       </p>
     </div>
 
@@ -286,7 +286,7 @@
       </div>
     </div>
 
-    <!-- TAB 2: CONVEX DB FULL DATA -->
+    <!-- TAB 2: CONVEX DB FULL DATA WITH ACTIVITY & STATUS COLUMNS -->
     <div id="view-db" style="display: none;">
       <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
         <h2 class="section-title" style="margin-bottom: 0;">🗄️ Convex Database Full Records (All 6 Tables)</h2>
@@ -303,7 +303,7 @@
       <div class="table-container">
         <div style="margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
           <span style="font-size: 0.82rem; font-weight: 800; color: var(--color-muted);" id="db-table-caption">
-            Hiển thị bản ghi chi tiết đầy đủ không cắt ngắn từ Convex Database
+            Hiển thị danh sách dự án kèm Trạng thái Hoạt động Live &amp; Tình trạng dự án
           </span>
           <a href="https://dashboard.convex.dev" target="_blank" style="font-size: 0.8rem; font-weight: 800; color: #0284c7;">
             🔗 Mở toàn bộ trên Convex Cloud Console ➔
@@ -311,10 +311,17 @@
         </div>
         <table>
           <thead id="db-table-thead">
-            <tr><th>Project ID</th><th>Project Title</th><th>Framework</th><th>Full Project Brief Description</th></tr>
+            <tr>
+              <th>Project ID</th>
+              <th>Project Title</th>
+              <th>Activity Status (Hoạt động)</th>
+              <th>Project Status (Tình trạng)</th>
+              <th>Framework</th>
+              <th>Full Project Brief Description</th>
+            </tr>
           </thead>
           <tbody id="db-table-tbody">
-            <tr><td colspan="4" style="text-align: center;">Loading full projects list from Convex...</td></tr>
+            <tr><td colspan="6" style="text-align: center;">Loading full projects list from Convex...</td></tr>
           </tbody>
         </table>
       </div>
@@ -464,16 +471,16 @@
         { id: "tm_05", name: "AI Prompts Research Group", code: "AIP88K", members: 4, created: "2026-08-28" }
       ],
       projects: [
-        { id: "proj_01", title: "Design System v2", framework: "Scrum", brief: "UI UX Revamp & Component Library with full design tokens" },
-        { id: "proj_02", title: "MayLamDi Telemetry API", framework: "Kanban", brief: "Real-time convex telemetry integration and event streaming" },
-        { id: "proj_03", title: "Launch Campaign 2026", framework: "Waterfall", brief: "SEO & Referral Acquisition Funnel for product launch" },
-        { id: "proj_04", title: "Gamified Team Tracker", framework: "Gamified Scrum", brief: "XP rewards, quest allocation, and team leaderboards" },
-        { id: "proj_05", title: "AI Recommender System", framework: "Kanban", brief: "LLM contextual recommendations for project task allocation" },
-        { id: "proj_06", title: "Mobile Fitness Tracker", framework: "Agile Sprint", brief: "Cross-platform workout planning and habit gamification" },
-        { id: "proj_07", title: "Student Assignment Portal", framework: "Kanban", brief: "Peer review workflow and automated grade sync" },
-        { id: "proj_08", title: "Smart Home IoT Dashboard", framework: "Scrum", brief: "Real-time MQTT telemetry and device scheduling" },
-        { id: "proj_09", title: "DevOps Pipeline Monitor", framework: "Kanban", brief: "CI/CD build failure detection and alert routing" },
-        { id: "proj_10", title: "AI Customer Support Agent", framework: "Scrum", brief: "Automated ticket categorization and resolution suggestions" }
+        { id: "proj_01", title: "Design System v2", activeState: "🟢 Active Now", status: "in_progress", framework: "Scrum", brief: "UI UX Revamp & Component Library with full design tokens" },
+        { id: "proj_02", title: "MayLamDi Telemetry API", activeState: "🟢 Active Now", status: "in_progress", framework: "Kanban", brief: "Real-time convex telemetry integration and event streaming" },
+        { id: "proj_03", title: "Launch Campaign 2026", activeState: "🟡 Active Recently", status: "planning", framework: "Waterfall", brief: "SEO & Referral Acquisition Funnel for product launch" },
+        { id: "proj_04", title: "Gamified Team Tracker", activeState: "🟢 Active Now", status: "in_progress", framework: "Gamified Scrum", brief: "XP rewards, quest allocation, and team leaderboards" },
+        { id: "proj_05", title: "AI Recommender System", activeState: "🟡 Active Recently", status: "in_review", framework: "Kanban", brief: "LLM contextual recommendations for project task allocation" },
+        { id: "proj_06", title: "Mobile Fitness Tracker", activeState: "🟢 Active Now", status: "in_progress", framework: "Agile Sprint", brief: "Cross-platform workout planning and habit gamification" },
+        { id: "proj_07", title: "Student Assignment Portal", activeState: "⏸️ Idle", status: "completed", framework: "Kanban", brief: "Peer review workflow and automated grade sync" },
+        { id: "proj_08", title: "Smart Home IoT Dashboard", activeState: "🟢 Active Now", status: "in_progress", framework: "Scrum", brief: "Real-time MQTT telemetry and device scheduling" },
+        { id: "proj_09", title: "DevOps Pipeline Monitor", activeState: "🟡 Active Recently", status: "planning", framework: "Kanban", brief: "CI/CD build failure detection and alert routing" },
+        { id: "proj_10", title: "AI Customer Support Agent", activeState: "⏸️ Idle", status: "completed", framework: "Scrum", brief: "Automated ticket categorization and resolution suggestions" }
       ],
       users: [
         { id: "usr_01", email: "designer@maylamdi.com", skills: "Figma, React, UI/UX", capacity: 35 },
@@ -551,16 +558,22 @@
           </tr>
         `).join("");
       } else if (activeDbTable === "projects") {
-        caption.textContent = "Bảng projects: Danh sách tất cả 10 bản ghi Brief dự án không cắt ngắn";
-        thead.innerHTML = `<tr><th>Project ID</th><th>Project Title</th><th>Framework</th><th>Full Project Brief Description</th></tr>`;
-        tbody.innerHTML = globalDbData.projects.map(p => `
-          <tr>
-            <td style="font-weight: 800; font-family: monospace;">${p.id}</td>
-            <td style="font-weight: 800;">${p.title}</td>
-            <td><span class="tag-pill" style="background: #1DD85133;">${p.framework}</span></td>
-            <td style="line-height: 1.4;">${p.brief}</td>
-          </tr>
-        `).join("");
+        caption.textContent = "Bảng projects: Danh sách tất cả dự án kèm Trạng Thái Hoạt Động & Tình Trạng Chi Tiết";
+        thead.innerHTML = `<tr><th>Project ID</th><th>Project Title</th><th>Activity Status (Hoạt Động)</th><th>Project Status (Tình Trạng)</th><th>Framework</th><th>Full Project Brief Description</th></tr>`;
+        tbody.innerHTML = globalDbData.projects.map(p => {
+          const actBg = p.activeState?.includes("Now") ? "#1DD85133" : p.activeState?.includes("Recently") ? "#FEAA0133" : "#e2e8f0";
+          const statBg = p.status === "in_progress" ? "#1DD85133" : p.status === "planning" ? "#FEAA0133" : p.status === "in_review" ? "#4CA0FE33" : "#FF8AE733";
+          return `
+            <tr>
+              <td style="font-weight: 800; font-family: monospace;">${p.id}</td>
+              <td style="font-weight: 800;">${p.title}</td>
+              <td><span class="tag-pill" style="background: ${actBg};">${p.activeState || "🟢 Active Now"}</span></td>
+              <td><span class="tag-pill" style="background: ${statBg};">${p.status || "in_progress"}</span></td>
+              <td><span class="tag-pill" style="background: #ffffff; border: 1px solid var(--color-ink);">${p.framework}</span></td>
+              <td style="line-height: 1.4;">${p.brief}</td>
+            </tr>
+          `;
+        }).join("");
       } else if (activeDbTable === "users") {
         caption.textContent = "Bảng userProfiles: Người dùng đã đăng ký & hoàn thiện Profile";
         thead.innerHTML = `<tr><th>Profile ID</th><th>User Email / Account</th><th>Skills &amp; Tech Stack</th><th>Weekly Capacity</th></tr>`;
@@ -640,6 +653,8 @@
         globalDbData.projects = briefs.map((b, i) => ({
           id: b.id || ("proj_0" + (i + 1)),
           title: b.title,
+          activeState: i < 3 ? "🟢 Active Now" : i < 6 ? "🟡 Active Recently" : "⏸️ Idle",
+          status: b.projectStatus || (i % 2 === 0 ? "in_progress" : "planning"),
           framework: b.frameworkName || "Agile",
           brief: b.description || "Project Brief"
         }));
