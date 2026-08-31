@@ -32,12 +32,12 @@ export function LandscapeQuestBoard({
       title="Click to open Quest Board"
       style={{
         position: "absolute",
-        left: "38.5%",
-        top: "23%",
-        width: "13.5%",
+        left: "48%",
+        top: "36%",
+        width: "11%",
         aspectRatio: "108 / 124",
-        maxWidth: "145px",
-        minWidth: "95px",
+        maxWidth: "110px",
+        minWidth: "75px",
         zIndex: 15,
         display: "flex",
         flexDirection: "column",
@@ -45,7 +45,7 @@ export function LandscapeQuestBoard({
         pointerEvents: "auto",
         cursor: "pointer",
         userSelect: "none",
-        transform: isHovered ? "translate(-50%, -50%) scale(1.08) translateY(-2px)" : "translate(-50%, -50%) scale(1)",
+        transform: isHovered ? "translate(-50%, -50%) scale(1.06) translateY(-2px)" : "translate(-50%, -50%) scale(1)",
         transition: "transform 0.15s ease",
       }}
     >

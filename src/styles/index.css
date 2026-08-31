@@ -5201,8 +5201,10 @@ footer {
     transform-origin: center top !important;
   }
   .landscape-questboard-layer {
-    transform: translate(-50%, -50%) scale(0.95);
-    transform-origin: center center;
+    transform: translate(-50%, -50%) scale(0.92) !important;
+    transform-origin: center center !important;
+    top: 36% !important;
+    left: 48% !important;
   }
   .pvz-deadline-progress-container {
     transform: translateX(-50%) scale(0.78) !important;
@@ -5292,10 +5294,10 @@ footer {
     z-index: 30 !important;
   }
   .landscape-questboard-layer {
-    transform: translate(-50%, -50%) scale(1.15) !important;
+    transform: translate(-50%, -50%) scale(0.92) !important;
     transform-origin: center center !important;
-    top: 22% !important;
-    left: 38.5% !important;
+    top: 36% !important;
+    left: 48% !important;
     z-index: 20 !important;
   }
   .pvz-deadline-progress-container {
