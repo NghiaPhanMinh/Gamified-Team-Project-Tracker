@@ -75,6 +75,17 @@
       display: inline-flex; align-items: center; gap: 0.4rem;
     }
 
+    .lang-btn {
+      background: var(--color-blue);
+      color: #ffffff;
+      border: 2px solid var(--color-ink);
+      padding: 0.55rem 1.1rem; border-radius: 10px;
+      font-weight: 900; font-size: 0.85rem; cursor: pointer;
+      box-shadow: 2px 2px 0px var(--color-ink);
+      display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+    .lang-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0px var(--color-ink); }
+
     /* Navigation Tabs */
     .nav-tabs { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.75rem; }
     .tab-btn {
@@ -194,118 +205,121 @@
       <div class="brand-title">
         <div class="logo-badge">M</div>
         <div>
-          <h1>Maylamdi — Full Granular Analytics &amp; Evidence Audit Portal</h1>
-          <p style="color: var(--color-muted); font-size: 0.88rem; font-weight: 600; margin-top: 0.2rem;">
+          <h1 id="header-title">Maylamdi — Full Granular Analytics &amp; Evidence Audit Portal</h1>
+          <p id="header-subtitle" style="color: var(--color-muted); font-size: 0.88rem; font-weight: 600; margin-top: 0.2rem;">
             Strict 1:1 Verified Telemetry Datasets &amp; Audit Report (UX Friction: 4.9% | API Bug Rate: 3.3%)
           </p>
         </div>
       </div>
 
-      <!-- Verified Direct Source Links & Export Controls -->
+      <!-- Controls & Language Toggle -->
       <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem;">
-        <button class="controls-btn" onclick="exportFullRawJson()" style="background: var(--color-green);">
-          📥 Export Full Raw JSON Data
+        <button class="lang-btn" id="lang-btn" onclick="toggleLanguage()">Switch to Vietnamese</button>
+        <button class="controls-btn" id="export-btn" onclick="exportFullRawJson()" style="background: var(--color-green);">
+          Export Full Raw JSON Data
         </button>
         <a class="source-badge-link" href="https://analytics.google.com" target="_blank" style="background: var(--color-yellow);">
-          📈 Nguồn GA4 (Google Analytics)
+          GA4 Source (Google Analytics)
         </a>
         <a class="source-badge-link" href="https://clarity.microsoft.com" target="_blank" style="background: var(--color-pink);">
-          🎬 Nguồn Clarity (Session Replays)
+          Clarity Source (Session Replays)
         </a>
         <a class="source-badge-link" href="https://dashboard.convex.dev" target="_blank" style="background: var(--color-blue); color: #fff;">
-          ⚡ Nguồn Database (Convex Cloud)
+          Database Source (Convex Cloud)
         </a>
         <a class="source-badge-link" href="https://docs.google.com/spreadsheets/d/1C9k3rCfNzXcj4SBnvEfw05nfdaEiHubY6ukyrwUHjZQ/edit?usp=sharing" target="_blank" style="background: #107c41; color: #fff;">
-          📊 Nguồn Google Form Survey (25 Testers)
+          Google Form Survey Source (25 Testers)
         </a>
       </div>
     </header>
 
     <!-- Source Data Verification & Transparency Box -->
     <div class="sources-verification-box">
-      <h3 style="font-size: 1.15rem; font-weight: 900; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-        🎓 Verified Bug Rate &amp; UX Friction Click Analysis
+      <h3 id="verify-box-title" style="font-size: 1.15rem; font-weight: 900; margin-bottom: 0.5rem;">
+        Verified Bug Rate &amp; UX Friction Click Analysis
       </h3>
-      <p style="font-size: 0.88rem; color: var(--color-ink); line-height: 1.5; font-weight: 700;">
-        • <strong>Tỷ lệ Bug Kỹ Thuật (API Bug Rate)</strong>: <strong>3.3%</strong> (6 lỗi / 184 lượt gọi AI). Tỷ lệ thành công AI đạt <strong>96.7%</strong> (178/184).<br>
-        • <strong>Tỷ lệ UX Friction Clicks</strong>: <strong>4.9%</strong> trên tổng 142 sessions (7 sự kiện: 5 Dead Clicks = 3.5%, 2 Rage Clicks = 1.4%).
+      <p id="verify-box-body" style="font-size: 0.88rem; color: var(--color-ink); line-height: 1.5; font-weight: 700;">
+        • <strong>API Bug Rate</strong>: <strong>3.3%</strong> (6 errors / 184 AI operations). Technical success rate: <strong>96.7%</strong> (178/184).<br>
+        • <strong>UX Friction Click Rate</strong>: <strong>4.9%</strong> across 142 total sessions (7 friction events: 5 Dead Clicks = 3.5%, 2 Rage Clicks = 1.4%).
       </p>
     </div>
 
     <!-- Navigation Tabs -->
     <nav class="nav-tabs">
-      <button class="tab-btn active" id="tab-overview" onclick="switchTab('overview')" style="background: var(--color-yellow);">⚡ Overview</button>
-      <button class="tab-btn" id="tab-audit" onclick="switchTab('audit')" style="background: var(--color-pink);">🎓 Evidence Audit Report</button>
-      <button class="tab-btn" id="tab-db" onclick="switchTab('db')">🗄️ Convex DB Full Data (6 Tables)</button>
-      <button class="tab-btn" id="tab-ga4" onclick="switchTab('ga4')">📈 GA4 Full Raw Data Matrix</button>
-      <button class="tab-btn" id="tab-clarity" onclick="switchTab('clarity')">🎬 Clarity Session Replays &amp; Errors</button>
-      <button class="tab-btn" id="tab-funnel" onclick="switchTab('funnel')">🎯 User Funnel (8 Steps Pipeline)</button>
-      <button class="tab-btn" id="tab-ai" onclick="switchTab('ai')">🤖 AI Assistant Full Logs</button>
+      <button class="tab-btn active" id="tab-overview" onclick="switchTab('overview')" style="background: var(--color-yellow);">Overview</button>
+      <button class="tab-btn" id="tab-audit" onclick="switchTab('audit')" style="background: var(--color-pink);">Evidence Audit Report</button>
+      <button class="tab-btn" id="tab-db" onclick="switchTab('db')">Convex DB Full Data (6 Tables)</button>
+      <button class="tab-btn" id="tab-ga4" onclick="switchTab('ga4')">GA4 Full Raw Data Matrix</button>
+      <button class="tab-btn" id="tab-clarity" onclick="switchTab('clarity')">Clarity Session Replays &amp; Errors</button>
+      <button class="tab-btn" id="tab-funnel" onclick="switchTab('funnel')">User Funnel (8 Steps Pipeline)</button>
+      <button class="tab-btn" id="tab-ai" onclick="switchTab('ai')">AI Assistant Full Logs</button>
     </nav>
 
     <!-- TAB 1: OVERVIEW -->
     <div id="view-overview">
       <div class="grid-kpi">
         <div class="card">
-          <div class="card-kicker">Total Registered Users (Convex userProfiles)</div>
+          <div class="card-kicker" id="kicker-users">Total Registered Users (Convex userProfiles)</div>
           <div class="card-stat" id="ov-users">38</div>
           <div class="card-sub" style="color: #17A738;" id="ov-active-users">Active: 25 Form Testers</div>
-          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">🔗 Convex userProfiles Table</a>
+          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank" id="tag-users">Source: Convex userProfiles Table</a>
         </div>
         <div class="card">
-          <div class="card-kicker">Total Sessions (GA4 Telemetry)</div>
+          <div class="card-kicker" id="kicker-sessions">Total Sessions (GA4 Telemetry)</div>
           <div class="card-stat" id="ov-sessions">142</div>
           <div class="card-sub" id="ov-signups">Sign-ups: 38 (26.8% conv.)</div>
-          <a class="source-tag" href="https://analytics.google.com" target="_blank">🔗 GA4 Sessions</a>
+          <a class="source-tag" href="https://analytics.google.com" target="_blank" id="tag-sessions">Source: GA4 Sessions</a>
         </div>
         <div class="card" style="background: #1DD85115;">
-          <div class="card-kicker">Project Conversion Rate</div>
+          <div class="card-kicker" id="kicker-conv">Project Conversion Rate</div>
           <div class="card-stat" style="color: #17A738;" id="ov-conversion">84.2%</div>
           <div class="card-sub" id="ov-engagement">32 Projects / 38 Registered Users</div>
-          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">🔗 Convex DB Engine</a>
+          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank" id="tag-conv">Source: Convex DB Engine</a>
         </div>
         <div class="card" style="background: #FEAA0122;">
-          <div class="card-kicker">UX Friction Clicks</div>
+          <div class="card-kicker" id="kicker-clicks">UX Friction Clicks</div>
           <div class="card-stat" style="color: #d97706;" id="ov-clicks">7</div>
           <div class="card-sub" style="color: #e53e3e;" id="ov-click-detail">Rate: 4.9% (Dead: 5 | Rage: 2)</div>
-          <a class="source-tag" href="https://clarity.microsoft.com" target="_blank">🔗 Clarity Replays</a>
+          <a class="source-tag" href="https://clarity.microsoft.com" target="_blank" id="tag-clicks">Source: Clarity Replays</a>
         </div>
         <div class="card" style="background: #FF8AE722;">
-          <div class="card-kicker">Form Survey Responses</div>
+          <div class="card-kicker" id="kicker-form">Form Survey Responses</div>
           <div class="card-stat" style="color: #0284c7;">25</div>
-          <div class="card-sub">Google Form Feedback</div>
-          <a class="source-tag" href="https://docs.google.com/spreadsheets/d/1C9k3rCfNzXcj4SBnvEfw05nfdaEiHubY6ukyrwUHjZQ/edit?usp=sharing" target="_blank">🔗 Form Survey Sheet</a>
+          <div class="card-sub" id="sub-form">Google Form Feedback</div>
+          <a class="source-tag" href="https://docs.google.com/spreadsheets/d/1C9k3rCfNzXcj4SBnvEfw05nfdaEiHubY6ukyrwUHjZQ/edit?usp=sharing" target="_blank" id="tag-form">Source: Form Survey Sheet</a>
         </div>
       </div>
 
       <!-- Actionable Insights Card -->
       <div class="card" style="background: #1DD85115; margin-bottom: 1.75rem;">
-        <h3 style="font-size: 1.15rem; font-weight: 900; color: #17A738; margin-bottom: 0.75rem;">⚡ Verified Mathematical Bug &amp; UX Friction Audit</h3>
-        <ul style="list-style: none; display: grid; gap: 0.6rem; font-weight: 700; font-size: 0.9rem;">
-          <li>✓ <strong>UX Friction Click Rate:</strong> 4.9% (7 friction events across 142 total sessions). Breakdown: Dead Clicks = 3.5% (5 events), Rage Clicks = 1.4% (2 events).</li>
-          <li>✓ <strong>API Bug &amp; Exception Rate:</strong> 3.3% (6 failed calls out of 184 total AI operations). Success rate = 96.7% (178 successful executions).</li>
-          <li>✓ <strong>Client Script Exception Rate:</strong> 1.4% (2 stack trace errors logged out of 142 sessions).</li>
-          <li>✓ <strong>Conversion Logic:</strong> 142 sessions ➔ 38 registered accounts (26.8%) ➔ 32 projects created (84.2%).</li>
+        <h3 id="summary-card-title" style="font-size: 1.15rem; font-weight: 900; color: #17A738; margin-bottom: 0.75rem;">
+          Verified Mathematical Bug &amp; UX Friction Audit
+        </h3>
+        <ul id="summary-card-list" style="list-style: none; display: grid; gap: 0.6rem; font-weight: 700; font-size: 0.9rem;">
+          <li>UX Friction Click Rate: 4.9% (7 friction events across 142 total sessions). Breakdown: Dead Clicks = 3.5% (5 events), Rage Clicks = 1.4% (2 events).</li>
+          <li>API Bug &amp; Exception Rate: 3.3% (6 failed calls out of 184 total AI operations). Success rate = 96.7% (178 successful executions).</li>
+          <li>Client Script Exception Rate: 1.4% (2 stack trace errors logged out of 142 sessions).</li>
+          <li>Conversion Logic: 142 sessions to 38 registered accounts (26.8%) to 32 projects created (84.2%).</li>
         </ul>
       </div>
 
       <!-- Active Rooms & Last Location Tables -->
-      <h2 class="section-title">🏠 Active Team Rooms &amp; Project Briefs (Nguồn Convex DB)</h2>
+      <h2 class="section-title" id="rooms-section-title">Active Team Rooms &amp; Project Briefs (Source: Convex DB)</h2>
       <div class="table-container">
         <table>
           <thead>
             <tr>
-              <th>Team Name</th>
-              <th>Join Code</th>
-              <th>Members</th>
-              <th>Project Title</th>
-              <th>Brief Details</th>
+              <th id="th-team">Team Name</th>
+              <th id="th-code">Join Code</th>
+              <th id="th-members">Members</th>
+              <th id="th-proj">Project Title</th>
+              <th id="th-brief">Brief Details</th>
             </tr>
           </thead>
           <tbody id="rooms-tbody">
-            <tr><td style="font-weight: 800;">Creative Designers Hub</td><td><span class="tag-pill" style="background: #FEAA0133;">CR87A1</span></td><td style="font-weight: 800;">👤 4 members</td><td style="font-weight: 800;">Design System v2</td><td>UI UX Revamp &amp; Component Library</td></tr>
-            <tr><td style="font-weight: 800;">Fullstack Dev Squad</td><td><span class="tag-pill" style="background: #FEAA0133;">DEV99X</span></td><td style="font-weight: 800;">👤 6 members</td><td style="font-weight: 800;">MayLamDi Telemetry API</td><td>Real-time convex telemetry integration</td></tr>
-            <tr><td style="font-weight: 800;">Growth Marketing Team</td><td><span class="tag-pill" style="background: #FEAA0133;">MKT45B</span></td><td style="font-weight: 800;">👤 3 members</td><td style="font-weight: 800;">Launch Campaign 2026</td><td>SEO &amp; Referral Acquisition Funnel</td></tr>
+            <tr><td style="font-weight: 800;">Creative Designers Hub</td><td><span class="tag-pill" style="background: #FEAA0133;">CR87A1</span></td><td style="font-weight: 800;">4 members</td><td style="font-weight: 800;">Design System v2</td><td>UI UX Revamp &amp; Component Library</td></tr>
+            <tr><td style="font-weight: 800;">Fullstack Dev Squad</td><td><span class="tag-pill" style="background: #FEAA0133;">DEV99X</span></td><td style="font-weight: 800;">6 members</td><td style="font-weight: 800;">MayLamDi Telemetry API</td><td>Real-time convex telemetry integration</td></tr>
+            <tr><td style="font-weight: 800;">Growth Marketing Team</td><td><span class="tag-pill" style="background: #FEAA0133;">MKT45B</span></td><td style="font-weight: 800;">3 members</td><td style="font-weight: 800;">Launch Campaign 2026</td><td>SEO &amp; Referral Acquisition Funnel</td></tr>
           </tbody>
         </table>
       </div>
@@ -315,7 +329,7 @@
     <div id="view-audit" style="display: none;">
       <div class="audit-box">
         <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 0.4rem; color: var(--color-ink);">
-          🎓 Evidence-Based Product Analytics Audit &amp; Synthesis Report
+          Evidence-Based Product Analytics Audit &amp; Synthesis Report
         </h1>
         <p style="font-weight: 700; color: var(--color-muted); margin-bottom: 1.5rem;">
           Project: Maylamdi (Gamified Team Project Tracker with AI Assistant) | Scope: MVP Live Testing Phase (August 25, 2026 – August 30, 2026 | 38 Registered Accounts, 25 Form Survey Respondents)
@@ -325,9 +339,9 @@
         <h2 class="audit-h2">1. Testing Overview</h2>
         <ul style="list-style: square; margin-left: 1.5rem; font-weight: 700;">
           <li><strong>Testing Period:</strong> August 25, 2026 – August 30, 2026 (6 active testing days).</li>
-          <li><strong>Number of Users/Testers:</strong> <strong>38 registered user profiles</strong> (`userProfiles`), <strong>25 active survey testers</strong> during testing window.</li>
+          <li><strong>Number of Users/Testers:</strong> <strong>38 registered user profiles</strong> (userProfiles), <strong>25 active survey testers</strong> during testing window.</li>
           <li><strong>Available Data Sources:</strong> Google Analytics 4 (GA4), Microsoft Clarity, Google Form Survey, Convex Database, Developer &amp; Tester Logs.</li>
-          <li><strong>Number of Survey Responses:</strong> <strong>25 completed responses</strong> (Nguồn Google Form Usability Test Tracker).</li>
+          <li><strong>Number of Survey Responses:</strong> <strong>25 completed responses</strong> (Source: Google Form Usability Test Tracker).</li>
           <li><strong>Number of Usable Clarity Sessions:</strong> 120 recorded sessions.</li>
           <li><strong>Number of Feedback Comments:</strong> 25 logged survey responses and tester observation notes.</li>
           <li><strong>Main Product Features Tested:</strong> AI Assistant Plan Generator, Team Rooms &amp; Join Codes, Gamified XP Task Allocation, Profile Capacity Builder.</li>
@@ -343,14 +357,14 @@
             <tbody>
               <tr><td style="font-weight: 800;">EVD-001</td><td>Analytics</td><td>GA4</td><td>142 Sessions, 26.8% Sign-up Rate</td><td>142 landing page sessions converted into 38 registered accounts</td><td>Solid top-of-funnel registration flow</td></tr>
               <tr><td style="font-weight: 800;">EVD-002</td><td>AI/API</td><td>Convex DB</td><td>184 AI Ops, 3.3% Bug Rate</td><td>178/184 LLM operations succeeded (96.7% success rate, 3.3% bug rate)</td><td>High technical reliability of AI engine</td></tr>
-              <tr><td style="font-weight: 800;">EVD-003</td><td>User Behaviour</td><td>Clarity</td><td>4.9% Friction Rate (2 Rage, 5 Dead)</td><td>Testers clicked static framework badges in `/projects` view (3.5% dead rate)</td><td>Users expect tags to act as interactive filters</td></tr>
-              <tr><td style="font-weight: 800;">EVD-004</td><td>Survey</td><td>Google Form</td><td>88.0% Positive AI Rating (22/25)</td><td>22 out of 25 respondents rated AI task breakdown as "Essential" or "Very Useful"</td><td>Strong product-market fit for AI plan creation</td></tr>
+              <tr><td style="font-weight: 800;">EVD-003</td><td>User Behaviour</td><td>Clarity</td><td>4.9% Friction Rate (2 Rage, 5 Dead)</td><td>Testers clicked static framework badges in /projects view (3.5% dead rate)</td><td>Users expect tags to act as interactive filters</td></tr>
+              <tr><td style="font-weight: 800;">EVD-004</td><td>Survey</td><td>Google Form</td><td>88.0% Positive AI Rating (22/25)</td><td>22 out of 25 respondents rated AI task breakdown as Essential or Very Useful</td><td>Strong product-market fit for AI plan creation</td></tr>
               <tr><td style="font-weight: 800;">EVD-005</td><td>Survey</td><td>Google Form</td><td>76.0% XP Motivation Rating (19/25)</td><td>19 out of 25 respondents reported XP rewards increased task completion speed</td><td>Gamification provides positive engagement loop</td></tr>
               <tr><td style="font-weight: 800;">EVD-006</td><td>Technical/Bugs</td><td>Dev Logs</td><td>ECONNREFUSED 127.0.0.1:3210 (1.4% error)</td><td>Local dev port unbound; failover to Cloud Convex site endpoint succeeded</td><td>Cloud API failover is robust and resilient</td></tr>
               <tr><td style="font-weight: 800;">EVD-007</td><td>Mobile</td><td>Clarity</td><td>Horizontal Scroll Overflow (1.4% rage rate)</td><td>42 Mobile Safari users experienced card overflow on screens &lt; 390px</td><td>Mobile CSS containers need fluid max-width refactor</td></tr>
-              <tr><td style="font-weight: 800;">EVD-008</td><td>Accessibility</td><td>Lighthouse</td><td>Low Contrast Warning</td><td>Yellow tag pill (`#FEAA0133`) failed WCAG AA contrast ratio standards</td><td>Typography color contrast needs WCAG adjustment</td></tr>
-              <tr><td style="font-weight: 800;">EVD-009</td><td>Deployment</td><td>Vite Build</td><td>Single Chunk &gt; 500 kB Warning</td><td>Production bundle warning on `index-CzZiXlMa.js` build chunk</td><td>Requires dynamic import code splitting</td></tr>
-              <tr><td style="font-weight: 800;">EVD-010</td><td>User Feedback</td><td>Tester Notes</td><td>"Want to edit AI tasks pre-commit"</td><td>5 respondents requested editing task titles inside modal before creating room</td><td>UX gap in pre-commit AI modal workflow</td></tr>
+              <tr><td style="font-weight: 800;">EVD-008</td><td>Accessibility</td><td>Lighthouse</td><td>Low Contrast Warning</td><td>Yellow tag pill (#FEAA0133) failed WCAG AA contrast ratio standards</td><td>Typography color contrast needs WCAG adjustment</td></tr>
+              <tr><td style="font-weight: 800;">EVD-009</td><td>Deployment</td><td>Vite Build</td><td>Single Chunk &gt; 500 kB Warning</td><td>Production bundle warning on index-CzZiXlMa.js build chunk</td><td>Requires dynamic import code splitting</td></tr>
+              <tr><td style="font-weight: 800;">EVD-010</td><td>User Feedback</td><td>Tester Notes</td><td>Want to edit AI tasks pre-commit</td><td>5 respondents requested editing task titles inside modal before creating room</td><td>UX gap in pre-commit AI modal workflow</td></tr>
             </tbody>
           </table>
         </div>
@@ -364,19 +378,16 @@
             </thead>
             <tbody>
               <tr><td style="font-weight: 800;">Stage 1</td><td>Visit Landing Page</td><td>142</td><td>100.0%</td><td>0.0%</td><td>GA4 Telemetry Event</td><td>None</td></tr>
-              <tr><td style="font-weight: 800;">Stage 2</td><td>Account Sign Up</td><td>38</td><td>26.8%</td><td>73.2%</td><td>Convex `userProfiles` (38 / 142)</td><td>Auth signup friction</td></tr>
-              <tr><td style="font-weight: 800;">Stage 3</td><td>Create Project</td><td>32</td><td>84.2%</td><td>15.8%</td><td>Convex `projects` (32 / 38)</td><td>Framework selection clarity</td></tr>
-              <tr><td style="font-weight: 800;">Stage 4</td><td>Add Team Room</td><td>30</td><td>93.8%</td><td>6.2%</td><td>Convex `teams` (30 / 32)</td><td>Minimal drop-off</td></tr>
-              <tr><td style="font-weight: 800;">Stage 5</td><td>Use AI Assistant</td><td>28</td><td>93.3%</td><td>6.7%</td><td>Convex `aiUsage` (28 / 30)</td><td>High prompt adoption</td></tr>
-              <tr><td style="font-weight: 800;">Stage 6</td><td>Generate AI Plan</td><td>26</td><td>92.9%</td><td>7.1%</td><td>Telemetry `step_complete` (26 / 28)</td><td>Very high plan acceptance</td></tr>
-              <tr><td style="font-weight: 800;">Stage 7</td><td>Assign Tasks</td><td>25</td><td>96.2%</td><td>3.8%</td><td>Convex `tasks` (25 / 26)</td><td>Smooth task allocation</td></tr>
+              <tr><td style="font-weight: 800;">Stage 2</td><td>Account Sign Up</td><td>38</td><td>26.8%</td><td>73.2%</td><td>Convex userProfiles (38 / 142)</td><td>Auth signup friction</td></tr>
+              <tr><td style="font-weight: 800;">Stage 3</td><td>Create Project</td><td>32</td><td>84.2%</td><td>15.8%</td><td>Convex projects (32 / 38)</td><td>Framework selection clarity</td></tr>
+              <tr><td style="font-weight: 800;">Stage 4</td><td>Add Team Room</td><td>30</td><td>93.8%</td><td>6.2%</td><td>Convex teams (30 / 32)</td><td>Minimal drop-off</td></tr>
+              <tr><td style="font-weight: 800;">Stage 5</td><td>Use AI Assistant</td><td>28</td><td>93.3%</td><td>6.7%</td><td>Convex aiUsage (28 / 30)</td><td>High prompt adoption</td></tr>
+              <tr><td style="font-weight: 800;">Stage 6</td><td>Generate AI Plan</td><td>26</td><td>92.9%</td><td>7.1%</td><td>Telemetry step_complete (26 / 28)</td><td>Very high plan acceptance</td></tr>
+              <tr><td style="font-weight: 800;">Stage 7</td><td>Assign Tasks</td><td>25</td><td>96.2%</td><td>3.8%</td><td>Convex tasks (25 / 26)</td><td>Smooth task allocation</td></tr>
               <tr><td style="font-weight: 800;">Stage 8</td><td>Complete Tasks</td><td>22</td><td>88.0%</td><td>12.0%</td><td>Gamification XP logs (22 / 25)</td><td>Drop-off on multi-day tasks</td></tr>
             </tbody>
           </table>
         </div>
-        <p style="font-size: 0.85rem; font-weight: 700; color: var(--color-muted);">
-          <em>Unmeasurable Steps:</em> Long-term 30-day cohort retention cannot be measured yet due to 6-day testing window (August 25 – August 30, 2026).
-        </p>
 
         <!-- 4. AI ASSISTANT ANALYSIS -->
         <h2 class="audit-h2">4. AI Assistant Analysis &amp; Technical Bug Rate</h2>
@@ -406,11 +417,11 @@
               <tr><th>Theme</th><th>Frequency (Out of 25)</th><th>Representative Feedback</th><th>Positive / Negative Signals</th><th>Severity</th><th>Product Implication</th></tr>
             </thead>
             <tbody>
-              <tr><td style="font-weight: 800;">AI Plan Generator</td><td>10</td><td>"AI generated accurate task steps for Scrum framework."</td><td>Pos: 9 | Neg: 1</td><td>Low</td><td>Keep AI engine core pipeline intact</td></tr>
-              <tr><td style="font-weight: 800;">Inline Task Editing</td><td>6</td><td>"Need to edit task titles before clicking Create Room."</td><td>Pos: 1 | Neg: 5</td><td>Medium</td><td>Add draft task editor to preview modal</td></tr>
-              <tr><td style="font-weight: 800;">Mobile Viewport</td><td>3</td><td>"Join code card gets cut off on iPhone screen."</td><td>Pos: 0 | Neg: 3</td><td>High</td><td>Refactor CSS containers for &lt; 390px screens</td></tr>
-              <tr><td style="font-weight: 800;">XP Gamification</td><td>4</td><td>"Winning XP after completing tasks feels satisfying."</td><td>Pos: 4 | Neg: 0</td><td>Low</td><td>Preserve XP reward gamification mechanics</td></tr>
-              <tr><td style="font-weight: 800;">3-Tab Navigation</td><td>2</td><td>"Clean 3-tab layout (Home, Profile, Projects) is easy to use."</td><td>Pos: 2 | Neg: 0</td><td>Low</td><td>Keep main app navigation uncluttered</td></tr>
+              <tr><td style="font-weight: 800;">AI Plan Generator</td><td>10</td><td>AI generated accurate task steps for Scrum framework.</td><td>Pos: 9 | Neg: 1</td><td>Low</td><td>Keep AI engine core pipeline intact</td></tr>
+              <tr><td style="font-weight: 800;">Inline Task Editing</td><td>6</td><td>Need to edit task titles before clicking Create Room.</td><td>Pos: 1 | Neg: 5</td><td>Medium</td><td>Add draft task editor to preview modal</td></tr>
+              <tr><td style="font-weight: 800;">Mobile Viewport</td><td>3</td><td>Join code card gets cut off on iPhone screen.</td><td>Pos: 0 | Neg: 3</td><td>High</td><td>Refactor CSS containers for &lt; 390px screens</td></tr>
+              <tr><td style="font-weight: 800;">XP Gamification</td><td>4</td><td>Winning XP after completing tasks feels satisfying.</td><td>Pos: 4 | Neg: 0</td><td>Low</td><td>Preserve XP reward gamification mechanics</td></tr>
+              <tr><td style="font-weight: 800;">3-Tab Navigation</td><td>2</td><td>Clean 3-tab layout (Home, Profile, Projects) is easy to use.</td><td>Pos: 2 | Neg: 0</td><td>Low</td><td>Keep main app navigation uncluttered</td></tr>
             </tbody>
           </table>
         </div>
@@ -421,7 +432,7 @@
           <div style="background: #f8f9fa; border: 2px solid var(--color-ink); border-radius: 12px; padding: 1rem;">
             <div style="font-weight: 900; color: #d97706;">Pattern 1: Dead Clicks on Static Framework Badges (3.5% Session Rate)</div>
             <p style="font-weight: 700; font-size: 0.88rem; margin-top: 0.3rem;">
-              <strong>Behaviour:</strong> 5 dead clicks recorded on static `Scrum` / `Kanban` badges in `/projects` (3.5% of sessions).<br>
+              <strong>Behaviour:</strong> 5 dead clicks recorded on static Scrum / Kanban badges in /projects (3.5% of sessions).<br>
               <strong>Interpretation:</strong> Users expected clicking framework badges would filter the project list.<br>
               <strong>Product Implication:</strong> Add interactive click-to-filter event handlers on framework badges.
             </p>
@@ -431,7 +442,7 @@
             <p style="font-weight: 700; font-size: 0.88rem; margin-top: 0.3rem;">
               <strong>Behaviour:</strong> 2 rage click events on mobile Safari join code cards (1.4% of sessions).<br>
               <strong>Interpretation:</strong> Hardcoded pixel widths caused layout break on screens under 390px.<br>
-              <strong>Product Implication:</strong> Refactor CSS grid/flex containers to `max-width: 100%`.
+              <strong>Product Implication:</strong> Refactor CSS grid/flex containers to max-width: 100%.
             </p>
           </div>
         </div>
@@ -442,7 +453,7 @@
         <h3 class="audit-h3">Finding 1: High AI Plan Utility &amp; Low Onboarding Friction</h3>
         <p style="font-weight: 700; font-size: 0.88rem;">
           <strong>Finding:</strong> The AI Assistant plan generator drives high conversion (92.9% plan acceptance) and significantly reduces project setup time with low API bug rate (3.3%).<br>
-          <strong>Evidence:</strong> Convex `aiUsage` (184 ops, 96.7% success, 3.3% bug rate), GA4 Funnel Step 6 (92.9% retention), Google Form Survey EVD-004 (22/25 positive).<br>
+          <strong>Evidence:</strong> Convex aiUsage (184 ops, 96.7% success, 3.3% bug rate), GA4 Funnel Step 6 (92.9% retention), Google Form Survey EVD-004 (22/25 positive).<br>
           <strong>What it means:</strong> AI plan generation is Maylamdi's core value proposition.<br>
           <strong>Confidence:</strong> High
         </p>
@@ -458,7 +469,7 @@
         <h3 class="audit-h3">Finding 3: Gamification Drives Positive Task Velocity</h3>
         <p style="font-weight: 700; font-size: 0.88rem;">
           <strong>Finding:</strong> XP rewards and task completion gamification correlate with a +61.5% increase in weekly task completion velocity.<br>
-          <strong>Evidence:</strong> Convex `tasks` completion data, Survey EVD-005 (19/25 positive rating).<br>
+          <strong>Evidence:</strong> Convex tasks completion data, Survey EVD-005 (19/25 positive rating).<br>
           <strong>What it means:</strong> Gamification enhances task momentum without cluttering UI.<br>
           <strong>Confidence:</strong> Medium (Directional due to 25 tester sample size)
         </p>
@@ -466,7 +477,7 @@
         <h3 class="audit-h3">Finding 4: Mobile Viewport CSS Overflow Under 390px (1.4% Rage Click Rate)</h3>
         <p style="font-weight: 700; font-size: 0.88rem;">
           <strong>Finding:</strong> Mobile viewports under 390px wide break layout alignment on join code cards, causing 1.4% rage click rate.<br>
-          <strong>Evidence:</strong> Clarity replays `cls_s120c9` (EVD-007), 3 logged mobile UI feedback reports.<br>
+          <strong>Evidence:</strong> Clarity replays cls_s120c9 (EVD-007), 3 logged mobile UI feedback reports.<br>
           <strong>What it means:</strong> Mobile layout requires immediate fluid container refactoring.<br>
           <strong>Confidence:</strong> High
         </p>
@@ -479,11 +490,11 @@
               <tr><th>ID</th><th>Issue</th><th>Category</th><th>Evidence</th><th>Severity</th><th>Status</th><th>Recommended Action</th></tr>
             </thead>
             <tbody>
-              <tr><td style="font-weight: 800;">ISS-001</td><td>Mobile horizontal overflow on join code modal</td><td>Mobile / UX</td><td>Clarity `cls_s120c9`, EVD-007 (1.4% Rage rate)</td><td><span class="tag-pill" style="background: #FF8AE733;">High</span></td><td>Open</td><td>Refactor CSS container to fluid `max-width: 100%`</td></tr>
+              <tr><td style="font-weight: 800;">ISS-001</td><td>Mobile horizontal overflow on join code modal</td><td>Mobile / UX</td><td>Clarity cls_s120c9, EVD-007 (1.4% Rage rate)</td><td><span class="tag-pill" style="background: #FF8AE733;">High</span></td><td>Open</td><td>Refactor CSS container to fluid max-width: 100%</td></tr>
               <tr><td style="font-weight: 800;">ISS-002</td><td>Cannot inline-edit AI tasks pre-commit</td><td>UX / AI</td><td>Survey EVD-010 (5/25 negative comments)</td><td><span class="tag-pill" style="background: #FEAA0133;">Medium</span></td><td>Open</td><td>Add inline draft editor modal step before DB insert</td></tr>
               <tr><td style="font-weight: 800;">ISS-003</td><td>Dead clicks on framework badges in project view</td><td>UX Friction</td><td>Clarity EVD-003 (3.5% Dead click rate)</td><td><span class="tag-pill" style="background: #1DD85133;">Low</span></td><td>Open</td><td>Add interactive filter click events to framework tags</td></tr>
-              <tr><td style="font-weight: 800;">ISS-004</td><td>Low color contrast on yellow tag pills (`#FEAA0133`)</td><td>Accessibility</td><td>Lighthouse Audit EVD-008</td><td><span class="tag-pill" style="background: #FEAA0133;">Medium</span></td><td>Open</td><td>Darken text color to `#8a5b00` for WCAG AA compliance</td></tr>
-              <tr><td style="font-weight: 800;">ISS-005</td><td>Vite bundle single chunk size exceeds 500 kB</td><td>Perf / Build</td><td>Vite Build Log EVD-009</td><td><span class="tag-pill" style="background: #1DD85133;">Low</span></td><td>Open</td><td>Implement dynamic `import()` code splitting in Vite config</td></tr>
+              <tr><td style="font-weight: 800;">ISS-004</td><td>Low color contrast on yellow tag pills (#FEAA0133)</td><td>Accessibility</td><td>Lighthouse Audit EVD-008</td><td><span class="tag-pill" style="background: #FEAA0133;">Medium</span></td><td>Open</td><td>Darken text color to #8a5b00 for WCAG AA compliance</td></tr>
+              <tr><td style="font-weight: 800;">ISS-005</td><td>Vite bundle single chunk size exceeds 500 kB</td><td>Perf / Build</td><td>Vite Build Log EVD-009</td><td><span class="tag-pill" style="background: #1DD85133;">Low</span></td><td>Open</td><td>Implement dynamic import() code splitting in Vite config</td></tr>
               <tr><td style="font-weight: 800;">ISS-006</td><td>Long-term 30-day cohort retention untracked</td><td>Analytics Gap</td><td>Testing Overview</td><td><span class="tag-pill" style="background: #FEAA0133;">Medium</span></td><td>Not fully tested</td><td>Instrument long-term cohort tracking events in Convex</td></tr>
             </tbody>
           </table>
@@ -509,7 +520,7 @@
           <div style="background: #1DD85115; border: 2px solid #17A738; border-radius: 12px; padding: 1rem;">
             <h3 style="color: #17A738; font-weight: 900; margin-bottom: 0.5rem;">What Should NOT Change Yet</h3>
             <p style="font-weight: 700; font-size: 0.88rem;">
-              1. <strong>Clean 3-Tab Main App Shell Navigation:</strong> Keep main app shell limited to `Home`, `Profile`, `Projects`. Survey feedback is 100% positive (2/2 responses).<br>
+              1. <strong>Clean 3-Tab Main App Shell Navigation:</strong> Keep main app shell limited to Home, Profile, Projects. Survey feedback is 100% positive (2/2 responses).<br>
               2. <strong>Core AI Prompt-to-Brief Engine:</strong> 96.7% success rate (3.3% bug rate) and 92.9% funnel retention confirm current engine is highly effective.<br>
               3. <strong>Gamification XP Reward Structure:</strong> 76.0% satisfaction rating (19/25) proves XP rewards motivate on-time task completion.
             </p>
@@ -524,11 +535,11 @@
               <tr><th>Finding</th><th>GA4</th><th>Clarity</th><th>Google Form Survey (25 Testers)</th><th>Feedback</th><th>Technical Evidence</th><th>Priority</th></tr>
             </thead>
             <tbody>
-              <tr><td style="font-weight: 800;">Finding 1 (AI Plan Utility)</td><td>✓</td><td></td><td>✓ (22/25)</td><td>✓</td><td>✓ (Convex `aiUsage` 3.3% bug rate)</td><td>P0</td></tr>
-              <tr><td style="font-weight: 800;">Finding 2 (Inline Edit Need)</td><td></td><td>✓</td><td>✓ (5/25)</td><td>✓</td><td></td><td>P0</td></tr>
-              <tr><td style="font-weight: 800;">Finding 3 (Gamification Impact)</td><td>✓</td><td></td><td>✓ (19/25)</td><td>✓</td><td>✓ (Convex `tasks`)</td><td>P1</td></tr>
-              <tr><td style="font-weight: 800;">Finding 4 (Mobile CSS Break)</td><td></td><td>✓ (1.4% Rage)</td><td>✓ (3/25)</td><td>✓</td><td>✓ (Clarity replays)</td><td>P0</td></tr>
-              <tr><td style="font-weight: 800;">Finding 5 (3-Tab Shell Layout)</td><td>✓</td><td>✓</td><td>✓ (2/25)</td><td>✓</td><td></td><td>P2</td></tr>
+              <tr><td style="font-weight: 800;">Finding 1 (AI Plan Utility)</td><td>Yes</td><td></td><td>Yes (22/25)</td><td>Yes</td><td>Yes (Convex aiUsage 3.3% bug rate)</td><td>P0</td></tr>
+              <tr><td style="font-weight: 800;">Finding 2 (Inline Edit Need)</td><td></td><td>Yes</td><td>Yes (5/25)</td><td>Yes</td><td></td><td>P0</td></tr>
+              <tr><td style="font-weight: 800;">Finding 3 (Gamification Impact)</td><td>Yes</td><td></td><td>Yes (19/25)</td><td>Yes</td><td>Yes (Convex tasks)</td><td>P1</td></tr>
+              <tr><td style="font-weight: 800;">Finding 4 (Mobile CSS Break)</td><td></td><td>Yes (1.4% Rage)</td><td>Yes (3/25)</td><td>Yes</td><td>Yes (Clarity replays)</td><td>P0</td></tr>
+              <tr><td style="font-weight: 800;">Finding 5 (3-Tab Shell Layout)</td><td>Yes</td><td>Yes</td><td>Yes (2/25)</td><td>Yes</td><td></td><td>P2</td></tr>
             </tbody>
           </table>
         </div>
@@ -538,7 +549,7 @@
         <div style="background: var(--color-bg); border: 2.5px solid var(--color-ink); border-radius: 12px; padding: 1.25rem;">
           <h3 style="font-size: 1.15rem; font-weight: 900; margin-bottom: 0.75rem; color: var(--color-ink);">Executive Summary for University Project Report</h3>
           
-          <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: #17A738;">🏆 5 Strongest Findings:</p>
+          <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: #17A738;">5 Strongest Findings:</p>
           <ol style="margin-left: 1.5rem; font-weight: 700; font-size: 0.88rem; margin-bottom: 1rem;">
             <li>AI Assistant plan generator is Maylamdi's primary conversion engine (92.9% plan acceptance, 96.7% technical success rate, 3.3% bug rate).</li>
             <li>Pre-commit inline task editing is the top user request (5/25 survey testers) to eliminate project setup friction.</li>
@@ -547,7 +558,7 @@
             <li>The clean 3-tab main app shell navigation maintains high usability and zero navigation rage clicks.</li>
           </ol>
 
-          <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: #e53e3e;">⚠️ 5 Most Important Known Issues:</p>
+          <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: #e53e3e;">5 Most Important Known Issues:</p>
           <ol style="margin-left: 1.5rem; font-weight: 700; font-size: 0.88rem; margin-bottom: 1rem;">
             <li>ISS-001: Mobile viewport horizontal overflow &amp; 1.4% rage click rate (High Severity).</li>
             <li>ISS-002: Inability to inline-edit AI task breakdown pre-commit (Medium Severity).</li>
@@ -556,23 +567,23 @@
             <li>ISS-005: Production Vite single bundle chunk warning (Low Severity).</li>
           </ol>
 
-          <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: #0284c7;">🎯 5 Highest-Priority Iteration Decisions:</p>
+          <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: #0284c7;">5 Highest-Priority Iteration Decisions:</p>
           <ol style="margin-left: 1.5rem; font-weight: 700; font-size: 0.88rem; margin-bottom: 1rem;">
-            <li>Refactor mobile CSS card containers to fluid widths (`max-width: 100%`).</li>
+            <li>Refactor mobile CSS card containers to fluid widths (max-width: 100%).</li>
             <li>Add inline draft task editor modal inside AI Assistant preview flow.</li>
             <li>Add interactive click-to-filter handlers on framework badges.</li>
             <li>Upgrade tag pill typography colors for WCAG AA compliance.</li>
-            <li>Enable dynamic code splitting in `vite.config.ts`.</li>
+            <li>Enable dynamic code splitting in vite.config.ts.</li>
           </ol>
 
-          <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: #d97706;">🛡️ 3 Things That Should NOT Be Changed Yet:</p>
+          <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: #d97706;">3 Things That Should NOT Be Changed Yet:</p>
           <ol style="margin-left: 1.5rem; font-weight: 700; font-size: 0.88rem; margin-bottom: 1rem;">
             <li>Do NOT add heavy navigation items to the main app shell (preserve 3-tab layout).</li>
             <li>Do NOT alter the core AI prompt-to-brief generation pipeline.</li>
             <li>Do NOT change the core XP reward mechanics for completed tasks.</li>
           </ol>
 
-          <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--color-muted);">🔍 Biggest Evidence Gaps:</p>
+          <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--color-muted);">Biggest Evidence Gaps:</p>
           <ul style="margin-left: 1.5rem; font-weight: 700; font-size: 0.88rem;">
             <li>Long-term 30-day cohort retention data (limited by 6-day MVP testing window: August 25 – August 30, 2026).</li>
             <li>Sample size constraint: Google Form survey responses capped at N=25 testers.</li>
@@ -584,24 +595,24 @@
     <!-- TAB 2: CONVEX DB FULL DATA WITH ACTIVITY & STATUS COLUMNS -->
     <div id="view-db" style="display: none;">
       <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h2 class="section-title" style="margin-bottom: 0;">🗄️ Convex Database Full Records (All 6 Tables)</h2>
+        <h2 class="section-title" id="db-section-title" style="margin-bottom: 0;">Convex Database Full Records (All 6 Tables)</h2>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <button class="db-subtab-btn active" id="dbtab-projects" onclick="switchDbTable('projects')">📋 projects (10 Briefs)</button>
-          <button class="db-subtab-btn" id="dbtab-teams" onclick="switchDbTable('teams')">🏠 teams (5 Rooms)</button>
-          <button class="db-subtab-btn" id="dbtab-users" onclick="switchDbTable('users')">👥 userProfiles (5 Accounts)</button>
-          <button class="db-subtab-btn" id="dbtab-tasks" onclick="switchDbTable('tasks')">✅ tasks (5 Tasks)</button>
-          <button class="db-subtab-btn" id="dbtab-ai" onclick="switchDbTable('ai')">🤖 aiUsage (4 AI Calls)</button>
-          <button class="db-subtab-btn" id="dbtab-telemetry" onclick="switchDbTable('telemetry')">⚡ userTelemetryEvents</button>
+          <button class="db-subtab-btn active" id="dbtab-projects" onclick="switchDbTable('projects')">projects (10 Briefs)</button>
+          <button class="db-subtab-btn" id="dbtab-teams" onclick="switchDbTable('teams')">teams (5 Rooms)</button>
+          <button class="db-subtab-btn" id="dbtab-users" onclick="switchDbTable('users')">userProfiles (5 Accounts)</button>
+          <button class="db-subtab-btn" id="dbtab-tasks" onclick="switchDbTable('tasks')">tasks (5 Tasks)</button>
+          <button class="db-subtab-btn" id="dbtab-ai" onclick="switchDbTable('ai')">aiUsage (4 AI Calls)</button>
+          <button class="db-subtab-btn" id="dbtab-telemetry" onclick="switchDbTable('telemetry')">userTelemetryEvents</button>
         </div>
       </div>
 
       <div class="table-container">
         <div style="margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
           <span style="font-size: 0.82rem; font-weight: 800; color: var(--color-muted);" id="db-table-caption">
-            Hiển thị danh sách dự án kèm Trạng thái Hoạt động Live &amp; Tình trạng dự án
+            Showing full project list with live activity state &amp; project status
           </span>
-          <a href="https://dashboard.convex.dev" target="_blank" style="font-size: 0.8rem; font-weight: 800; color: #0284c7;">
-            🔗 Mở toàn bộ trên Convex Cloud Console ➔
+          <a href="https://dashboard.convex.dev" target="_blank" id="db-cloud-link" style="font-size: 0.8rem; font-weight: 800; color: #0284c7;">
+            Open full database on Convex Cloud Console
           </a>
         </div>
         <table>
@@ -609,8 +620,8 @@
             <tr>
               <th>Project ID</th>
               <th>Project Title</th>
-              <th>Activity Status (Hoạt động)</th>
-              <th>Project Status (Tình trạng)</th>
+              <th>Activity Status</th>
+              <th>Project Status</th>
               <th>Framework</th>
               <th>Full Project Brief Description</th>
             </tr>
@@ -624,7 +635,7 @@
 
     <!-- TAB 3: GA4 FULL RAW DATA -->
     <div id="view-ga4" style="display: none;">
-      <h2 class="section-title">📈 Google Analytics 4 — Full Granular Acquisition Matrix</h2>
+      <h2 class="section-title">Google Analytics 4 — Full Granular Acquisition Matrix</h2>
       
       <div style="margin-bottom: 1.5rem;">
         <h3 style="font-size: 1.05rem; font-weight: 900; margin-bottom: 0.75rem;">1. Full Source / Medium Traffic Breakdown</h3>
@@ -663,7 +674,7 @@
 
     <!-- TAB 4: CLARITY SESSION REPLAYS & ERRORS -->
     <div id="view-clarity" style="display: none;">
-      <h2 class="section-title">🎬 Microsoft Clarity — Session Replays &amp; Exception Stack Trace</h2>
+      <h2 class="section-title">Microsoft Clarity — Session Replays &amp; Exception Stack Trace</h2>
       
       <div style="margin-bottom: 1.5rem;">
         <h3 style="font-size: 1.05rem; font-weight: 900; margin-bottom: 0.75rem;">1. Full Session Replay Recordings List</h3>
@@ -673,9 +684,9 @@
               <tr><th>Session ID</th><th>User Location</th><th>Device &amp; Browser</th><th>Duration</th><th>Scroll Depth</th><th>Rage Clicks</th><th>Dead Clicks</th><th>Replay Action</th></tr>
             </thead>
             <tbody>
-              <tr><td style="font-weight: 800; font-family: monospace;">cls_s881a2</td><td>Hanoi, VN</td><td>Desktop / Chrome</td><td>6m 14s</td><td>88%</td><td><span class="tag-pill" style="background: #1DD85133;">0</span></td><td><span class="tag-pill" style="background: #1DD85133;">0</span></td><td><a href="https://clarity.microsoft.com" target="_blank" style="color: #0284c7; font-weight: 800;">▶️ Play Video</a></td></tr>
-              <tr><td style="font-weight: 800; font-family: monospace;">cls_s994b7</td><td>HCMC, VN</td><td>Desktop / Windows Edge</td><td>4m 45s</td><td>92%</td><td><span class="tag-pill" style="background: #FF8AE733;">2</span></td><td><span class="tag-pill" style="background: #FEAA0133;">1</span></td><td><a href="https://clarity.microsoft.com" target="_blank" style="color: #0284c7; font-weight: 800;">▶️ Play Video</a></td></tr>
-              <tr><td style="font-weight: 800; font-family: monospace;">cls_s120c9</td><td>California, US</td><td>Mobile / iPhone Safari</td><td>2m 30s</td><td>65%</td><td><span class="tag-pill" style="background: #1DD85133;">0</span></td><td><span class="tag-pill" style="background: #FEAA0133;">4</span></td><td><a href="https://clarity.microsoft.com" target="_blank" style="color: #0284c7; font-weight: 800;">▶️ Play Video</a></td></tr>
+              <tr><td style="font-weight: 800; font-family: monospace;">cls_s881a2</td><td>Hanoi, VN</td><td>Desktop / Chrome</td><td>6m 14s</td><td>88%</td><td><span class="tag-pill" style="background: #1DD85133;">0</span></td><td><span class="tag-pill" style="background: #1DD85133;">0</span></td><td><a href="https://clarity.microsoft.com" target="_blank" style="color: #0284c7; font-weight: 800;">Play Video</a></td></tr>
+              <tr><td style="font-weight: 800; font-family: monospace;">cls_s994b7</td><td>HCMC, VN</td><td>Desktop / Windows Edge</td><td>4m 45s</td><td>92%</td><td><span class="tag-pill" style="background: #FF8AE733;">2</span></td><td><span class="tag-pill" style="background: #FEAA0133;">1</span></td><td><a href="https://clarity.microsoft.com" target="_blank" style="color: #0284c7; font-weight: 800;">Play Video</a></td></tr>
+              <tr><td style="font-weight: 800; font-family: monospace;">cls_s120c9</td><td>California, US</td><td>Mobile / iPhone Safari</td><td>2m 30s</td><td>65%</td><td><span class="tag-pill" style="background: #1DD85133;">0</span></td><td><span class="tag-pill" style="background: #FEAA0133;">4</span></td><td><a href="https://clarity.microsoft.com" target="_blank" style="color: #0284c7; font-weight: 800;">Play Video</a></td></tr>
             </tbody>
           </table>
         </div>
@@ -699,7 +710,7 @@
 
     <!-- TAB 5: USER FUNNEL -->
     <div id="view-funnel" style="display: none;">
-      <h2 class="section-title">🎯 8-Stage Conversion Funnel Flow (Convex DB Telemetry)</h2>
+      <h2 class="section-title">8-Stage Conversion Funnel Flow (Convex DB Telemetry)</h2>
       <div id="funnel-container">
         <!-- Rendered dynamically -->
       </div>
@@ -707,28 +718,28 @@
 
     <!-- TAB 6: AI ASSISTANT -->
     <div id="view-ai" style="display: none;">
-      <h2 class="section-title">🤖 AI Assistant Operations &amp; Success Metrics (Convex DB aiUsage)</h2>
+      <h2 class="section-title">AI Assistant Operations &amp; Success Metrics (Convex DB aiUsage)</h2>
       <div class="grid-kpi">
         <div class="card">
           <div class="card-kicker">AI Operations</div>
           <div class="card-stat" id="ai-ops">184</div>
-          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">🔗 Convex aiUsage Table</a>
+          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">Source: Convex aiUsage Table</a>
         </div>
         <div class="card" style="background: #1DD85115;">
           <div class="card-kicker">Success Rate</div>
           <div class="card-stat" style="color: #17A738;" id="ai-success">96.7%</div>
           <div class="card-sub" style="color: #e53e3e;">API Bug Rate: 3.3% (6/184)</div>
-          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">🔗 Convex Success Logs</a>
+          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">Source: Convex Success Logs</a>
         </div>
         <div class="card">
           <div class="card-kicker">Avg Response Time</div>
           <div class="card-stat" id="ai-latency">1,450 ms</div>
-          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">🔗 Convex Latency</a>
+          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">Source: Convex Latency</a>
         </div>
         <div class="card" style="background: #FFF73F33;">
           <div class="card-kicker">Plan Acceptance</div>
           <div class="card-stat">88.0%</div>
-          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">🔗 Convex Projects</a>
+          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">Source: Convex Projects</a>
         </div>
       </div>
 
@@ -758,6 +769,174 @@
   <script>
     const API_URL = "https://resilient-mastiff-759.convex.site/api/telemetry/dashboard";
     let activeDbTable = "projects";
+    let currentLang = "en";
+
+    const translations = {
+      en: {
+        langBtn: "Switch to Vietnamese",
+        exportBtn: "Export Full Raw JSON Data",
+        headerTitle: "Maylamdi — Full Granular Analytics & Evidence Audit Portal",
+        headerSubtitle: "Strict 1:1 Verified Telemetry Datasets & Audit Report (UX Friction: 4.9% | API Bug Rate: 3.3%)",
+        verifyTitle: "Verified Bug Rate & UX Friction Click Analysis",
+        verifyBody: "• <strong>API Bug Rate</strong>: <strong>3.3%</strong> (6 errors / 184 AI operations). Technical success rate: <strong>96.7%</strong> (178/184).<br>• <strong>UX Friction Click Rate</strong>: <strong>4.9%</strong> across 142 total sessions (7 friction events: 5 Dead Clicks = 3.5%, 2 Rage Clicks = 1.4%).",
+        tabOverview: "Overview",
+        tabAudit: "Evidence Audit Report",
+        tabDb: "Convex DB Full Data (6 Tables)",
+        tabGa4: "GA4 Full Raw Data Matrix",
+        tabClarity: "Clarity Session Replays & Errors",
+        tabFunnel: "User Funnel (8 Steps Pipeline)",
+        tabAi: "AI Assistant Full Logs",
+        kickerUsers: "Total Registered Users (Convex userProfiles)",
+        ovActiveUsers: "Active: 25 Form Testers",
+        tagUsers: "Source: Convex userProfiles Table",
+        kickerSessions: "Total Sessions (GA4 Telemetry)",
+        ovSignups: "Sign-ups: 38 (26.8% conv.)",
+        tagSessions: "Source: GA4 Sessions",
+        kickerConv: "Project Conversion Rate",
+        ovEngagement: "32 Projects / 38 Registered Users",
+        tagConv: "Source: Convex DB Engine",
+        kickerClicks: "UX Friction Clicks",
+        ovClickDetail: "Rate: 4.9% (Dead: 5 | Rage: 2)",
+        tagClicks: "Source: Clarity Replays",
+        kickerForm: "Form Survey Responses",
+        subForm: "Google Form Feedback",
+        tagForm: "Source: Form Survey Sheet",
+        summaryTitle: "Verified Mathematical Bug & UX Friction Audit",
+        summaryList: [
+          "UX Friction Click Rate: 4.9% (7 friction events across 142 total sessions). Breakdown: Dead Clicks = 3.5% (5 events), Rage Clicks = 1.4% (2 events).",
+          "API Bug & Exception Rate: 3.3% (6 failed calls out of 184 total AI operations). Success rate = 96.7% (178 successful executions).",
+          "Client Script Exception Rate: 1.4% (2 stack trace errors logged out of 142 sessions).",
+          "Conversion Logic: 142 sessions to 38 registered accounts (26.8%) to 32 projects created (84.2%)."
+        ],
+        roomsTitle: "Active Team Rooms & Project Briefs (Source: Convex DB)",
+        thTeam: "Team Name",
+        thCode: "Join Code",
+        thMembers: "Members",
+        thProj: "Project Title",
+        thBrief: "Brief Details",
+        dbSectionTitle: "Convex Database Full Records (All 6 Tables)",
+        dbCaptionProjects: "Showing full project list with live activity state & project status",
+        dbCaptionTeams: "teams table: All full team room records",
+        dbCaptionUsers: "userProfiles table: Registered users with profile info",
+        dbCaptionTasks: "tasks table: Assigned project tasks",
+        dbCaptionAi: "aiUsage table: LLM Model call history & response latency",
+        dbCaptionTelemetry: "userTelemetryEvents table: Raw event log entries",
+        dbCloudLink: "Open full database on Convex Cloud Console"
+      },
+      vi: {
+        langBtn: "Switch to English",
+        exportBtn: "Xuất Dữ Liệu JSON Thô",
+        headerTitle: "Maylamdi — Cổng Phân Tích Dữ Liệu & Báo Cáo Kiểm Toán Chi Tiết",
+        headerSubtitle: "Dữ Liệu Telemetry Kiểm Toán Thực Tế 1:1 (UX Friction: 4.9% | Tỷ Lệ Lỗi API: 3.3%)",
+        verifyTitle: "Báo Cáo Kiểm Toán Tỷ Lệ Lỗi Kỹ Thuật & UX Friction Clicks",
+        verifyBody: "• <strong>Tỷ Lệ Lỗi API</strong>: <strong>3.3%</strong> (6 lỗi / 184 thao tác AI). Tỷ lệ thành công kỹ thuật: <strong>96.7%</strong> (178/184).<br>• <strong>Tỷ Lệ UX Friction Clicks</strong>: <strong>4.9%</strong> trên tổng 142 phiên (7 sự kiện: 5 Dead Clicks = 3.5%, 2 Rage Clicks = 1.4%).",
+        tabOverview: "Tổng Quan",
+        tabAudit: "Báo Cáo Kiểm Toán Evidence",
+        tabDb: "Dữ Liệu Convex DB (6 Bảng)",
+        tabGa4: "Ma Trận Dữ Liệu GA4",
+        tabClarity: "Clarity Session Replays & Lỗi",
+        tabFunnel: "Phễu Người Dùng (8 Bước)",
+        tabAi: "Nhật Ký AI Assistant",
+        kickerUsers: "Tổng Số Người Dùng Đăng Ký (Convex userProfiles)",
+        ovActiveUsers: "Hoạt động: 25 Người Làm Khảo Sát",
+        tagUsers: "Nguồn: Bảng Convex userProfiles",
+        kickerSessions: "Tổng Số Phiên Truy Cập (GA4 Telemetry)",
+        ovSignups: "Đăng ký: 38 (26.8% chuyển đổi)",
+        tagSessions: "Nguồn: GA4 Sessions",
+        kickerConv: "Tỷ Lệ Chuyển Đổi Dự Án",
+        ovEngagement: "32 Dự Án / 38 Người Dùng Đăng Ký",
+        tagConv: "Nguồn: Convex DB Engine",
+        kickerClicks: "Lượt Nhấp Ức Chế (UX Friction Clicks)",
+        ovClickDetail: "Tỷ lệ: 4.9% (Dead: 5 | Rage: 2)",
+        tagClicks: "Nguồn: Clarity Replays",
+        kickerForm: "Phiếu Phản Hồi Khảo Sát",
+        subForm: "Phản Hồi Google Form",
+        tagForm: "Nguồn: Google Form Survey Sheet",
+        summaryTitle: "Tóm Tắt Kiểm Toán Toán Học Về Lỗi & UX Friction",
+        summaryList: [
+          "Tỷ lệ UX Friction Clicks: 4.9% (7 sự kiện trên tổng 142 phiên). Chi tiết: Dead Clicks = 3.5% (5 sự kiện), Rage Clicks = 1.4% (2 sự kiện).",
+          "Tỷ lệ Lỗi API & Ngoại Lệ: 3.3% (6 cuộc gọi thất bại trên 184 thao tác AI). Tỷ lệ thành công = 96.7% (178 lượt thành công).",
+          "Tỷ lệ Lỗi Script Client: 1.4% (2 lỗi stack trace trên 142 phiên).",
+          "Logic Chuyển Đổi: 142 phiên chuyển thành 38 tài khoản đăng ký (26.8%) chuyển thành 32 dự án (84.2%)."
+        ],
+        roomsTitle: "Danh Sách Phòng Nhóm Hoạt Động & Brief Dự Án (Nguồn: Convex DB)",
+        thTeam: "Tên Nhóm",
+        thCode: "Mã Tham Gia",
+        thMembers: "Thành Viên",
+        thProj: "Tên Dự Án",
+        thBrief: "Mô Tả Brief",
+        dbSectionTitle: "Toàn Bộ Bản Ghi Cơ Sở Dữ Liệu Convex (6 Bảng)",
+        dbCaptionProjects: "Hiển thị danh sách dự án kèm trạng thái hoạt động & tình trạng dự án",
+        dbCaptionTeams: "Bảng teams: Tất cả bản ghi phòng nhóm đầy đủ",
+        dbCaptionUsers: "Bảng userProfiles: Người dùng đã đăng ký & hoàn thiện Profile",
+        dbCaptionTasks: "Bảng tasks: Nhiệm vụ dự án đã phân công",
+        dbCaptionAi: "Bảng aiUsage: Lịch sử gọi AI LLM Model & latency",
+        dbCaptionTelemetry: "Bảng userTelemetryEvents: Nhật ký sự kiện thao tác raw",
+        dbCloudLink: "Mở toàn bộ trên Convex Cloud Console"
+      }
+    };
+
+    function toggleLanguage() {
+      currentLang = currentLang === "en" ? "vi" : "en";
+      applyTranslations();
+    }
+
+    function applyTranslations() {
+      const t = translations[currentLang];
+      document.getElementById("lang-btn").textContent = t.langBtn;
+      document.getElementById("export-btn").textContent = t.exportBtn;
+      document.getElementById("header-title").textContent = t.headerTitle;
+      document.getElementById("header-subtitle").textContent = t.headerSubtitle;
+      document.getElementById("verify-box-title").textContent = t.verifyTitle;
+      document.getElementById("verify-box-body").innerHTML = t.verifyBody;
+
+      document.getElementById("tab-overview").textContent = t.tabOverview;
+      document.getElementById("tab-audit").textContent = t.tabAudit;
+      document.getElementById("tab-db").textContent = t.tabDb;
+      document.getElementById("tab-ga4").textContent = t.tabGa4;
+      document.getElementById("tab-clarity").textContent = t.tabClarity;
+      document.getElementById("tab-funnel").textContent = t.tabFunnel;
+      document.getElementById("tab-ai").textContent = t.tabAi;
+
+      document.getElementById("kicker-users").textContent = t.kickerUsers;
+      document.getElementById("ov-active-users").textContent = t.ovActiveUsers;
+      document.getElementById("tag-users").textContent = t.tagUsers;
+
+      document.getElementById("kicker-sessions").textContent = t.kickerSessions;
+      document.getElementById("ov-signups").textContent = t.ovSignups;
+      document.getElementById("tag-sessions").textContent = t.tagSessions;
+
+      document.getElementById("kicker-conv").textContent = t.kickerConv;
+      document.getElementById("ov-engagement").textContent = t.ovEngagement;
+      document.getElementById("tag-conv").textContent = t.tagConv;
+
+      document.getElementById("kicker-clicks").textContent = t.kickerClicks;
+      document.getElementById("ov-click-detail").textContent = t.ovClickDetail;
+      document.getElementById("tag-clicks").textContent = t.tagClicks;
+
+      document.getElementById("kicker-form").textContent = t.kickerForm;
+      document.getElementById("sub-form").textContent = t.subForm;
+      document.getElementById("tag-form").textContent = t.tagForm;
+
+      document.getElementById("summary-card-title").textContent = t.summaryTitle;
+      const listEl = document.getElementById("summary-card-list");
+      if (listEl) {
+        listEl.innerHTML = t.summaryList.map(item => `<li>${item}</li>`).join("");
+      }
+
+      document.getElementById("rooms-section-title").textContent = t.roomsTitle;
+      document.getElementById("th-team").textContent = t.thTeam;
+      document.getElementById("th-code").textContent = t.thCode;
+      document.getElementById("th-members").textContent = t.thMembers;
+      document.getElementById("th-proj").textContent = t.thProj;
+      document.getElementById("th-brief").textContent = t.thBrief;
+
+      document.getElementById("db-section-title").textContent = t.dbSectionTitle;
+      document.getElementById("db-cloud-link").textContent = t.dbCloudLink;
+
+      renderDbTable();
+    }
+
     let globalDbData = {
       teams: [
         { id: "tm_01", name: "Creative Designers Hub", code: "CR87A1", members: 4, created: "2026-08-25" },
@@ -767,16 +946,16 @@
         { id: "tm_05", name: "AI Prompts Research Group", code: "AIP88K", members: 4, created: "2026-08-30" }
       ],
       projects: [
-        { id: "proj_01", title: "Design System v2", activeState: "🟢 Active Now", status: "in_progress", framework: "Scrum", brief: "UI UX Revamp & Component Library with full design tokens" },
-        { id: "proj_02", title: "MayLamDi Telemetry API", activeState: "🟢 Active Now", status: "in_progress", framework: "Kanban", brief: "Real-time convex telemetry integration and event streaming" },
-        { id: "proj_03", title: "Launch Campaign 2026", activeState: "🟡 Active Recently", status: "planning", framework: "Waterfall", brief: "SEO & Referral Acquisition Funnel for product launch" },
-        { id: "proj_04", title: "Gamified Team Tracker", activeState: "🟢 Active Now", status: "in_progress", framework: "Gamified Scrum", brief: "XP rewards, quest allocation, and team leaderboards" },
-        { id: "proj_05", title: "AI Recommender System", activeState: "🟡 Active Recently", status: "in_review", framework: "Kanban", brief: "LLM contextual recommendations for project task allocation" },
-        { id: "proj_06", title: "Mobile Fitness Tracker", activeState: "🟢 Active Now", status: "in_progress", framework: "Agile Sprint", brief: "Cross-platform workout planning and habit gamification" },
-        { id: "proj_07", title: "Student Assignment Portal", activeState: "⏸️ Idle", status: "completed", framework: "Kanban", brief: "Peer review workflow and automated grade sync" },
-        { id: "proj_08", title: "Smart Home IoT Dashboard", activeState: "🟢 Active Now", status: "in_progress", framework: "Scrum", brief: "Real-time MQTT telemetry and device scheduling" },
-        { id: "proj_09", title: "DevOps Pipeline Monitor", activeState: "🟡 Active Recently", status: "planning", framework: "Kanban", brief: "CI/CD build failure detection and alert routing" },
-        { id: "proj_10", title: "AI Customer Support Agent", activeState: "⏸️ Idle", status: "completed", framework: "Scrum", brief: "Automated ticket categorization and resolution suggestions" }
+        { id: "proj_01", title: "Design System v2", activeState: "Active Now", status: "in_progress", framework: "Scrum", brief: "UI UX Revamp & Component Library with full design tokens" },
+        { id: "proj_02", title: "MayLamDi Telemetry API", activeState: "Active Now", status: "in_progress", framework: "Kanban", brief: "Real-time convex telemetry integration and event streaming" },
+        { id: "proj_03", title: "Launch Campaign 2026", activeState: "Active Recently", status: "planning", framework: "Waterfall", brief: "SEO & Referral Acquisition Funnel for product launch" },
+        { id: "proj_04", title: "Gamified Team Tracker", activeState: "Active Now", status: "in_progress", framework: "Gamified Scrum", brief: "XP rewards, quest allocation, and team leaderboards" },
+        { id: "proj_05", title: "AI Recommender System", activeState: "Active Recently", status: "in_review", framework: "Kanban", brief: "LLM contextual recommendations for project task allocation" },
+        { id: "proj_06", title: "Mobile Fitness Tracker", activeState: "Active Now", status: "in_progress", framework: "Agile Sprint", brief: "Cross-platform workout planning and habit gamification" },
+        { id: "proj_07", title: "Student Assignment Portal", activeState: "Idle", status: "completed", framework: "Kanban", brief: "Peer review workflow and automated grade sync" },
+        { id: "proj_08", title: "Smart Home IoT Dashboard", activeState: "Active Now", status: "in_progress", framework: "Scrum", brief: "Real-time MQTT telemetry and device scheduling" },
+        { id: "proj_09", title: "DevOps Pipeline Monitor", activeState: "Active Recently", status: "planning", framework: "Kanban", brief: "CI/CD build failure detection and alert routing" },
+        { id: "proj_10", title: "AI Customer Support Agent", activeState: "Idle", status: "completed", framework: "Scrum", brief: "Automated ticket categorization and resolution suggestions" }
       ],
       users: [
         { id: "usr_01", email: "designer@maylamdi.com", skills: "Figma, React, UI/UX", capacity: 35 },
@@ -840,22 +1019,23 @@
       const thead = document.getElementById("db-table-thead");
       const tbody = document.getElementById("db-table-tbody");
       const caption = document.getElementById("db-table-caption");
+      const t = translations[currentLang];
 
       if (activeDbTable === "teams") {
-        caption.textContent = "Bảng teams: Tất cả bản ghi phòng nhóm đầy đủ";
+        caption.textContent = t.dbCaptionTeams;
         thead.innerHTML = `<tr><th>Team ID</th><th>Team Name</th><th>Join Code</th><th>Members</th><th>Created At</th></tr>`;
-        tbody.innerHTML = globalDbData.teams.map(t => `
+        tbody.innerHTML = globalDbData.teams.map(tItem => `
           <tr>
-            <td style="font-weight: 800; font-family: monospace;">${t.id}</td>
-            <td style="font-weight: 800;">${t.name}</td>
-            <td><span class="tag-pill" style="background: #FEAA0133;">${t.code}</span></td>
-            <td style="font-weight: 800;">👤 ${t.members} members</td>
-            <td>${t.created}</td>
+            <td style="font-weight: 800; font-family: monospace;">${tItem.id}</td>
+            <td style="font-weight: 800;">${tItem.name}</td>
+            <td><span class="tag-pill" style="background: #FEAA0133;">${tItem.code}</span></td>
+            <td style="font-weight: 800;">${tItem.members} members</td>
+            <td>${tItem.created}</td>
           </tr>
         `).join("");
       } else if (activeDbTable === "projects") {
-        caption.textContent = "Bảng projects: Danh sách tất cả dự án kèm Trạng Thái Hoạt Động & Tình Trạng Chi Tiết";
-        thead.innerHTML = `<tr><th>Project ID</th><th>Project Title</th><th>Activity Status (Hoạt Động)</th><th>Project Status (Tình Trạng)</th><th>Framework</th><th>Full Project Brief Description</th></tr>`;
+        caption.textContent = t.dbCaptionProjects;
+        thead.innerHTML = `<tr><th>Project ID</th><th>Project Title</th><th>Activity Status</th><th>Project Status</th><th>Framework</th><th>Full Project Brief Description</th></tr>`;
         tbody.innerHTML = globalDbData.projects.map(p => {
           const actBg = p.activeState?.includes("Now") ? "#1DD85133" : p.activeState?.includes("Recently") ? "#FEAA0133" : "#e2e8f0";
           const statBg = p.status === "in_progress" ? "#1DD85133" : p.status === "planning" ? "#FEAA0133" : p.status === "in_review" ? "#4CA0FE33" : "#FF8AE733";
@@ -863,7 +1043,7 @@
             <tr>
               <td style="font-weight: 800; font-family: monospace;">${p.id}</td>
               <td style="font-weight: 800;">${p.title}</td>
-              <td><span class="tag-pill" style="background: ${actBg};">${p.activeState || "🟢 Active Now"}</span></td>
+              <td><span class="tag-pill" style="background: ${actBg};">${p.activeState || "Active Now"}</span></td>
               <td><span class="tag-pill" style="background: ${statBg};">${p.status || "in_progress"}</span></td>
               <td><span class="tag-pill" style="background: #ffffff; border: 1px solid var(--color-ink);">${p.framework}</span></td>
               <td style="line-height: 1.4;">${p.brief}</td>
@@ -871,18 +1051,18 @@
           `;
         }).join("");
       } else if (activeDbTable === "users") {
-        caption.textContent = "Bảng userProfiles: Người dùng đã đăng ký & hoàn thiện Profile";
+        caption.textContent = t.dbCaptionUsers;
         thead.innerHTML = `<tr><th>Profile ID</th><th>User Email / Account</th><th>Skills &amp; Tech Stack</th><th>Weekly Capacity</th></tr>`;
         tbody.innerHTML = globalDbData.users.map(u => `
           <tr>
             <td style="font-weight: 800; font-family: monospace;">${u.id}</td>
             <td style="font-weight: 800;">${u.email}</td>
             <td>${u.skills}</td>
-            <td style="font-weight: 800; color: #17A738;">⏱️ ${u.capacity} hrs/week</td>
+            <td style="font-weight: 800; color: #17A738;">${u.capacity} hrs/week</td>
           </tr>
         `).join("");
       } else if (activeDbTable === "tasks") {
-        caption.textContent = "Bảng tasks: Nhiệm vụ dự án đã phân công";
+        caption.textContent = t.dbCaptionTasks;
         thead.innerHTML = `<tr><th>Task ID</th><th>Task Title</th><th>Status</th><th>Priority</th></tr>`;
         tbody.innerHTML = globalDbData.tasks.map(tk => `
           <tr>
@@ -893,18 +1073,18 @@
           </tr>
         `).join("");
       } else if (activeDbTable === "ai") {
-        caption.textContent = "Bảng aiUsage: Lịch sử gọi AI LLM Model & Latency";
+        caption.textContent = t.dbCaptionAi;
         thead.innerHTML = `<tr><th>Log ID</th><th>LLM Model</th><th>Success</th><th>Response Latency</th></tr>`;
         tbody.innerHTML = globalDbData.ai.map(a => `
           <tr>
             <td style="font-weight: 800; font-family: monospace;">${a.id}</td>
             <td style="font-weight: 800;">${a.model}</td>
             <td><span class="tag-pill" style="background: #1DD85133;">${a.success}</span></td>
-            <td style="font-weight: 800;">⚡ ${a.latency}</td>
+            <td style="font-weight: 800;">${a.latency}</td>
           </tr>
         `).join("");
       } else if (activeDbTable === "telemetry") {
-        caption.textContent = "Bảng userTelemetryEvents: Nhật ký sự kiện thao tác raw";
+        caption.textContent = t.dbCaptionTelemetry;
         thead.innerHTML = `<tr><th>Event ID</th><th>Event Type</th><th>Flow Name</th><th>Step Name</th><th>Session ID</th></tr>`;
         tbody.innerHTML = globalDbData.telemetry.map(e => `
           <tr>
@@ -949,7 +1129,7 @@
         globalDbData.projects = briefs.map((b, i) => ({
           id: b.id || ("proj_0" + (i + 1)),
           title: b.title,
-          activeState: i < 3 ? "🟢 Active Now" : i < 6 ? "🟡 Active Recently" : "⏸️ Idle",
+          activeState: i < 3 ? "Active Now" : i < 6 ? "Active Recently" : "Idle",
           status: b.projectStatus || (i % 2 === 0 ? "in_progress" : "planning"),
           framework: b.frameworkName || "Agile",
           brief: b.description || "Project Brief"
@@ -957,18 +1137,12 @@
       }
 
       if (rooms.length) {
-        // Direct binding to strict real counts with zero pseudo-multipliers
-        document.getElementById("ov-users").textContent = "38";
-        document.getElementById("ov-active-users").textContent = "Active: 25 Form Testers";
-        document.getElementById("ov-sessions").textContent = "142";
-        document.getElementById("ov-signups").textContent = "Sign-ups: 38 (26.8% conv.)";
-
         const roomsTbody = document.getElementById("rooms-tbody");
         roomsTbody.innerHTML = rooms.map(r => `
           <tr>
             <td style="font-weight: 800;">${r.teamName}</td>
             <td><span class="tag-pill" style="background: #FEAA0133;">${r.joinCode}</span></td>
-            <td style="font-weight: 800;">👤 ${r.memberCount} members</td>
+            <td style="font-weight: 800;">${r.memberCount} members</td>
             <td style="font-weight: 800;">${r.projectTitle}</td>
             <td style="max-width: 320px; line-height: 1.4;">${r.projectBrief}</td>
           </tr>
@@ -1004,7 +1178,7 @@
             </div>
             <div style="text-align: right;">
               <div style="font-size: 1.3rem; font-weight: 900;">${f.count.toLocaleString()}</div>
-              <div style="font-size: 0.78rem; font-weight: 800; color: #17A738;">✓ ${f.rate}% retained</div>
+              <div style="font-size: 0.78rem; font-weight: 800; color: #17A738;">Retained: ${f.rate}%</div>
             </div>
           </div>
         `).join("");
