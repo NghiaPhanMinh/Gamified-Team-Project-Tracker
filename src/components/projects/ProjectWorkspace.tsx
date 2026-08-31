@@ -299,6 +299,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
   const [renamingPhaseId, setRenamingPhaseId] = useState<Id<"phases"> | null>(null);
   const [renamePhaseName, setRenamePhaseName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const importedDrafts = useRef(false);
 
@@ -617,12 +618,39 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
           <button
             key={tab.value}
             type="button"
+            disabled={isAiGenerating}
+            title={isAiGenerating ? "AI is analyzing project brief & generating tasks. Please wait..." : undefined}
             className={activeTab === tab.value ? "is-active" : ""}
-            onClick={() => setActiveTab(tab.value)}
+            onClick={() => {
+              if (!isAiGenerating) {
+                setActiveTab(tab.value);
+              }
+            }}
+            style={isAiGenerating ? { opacity: 0.6, cursor: "not-allowed" } : undefined}
           >
             {tab.label}
           </button>
         ))}
+        {isAiGenerating ? (
+          <span
+            className="tab-ai-lock-indicator"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "4px 10px",
+              borderRadius: "999px",
+              background: "var(--color-yellow, #fff73f)",
+              color: "#101517",
+              fontSize: "0.75rem",
+              fontWeight: 800,
+              marginLeft: "auto",
+              alignSelf: "center",
+            }}
+          >
+            <Zap size={12} className="spinner-icon" /> AI Analyzing... (Tabs Locked)
+          </span>
+        ) : null}
       </nav>
 
       {overdueTasks.length > 0 || inactiveMembers.length > 0 ? (
@@ -675,6 +703,7 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
               workspace={workspace}
               onUseTask={useAiTask}
               autoStart={workspace.tasks.length === 0 && shouldRunAi}
+              onGeneratingChange={setIsAiGenerating}
             />
           )}
 

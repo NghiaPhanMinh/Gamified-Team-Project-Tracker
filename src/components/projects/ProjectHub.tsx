@@ -29,6 +29,7 @@ export function ProjectHub({
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [frameworkFilter, setFrameworkFilter] = useState<string | null>(null);
   const renameProject = useMutation(api.projects.rename);
   const setArchived = useMutation(api.projects.setArchived);
   const removeProject = useMutation(api.projects.removeFromMine);
@@ -96,8 +97,38 @@ export function ProjectHub({
         <div><p className="card-eyebrow">Projects in this room</p><h2 id="room-projects-title">Choose a project</h2></div>
         <span className="sync-label">Live</span>
       </div>
+      {frameworkFilter ? (
+        <div
+          className="framework-active-filter-bar"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            margin: "0.5rem 0 1rem",
+            padding: "0.4rem 0.8rem",
+            background: "color-mix(in srgb, var(--color-blue) 18%, var(--color-surface))",
+            border: "2px solid var(--color-blue)",
+            borderRadius: "10px",
+            fontSize: "0.85rem",
+          }}
+        >
+          <span>
+            Filtering projects by: <strong>{frameworkFilter}</strong>
+          </span>
+          <button
+            type="button"
+            className="quiet-button"
+            style={{ padding: "2px 8px", fontSize: "0.75rem", fontWeight: 800, cursor: "pointer" }}
+            onClick={() => setFrameworkFilter(null)}
+          >
+            Clear filter ✕
+          </button>
+        </div>
+      ) : null}
       <div className="project-card-grid">
-        {projects.map((project) => (
+        {projects
+          .filter((p) => !frameworkFilter || p.frameworkName.toLowerCase() === frameworkFilter.toLowerCase())
+          .map((project) => (
           <article
             key={project._id}
             className={project.status === "archived" ? "is-archived" : ""}
@@ -107,7 +138,22 @@ export function ProjectHub({
             onPointerLeave={cancelLongPress}
             onPointerCancel={cancelLongPress}
           >
-            <div><span className="project-status">{project.status}</span><span>{project.frameworkName}</span></div>
+            <div>
+              <span className="project-status">{project.status}</span>
+              <span
+                className="framework-filter-pill"
+                role="button"
+                tabIndex={0}
+                title={`Filter projects by ${project.frameworkName}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFrameworkFilter((curr) => curr === project.frameworkName ? null : project.frameworkName);
+                }}
+                style={{ cursor: "pointer" }}
+              >
+                {project.frameworkName}
+              </span>
+            </div>
             <h3>{project.title}</h3>
             <p>{project.description || "No project brief yet."}</p>
             <dl><div><dt>Deadline</dt><dd>{project.deadline}</dd></div><div><dt>Team</dt><dd>{project.memberCount} members</dd></div></dl>

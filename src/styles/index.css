@@ -5182,74 +5182,130 @@ footer {
   }
 }
 
-@media (max-width: 768px) {
+/* Tablet and iPad Scaling for Game Scene */
+@media (max-width: 1024px) and (min-width: 641px) {
   .cloud-far {
     display: none;
   }
+  .landscape-scene-container {
+    aspect-ratio: 16 / 9;
+    min-height: 380px;
+    max-height: 520px;
+  }
   .boss-hp-container {
-    transform: scale(0.85);
-    transform-origin: center top;
+    transform: scale(0.82) !important;
+    transform-origin: center top !important;
   }
   .village-hp-container {
-    transform: scale(0.85);
-    transform-origin: center top;
+    transform: scale(0.82) !important;
+    transform-origin: center top !important;
   }
   .landscape-questboard-layer {
     transform: translate(-50%, -50%) scale(0.88);
     transform-origin: center center;
   }
+  .pvz-deadline-progress-container {
+    transform: translateX(-50%) scale(0.78) !important;
+    bottom: 10px !important;
+  }
   .rpg-top-bar-controls {
-    top: 8px !important;
-    right: 8px !important;
-    gap: 4px !important;
+    top: 10px !important;
+    right: 12px !important;
+    gap: 6px !important;
   }
   .rpg-top-bar-controls .rpg-btn-leaderboard {
     padding: 4px 8px !important;
     font-size: 0.72rem !important;
+    height: 28px !important;
   }
   .rpg-btn-attack-circle {
-    width: 54px;
-    height: 54px;
-    font-size: 0.72rem;
-    bottom: 12px;
-    left: 12px;
+    width: 52px !important;
+    height: 52px !important;
+    font-size: 0.72rem !important;
+    bottom: 10px !important;
+    left: 10px !important;
   }
 }
 
-@media (max-width: 520px) {
+/* Mobile Phone Responsive Game Scene (Crop Square Viewport, Proportional Controls & Health Bars) */
+@media (max-width: 640px) {
+  .cloud-far {
+    display: none;
+  }
   .landscape-scene-container {
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 1 / 1 !important;
+    min-height: 300px !important;
+    max-height: 420px !important;
+    border-radius: 18px !important;
   }
-  .boss-hp-container {
-    transform: scale(0.72);
-    transform-origin: center top;
-  }
-  .village-hp-container {
-    transform: scale(0.72);
-    transform-origin: center top;
-  }
-  .landscape-questboard-layer {
-    transform: translate(-50%, -50%) scale(0.75);
-    transform-origin: center center;
-  }
-  .pvz-deadline-progress-container {
-    transform: translateX(-50%) scale(0.82) !important;
+  .landscape-scene-container svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   .rpg-top-bar-controls {
-    top: 6px !important;
-    right: 6px !important;
-    gap: 3px !important;
+    top: 8px !important;
+    left: 8px !important;
+    right: 8px !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-end !important;
+    gap: 4px !important;
+    z-index: 35 !important;
   }
   .rpg-top-bar-controls .rpg-btn-leaderboard {
-    padding: 3px 6px !important;
-    font-size: 0.65rem !important;
+    padding: 2px 6px !important;
+    font-size: 0.58rem !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    height: 24px !important;
+    min-height: 24px !important;
+    border: 1.5px solid #101517 !important;
+    border-radius: 6px !important;
+    box-shadow: 1.5px 1.5px 0 #101517 !important;
+    letter-spacing: -0.02em !important;
+  }
+  .rpg-top-bar-controls .rpg-control-icon,
+  .rpg-top-bar-controls .rpg-book-icon {
+    transform: scale(0.65) !important;
+    margin-right: 2px !important;
+  }
+  .village-hp-container {
+    transform: scale(0.62) !important;
+    transform-origin: left top !important;
+    top: 38px !important;
+    left: 8px !important;
+    z-index: 30 !important;
+  }
+  .boss-hp-container {
+    transform: scale(0.62) !important;
+    transform-origin: right top !important;
+    top: 38px !important;
+    right: 8px !important;
+    left: auto !important;
+    z-index: 30 !important;
+  }
+  .landscape-questboard-layer {
+    transform: translate(-50%, -50%) scale(0.72) !important;
+    transform-origin: center center !important;
+  }
+  .pvz-deadline-progress-container {
+    bottom: 6px !important;
+    left: 50% !important;
+    transform: translateX(-50%) scale(0.55) !important;
+    transform-origin: center bottom !important;
+    max-width: 76% !important;
+    padding: 4px 8px !important;
+    z-index: 25 !important;
   }
   .rpg-btn-attack-circle {
-    width: 46px;
-    height: 46px;
-    font-size: 0.65rem;
-    bottom: 8px;
-    left: 8px;
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 0.62rem !important;
+    bottom: 6px !important;
+    left: 6px !important;
+    z-index: 32 !important;
+    border-width: 2px !important;
   }
 }
 

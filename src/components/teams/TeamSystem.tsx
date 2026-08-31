@@ -54,11 +54,13 @@ export function ProjectIndexCard({
   colorIndex,
   onOpen,
   onRequestRemoval,
+  onFilterFramework,
 }: {
   project: ProjectSummary;
   colorIndex: number;
   onOpen: () => void;
   onRequestRemoval: () => void;
+  onFilterFramework?: (frameworkName: string) => void;
 }) {
   return (
     <article className="project-index-card-shell" data-project-status={project.status}>
@@ -71,7 +73,24 @@ export function ProjectIndexCard({
         <span className="live-badge"><i aria-hidden="true" /> {project.status}</span>
         <strong>{project.title}</strong>
         <small>{project.roomName} · {project.memberCount} {project.memberCount === 1 ? "member" : "members"}</small>
-        <span>{project.frameworkName}</span>
+        <span
+          className="framework-filter-pill"
+          role="button"
+          tabIndex={0}
+          title={`Filter projects by ${project.frameworkName}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onFilterFramework?.(project.frameworkName);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.stopPropagation();
+              onFilterFramework?.(project.frameworkName);
+            }
+          }}
+        >
+          {project.frameworkName}
+        </span>
         <span>Open project →</span>
       </button>
       <button
@@ -143,6 +162,7 @@ export function TeamSystem({
   const personalTaskGroups = useQuery(api.tasks.listMineAcrossRooms);
   const removeProject = useMutation(api.projects.removeFromMine);
   const [removalTarget, setRemovalTarget] = useState<ProjectRemovalTarget | null>(null);
+  const [frameworkFilter, setFrameworkFilter] = useState<string | null>(null);
 
   if (activeSection === "home") {
     const nextTask = personalTaskGroups
@@ -244,22 +264,54 @@ export function TeamSystem({
         <button className="quiet-button" type="button" onClick={() => onOpenProjects("join")}>Join with code</button>
         <button className="quiet-button" type="button" onClick={() => onOpenProjects("personal-tasks")}>View my tasks</button>
       </div>
+      {frameworkFilter ? (
+        <div
+          className="framework-active-filter-bar"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            margin: "0.75rem 0",
+            padding: "0.5rem 0.85rem",
+            background: "color-mix(in srgb, var(--color-blue) 18%, var(--color-surface))",
+            border: "2px solid var(--color-blue)",
+            borderRadius: "10px",
+            fontSize: "0.85rem",
+          }}
+        >
+          <span>
+            Filtering projects by framework: <strong>{frameworkFilter}</strong>
+          </span>
+          <button
+            type="button"
+            className="quiet-button"
+            style={{ padding: "2px 8px", fontSize: "0.75rem", fontWeight: 800, cursor: "pointer" }}
+            onClick={() => setFrameworkFilter(null)}
+          >
+            Clear filter ✕
+          </button>
+        </div>
+      ) : null}
       {projectCards === undefined ? <p aria-busy="true">Loading projects…</p> : null}
       {projectCards !== undefined && projectCards.length === 0 && rooms.length === 0 ? (
         <div className="project-empty"><strong>No rooms yet.</strong><p>Create a project or join your teammates to begin.</p></div>
       ) : projectCards !== undefined ? (
         <div className="room-index-grid">
-          {projectCards.map((project, index) => (
-            <ProjectIndexCard
-              key={project._id}
-              project={project}
-              colorIndex={index}
-              onOpen={() => onOpenRoom(project.teamId)}
-              onRequestRemoval={() => setRemovalTarget({ projectId: project._id, projectTitle: project.title })}
-            />
-          ))}
+          {projectCards
+            .filter((p) => !frameworkFilter || p.frameworkName.toLowerCase() === frameworkFilter.toLowerCase())
+            .map((project, index) => (
+              <ProjectIndexCard
+                key={project._id}
+                project={project}
+                colorIndex={index}
+                onOpen={() => onOpenRoom(project.teamId)}
+                onRequestRemoval={() => setRemovalTarget({ projectId: project._id, projectTitle: project.title })}
+                onFilterFramework={(fName) => setFrameworkFilter(fName === frameworkFilter ? null : fName)}
+              />
+            ))}
           {rooms
             .filter((room) => !projectCards.some((project) => project.teamId === room._id))
+            .filter(() => !frameworkFilter)
             .map((room, index) => (
               <button
                 key={room._id}

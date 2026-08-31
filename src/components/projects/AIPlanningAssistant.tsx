@@ -20,12 +20,14 @@ type AIPlanningAssistantProps = {
   workspace: Workspace;
   onUseTask: (task: AiTaskSuggestion) => void;
   autoStart?: boolean;
+  onGeneratingChange?: (isGenerating: boolean) => void;
 };
 
 export function AIPlanningAssistant({
   workspace,
   onUseTask,
   autoStart = false,
+  onGeneratingChange,
 }: AIPlanningAssistantProps) {
   const generateProjectPlan = useAction(api.ai.generateProjectPlan);
   const generateProjectPlanWithKey = useAction(api.ai.generateProjectPlanWithKey);
@@ -48,6 +50,10 @@ export function AIPlanningAssistant({
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingSeconds, setLoadingSeconds] = useState(0);
   const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    onGeneratingChange?.(isGenerating);
+  }, [isGenerating, onGeneratingChange]);
 
   useEffect(() => {
     trackEvent("ai_assistant_opened", {
@@ -207,6 +213,41 @@ export function AIPlanningAssistant({
           tasks: current.tasks.map((task) =>
             task.tempId === tempId ? { ...task, ...patch } : task,
           ),
+        }
+      : current);
+  }
+
+  function deleteTask(tempId: string) {
+    setDraft((current) => current
+      ? {
+          ...current,
+          tasks: current.tasks.filter((task) => task.tempId !== tempId),
+        }
+      : current);
+  }
+
+  function handleAddNewTask() {
+    const newTask: AiTaskSuggestion = {
+      tempId: `custom_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      title: "New Custom Task",
+      description: "Enter task requirements and deliverables...",
+      phaseId: workspace.phases[0]?._id ?? "",
+      primaryOwnerProfileId: workspace.members[0]?.profileId ?? workspace.currentProfileId,
+      collaboratorProfileIds: [],
+      reviewerProfileId: null,
+      requiredSkills: [],
+      estimatedEffortHours: 3,
+      difficulty: 2,
+      weight: 3,
+      startDate: workspace.project.startDate || new Date().toISOString().split("T")[0],
+      dueDate: workspace.project.deadline || new Date(Date.now() + 86400000 * 7).toISOString().split("T")[0],
+      dependencyTempIds: [],
+      allocationExplanation: "Manually added by room leader.",
+    };
+    setDraft((current) => current
+      ? {
+          ...current,
+          tasks: [...current.tasks, newTask],
         }
       : current);
   }
@@ -396,14 +437,35 @@ export function AIPlanningAssistant({
               <h4 id="ai-plan-output-title">Suggested project plan</h4>
               <span>{draft.tasks.length}</span>
             </div>
-            <div className="ai-allocation-note"><strong>Suggested Allocation</strong><span>Owners and explanations are editable before the plan is saved.</span></div>
+            <div className="ai-allocation-note" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "8px", margin: "8px 0 12px" }}>
+              <div>
+                <strong>Suggested Allocation</strong>
+                <span> · Tap on any task below to edit its title, owner, phase, effort, or deadline.</span>
+              </div>
+              <button
+                type="button"
+                className="quiet-button"
+                onClick={handleAddNewTask}
+                style={{ fontWeight: 800, textDecoration: "underline", fontSize: "0.85rem", cursor: "pointer" }}
+              >
+                + Add Task
+              </button>
+            </div>
             <div className="ai-task-list">
               {draft.tasks.map((task, index) => (
-                <details key={task.tempId}>
-                  <summary>
+                <details key={task.tempId} className="ai-task-item-details">
+                  <summary style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px" }}>
                     <span className="ai-task-sequence" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-                    <span className="ai-task-summary-copy"><strong>{task.title}</strong><small>{task.estimatedEffortHours}h · difficulty {task.difficulty}/5</small></span>
-                    <span className="ai-task-summary-owner">{workspace.members.find((member) => member.profileId === task.primaryOwnerProfileId)?.displayName ?? "Choose owner"}</span>
+                    <span className="ai-task-summary-copy" style={{ flex: 1 }}>
+                      <strong style={{ display: "block" }}>{task.title}</strong>
+                      <small style={{ opacity: 0.85 }}>{task.estimatedEffortHours}h · difficulty {task.difficulty}/5 · Due: {task.dueDate}</small>
+                    </span>
+                    <span className="ai-task-summary-owner" style={{ padding: "4px 8px", borderRadius: "999px", background: "rgba(255,255,255,0.25)", fontSize: "0.75rem", fontWeight: 700 }}>
+                      {workspace.members.find((member) => member.profileId === task.primaryOwnerProfileId)?.displayName ?? "Choose owner"}
+                    </span>
+                    <span style={{ fontSize: "0.8rem", opacity: 0.85, padding: "2px 6px", border: "1px solid currentColor", borderRadius: "6px", whiteSpace: "nowrap" }}>
+                      ✏️ Edit
+                    </span>
                   </summary>
                   <div className="ai-task-editor">
                     <label className="ai-field-wide">
@@ -452,17 +514,50 @@ export function AIPlanningAssistant({
                       <small>Dependencies: {task.dependencyTempIds.length ? task.dependencyTempIds.join(", ") : "none"} · Collaborators: {task.collaboratorProfileIds.length}</small>
                     </div>
                     {task.longTaskBreakdown ? <p className="long-task-guidance ai-field-wide">{task.longTaskBreakdown}</p> : null}
-                    <button className="primary-button ai-field-wide" type="button" onClick={() => {
-                      trackEvent("ai_recommendation_accepted", {
-                        recommendation_type: "task_suggestion",
-                      });
-                      onUseTask(task);
-                    }}>
-                      Review in manual task form
-                    </button>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", marginTop: "10px", gridColumn: "1 / -1" }}>
+                      <button
+                        type="button"
+                        className="danger-button"
+                        onClick={() => deleteTask(task.tempId)}
+                        style={{ padding: "6px 12px", fontSize: "0.85rem", cursor: "pointer" }}
+                      >
+                        🗑️ Remove Task
+                      </button>
+                      <button className="primary-button" type="button" onClick={() => {
+                        trackEvent("ai_recommendation_accepted", {
+                          recommendation_type: "task_suggestion",
+                        });
+                        onUseTask(task);
+                      }}>
+                        Review in manual task form
+                      </button>
+                    </div>
                   </div>
                 </details>
               ))}
+              <button
+                type="button"
+                className="secondary-button ai-add-custom-task-btn"
+                onClick={handleAddNewTask}
+                style={{
+                  width: "100%",
+                  marginTop: "12px",
+                  padding: "12px 16px",
+                  border: "2px dashed var(--color-navy, #101517)",
+                  borderRadius: "14px",
+                  background: "color-mix(in srgb, var(--color-yellow, #fff73f) 25%, var(--color-surface, #ffffff))",
+                  color: "#101517",
+                  fontWeight: 900,
+                  fontSize: "0.95rem",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                }}
+              >
+                + Add Task
+              </button>
             </div>
           </section>
           </section>

@@ -1038,6 +1038,40 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   color: var(--mld-success-deep);
 }
 
+/* WCAG AA Compliance for Yellow Tag Pills & Badges (#FEAA0133 -> text #8a5b00) - ISS-004 */
+.tag-pill-yellow,
+.project-status.is-warning,
+.status-pill.is-warning,
+.stat-pill.is-warning,
+[data-pill-color="yellow"],
+.validation-result-badge.is-warning-badge,
+.feed-status-tag.invalid-tag {
+  color: #8a5b00 !important;
+}
+
+/* Interactive Framework Filter Pill - ISS-003 */
+.framework-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: var(--mld-radius-pill);
+  background: color-mix(in srgb, var(--mld-info) 18%, var(--mld-surface-01));
+  color: var(--mld-text);
+  font-size: var(--mld-caption-size);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 120ms ease, background-color 120ms ease;
+  user-select: none;
+}
+
+.framework-filter-pill:hover,
+.framework-filter-pill:focus-visible {
+  transform: scale(1.05);
+  background: var(--mld-info);
+  color: #101517;
+  outline: none;
+}
+
 :root[data-theme="dark"] .live-badge,
 :root[data-theme="dark"] .sync-label {
   color: var(--mld-success);
