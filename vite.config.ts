@@ -19,7 +19,7 @@ export default defineConfig({
             if (id.includes("lucide-react")) {
               return "vendor-icons";
             }
-            if (id.includes("html2canvas") || id.includes("purify")) {
+            if (id.includes("jspdf")) {
               return "vendor-export";
             }
           }

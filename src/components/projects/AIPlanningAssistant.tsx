@@ -232,6 +232,7 @@ export function AIPlanningAssistant({
       title: "New Custom Task",
       description: "Enter task requirements and deliverables...",
       phaseId: workspace.phases[0]?._id ?? "",
+      milestoneTempId: null,
       primaryOwnerProfileId: workspace.members[0]?.profileId ?? workspace.currentProfileId,
       collaboratorProfileIds: [],
       reviewerProfileId: null,
@@ -239,10 +240,13 @@ export function AIPlanningAssistant({
       estimatedEffortHours: 3,
       difficulty: 2,
       weight: 3,
+      required: true,
       startDate: workspace.project.startDate || new Date().toISOString().split("T")[0],
       dueDate: workspace.project.deadline || new Date(Date.now() + 86400000 * 7).toISOString().split("T")[0],
       dependencyTempIds: [],
+      requiresReview: true,
       allocationExplanation: "Manually added by room leader.",
+      longTaskBreakdown: "",
     };
     setDraft((current) => current
       ? {
