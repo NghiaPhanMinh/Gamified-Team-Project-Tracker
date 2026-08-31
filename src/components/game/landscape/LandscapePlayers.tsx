@@ -68,11 +68,22 @@ export function getMageTheme(spellType?: string, profileId: string = "", index: 
   }
 }
 
+export function getPlayerCoordinates(index: number = 0, totalCount: number = 1) {
+  if (totalCount <= 2) {
+    const x = 285 + index * 40;
+    const y = 265 + (index % 2) * 10;
+    return { x, y };
+  }
+  // Staggered 2-column vertical stacking for 3+ members
+  const col = index % 2;
+  const row = Math.floor(index / 2);
+  const x = 278 + col * 38;
+  const y = 246 + row * 26;
+  return { x, y };
+}
+
 export function LandscapePlayers({ members }: LandscapePlayersProps) {
   const count = Math.max(1, members.length);
-  const startX = 320;
-  const availableWidth = 130;
-  const spacing = Math.min(45, availableWidth / count);
 
   return (
     <div className="landscape-layer layer-7-players" aria-label="Party members roster">
@@ -85,8 +96,7 @@ export function LandscapePlayers({ members }: LandscapePlayersProps) {
       <svg viewBox="0 0 1000 400" width="100%" height="100%">
         <g>
           {members.map((member, index) => {
-            const offsetX = startX + index * spacing;
-            const offsetY = 265 + (index % 2) * 12;
+            const { x: offsetX, y: offsetY } = getPlayerCoordinates(index, count);
             const active = member.isActiveToday;
             const mage = getMageTheme(member.spellType, member.profileId, index);
 

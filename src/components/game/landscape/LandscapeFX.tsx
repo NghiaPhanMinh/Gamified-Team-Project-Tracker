@@ -27,10 +27,10 @@ export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
     if (!activeEvent) return [];
     if (activeEvent.spellType === "all" || activeEvent.target === "all") {
       return [
-        { id: "goblin-0", x: 505, y: 290, scale: 0.85 },
-        { id: "goblin-1", x: 550, y: 302, scale: 0.85 },
-        { id: "goblin-2", x: 595, y: 290, scale: 0.85 },
-        { id: "goblin-3", x: 640, y: 302, scale: 0.85 },
+        { id: "goblin-0", x: 440, y: 285, scale: 0.85 },
+        { id: "goblin-1", x: 475, y: 285, scale: 0.85 },
+        { id: "goblin-2", x: 440, y: 260, scale: 0.85 },
+        { id: "goblin-3", x: 475, y: 260, scale: 0.85 },
         { id: "dragon-boss", x: 750, y: 175, scale: 2.2 },
       ];
     }
@@ -38,8 +38,8 @@ export function LandscapeFX({ activeEvent, isVictory }: LandscapeFXProps) {
       return [
         {
           id: "goblin-target",
-          x: activeEvent.targetX ?? 505,
-          y: activeEvent.targetY ?? 290,
+          x: activeEvent.targetX ?? 440,
+          y: activeEvent.targetY ?? 285,
           scale: 0.85,
         },
       ];

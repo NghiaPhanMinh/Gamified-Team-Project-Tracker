@@ -30,16 +30,23 @@ export function getGoblinClothingColor(memberId: string) {
   return colors[index];
 }
 
-export function getGoblinCoordinates(index: number = 0) {
-  const offsetX = index * 45;
-  const offsetY = (index % 2) * 12;
-  return {
-    x: 490 + offsetX + 15,
-    y: 270 + offsetY + 20,
-  };
+export function getGoblinCoordinates(index: number = 0, totalCount: number = 1) {
+  if (totalCount <= 2) {
+    const x = 425 + index * 40;
+    const y = 265 + (index % 2) * 10;
+    return { x, y };
+  }
+  // Staggered 2-column vertical stacking for 3+ goblins
+  const col = index % 2;
+  const row = Math.floor(index / 2);
+  const x = 420 + col * 38;
+  const y = 246 + row * 26;
+  return { x, y };
 }
 
 export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
+  const count = Math.max(1, goblins.length);
+
   return (
     <div className="landscape-layer layer-6-goblins" aria-label="Daily goblins wave defense">
       <style>{`
@@ -53,11 +60,10 @@ export function LandscapeGoblins({ goblins }: LandscapeGoblinsProps) {
         }
       `}</style>
       <svg viewBox="0 0 1000 400" width="100%" height="100%">
-        {/* Right-center middle field face-off zone (x = 490px to 620px) grounded at baseline y = 270px */}
-        <g transform="translate(490, 270)">
+        {/* Center middle field face-off zone closer to players */}
+        <g>
           {goblins.map((goblin, index) => {
-            const offsetX = index * 45;
-            const offsetY = (index % 2) * 12;
+            const { x: offsetX, y: offsetY } = getGoblinCoordinates(index, count);
             const isGhost = goblin.goblinState === "ghost" || (goblin.isDefeated ?? false);
             const clothingColor = getGoblinClothingColor(goblin.memberId || goblin.id);
 

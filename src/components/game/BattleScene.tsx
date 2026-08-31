@@ -2652,25 +2652,27 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
             {isAudioMuted ? "Sound: Muted" : (isLofiBgmPlaying ? "Heroic BGM: On" : "Sound & Music")}
           </button>
 
-          {/* Admin Edit Dragon Layout Overlay Button */}
-          <button
-            className="rpg-btn-leaderboard rpg-btn-layout-admin"
-            style={{ position: "relative", top: 0, right: 0 }}
-            onClick={() => {
-              if (!adminAuthenticated) {
-                setShowAdminPasswordModal(true);
-              } else {
-                setShowDragonEditor((prev) => !prev);
-                if (!selectedDragonPart) {
-                  setSelectedDragonPart("headNeck");
+          {/* Admin Edit Dragon Layout Overlay Button (Hidden from normal UI, preserved for admin access) */}
+          {(showDragonEditor || adminAuthenticated) && (
+            <button
+              className="rpg-btn-leaderboard rpg-btn-layout-admin"
+              style={{ position: "relative", top: 0, right: 0 }}
+              onClick={() => {
+                if (!adminAuthenticated) {
+                  setShowAdminPasswordModal(true);
+                } else {
+                  setShowDragonEditor((prev) => !prev);
+                  if (!selectedDragonPart) {
+                    setSelectedDragonPart("headNeck");
+                  }
                 }
-              }
-            }}
-            type="button"
-          >
-            <span className="rpg-control-icon rpg-layout-icon" aria-hidden="true"><i /><i /><i /><i /></span>
-            Layout Admin
-          </button>
+              }}
+              type="button"
+            >
+              <span className="rpg-control-icon rpg-layout-icon" aria-hidden="true"><i /><i /><i /><i /></span>
+              Layout Admin
+            </button>
+          )}
 
           {/* Leaderboard Overlay Button */}
           <button
