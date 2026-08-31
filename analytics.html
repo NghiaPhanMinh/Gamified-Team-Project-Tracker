@@ -147,13 +147,19 @@
       border: 1px solid var(--color-ink);
     }
 
-    .funnel-step {
-      background: var(--color-card); border: 2.5px solid var(--color-ink);
-      border-radius: 14px; padding: 1.1rem 1.4rem; box-shadow: 3px 3px 0px var(--color-ink);
-      margin-bottom: 0.85rem; display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center;
+    .funnel-step-card {
+      background: var(--color-card); border: 3px solid var(--color-ink);
+      border-radius: 16px; padding: 1.25rem 1.6rem; box-shadow: 4px 4px 0px var(--color-ink);
+      display: grid; grid-template-columns: auto 1fr auto; gap: 1.25rem; align-items: center;
+      position: relative;
     }
 
-    .progress-bar-track { width: 100%; height: 14px; background: #e2e8f0; border-radius: 7px; overflow: hidden; display: flex; border: 1px solid var(--color-ink); margin-top: 0.4rem; }
+    .funnel-arrow {
+      text-align: center; font-size: 1.6rem; font-weight: 900;
+      color: var(--color-ink); margin: 0.4rem 0; line-height: 1;
+    }
+
+    .progress-bar-track { width: 100%; height: 14px; background: #e2e8f0; border-radius: 7px; overflow: hidden; display: flex; border: 1.5px solid var(--color-ink); margin-top: 0.4rem; }
     .progress-fill-success { background: var(--color-green); height: 100%; }
     .progress-fill-exit { background: var(--color-pink); height: 100%; }
 
@@ -536,7 +542,7 @@
             </thead>
             <tbody>
               <tr><td style="font-weight: 800;">Finding 1 (AI Plan Utility)</td><td>Yes</td><td></td><td>Yes (22/25)</td><td>Yes</td><td>Yes (Convex aiUsage 3.3% bug rate)</td><td>P0</td></tr>
-              <tr><td style="font-weight: 800;">Finding 2 (Inline Edit Need)</td><td></td><td>Yes</td><td>Yes (5/25)</td><td>Yes</td><td></td><td>P0</td></tr>
+              <tr><td style="font-weight: 800;">Finding 2 (Inline Edit Need)</td><td>Yes</td><td>Yes</td><td>Yes (5/25)</td><td>Yes</td><td></td><td>P0</td></tr>
               <tr><td style="font-weight: 800;">Finding 3 (Gamification Impact)</td><td>Yes</td><td></td><td>Yes (19/25)</td><td>Yes</td><td>Yes (Convex tasks)</td><td>P1</td></tr>
               <tr><td style="font-weight: 800;">Finding 4 (Mobile CSS Break)</td><td></td><td>Yes (1.4% Rage)</td><td>Yes (3/25)</td><td>Yes</td><td>Yes (Clarity replays)</td><td>P0</td></tr>
               <tr><td style="font-weight: 800;">Finding 5 (3-Tab Shell Layout)</td><td>Yes</td><td>Yes</td><td>Yes (2/25)</td><td>Yes</td><td></td><td>P2</td></tr>
@@ -708,10 +714,23 @@
       </div>
     </div>
 
-    <!-- TAB 5: USER FUNNEL -->
+    <!-- TAB 5: DEDICATED STANDALONE CONVERSION FUNNEL PIPELINE -->
     <div id="view-funnel" style="display: none;">
-      <h2 class="section-title">8-Stage Conversion Funnel Flow (Convex DB Telemetry)</h2>
-      <div id="funnel-container">
+      <h2 class="section-title" id="funnel-tab-title">Standalone 8-Stage Conversion Funnel Flow</h2>
+      
+      <!-- Summary KPI Card for Funnel -->
+      <div class="card" style="background: #1DD85115; margin-bottom: 1.5rem;">
+        <h3 id="funnel-summary-title" style="font-size: 1.15rem; font-weight: 900; color: #17A738; margin-bottom: 0.5rem;">
+          End-to-End Conversion Pipeline Analysis
+        </h3>
+        <p id="funnel-summary-text" style="font-size: 0.88rem; font-weight: 700; color: var(--color-ink); line-height: 1.5;">
+          • <strong>Total End-to-End Conversion (142 Visits to 22 Tasks Completed)</strong>: <strong>15.5%</strong><br>
+          • <strong>Active User Task Completion Rate (38 Registered to 22 Tasks Completed)</strong>: <strong>57.9%</strong><br>
+          • <strong>AI Plan Generation Acceptance (28 AI Users to 26 AI Plans Generated)</strong>: <strong>92.9%</strong>
+        </p>
+      </div>
+
+      <div id="funnel-container" style="display: flex; flex-direction: column; gap: 0;">
         <!-- Rendered dynamically -->
       </div>
     </div>
@@ -821,7 +840,20 @@
         dbCaptionTasks: "tasks table: Assigned project tasks",
         dbCaptionAi: "aiUsage table: LLM Model call history & response latency",
         dbCaptionTelemetry: "userTelemetryEvents table: Raw event log entries",
-        dbCloudLink: "Open full database on Convex Cloud Console"
+        dbCloudLink: "Open full database on Convex Cloud Console",
+        funnelTabTitle: "Standalone 8-Stage Conversion Funnel Flow",
+        funnelSummaryTitle: "End-to-End Conversion Pipeline Analysis",
+        funnelSummaryText: "• <strong>Total End-to-End Conversion (142 Visits to 22 Tasks Completed)</strong>: <strong>15.5%</strong><br>• <strong>Active User Task Completion Rate (38 Registered to 22 Tasks Completed)</strong>: <strong>57.9%</strong><br>• <strong>AI Plan Generation Acceptance (28 AI Users to 26 AI Plans Generated)</strong>: <strong>92.9%</strong>",
+        funnelSteps: [
+          { stage: 1, name: "142 VISITS", count: 142, label: "Visits / Landing Page", rate: 100.0, dropRate: 0.0, dropCount: 0 },
+          { stage: 2, name: "38 REGISTERED", count: 38, label: "Registered Accounts", rate: 26.8, dropRate: 73.2, dropCount: 104 },
+          { stage: 3, name: "32 PROJECTS CREATED", count: 32, label: "Projects Created", rate: 84.2, dropRate: 15.8, dropCount: 6 },
+          { stage: 4, name: "30 TEAM ROOMS", count: 30, label: "Team Rooms Added", rate: 93.8, dropRate: 6.2, dropCount: 2 },
+          { stage: 5, name: "28 AI USED", count: 28, label: "AI Assistant Used", rate: 93.3, dropRate: 6.7, dropCount: 2 },
+          { stage: 6, name: "26 AI PLANS GENERATED", count: 26, label: "AI Plans Generated", rate: 92.9, dropRate: 7.1, dropCount: 2 },
+          { stage: 7, name: "25 TASKS ASSIGNED", count: 25, label: "Tasks Assigned", rate: 96.2, dropRate: 3.8, dropCount: 1 },
+          { stage: 8, name: "22 TASKS COMPLETED", count: 22, label: "Tasks Completed", rate: 88.0, dropRate: 12.0, dropCount: 3 }
+        ]
       },
       vi: {
         langBtn: "Switch to English",
@@ -872,7 +904,20 @@
         dbCaptionTasks: "Bảng tasks: Nhiệm vụ dự án đã phân công",
         dbCaptionAi: "Bảng aiUsage: Lịch sử gọi AI LLM Model & latency",
         dbCaptionTelemetry: "Bảng userTelemetryEvents: Nhật ký sự kiện thao tác raw",
-        dbCloudLink: "Mở toàn bộ trên Convex Cloud Console"
+        dbCloudLink: "Mở toàn bộ trên Convex Cloud Console",
+        funnelTabTitle: "Luồng Phễu Chuyển Đổi 8 Bước Độc Lập",
+        funnelSummaryTitle: "Phân Tích Phễu Chuyển Đổi Toàn Luồng",
+        funnelSummaryText: "• <strong>Tổng Chuyển Đổi Toàn Luồng (142 Ghé Thăm tới 22 Task Hoàn Thành)</strong>: <strong>15.5%</strong><br>• <strong>Tỷ Lệ Hoàn Thành Task Người Dùng Đã Đăng Ký (38 Đăng Ký tới 22 Task)</strong>: <strong>57.9%</strong><br>• <strong>Tỷ Lệ Chấp Nhận AI Plan (28 Dùng AI tới 26 Plan Đã Tạo)</strong>: <strong>92.9%</strong>",
+        funnelSteps: [
+          { stage: 1, name: "142 GHÉ THĂM (VISITS)", count: 142, label: "Lượt Ghé Thăm / Trang Chủ", rate: 100.0, dropRate: 0.0, dropCount: 0 },
+          { stage: 2, name: "38 ĐĂNG KÝ (REGISTERED)", count: 38, label: "Tài Khoản Đã Đăng Ký", rate: 26.8, dropRate: 73.2, dropCount: 104 },
+          { stage: 3, name: "32 TẠO DỰ ÁN (PROJECTS CREATED)", count: 32, label: "Dự Án Đã Khởi Tạo", rate: 84.2, dropRate: 15.8, dropCount: 6 },
+          { stage: 4, name: "30 PHÒNG NHÓM (TEAM ROOMS)", count: 30, label: "Phòng Nhóm Đã Thêm", rate: 93.8, dropRate: 6.2, dropCount: 2 },
+          { stage: 5, name: "28 DÙNG AI (AI USED)", count: 28, label: "Đã Sử Dụng AI Assistant", rate: 93.3, dropRate: 6.7, dropCount: 2 },
+          { stage: 6, name: "26 TẠO AI PLAN (AI PLANS GENERATED)", count: 26, label: "Kế Hoạch AI Đã Tạo", rate: 92.9, dropRate: 7.1, dropCount: 2 },
+          { stage: 7, name: "25 GIAO TASK (TASKS ASSIGNED)", count: 25, label: "Nhiệm Vụ Đã Phân Công", rate: 96.2, dropRate: 3.8, dropCount: 1 },
+          { stage: 8, name: "22 HOÀN THÀNH TASK (TASKS COMPLETED)", count: 22, label: "Nhiệm Vụ Đã Hoàn Thành", rate: 88.0, dropRate: 12.0, dropCount: 3 }
+        ]
       }
     };
 
@@ -934,7 +979,12 @@
       document.getElementById("db-section-title").textContent = t.dbSectionTitle;
       document.getElementById("db-cloud-link").textContent = t.dbCloudLink;
 
+      document.getElementById("funnel-tab-title").textContent = t.funnelTabTitle;
+      document.getElementById("funnel-summary-title").textContent = t.funnelSummaryTitle;
+      document.getElementById("funnel-summary-text").innerHTML = t.funnelSummaryText;
+
       renderDbTable();
+      renderFunnel();
     }
 
     let globalDbData = {
@@ -1001,6 +1051,7 @@
         }
       });
       if (tabName === "db") renderDbTable();
+      if (tabName === "funnel") renderFunnel();
     }
 
     function switchDbTable(tableKey) {
@@ -1151,37 +1202,43 @@
     }
 
     function renderFunnel() {
-      const defaultFunnel = [
-        { stage: 1, name: "1. Visit Landing Page", count: 142, rate: 100.0, drop: 0.0 },
-        { stage: 2, name: "2. Account Sign Up", count: 38, rate: 26.8, drop: 73.2 },
-        { stage: 3, name: "3. Create Project", count: 32, rate: 84.2, drop: 15.8 },
-        { stage: 4, name: "4. Add Team Room", count: 30, rate: 93.8, drop: 6.2 },
-        { stage: 5, name: "5. Use AI Assistant", count: 28, rate: 93.3, drop: 6.7 },
-        { stage: 6, name: "6. Generate AI Plan", count: 26, rate: 92.9, drop: 7.1 },
-        { stage: 7, name: "7. Assign Tasks", count: 25, rate: 96.2, drop: 3.8 },
-        { stage: 8, name: "8. Complete Tasks", count: 22, rate: 88.0, drop: 12.0 },
-      ];
+      const t = translations[currentLang];
+      const steps = t.funnelSteps;
 
       const funnelContainer = document.getElementById("funnel-container");
       if (funnelContainer) {
-        funnelContainer.innerHTML = defaultFunnel.map(f => `
-          <div class="funnel-step">
-            <div>
-              <div style="display: flex; align-items: center; gap: 0.6rem; font-weight: 900;">
-                <span style="background: var(--color-ink); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">${f.stage}</span>
-                <span>${f.name}</span>
+        let html = "";
+        steps.forEach((f, idx) => {
+          html += `
+            <div class="funnel-step-card">
+              <div style="background: var(--color-ink); color: #fff; border-radius: 12px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 900;">
+                ${f.stage}
               </div>
-              <div class="progress-bar-track">
-                <div class="progress-fill-success" style="width: ${f.rate}%;"></div>
-                <div class="progress-fill-exit" style="width: ${f.drop}%;"></div>
+              <div>
+                <div style="font-size: 1.15rem; font-weight: 900; color: var(--color-ink); uppercase;">
+                  ${f.name}
+                </div>
+                <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-muted); margin-top: 0.1rem;">
+                  ${f.label}
+                </div>
+                <div class="progress-bar-track">
+                  <div class="progress-fill-success" style="width: ${f.rate}%;"></div>
+                  <div class="progress-fill-exit" style="width: ${f.dropRate}%;"></div>
+                </div>
+              </div>
+              <div style="text-align: right; min-width: 140px;">
+                <div style="font-size: 1.35rem; font-weight: 900; color: var(--color-ink);">${f.count.toLocaleString()}</div>
+                <div style="font-size: 0.8rem; font-weight: 800; color: #17A738;">Retained: ${f.rate}%</div>
+                ${f.dropRate > 0 ? `<div style="font-size: 0.75rem; font-weight: 700; color: #e53e3e;">Drop-off: ${f.dropRate}% (${f.dropCount})</div>` : `<div style="font-size: 0.75rem; font-weight: 700; color: var(--color-muted);">Baseline (100%)</div>`}
               </div>
             </div>
-            <div style="text-align: right;">
-              <div style="font-size: 1.3rem; font-weight: 900;">${f.count.toLocaleString()}</div>
-              <div style="font-size: 0.78rem; font-weight: 800; color: #17A738;">Retained: ${f.rate}%</div>
-            </div>
-          </div>
-        `).join("");
+          `;
+
+          if (idx < steps.length - 1) {
+            html += `<div class="funnel-arrow">↓</div>`;
+          }
+        });
+        funnelContainer.innerHTML = html;
       }
     }
 
