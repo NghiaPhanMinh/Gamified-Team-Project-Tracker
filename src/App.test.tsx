@@ -30,7 +30,7 @@ describe("MayLamDi signed-out journey", () => {
     document.documentElement.dataset.theme = "light";
   });
 
-  it("shows one clear Google sign-in action and a short purpose statement", () => {
+  it("shows the branded hero and the scoped purpose story without a hero login CTA", () => {
     render(<App />);
 
     expect(
@@ -39,9 +39,9 @@ describe("MayLamDi signed-out journey", () => {
     expect(screen.getAllByAltText("MayLamDi logo")).not.toHaveLength(0);
     expect(screen.getByText(/create or join a project room/i)).toBeInTheDocument();
     expect(screen.queryByText(/how it helps/i)).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /continue with google/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/group projects should feel shared/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /continue with google/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /see what maylamdi does/i })).toBeInTheDocument();
   });
 
   it("persists a dark theme preference", () => {

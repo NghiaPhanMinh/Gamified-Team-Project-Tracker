@@ -22,18 +22,36 @@ describe("MayLamDi landing page", () => {
     vi.unstubAllGlobals();
   });
 
-  it("shows the existing sign-in action to signed-out visitors", () => {
+  it("keeps authentication actions out of the hero and introduces a quiet scroll cue", () => {
     render(<MemoryRouter><LandingPage /></MemoryRouter>);
 
-    expect(screen.getByRole("button", { name: /continue with google/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /continue with google/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /go to projects/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /see what maylamdi does/i })).toHaveAttribute(
+      "href",
+      "#why-maylamdi",
+    );
   });
 
-  it("uses an authenticated workspace CTA without asking the user to sign in again", () => {
+  it("keeps the hero free of authentication CTAs for authenticated visitors too", () => {
     render(<MemoryRouter><LandingPage isAuthenticated /></MemoryRouter>);
 
-    expect(screen.getByRole("link", { name: /go to projects/i })).toHaveAttribute("href", "/projects");
+    expect(screen.queryByRole("link", { name: /go to projects/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /continue with google/i })).not.toBeInTheDocument();
+  });
+
+  it("adds the scoped product-purpose section before the existing feature marquee", () => {
+    const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
+
+    const purpose = container.querySelector<HTMLElement>("#why-maylamdi");
+    const features = container.querySelector<HTMLElement>("#how-it-works");
+
+    expect(screen.getByText("Why MayLamDi")).toBeInTheDocument();
+    expect(screen.getByText("Group projects should feel shared,")).toBeInTheDocument();
+    expect(screen.getByText("not carried by one person.")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /simplified maylamdi project workspace/i })).toBeInTheDocument();
+    expect(purpose?.nextElementSibling).toBe(features);
+    expect(purpose?.querySelectorAll("[data-purpose-phrase]")).toHaveLength(7);
   });
 
   it("renders the looping card sequence and replays the branded title burst", () => {

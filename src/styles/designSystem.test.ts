@@ -53,6 +53,19 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("stroke-dashoffset: 0");
   });
 
+  it("keeps the scoped purpose story sticky, phrase-led, and mobile-safe", () => {
+    expect(css).toContain(".marketing-purpose");
+    expect(css).toContain("min-height: 175vh");
+    expect(css).toContain(".marketing-purpose-sticky");
+    expect(css).toContain("position: sticky");
+    expect(css).toContain("--purpose-phrase-opacity");
+    expect(css).toContain("--purpose-visual-y");
+    expect(css).toContain("@media (max-width: 760px)");
+    expect(css).toContain("min-height: auto");
+    expect(css).toContain(".marketing-purpose-phrase");
+    expect(css).toContain("opacity: 1");
+  });
+
   it("keeps project identity, settings accordions, and sticky tabs theme-safe", () => {
     expect(css).toContain(".room-index-card.room-index-card-colored");
     expect(css).toContain("background: var(--group-color)");

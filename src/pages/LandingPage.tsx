@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowDown, CheckCircle2 } from "lucide-react";
 
-import { GoogleSignInButton } from "../components/auth/GoogleSignInButton";
 import { BrandLogo } from "../components/brand/BrandLogo";
 import { ThemeToggle } from "../components/theme/ThemeToggle";
 
@@ -43,6 +42,57 @@ const MARQUEE_GROUP_COUNT = 4;
 
 const BURST_COLORS = ["#fff73f", "#ff8ae7", "#4ca0fe", "#1dd851", "#feaa01"];
 
+const PURPOSE_PHRASES = [
+  "Group projects should feel shared,",
+  "not carried by one person.",
+  "MayLamDi helps university teams",
+  "plan work fairly,",
+  "see who owns what,",
+  "and keep contribution visible",
+  "from start to finish.",
+] as const;
+
+function PurposeWorkspaceVisual() {
+  return (
+    <div
+      className="marketing-purpose-workspace"
+      role="img"
+      aria-label="Simplified MayLamDi project workspace showing shared tasks and visible ownership"
+      data-purpose-visual
+    >
+      <div className="marketing-purpose-workspace-bar">
+        <div aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+        <strong>Project room</strong>
+        <span className="live-badge">Live</span>
+      </div>
+      <div className="marketing-purpose-workspace-body">
+        <div className="marketing-purpose-workspace-nav">
+          <span className="is-active">Project</span>
+          <span>Tasks</span>
+          <span>Team</span>
+        </div>
+        <div className="marketing-purpose-workspace-content">
+          <span className="card-eyebrow">Launch week · Shared plan</span>
+          <div className="marketing-purpose-progress-heading">
+            <strong>72% visible progress</strong>
+            <span>3 teammates</span>
+          </div>
+          <div className="progress-track"><span style={{ width: "72%" }} /></div>
+          <div className="marketing-purpose-task-list">
+            <div><span>Research findings</span><strong>Team</strong></div>
+            <div><span>Prototype review</span><strong>You</strong></div>
+            <div><span>Final handoff</span><strong>Shared</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function buildBurstWords(): BurstWord[] {
   return Array.from({ length: 42 }, (_, index) => {
     const angle = Math.random() * Math.PI * 2;
@@ -66,11 +116,95 @@ function buildBurstWords(): BurstWord[] {
 export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
   const [burstWords, setBurstWords] = useState<BurstWord[]>([]);
   const cleanupTimer = useRef<number | null>(null);
+  const purposeSection = useRef<HTMLElement | null>(null);
 
   useEffect(() => () => {
     if (cleanupTimer.current !== null) {
       window.clearTimeout(cleanupTimer.current);
     }
+  }, []);
+
+  useEffect(() => {
+    const section = purposeSection.current;
+    if (!section) return;
+
+    const phrases = Array.from(
+      section.querySelectorAll<HTMLElement>("[data-purpose-phrase]"),
+    );
+    const visual = section.querySelector<HTMLElement>("[data-purpose-visual]");
+    const reducedMotion = typeof window.matchMedia === "function"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
+    const mobileLayout = typeof window.matchMedia === "function"
+      ? window.matchMedia("(max-width: 760px)")
+      : null;
+    const requestFrame = typeof window.requestAnimationFrame === "function"
+      ? window.requestAnimationFrame.bind(window)
+      : (callback: FrameRequestCallback) => window.setTimeout(() => callback(Date.now()), 16);
+    const cancelFrame = typeof window.cancelAnimationFrame === "function"
+      ? window.cancelAnimationFrame.bind(window)
+      : window.clearTimeout.bind(window);
+    let animationFrame: number | null = null;
+
+    const clamp = (value: number) => Math.min(1, Math.max(0, value));
+
+    const updatePurposeReveal = () => {
+      animationFrame = null;
+      const rect = section.getBoundingClientRect();
+      const shouldReduceMotion = reducedMotion?.matches ?? false;
+      const isMobileLayout = mobileLayout?.matches ?? window.innerWidth <= 760;
+      let progress = 1;
+
+      if (!shouldReduceMotion) {
+        if (isMobileLayout) {
+          progress = clamp(
+            (window.innerHeight * 0.82 - rect.top) / Math.max(rect.height * 0.78, 1),
+          );
+        } else {
+          progress = clamp(
+            -rect.top / Math.max(section.offsetHeight - window.innerHeight, 1),
+          );
+        }
+      }
+
+      phrases.forEach((phrase, index) => {
+        const start = phrases.length > 1 ? (index / (phrases.length - 1)) * 0.72 : 0;
+        const reveal = shouldReduceMotion
+          ? 1
+          : clamp((progress - start) / 0.28);
+        const easedReveal = 1 - Math.pow(1 - reveal, 3);
+
+        phrase.style.setProperty("--purpose-phrase-opacity", String(0.2 + easedReveal * 0.8));
+        phrase.style.setProperty("--purpose-phrase-shift", `${(1 - easedReveal) * 12}px`);
+      });
+
+      if (visual) {
+        const motionProgress = shouldReduceMotion ? 1 : progress;
+        visual.style.setProperty("--purpose-visual-y", `${(1 - motionProgress) * 80}px`);
+        visual.style.setProperty("--purpose-visual-rotate", `${(1 - motionProgress) * 3}deg`);
+        visual.style.setProperty("--purpose-visual-scale", String(0.95 + motionProgress * 0.05));
+      }
+    };
+
+    const schedulePurposeReveal = () => {
+      if (animationFrame === null) {
+        animationFrame = requestFrame(updatePurposeReveal);
+      }
+    };
+
+    updatePurposeReveal();
+    window.addEventListener("scroll", schedulePurposeReveal, { passive: true });
+    window.addEventListener("resize", schedulePurposeReveal);
+    reducedMotion?.addEventListener("change", schedulePurposeReveal);
+    mobileLayout?.addEventListener("change", schedulePurposeReveal);
+
+    return () => {
+      window.removeEventListener("scroll", schedulePurposeReveal);
+      window.removeEventListener("resize", schedulePurposeReveal);
+      reducedMotion?.removeEventListener("change", schedulePurposeReveal);
+      mobileLayout?.removeEventListener("change", schedulePurposeReveal);
+      if (animationFrame !== null) cancelFrame(animationFrame);
+    };
   }, []);
 
   function triggerTextBurst() {
@@ -87,7 +221,10 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
   }
 
   return (
-    <main className="marketing-shell">
+    <main
+      className="marketing-shell"
+      data-authenticated={isAuthenticated ? "true" : "false"}
+    >
       <header className="marketing-header">
         <Link className="nav-brand" to="/" aria-label="MayLamDi landing page">
           <BrandLogo compact />
@@ -126,19 +263,9 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
             Create or join a project room, then move from brief to plan to execution
             together with less guesswork.
           </p>
-          <div className="marketing-actions">
-            {isAuthenticated ? (
-              <Link className="primary-button" to="/projects">Go to Projects</Link>
-            ) : (
-              <GoogleSignInButton />
-            )}
-            <a className="quiet-button" href="#how-it-works">See how it works <ArrowRight aria-hidden="true" /></a>
-          </div>
-          <p className="marketing-signin-note">
-            {isAuthenticated
-              ? "Your private workspace is ready when you are."
-              : "Sign in once to keep your contribution trail private."}
-          </p>
+          <a className="marketing-scroll-cue" href="#why-maylamdi">
+            See what MayLamDi does <ArrowDown aria-hidden="true" />
+          </a>
           <div className="marketing-proof" aria-label="MayLamDi principles">
             <span><CheckCircle2 aria-hidden="true" /> Clear project plans</span>
             <span><CheckCircle2 aria-hidden="true" /> Explainable allocation</span>
@@ -169,6 +296,34 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
             <div className="marketing-mini-card"><span className="card-eyebrow">Team workload</span><strong>Balanced</strong><small>Visible before work drifts</small></div>
             <div className="marketing-mini-card"><span className="card-eyebrow">AI support</span><strong>Reviewable</strong><small>Suggestions stay with your team</small></div>
           </div>
+        </div>
+      </section>
+
+      <section
+        className="marketing-purpose"
+        id="why-maylamdi"
+        aria-labelledby="why-maylamdi-title"
+        ref={purposeSection}
+      >
+        <div className="marketing-purpose-sticky">
+          <div className="marketing-purpose-copy">
+            <p className="marketing-purpose-label">Why MayLamDi</p>
+            <h2 className="marketing-purpose-statement" id="why-maylamdi-title">
+              {PURPOSE_PHRASES.map((phrase, index) => (
+                <span
+                  className={index === 2 ? "marketing-purpose-phrase marketing-purpose-phrase--new-thought" : "marketing-purpose-phrase"}
+                  data-purpose-phrase
+                  key={phrase}
+                >
+                  {phrase}
+                </span>
+              ))}
+            </h2>
+          </div>
+          <PurposeWorkspaceVisual />
+          <p className="marketing-purpose-support">
+            Less guessing. Less gánh team. More shared responsibility.
+          </p>
         </div>
       </section>
 
