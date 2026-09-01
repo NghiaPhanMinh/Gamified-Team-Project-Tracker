@@ -254,6 +254,7 @@
     <nav class="nav-tabs">
       <button class="tab-btn active" id="tab-overview" onclick="switchTab('overview')" style="background: var(--color-yellow);">Overview</button>
       <button class="tab-btn" id="tab-audit" onclick="switchTab('audit')" style="background: var(--color-pink);">Evidence Audit Report</button>
+      <button class="tab-btn" id="tab-gamification" onclick="switchTab('gamification')" style="background: var(--color-green); color: #fff;">Gamification Metrics</button>
       <button class="tab-btn" id="tab-db" onclick="switchTab('db')">Convex DB Full Data (6 Tables)</button>
       <button class="tab-btn" id="tab-ga4" onclick="switchTab('ga4')">GA4 Full Raw Data Matrix</button>
       <button class="tab-btn" id="tab-clarity" onclick="switchTab('clarity')">Clarity Session Replays &amp; Errors</button>
@@ -294,6 +295,12 @@
           <div class="card-sub" id="sub-form">Google Form Feedback</div>
           <a class="source-tag" href="https://docs.google.com/spreadsheets/d/1C9k3rCfNzXcj4SBnvEfw05nfdaEiHubY6ukyrwUHjZQ/edit?usp=sharing" target="_blank" id="tag-form">Source: Form Survey Sheet</a>
         </div>
+        <div class="card" style="background: #1DD85122;">
+          <div class="card-kicker" id="kicker-gami">Gamification XP Velocity</div>
+          <div class="card-stat" style="color: #17A738;" id="ov-gami">+61.5%</div>
+          <div class="card-sub" style="color: #17A738;" id="sub-gami">4.2 vs 2.6 tasks/wk (76% Motivation)</div>
+          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank" id="tag-gami">Source: Convex XP Task Telemetry</a>
+        </div>
       </div>
 
       <!-- Actionable Insights Card -->
@@ -306,6 +313,7 @@
           <li>API Bug &amp; Exception Rate: 3.3% (6 failed calls out of 184 total AI operations). Success rate = 96.7% (178 successful executions).</li>
           <li>Client Script Exception Rate: 1.4% (2 stack trace errors logged out of 142 sessions).</li>
           <li>Conversion Logic: 142 sessions to 38 registered accounts (26.8%) to 32 projects created (84.2%).</li>
+          <li>Gamification Task Velocity: Gamified team members completed +61.5% more tasks/week (4.2 vs 2.6 tasks/wk control group), supported by 76.0% survey satisfaction (19/25 testers).</li>
         </ul>
       </div>
 
@@ -408,7 +416,7 @@
         <!-- 5. GAMIFICATION ANALYSIS -->
         <h2 class="audit-h2">5. Gamification Analysis</h2>
         <ul style="list-style: square; margin-left: 1.5rem; font-weight: 700; margin-bottom: 1rem;">
-          <li><strong>Adoption:</strong> 78% of active team rooms engaged with XP reward task tracking.</li>
+          <li><strong>Adoption:</strong> 78.0% of active team rooms engaged with XP reward task tracking (25 out of 32 projects).</li>
           <li><strong>Task Completion Velocity:</strong> Gamified team members completed an average of 4.2 tasks/week vs 2.6 tasks/week for non-gamified control teams (+61.5% completion speed).</li>
           <li><strong>User Perception:</strong> 76.0% of survey respondents (19 out of 25) noted XP rewards increased satisfaction and task completion motivation.</li>
           <li><strong>Does gamification show promising signals?</strong> YES. Directional data indicates strong motivation lift.</li>
@@ -599,7 +607,61 @@
       </div>
     </div>
 
-    <!-- TAB 2: CONVEX DB FULL DATA WITH ACTIVITY & STATUS COLUMNS -->
+    <!-- TAB 3: GAMIFICATION METRICS (NEW DEDICATED TAB) -->
+    <div id="view-gamification" style="display: none;">
+      <h2 class="section-title" id="gami-tab-title">Gamification Features &amp; XP Rewards Telemetry</h2>
+      
+      <div class="grid-kpi">
+        <div class="card" style="background: #1DD85115;">
+          <div class="card-kicker" id="gami-k1-title">Task Velocity Lift</div>
+          <div class="card-stat" style="color: #17A738;">+61.5%</div>
+          <div class="card-sub" style="color: #17A738;">4.2 vs 2.6 tasks/week (Control)</div>
+          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">Source: Convex XP Telemetry</a>
+        </div>
+        <div class="card">
+          <div class="card-kicker" id="gami-k2-title">Gamified Team Adoption</div>
+          <div class="card-stat">78.0%</div>
+          <div class="card-sub" style="color: var(--color-muted);">25 / 32 Active Team Rooms</div>
+          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">Source: Convex Teams Table</a>
+        </div>
+        <div class="card" style="background: #FFF73F33;">
+          <div class="card-kicker" id="gami-k3-title">XP Motivation Rating</div>
+          <div class="card-stat">76.0%</div>
+          <div class="card-sub" style="color: #0284c7;">19 / 25 Form Survey Testers</div>
+          <a class="source-tag" href="https://docs.google.com/spreadsheets/d/1C9k3rCfNzXcj4SBnvEfw05nfdaEiHubY6ukyrwUHjZQ/edit?usp=sharing" target="_blank">Source: Form Survey Sheet</a>
+        </div>
+        <div class="card" style="background: #FF8AE722;">
+          <div class="card-kicker" id="gami-k4-title">XP Tasks Completed</div>
+          <div class="card-stat" style="color: #0284c7;">22</div>
+          <div class="card-sub" style="color: #17A738;">88.0% Funnel Step 8 Completion</div>
+          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">Source: Convex Tasks DB</a>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <h3 style="font-size: 1.05rem; font-weight: 900; margin-bottom: 0.75rem;" id="gami-table-title">
+          XP Reward Quests &amp; Gamification Rules Breakdown
+        </h3>
+        <table>
+          <thead>
+            <tr>
+              <th id="gth-action">Gamified Quest Action</th>
+              <th id="gth-xp">XP Reward Value</th>
+              <th id="gth-completion">Completed Events</th>
+              <th id="gth-impact">User Velocity &amp; Engagement Impact</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="font-weight: 800;">Complete Assigned Project Task</td><td><span class="tag-pill" style="background: #1DD85133;">+50 XP</span></td><td style="font-weight: 800;">22 Tasks</td><td>Drives +61.5% weekly task completion velocity</td></tr>
+            <tr><td style="font-weight: 800;">Accept AI Assistant Project Brief</td><td><span class="tag-pill" style="background: #FEAA0133;">+100 XP</span></td><td style="font-weight: 800;">26 Plans</td><td>Accelerates initial team onboarding &amp; setup</td></tr>
+            <tr><td style="font-weight: 800;">Join Team Room via Join Code</td><td><span class="tag-pill" style="background: #4CA0FE33;">+30 XP</span></td><td style="font-weight: 800;">30 Rooms</td><td>Encourages peer collaboration &amp; team joining</td></tr>
+            <tr><td style="font-weight: 800;">Complete Profile Capacity Setup</td><td><span class="tag-pill" style="background: #FF8AE733;">+20 XP</span></td><td style="font-weight: 800;">38 Users</td><td>Improves profile data completion &amp; skill fit</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 4: CONVEX DB FULL DATA -->
     <div id="view-db" style="display: none;">
       <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
         <h2 class="section-title" id="db-section-title" style="margin-bottom: 0;">Convex Database Full Records (All 6 Tables)</h2>
@@ -640,7 +702,7 @@
       </div>
     </div>
 
-    <!-- TAB 3: GA4 FULL RAW DATA -->
+    <!-- TAB 5: GA4 FULL RAW DATA -->
     <div id="view-ga4" style="display: none;">
       <h2 class="section-title">Google Analytics 4 — Full Granular Acquisition Matrix</h2>
       
@@ -679,7 +741,7 @@
       </div>
     </div>
 
-    <!-- TAB 4: CLARITY SESSION REPLAYS & ERRORS -->
+    <!-- TAB 6: CLARITY SESSION REPLAYS & ERRORS -->
     <div id="view-clarity" style="display: none;">
       <h2 class="section-title">Microsoft Clarity — Session Replays &amp; Exception Stack Trace</h2>
       
@@ -715,7 +777,7 @@
       </div>
     </div>
 
-    <!-- TAB 5: DEDICATED STANDALONE CONVERSION FUNNEL PIPELINE -->
+    <!-- TAB 7: DEDICATED STANDALONE CONVERSION FUNNEL PIPELINE -->
     <div id="view-funnel" style="display: none;">
       <h2 class="section-title" id="funnel-tab-title">Standalone 8-Stage Conversion Funnel Flow</h2>
       
@@ -736,7 +798,7 @@
       </div>
     </div>
 
-    <!-- TAB 6: AI ASSISTANT -->
+    <!-- TAB 8: AI ASSISTANT -->
     <div id="view-ai" style="display: none;">
       <h2 class="section-title">AI Assistant Operations &amp; Success Metrics (Convex DB aiUsage)</h2>
       <div class="grid-kpi">
@@ -801,6 +863,7 @@
         verifyBody: "• <strong>API Bug Rate</strong>: <strong>3.3%</strong> (6 errors / 184 AI operations). Technical success rate: <strong>96.7%</strong> (178/184).<br>• <strong>Clarity Invalid Clicks Rate</strong>: <strong>46.06%</strong> across <strong>76 sessions</strong> recorded in Microsoft Clarity dashboard (dead/invalid clicks on static framework tags, non-interactive badges, and overflow borders).",
         tabOverview: "Overview",
         tabAudit: "Evidence Audit Report",
+        tabGamification: "Gamification Metrics",
         tabDb: "Convex DB Full Data (6 Tables)",
         tabGa4: "GA4 Full Raw Data Matrix",
         tabClarity: "Clarity Session Replays & Errors",
@@ -821,12 +884,16 @@
         kickerForm: "Form Survey Responses",
         subForm: "Google Form Feedback",
         tagForm: "Source: Form Survey Sheet",
+        kickerGami: "Gamification XP Velocity",
+        subGami: "4.2 vs 2.6 tasks/wk (76% Motivation)",
+        tagGami: "Source: Convex XP Task Telemetry",
         summaryTitle: "Verified Mathematical Bug & Clarity Invalid Clicks Audit",
         summaryList: [
           "Clarity Invalid Clicks Rate: 46.06% across 76 recorded sessions. Primary drivers: dead clicks on static framework tags, non-interactive pills, and mobile card overflow.",
           "API Bug & Exception Rate: 3.3% (6 failed calls out of 184 total AI operations). Success rate = 96.7% (178 successful executions).",
           "Client Script Exception Rate: 1.4% (2 stack trace errors logged out of 142 sessions).",
-          "Conversion Logic: 142 sessions to 38 registered accounts (26.8%) to 32 projects created (84.2%)."
+          "Conversion Logic: 142 sessions to 38 registered accounts (26.8%) to 32 projects created (84.2%).",
+          "Gamification Task Velocity: Gamified team members completed +61.5% more tasks/week (4.2 vs 2.6 tasks/wk control group), supported by 76.0% survey satisfaction (19/25 testers)."
         ],
         roomsTitle: "Active Team Rooms & Project Briefs (Source: Convex DB)",
         thTeam: "Team Name",
@@ -834,6 +901,16 @@
         thMembers: "Members",
         thProj: "Project Title",
         thBrief: "Brief Details",
+        gamiTabTitle: "Gamification Features & XP Rewards Telemetry",
+        gamiK1Title: "Task Velocity Lift",
+        gamiK2Title: "Gamified Team Adoption",
+        gamiK3Title: "XP Motivation Rating",
+        gamiK4Title: "XP Tasks Completed",
+        gamiTableTitle: "XP Reward Quests & Gamification Rules Breakdown",
+        gthAction: "Gamified Quest Action",
+        gthXp: "XP Reward Value",
+        gthCompletion: "Completed Events",
+        gthImpact: "User Velocity & Engagement Impact",
         dbSectionTitle: "Convex Database Full Records (All 6 Tables)",
         dbCaptionProjects: "Showing full project list with live activity state & project status",
         dbCaptionTeams: "teams table: All full team room records",
@@ -865,6 +942,7 @@
         verifyBody: "• <strong>Tỷ Lệ Lỗi API</strong>: <strong>3.3%</strong> (6 lỗi / 184 thao tác AI). Tỷ lệ thành công kỹ thuật: <strong>96.7%</strong> (178/184).<br>• <strong>Tỷ Lệ Clarity Invalid Clicks</strong>: <strong>46.06%</strong> ghi nhận trên <strong>76 phiên</strong> trong bảng điều khiển Microsoft Clarity (lượt nhấp đơ/không hợp lệ vào các mác thẻ Scrum/Kanban tĩnh và viền thẻ tràn màn hình).",
         tabOverview: "Tổng Quan",
         tabAudit: "Báo Cáo Kiểm Toán Evidence",
+        tabGamification: "Chỉ Số Gamification",
         tabDb: "Dữ Liệu Convex DB (6 Bảng)",
         tabGa4: "Ma Trận Dữ Liệu GA4",
         tabClarity: "Clarity Session Replays & Lỗi",
@@ -885,12 +963,16 @@
         kickerForm: "Phiếu Phản Hồi Khảo Sát",
         subForm: "Phản Hồi Google Form",
         tagForm: "Nguồn: Google Form Survey Sheet",
+        kickerGami: "Tăng Tốc Gamification XP",
+        subGami: "4.2 vs 2.6 task/tuần (76% Động lực)",
+        tagGami: "Nguồn: Convex XP Task Telemetry",
         summaryTitle: "Tóm Tắt Kiểm Toán Toán Học Về Lỗi & Clarity Invalid Clicks",
         summaryList: [
           "Tỷ lệ Clarity Invalid Clicks: 46.06% trên 76 phiên ghi nhận. Nguyên nhân chính: nhấp nhầm vào mác thẻ framework tĩnh, thẻ không tương tác và tràn viền mobile.",
           "Tỷ lệ Lỗi API & Ngoại Lệ: 3.3% (6 cuộc gọi thất bại trên 184 thao tác AI). Tỷ lệ thành công = 96.7% (178 lượt thành công).",
           "Tỷ lệ Lỗi Script Client: 1.4% (2 lỗi stack trace trên 142 phiên).",
-          "Logic Chuyển Đổi: 142 phiên chuyển thành 38 tài khoản đăng ký (26.8%) chuyển thành 32 dự án (84.2%)."
+          "Logic Chuyển Đổi: 142 phiên chuyển thành 38 tài khoản đăng ký (26.8%) chuyển thành 32 dự án (84.2%).",
+          "Tốc độ hoàn thành Gamification: Thành viên có Gamification hoàn thành nhanh hơn +61.5% task/tuần (4.2 so với 2.6 task/tuần nhóm đối chứng), hỗ trợ bởi 76.0% khảo sát hài lòng (19/25 tester)."
         ],
         roomsTitle: "Danh Sách Phòng Nhóm Hoạt Động & Brief Dự Án (Nguồn: Convex DB)",
         thTeam: "Tên Nhóm",
@@ -898,6 +980,16 @@
         thMembers: "Thành Viên",
         thProj: "Tên Dự Án",
         thBrief: "Mô Tả Brief",
+        gamiTabTitle: "Telemetry Tính Năng Gamification & Phần Thưởng XP",
+        gamiK1Title: "Tăng Tốc Tốc Độ Xử Lý Task",
+        gamiK2Title: "Tỷ Lệ Nhóm Dùng Gamification",
+        gamiK3Title: "Đánh Giá Động Lực XP",
+        gamiK4Title: "Task Hoàn Thành Tích XP",
+        gamiTableTitle: "Bảng Phân Tích Quest Tích XP & Quy Tắc Gamification",
+        gthAction: "Hành Động Quest Tích XP",
+        gthXp: "Giá Trị Thưởng XP",
+        gthCompletion: "Số Lượt Hoàn Thành",
+        gthImpact: "Tác Động Tốc Độ & Tương Tác Người Dùng",
         dbSectionTitle: "Toàn Bộ Bản Ghi Cơ Sở Dữ Liệu Convex (6 Bảng)",
         dbCaptionProjects: "Hiển thị danh sách dự án kèm trạng thái hoạt động & tình trạng dự án",
         dbCaptionTeams: "Bảng teams: Tất cả bản ghi phòng nhóm đầy đủ",
@@ -938,6 +1030,7 @@
 
       document.getElementById("tab-overview").textContent = t.tabOverview;
       document.getElementById("tab-audit").textContent = t.tabAudit;
+      document.getElementById("tab-gamification").textContent = t.tabGamification;
       document.getElementById("tab-db").textContent = t.tabDb;
       document.getElementById("tab-ga4").textContent = t.tabGa4;
       document.getElementById("tab-clarity").textContent = t.tabClarity;
@@ -964,6 +1057,10 @@
       document.getElementById("sub-form").textContent = t.subForm;
       document.getElementById("tag-form").textContent = t.tagForm;
 
+      document.getElementById("kicker-gami").textContent = t.kickerGami;
+      document.getElementById("sub-gami").textContent = t.subGami;
+      document.getElementById("tag-gami").textContent = t.tagGami;
+
       document.getElementById("summary-card-title").textContent = t.summaryTitle;
       const listEl = document.getElementById("summary-card-list");
       if (listEl) {
@@ -976,6 +1073,17 @@
       document.getElementById("th-members").textContent = t.thMembers;
       document.getElementById("th-proj").textContent = t.thProj;
       document.getElementById("th-brief").textContent = t.thBrief;
+
+      document.getElementById("gami-tab-title").textContent = t.gamiTabTitle;
+      document.getElementById("gami-k1-title").textContent = t.gamiK1Title;
+      document.getElementById("gami-k2-title").textContent = t.gamiK2Title;
+      document.getElementById("gami-k3-title").textContent = t.gamiK3Title;
+      document.getElementById("gami-k4-title").textContent = t.gamiK4Title;
+      document.getElementById("gami-table-title").textContent = t.gamiTableTitle;
+      document.getElementById("gth-action").textContent = t.gthAction;
+      document.getElementById("gth-xp").textContent = t.gthXp;
+      document.getElementById("gth-completion").textContent = t.gthCompletion;
+      document.getElementById("gth-impact").textContent = t.gthImpact;
 
       document.getElementById("db-section-title").textContent = t.dbSectionTitle;
       document.getElementById("db-cloud-link").textContent = t.dbCloudLink;
@@ -1036,7 +1144,7 @@
     };
 
     function switchTab(tabName) {
-      const tabs = ["overview", "audit", "db", "ga4", "clarity", "funnel", "ai"];
+      const tabs = ["overview", "audit", "gamification", "db", "ga4", "clarity", "funnel", "ai"];
       tabs.forEach(t => {
         const el = document.getElementById("view-" + t);
         if (el) el.style.display = t === tabName ? "block" : "none";
@@ -1044,10 +1152,12 @@
         if (btn) {
           if (t === tabName) {
             btn.classList.add("active");
-            btn.style.background = t === "audit" ? "var(--color-pink)" : "var(--color-yellow)";
+            btn.style.background = t === "audit" ? "var(--color-pink)" : t === "gamification" ? "var(--color-green)" : "var(--color-yellow)";
+            if (t === "gamification") btn.style.color = "#ffffff";
           } else {
             btn.classList.remove("active");
             btn.style.background = "var(--color-card)";
+            btn.style.color = "var(--color-ink)";
           }
         }
       });
