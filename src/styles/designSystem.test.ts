@@ -32,7 +32,9 @@ describe("MayLamDi design-system contract", () => {
   });
 
   it("uses the official local display font and blue project preview treatment", () => {
-    expect(css).toContain('/fonts/Blodestarkly-Regular.ttf');
+    expect(css).toContain('font-family: "Chaco"');
+    expect(css).toContain('/fonts/Chaco-Regular.otf');
+    expect(css).not.toContain("Blodestarkly");
     expect(css).toContain(".marketing-preview-card");
     expect(css).toContain("background: var(--mld-info)");
   });
