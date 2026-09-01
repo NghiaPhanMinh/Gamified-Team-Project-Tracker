@@ -510,6 +510,7 @@
               <tr><td style="font-weight: 800;">ISS-004</td><td>Low color contrast on yellow tag pills (#FEAA0133)</td><td>Accessibility</td><td>Lighthouse Audit EVD-008</td><td><span class="tag-pill" style="background: #FEAA0133;">Medium</span></td><td>Open</td><td>Darken text color to #8a5b00 for WCAG AA compliance</td></tr>
               <tr><td style="font-weight: 800;">ISS-005</td><td>Vite bundle single chunk size exceeds 500 kB</td><td>Perf / Build</td><td>Vite Build Log EVD-009</td><td><span class="tag-pill" style="background: #1DD85133;">Low</span></td><td>Open</td><td>Implement dynamic import() code splitting in Vite config</td></tr>
               <tr><td style="font-weight: 800;">ISS-006</td><td>Long-term 30-day cohort retention untracked</td><td>Analytics Gap</td><td>Testing Overview</td><td><span class="tag-pill" style="background: #FEAA0133;">Medium</span></td><td>Not fully tested</td><td>Instrument long-term cohort tracking events in Convex</td></tr>
+              <tr><td style="font-weight: 800;">ISS-007</td><td>High 73.2% landing page to signup drop-off (104 visitors lost)</td><td>Onboarding / UX</td><td>GA4 Funnel Step 1→2 (EVD-001)</td><td><span class="tag-pill" style="background: #FF8AE733;">High</span></td><td>Open</td><td>Add 1-click Google/GitHub OAuth &amp; guest preview mode</td></tr>
             </tbody>
           </table>
         </div>
@@ -522,7 +523,8 @@
             <p style="font-weight: 700; font-size: 0.88rem;">
               1. <strong>Framework Badge Interactive Filter:</strong> Problem: 46.06% invalid clicks on static badges → Evidence: Clarity 76 sessions proof → Decision: Add click-to-filter event handlers → Expected Impact: Eliminate dead click friction.<br>
               2. <strong>Mobile CSS Overflow:</strong> Problem: Card overflow on screens &lt; 390px → Evidence: EVD-007 (1.4% rage rate) → Decision: Refactor to fluid flex containers → Expected Impact: Eliminate mobile UI friction.<br>
-              3. <strong>AI Pre-Commit Task Editor:</strong> Problem: Users cannot edit tasks before DB insert → Evidence: EVD-010 → Decision: Add modal preview draft editor → Expected Impact: Increase user confidence &amp; project setup accuracy.
+              3. <strong>AI Pre-Commit Task Editor:</strong> Problem: Users cannot edit tasks before DB insert → Evidence: EVD-010 → Decision: Add modal preview draft editor → Expected Impact: Increase user confidence &amp; project setup accuracy.<br>
+              4. <strong>Reduce Signup Drop-off (73.2%):</strong> Problem: 104 out of 142 visitors leave before signup → Evidence: GA4 Funnel Step 1→2 → Decision: Add 1-click Google OAuth &amp; guest preview mode → Expected Impact: Increase top-of-funnel signup conversion from 26.8% to 45%+.
             </p>
           </div>
           <div style="background: #FEAA0115; border: 2px solid #d97706; border-radius: 12px; padding: 1rem;">
@@ -573,22 +575,22 @@
             <li>The clean 3-tab main app shell navigation maintains high usability and zero navigation rage clicks.</li>
           </ol>
 
-          <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: #e53e3e;">5 Most Important Known Issues:</p>
+          <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: #e53e3e;">5 Most Important Known Issues (Negative Friction Matrix):</p>
           <ol style="margin-left: 1.5rem; font-weight: 700; font-size: 0.88rem; margin-bottom: 1rem;">
+            <li>ISS-007: 73.2% top-of-funnel drop-off before account signup (104 out of 142 landing page visitors lost).</li>
             <li>ISS-003: 46.06% invalid click rate (76 sessions) on static framework badges and non-interactive cards.</li>
-            <li>ISS-001: Mobile viewport horizontal overflow &amp; 1.4% rage click rate (High Severity).</li>
-            <li>ISS-002: Inability to inline-edit AI task breakdown pre-commit (Medium Severity).</li>
-            <li>ISS-004: Yellow tag pill color contrast accessibility gap (Medium Severity).</li>
-            <li>ISS-005: Production Vite single bundle chunk warning (Low Severity).</li>
+            <li>ISS-001: Mobile viewport horizontal overflow &amp; 1.4% rage click rate on screens &lt; 390px.</li>
+            <li>ISS-002: Inability to inline-edit AI task breakdown pre-commit (5/25 negative comments).</li>
+            <li>ISS-004: Yellow tag pill color contrast accessibility gap &amp; 3.3% AI API error rate.</li>
           </ol>
 
           <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: #0284c7;">5 Highest-Priority Iteration Decisions:</p>
           <ol style="margin-left: 1.5rem; font-weight: 700; font-size: 0.88rem; margin-bottom: 1rem;">
             <li>Add interactive click-to-filter event handlers on framework badges to eliminate 46.06% invalid click rate.</li>
+            <li>Add 1-click Google/GitHub OAuth to reduce 73.2% signup drop-off.</li>
             <li>Refactor mobile CSS card containers to fluid widths (max-width: 100%).</li>
             <li>Add inline draft task editor modal inside AI Assistant preview flow.</li>
             <li>Upgrade tag pill typography colors for WCAG AA compliance.</li>
-            <li>Enable dynamic code splitting in vite.config.ts.</li>
           </ol>
 
           <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: #d97706;">3 Things That Should NOT Be Changed Yet:</p>
@@ -984,7 +986,7 @@
         gamiTabTitle: "Telemetry Tính Năng Gamification & Phần Thưởng XP",
         gamiK1Title: "Tăng Tốc Tốc Độ Xử Lý Task",
         gamiK2Title: "Tỷ Lệ Nhóm Dùng Gamification",
-        gamiK3Title: "Đánh Giá Động Lực XP",
+        gamiK3Title: "Đánh Giá Đánh Giá Động Lực XP",
         gamiK4Title: "Task Hoàn Thành Tích XP",
         gamiTableTitle: "Bảng Phân Tích Quest Tích XP & Quy Tắc Gamification",
         gthAction: "Hành Động Quest Tích XP",
