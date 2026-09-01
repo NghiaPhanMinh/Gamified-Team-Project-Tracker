@@ -31,9 +31,10 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("overflow-x: auto");
   });
 
-  it("uses the official local display font and blue project preview treatment", () => {
-    expect(css).toContain('font-family: "Chaco"');
-    expect(css).toContain('/fonts/Chaco-Regular.otf');
+  it("uses the selected local display font and blue project preview treatment", () => {
+    expect(css).toContain('font-family: "Paytone One"');
+    expect(css).toContain('/fonts/PaytoneOne-Regular.ttf');
+    expect(css).not.toContain('font-family: "Chaco"');
     expect(css).not.toContain("Blodestarkly");
     expect(css).toContain(".marketing-preview-card");
     expect(css).toContain("background: var(--mld-info)");
