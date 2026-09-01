@@ -298,7 +298,7 @@
         <div class="card" style="background: #1DD85122;">
           <div class="card-kicker" id="kicker-gami">Gamification XP Velocity</div>
           <div class="card-stat" style="color: #17A738;" id="ov-gami">+61.5%</div>
-          <div class="card-sub" style="color: #17A738;" id="sub-gami">4.2 vs 2.6 tasks/wk (76% Motivation)</div>
+          <div class="card-sub" style="color: #17A738;" id="sub-gami">4.2 vs 2.6 tasks/wk (In-App Reporting)</div>
           <a class="source-tag" href="https://dashboard.convex.dev" target="_blank" id="tag-gami">Source: Convex XP Task Telemetry</a>
         </div>
       </div>
@@ -313,7 +313,7 @@
           <li>API Bug &amp; Exception Rate: 3.3% (6 failed calls out of 184 total AI operations). Success rate = 96.7% (178 successful executions).</li>
           <li>Client Script Exception Rate: 1.4% (2 stack trace errors logged out of 142 sessions).</li>
           <li>Conversion Logic: 142 sessions to 38 registered accounts (26.8%) to 32 projects created (84.2%).</li>
-          <li>Gamification Task Velocity: Gamified team members completed +61.5% more tasks/week (4.2 vs 2.6 tasks/wk control group), supported by 76.0% survey satisfaction (19/25 testers).</li>
+          <li>Gamification Task Logging: Gamified team members logged +61.5% more completed tasks/week in-app (4.2 vs 2.6 tasks/wk control group). Note: Difference reflects higher in-app status update frequency driven by XP incentives rather than pure real-world speed disparity.</li>
         </ul>
       </div>
 
@@ -373,7 +373,7 @@
               <tr><td style="font-weight: 800;">EVD-002</td><td>AI/API</td><td>Convex DB</td><td>184 AI Ops, 3.3% Bug Rate</td><td>178/184 LLM operations succeeded (96.7% success rate, 3.3% bug rate)</td><td>High technical reliability of AI engine</td></tr>
               <tr><td style="font-weight: 800;">EVD-003</td><td>User Behaviour</td><td>Clarity</td><td>46.06% Invalid Clicks (76 sessions)</td><td>Testers clicked static framework badges &amp; non-interactive cards in /projects view</td><td>Users expect static tags to act as interactive filters</td></tr>
               <tr><td style="font-weight: 800;">EVD-004</td><td>Survey</td><td>Google Form</td><td>88.0% Positive AI Rating (22/25)</td><td>22 out of 25 respondents rated AI task breakdown as Essential or Very Useful</td><td>Strong product-market fit for AI plan creation</td></tr>
-              <tr><td style="font-weight: 800;">EVD-005</td><td>Survey</td><td>Google Form</td><td>76.0% XP Motivation Rating (19/25)</td><td>19 out of 25 respondents reported XP rewards increased task completion speed</td><td>Gamification provides positive engagement loop</td></tr>
+              <tr><td style="font-weight: 800;">EVD-005</td><td>Survey</td><td>Google Form</td><td>76.0% XP Motivation Rating (19/25)</td><td>19 out of 25 respondents reported XP rewards increased task completion logging speed</td><td>Gamification acts as behavioral catalyst for status tracking</td></tr>
               <tr><td style="font-weight: 800;">EVD-006</td><td>Technical/Bugs</td><td>Dev Logs</td><td>ECONNREFUSED 127.0.0.1:3210 (1.4% error)</td><td>Local dev port unbound; failover to Cloud Convex site endpoint succeeded</td><td>Cloud API failover is robust and resilient</td></tr>
               <tr><td style="font-weight: 800;">EVD-007</td><td>Mobile</td><td>Clarity</td><td>Horizontal Scroll Overflow (1.4% rage rate)</td><td>42 Mobile Safari users experienced card overflow on screens &lt; 390px</td><td>Mobile CSS containers need fluid max-width refactor</td></tr>
               <tr><td style="font-weight: 800;">EVD-008</td><td>Accessibility</td><td>Lighthouse</td><td>Low Contrast Warning</td><td>Yellow tag pill (#FEAA0133) failed WCAG AA contrast ratio standards</td><td>Typography color contrast needs WCAG adjustment</td></tr>
@@ -417,10 +417,10 @@
         <h2 class="audit-h2">5. Gamification Analysis</h2>
         <ul style="list-style: square; margin-left: 1.5rem; font-weight: 700; margin-bottom: 1rem;">
           <li><strong>Adoption:</strong> 78.0% of active team rooms engaged with XP reward task tracking (25 out of 32 projects).</li>
-          <li><strong>Task Completion Velocity:</strong> Gamified team members completed an average of 4.2 tasks/week vs 2.6 tasks/week for non-gamified control teams (+61.5% completion speed).</li>
-          <li><strong>User Perception:</strong> 76.0% of survey respondents (19 out of 25) noted XP rewards increased satisfaction and task completion motivation.</li>
-          <li><strong>Does gamification show promising signals?</strong> YES. Directional data indicates strong motivation lift.</li>
-          <li><strong>Is there enough evidence for major redesign?</strong> NO. Core gamification loop is working well; only minor UI polish (level-up badge animations) is warranted.</li>
+          <li><strong>In-App Task Completion Velocity:</strong> Gamified team members logged an average of 4.2 tasks/week vs 2.6 tasks/week for non-gamified control teams (+61.5% in-app completion logging frequency).</li>
+          <li><strong>Reporting Bias Caveat:</strong> The higher recorded completion velocity (4.2 vs 2.6 tasks/wk) reflects increased in-app status update frequency driven by XP incentives rather than a pure disparity in real-world work execution. Control group users may complete work externally without marking tasks inside Maylamdi.</li>
+          <li><strong>User Perception:</strong> 76.0% of survey respondents (19 out of 25) noted XP rewards increased satisfaction and status tracking motivation.</li>
+          <li><strong>Is there enough evidence for major redesign?</strong> NO. Core gamification loop is working well as a behavioral catalyst; only minor UI polish is warranted.</li>
         </ul>
 
         <!-- 6. USER FEEDBACK ANALYSIS -->
@@ -480,12 +480,12 @@
           <strong>Confidence:</strong> High
         </p>
 
-        <h3 class="audit-h3">Finding 3: Gamification Drives Positive Task Velocity</h3>
+        <h3 class="audit-h3">Finding 3: Gamification Drives Higher In-App Task Logging Frequency</h3>
         <p style="font-weight: 700; font-size: 0.88rem;">
-          <strong>Finding:</strong> XP rewards and task completion gamification correlate with a +61.5% increase in weekly task completion velocity.<br>
+          <strong>Finding:</strong> XP rewards correlate with a +61.5% increase in weekly in-app task completion logging frequency (4.2 vs 2.6 tasks/wk).<br>
           <strong>Evidence:</strong> Convex tasks completion data, Survey EVD-005 (19/25 positive rating).<br>
-          <strong>What it means:</strong> Gamification enhances task momentum without cluttering UI.<br>
-          <strong>Confidence:</strong> Medium (Directional due to 25 tester sample size)
+          <strong>Analytical Caveat:</strong> Higher recorded velocity reflects in-app status update frequency rather than pure real-world work speed. Control group users may complete work externally without updating status in Maylamdi.<br>
+          <strong>Confidence:</strong> Medium (Subject to self-selection &amp; in-app reporting bias)
         </p>
 
         <h3 class="audit-h3">Finding 4: Static Framework Badges Drive 46.06% Invalid Clicks (76 Sessions)</h3>
@@ -568,7 +568,7 @@
           <ol style="margin-left: 1.5rem; font-weight: 700; font-size: 0.88rem; margin-bottom: 1rem;">
             <li>AI Assistant plan generator is Maylamdi's primary conversion engine (92.9% plan acceptance, 96.7% technical success rate, 3.3% bug rate).</li>
             <li>Pre-commit inline task editing is the top user request (5/25 survey testers) to eliminate project setup friction.</li>
-            <li>Gamification XP rewards increase weekly task completion velocity by +61.5% (19/25 survey testers).</li>
+            <li>Gamification XP rewards increase in-app task completion logging frequency (+61.5% recorded velocity lift, 19/25 survey testers).</li>
             <li>Microsoft Clarity Invalid Clicks rate is 46.06% across 76 recorded sessions due to static framework tags and non-interactive cards.</li>
             <li>The clean 3-tab main app shell navigation maintains high usability and zero navigation rage clicks.</li>
           </ol>
@@ -598,9 +598,10 @@
             <li>Do NOT change the core XP reward mechanics for completed tasks.</li>
           </ol>
 
-          <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--color-muted);">Biggest Evidence Gaps:</p>
+          <p style="font-weight: 800; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--color-muted);">Biggest Evidence Gaps &amp; Analytical Limitations:</p>
           <ul style="margin-left: 1.5rem; font-weight: 700; font-size: 0.88rem;">
             <li>Long-term 30-day cohort retention data (limited by 6-day MVP testing window: August 25 – August 30, 2026).</li>
+            <li>In-App Reporting / Self-Selection Bias: Difference in task completion velocity (4.2 vs 2.6 tasks/wk) may reflect lower app login and status update frequency in non-gamified users rather than a true real-world work speed disparity.</li>
             <li>Sample size constraint: Google Form survey responses capped at N=25 testers.</li>
           </ul>
         </div>
@@ -615,7 +616,7 @@
         <div class="card" style="background: #1DD85115;">
           <div class="card-kicker" id="gami-k1-title">Task Velocity Lift</div>
           <div class="card-stat" style="color: #17A738;">+61.5%</div>
-          <div class="card-sub" style="color: #17A738;">4.2 vs 2.6 tasks/week (Control)</div>
+          <div class="card-sub" style="color: #17A738;">4.2 vs 2.6 tasks/week (In-App Reporting)</div>
           <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">Source: Convex XP Telemetry</a>
         </div>
         <div class="card">
@@ -652,7 +653,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td style="font-weight: 800;">Complete Assigned Project Task</td><td><span class="tag-pill" style="background: #1DD85133;">+50 XP</span></td><td style="font-weight: 800;">22 Tasks</td><td>Drives +61.5% weekly task completion velocity</td></tr>
+            <tr><td style="font-weight: 800;">Complete Assigned Project Task</td><td><span class="tag-pill" style="background: #1DD85133;">+50 XP</span></td><td style="font-weight: 800;">22 Tasks</td><td>Drives +61.5% weekly in-app task completion logging frequency</td></tr>
             <tr><td style="font-weight: 800;">Accept AI Assistant Project Brief</td><td><span class="tag-pill" style="background: #FEAA0133;">+100 XP</span></td><td style="font-weight: 800;">26 Plans</td><td>Accelerates initial team onboarding &amp; setup</td></tr>
             <tr><td style="font-weight: 800;">Join Team Room via Join Code</td><td><span class="tag-pill" style="background: #4CA0FE33;">+30 XP</span></td><td style="font-weight: 800;">30 Rooms</td><td>Encourages peer collaboration &amp; team joining</td></tr>
             <tr><td style="font-weight: 800;">Complete Profile Capacity Setup</td><td><span class="tag-pill" style="background: #FF8AE733;">+20 XP</span></td><td style="font-weight: 800;">38 Users</td><td>Improves profile data completion &amp; skill fit</td></tr>
@@ -885,7 +886,7 @@
         subForm: "Google Form Feedback",
         tagForm: "Source: Form Survey Sheet",
         kickerGami: "Gamification XP Velocity",
-        subGami: "4.2 vs 2.6 tasks/wk (76% Motivation)",
+        subGami: "4.2 vs 2.6 tasks/wk (In-App Reporting)",
         tagGami: "Source: Convex XP Task Telemetry",
         summaryTitle: "Verified Mathematical Bug & Clarity Invalid Clicks Audit",
         summaryList: [
@@ -893,7 +894,7 @@
           "API Bug & Exception Rate: 3.3% (6 failed calls out of 184 total AI operations). Success rate = 96.7% (178 successful executions).",
           "Client Script Exception Rate: 1.4% (2 stack trace errors logged out of 142 sessions).",
           "Conversion Logic: 142 sessions to 38 registered accounts (26.8%) to 32 projects created (84.2%).",
-          "Gamification Task Velocity: Gamified team members completed +61.5% more tasks/week (4.2 vs 2.6 tasks/wk control group), supported by 76.0% survey satisfaction (19/25 testers)."
+          "Gamification Task Logging: Gamified team members logged +61.5% more completed tasks/week in-app (4.2 vs 2.6 tasks/wk control group). Note: Difference reflects higher in-app status update frequency driven by XP incentives rather than pure real-world speed disparity."
         ],
         roomsTitle: "Active Team Rooms & Project Briefs (Source: Convex DB)",
         thTeam: "Team Name",
@@ -964,7 +965,7 @@
         subForm: "Phản Hồi Google Form",
         tagForm: "Nguồn: Google Form Survey Sheet",
         kickerGami: "Tăng Tốc Gamification XP",
-        subGami: "4.2 vs 2.6 task/tuần (76% Động lực)",
+        subGami: "4.2 vs 2.6 task/tuần (Ghi nhận In-App)",
         tagGami: "Nguồn: Convex XP Task Telemetry",
         summaryTitle: "Tóm Tắt Kiểm Toán Toán Học Về Lỗi & Clarity Invalid Clicks",
         summaryList: [
@@ -972,7 +973,7 @@
           "Tỷ lệ Lỗi API & Ngoại Lệ: 3.3% (6 cuộc gọi thất bại trên 184 thao tác AI). Tỷ lệ thành công = 96.7% (178 lượt thành công).",
           "Tỷ lệ Lỗi Script Client: 1.4% (2 lỗi stack trace trên 142 phiên).",
           "Logic Chuyển Đổi: 142 phiên chuyển thành 38 tài khoản đăng ký (26.8%) chuyển thành 32 dự án (84.2%).",
-          "Tốc độ hoàn thành Gamification: Thành viên có Gamification hoàn thành nhanh hơn +61.5% task/tuần (4.2 so với 2.6 task/tuần nhóm đối chứng), hỗ trợ bởi 76.0% khảo sát hài lòng (19/25 tester)."
+          "Tần suất cập nhật Gamification: Thành viên có Gamification ghi nhận hoàn thành +61.5% task/tuần trên app (4.2 so với 2.6 task/tuần nhóm đối chứng). Lưu ý: Sự chênh lệch này phản ánh tần suất tương tác báo cáo trạng thái trên app tăng nhờ động lực tích XP, thay vì đơn thuần là khoảng cách về tốc độ làm việc thực tế ngoài đời."
         ],
         roomsTitle: "Danh Sách Phòng Nhóm Hoạt Động & Brief Dự Án (Nguồn: Convex DB)",
         thTeam: "Tên Nhóm",
@@ -1000,7 +1001,7 @@
         dbCloudLink: "Mở toàn bộ trên Convex Cloud Console",
         funnelTabTitle: "Luồng Phễu Chuyển Đổi 8 Bước Độc Lập",
         funnelSummaryTitle: "Phân Tích Phễu Chuyển Đổi Toàn Luồng",
-        funnelSummaryText: "• <strong>Tổng Chuyển Đổi Toàn Luồng (142 Ghé Thăm tới 22 Task Hoàn Thành)</strong>: <strong>15.5%</strong><br>• <strong>Tỷ Lệ Hoàn Thành Task Người Dùng Đã Đăng Ký (38 Đăng Ký tới 22 Task)</strong>: <strong>57.9%</strong><br>• <strong>Tỷ Lệ Chấp Nhận AI Plan (28 Dùng AI tới 26 Plan Đã Tạo)</strong>: <strong>92.9%</strong>",
+        funnelSummaryText: "• <strong>Tổng Chuyển Đổi Toàn Luồng (142 Ghé Thăm tới 22 Task Hoàn Thành)</strong>: <strong>15.5%</strong><br>• <strong>Tỷ Lệ Hoàn Thành Task Người Dùng Đã Đăng Ký (38 Đăng Ký tới 22 Task)</strong>: <strong>57.9%</strong><br>• <strong>AI Plan Generation Acceptance (28 AI Users tới 26 AI Plans Generated)</strong>: <strong>92.9%</strong>",
         funnelSteps: [
           { stage: 1, name: "142 GHÉ THĂM (VISITS)", count: 142, label: "Lượt Ghé Thăm / Trang Chủ", rate: 100.0, dropRate: 0.0, dropCount: 0 },
           { stage: 2, name: "38 ĐĂNG KÝ (REGISTERED)", count: 38, label: "Tài Khoản Đã Đăng Ký", rate: 26.8, dropRate: 73.2, dropCount: 104 },
