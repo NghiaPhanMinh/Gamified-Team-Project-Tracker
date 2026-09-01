@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 
@@ -22,65 +22,48 @@ describe("MayLamDi landing page", () => {
     vi.unstubAllGlobals();
   });
 
-  it("keeps the first viewport brand-led and moves Google authentication to the final chapter", () => {
-    const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
-    const hero = container.querySelector<HTMLElement>(".landing-hero");
-    const finalCta = container.querySelector<HTMLElement>("#get-started");
-
-    expect(hero).not.toBeNull();
-    expect(within(hero!).getByRole("heading", { name: /make the work.*feel shared/i })).toBeInTheDocument();
-    expect(within(hero!).queryByRole("button", { name: /continue with google/i })).not.toBeInTheDocument();
-    expect(within(hero!).getByRole("link", { name: /scroll to see how/i })).toHaveAttribute("href", "#purpose");
-    expect(finalCta).not.toBeNull();
-    expect(within(finalCta!).getByRole("button", { name: /continue with google/i })).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: /continue with google/i })).toHaveLength(1);
-  });
-
-  it("uses the requested six-chapter story in the correct order", () => {
-    const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
-    const chapterIds = [...container.querySelectorAll<HTMLElement>("main > section")].map((section) => section.id);
-
-    expect(chapterIds).toEqual(["top", "purpose", "features", "how-it-works", "pricing", "get-started"]);
-    expect(screen.getByRole("heading", { name: /group projects shouldn’t need a designated carrier/i })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /one project.*three ways to stop gánh team/i })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /from brief to done/i })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /core teamwork stays free/i })).toBeInTheDocument();
-  });
-
-  it("explains tracking, editable AI assistance, and gamified progress as separate scenes", () => {
+  it("shows the existing sign-in action to signed-out visitors", () => {
     render(<MemoryRouter><LandingPage /></MemoryRouter>);
 
-    expect(screen.getByRole("heading", { name: /know who’s doing what/i })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /start with a plan, not a guessing game/i })).toBeInTheDocument();
-    expect(screen.getAllByText("AI suggests. You decide.")).toHaveLength(2);
-    expect(screen.getByRole("heading", { name: /make progress something the whole team can see/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/how real work becomes game feedback/i)).toHaveTextContent("Real work→Evidence→Progress→Game feedback");
+    expect(screen.getByRole("button", { name: /continue with google/i })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /go to projects/i })).not.toBeInTheDocument();
   });
 
-  it("shows the existing plans and routes their actions safely", () => {
-    render(<MemoryRouter><LandingPage /></MemoryRouter>);
-
-    expect(screen.getByText("0₫")).toBeInTheDocument();
-    expect(screen.getByText(/39K₫/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Start free" })).toHaveAttribute("href", "#get-started");
-    expect(screen.getByRole("link", { name: "Go Plus" })).toHaveAttribute("href", "#get-started");
-    expect(screen.queryByRole("link", { name: /explore as guest/i })).not.toBeInTheDocument();
-  });
-
-  it("shows authenticated navigation without asking the user to sign in again", () => {
+  it("uses an authenticated workspace CTA without asking the user to sign in again", () => {
     render(<MemoryRouter><LandingPage isAuthenticated /></MemoryRouter>);
 
-    expect(screen.getByRole("heading", { name: /welcome back/i })).toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: /projects/i }).every((link) => link.getAttribute("href") === "/projects")).toBe(true);
+    expect(screen.getByRole("link", { name: /go to projects/i })).toHaveAttribute("href", "/projects");
     expect(screen.queryByRole("button", { name: /continue with google/i })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Go Plus" })).toHaveAttribute("href", "/subscription");
   });
 
-  it("keeps the large brand logo and an unclipped hand-drawn annotation", () => {
+  it("renders the looping card sequence and replays the branded title burst", () => {
     const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
 
     expect(screen.getAllByAltText("MayLamDi logo")).toHaveLength(2);
-    expect(container.querySelector(".landing-hero-logo")).toBeInTheDocument();
-    expect(container.querySelectorAll(".landing-hero-sketch path")).toHaveLength(2);
+    expect(container.querySelectorAll(".marketing-feature-group")).toHaveLength(4);
+    expect(screen.getAllByText("Start with the brief.")).toHaveLength(4);
+    expect(screen.getAllByText("Plan work fairly.")).toHaveLength(4);
+    expect(screen.getAllByText("Make progress visible.")).toHaveLength(4);
+
+    fireEvent.click(screen.getByRole("button", { name: /make teamwork.*feel shared/i }));
+    expect(screen.getAllByText("MAYLAMDI")).toHaveLength(42);
+  });
+
+  it("marks feel shared with a responsive hand-drawn annotation", () => {
+    const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
+
+    expect(screen.getByText("feel shared.").parentElement).toHaveClass("marketing-title-hook");
+    expect(container.querySelectorAll(".marketing-title-sketch path")).toHaveLength(2);
+  });
+
+  it("places the existing project preview across the full hero grid", () => {
+    const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
+
+    const hero = container.querySelector<HTMLElement>(".marketing-hero");
+    const visual = container.querySelector<HTMLElement>(".marketing-hero-visual");
+    const preview = container.querySelector<HTMLElement>(".marketing-preview");
+
+    expect(preview?.parentElement).toBe(hero);
+    expect(visual).not.toContainElement(preview);
   });
 });

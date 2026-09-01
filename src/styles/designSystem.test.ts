@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import css from "./design-tokens.css?raw";
 import appCss from "./index.css?raw";
-import landingCss from "./landing.css?raw";
 
 describe("MayLamDi design-system contract", () => {
   it("uses the supplied light and dark surface tokens", () => {
@@ -33,10 +32,7 @@ describe("MayLamDi design-system contract", () => {
   });
 
   it("uses the official local display font and blue project preview treatment", () => {
-    expect(css).toContain('font-family: "Rubik 80s Fade"');
-    expect(css).toContain('/fonts/Rubik80sFade-Latin.woff2');
-    expect(css).toContain('/fonts/Rubik80sFade-LatinExt.woff2');
-    expect(landingCss).not.toContain("Blodestarkly");
+    expect(css).toContain('/fonts/Blodestarkly-Regular.ttf');
     expect(css).toContain(".marketing-preview-card");
     expect(css).toContain("background: var(--mld-info)");
   });
@@ -143,25 +139,5 @@ describe("MayLamDi design-system contract", () => {
     expect(appCss).toContain(".profile-gate-shell");
     expect(appCss).toContain("height: 100dvh");
     expect(appCss).toContain("overflow-y: auto");
-  });
-
-  it("keeps the long landing story responsive, reveal-based, and motion-safe", () => {
-    expect(landingCss).toContain(".landing-story [data-reveal]");
-    expect(landingCss).toContain(".landing-workflow-sticky");
-    expect(landingCss).toContain("position: sticky");
-    expect(landingCss).toContain(".landing-workflow-mobile-preview");
-    expect(landingCss).toContain("@media (max-width: 760px)");
-    expect(landingCss).toContain("@media (prefers-reduced-motion: reduce)");
-    expect(landingCss).toContain("animation-duration: 0.01ms !important");
-  });
-
-  it("uses the approved landing palette with dark text on bright chapters", () => {
-    expect(landingCss).toContain("#101517");
-    expect(landingCss).toContain("#fffdec");
-    expect(landingCss).toContain("background: var(--mld-info)");
-    expect(landingCss).toContain("background: var(--mld-team)");
-    expect(landingCss).toContain("background: var(--mld-success)");
-    expect(landingCss).toContain("background: var(--mld-primary)");
-    expect(landingCss).toContain("color: var(--landing-charcoal)");
   });
 });
