@@ -65,7 +65,13 @@ function getFunnyName(list: string[], seed: string) {
   return list[Math.abs(hash) % list.length];
 }
 
-type BattleSceneProps = { projectId: Id<"projects">; currentPhase?: string; tasksLocked?: boolean };
+type BattleSceneProps = {
+  projectId: Id<"projects">;
+  currentPhase?: string;
+  tasksLocked?: boolean;
+  openTaskId?: Id<"tasks"> | null;
+  onClearOpenTaskId?: () => void;
+};
 
 type OptionalBattleMetrics = {
   goblinsRemaining?: number;
@@ -990,7 +996,13 @@ function QuestCardHoverItem({
   );
 }
 
-export function BattleScene({ projectId, currentPhase, tasksLocked = true }: BattleSceneProps) {
+export function BattleScene({
+  projectId,
+  currentPhase,
+  tasksLocked = true,
+  openTaskId = null,
+  onClearOpenTaskId,
+}: BattleSceneProps) {
   const state = useQuery(api.battle.getState, { projectId });
 
   // Modal display toggles
@@ -1027,6 +1039,22 @@ export function BattleScene({ projectId, currentPhase, tasksLocked = true }: Bat
   const [showQuestBoardModal, setShowQuestBoardModal] = useState(false);
   const [questBoardTab, setQuestBoardTab] = useState<"all" | "mine" | "reviews" | "daily_proof">("all");
   const [selectedQuestTask, setSelectedQuestTask] = useState<QuestTask | null>(null);
+
+  useEffect(() => {
+    if (openTaskId && workspace?.tasks) {
+      const task = workspace.tasks.find((t) => t._id === openTaskId);
+      if (task) {
+        const assignee = workspace.members.find((m) => m?.profileId === task.primaryOwnerProfileId);
+        setSelectedQuestTask({
+          ...task,
+          assigneeName: assignee?.displayName,
+          isMine: task.primaryOwnerProfileId === workspace.currentProfileId,
+        });
+      }
+      setShowQuestBoardModal(true);
+      onClearOpenTaskId?.();
+    }
+  }, [openTaskId, workspace, onClearOpenTaskId]);
   const [showCreateQuestModal, setShowCreateQuestModal] = useState(false);
   const [isClaimingQuest, setIsClaimingQuest] = useState(false);
   const [claimQuestError, setClaimQuestError] = useState<string | null>(null);

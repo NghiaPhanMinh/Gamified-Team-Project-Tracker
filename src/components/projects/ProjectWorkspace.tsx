@@ -39,7 +39,6 @@ export type ProjectTab = "progress" | "tasks" | "plan" | "team";
 
 const PROJECT_TABS: { value: ProjectTab; label: string }[] = [
   { value: "progress", label: "Progress" },
-  { value: "tasks", label: "Tasks" },
   { value: "plan", label: "Project Plan" },
   { value: "team", label: "Team" },
 ];
@@ -589,6 +588,13 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
     setOpenBattleTaskId(taskId);
   }
 
+  function handleStartTask(taskId?: Id<"tasks">) {
+    if (taskId) {
+      setOpenBattleTaskId(taskId);
+    }
+    setActiveTab("progress");
+  }
+
   return (
     <section className="project-workspace" aria-labelledby="open-project-title">
       <header className="open-project-header compact-project-header">
@@ -709,120 +715,171 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
 
           {workspace.tasks.length > 0 ? (
             <section className="project-plan-breakdown" aria-labelledby="project-plan-title">
-              <div className="project-section-heading">
+              <div className="project-section-heading" style={{ marginBottom: "1rem" }}>
                 <div>
-                  <p className="card-eyebrow">Project Framework &amp; Responsibilities</p>
-                  <h2 id="project-plan-title">Task Responsibilities</h2>
-                  <p>Consolidated outline of project brief, deadline, phases, and task allocations.</p>
+                  <p className="card-eyebrow">Project Plan · Task Allocations</p>
+                  <h2 id="project-plan-title" style={{ margin: "0.2rem 0" }}>Allocated Tasks</h2>
+                  <p style={{ margin: 0, opacity: 0.9 }}>
+                    Review your team's assigned tasks. Click <strong>Edit</strong> to customize requirements, or click <strong>Start Task</strong> to open it in the battle Quest Board.
+                  </p>
                 </div>
-                <div className="project-plan-actions">
+                <div className="project-plan-actions" style={{ display: "flex", gap: "0.5rem" }}>
                   {workspace.canManageProject ? (
                     <button className="quiet-button" type="button" onClick={() => setBriefOpen(true)}>
                       Edit Deadline &amp; Settings
                     </button>
                   ) : null}
-                  <button className="primary-button" type="button" onClick={() => setActiveTab("tasks")}>
-                    Open Task Board
+                  <button className="primary-button" type="button" onClick={() => handleStartTask()}>
+                    ⚔️ Open Quest Board
                   </button>
                 </div>
               </div>
 
-              <section className="project-brief-card project-brief-details" aria-labelledby="project-brief-visible-title">
-                <div className="project-brief-copy">
-                  <p className="card-eyebrow">Brief Details</p>
-                  <h3 id="project-brief-visible-title">{workspace.project.title}</h3>
-                  <p>
-                    {workspace.project.description
-                      ? workspace.project.description.length > 100
-                        ? `${workspace.project.description.slice(0, 100).trim()}...`
-                        : workspace.project.description
-                      : "No project brief has been added yet."}
-                    {(workspace.project.description?.length ?? 0) > 100 ? (
-                      <button
-                        type="button"
-                        className="quiet-button"
-                        style={{ display: "inline-block", marginLeft: "0.5rem", fontWeight: 800, textDecoration: "underline", fontSize: "0.85rem", cursor: "pointer" }}
-                        onClick={() => setBriefOpen(true)}
-                      >
-                        View full brief in Edit Plan →
-                      </button>
-                    ) : null}
-                  </p>
-                </div>
-                <dl className="project-brief-meta project-brief-summary-meta">
-                  <div><dt>Deadline</dt><dd>{formatProjectDate(workspace.project.deadline)}</dd></div>
-                  <div><dt>Team</dt><dd>{workspace.members.length} team members</dd></div>
-                  <div><dt>Framework</dt><dd>{workspace.project.frameworkName}</dd></div>
-                </dl>
-              </section>
+              <div className="allocated-tasks-list" style={{ display: "grid", gap: "0.85rem" }}>
+                {workspace.tasks.map((task) => {
+                  const isOwner = task.primaryOwnerProfileId === workspace.currentProfileId;
+                  const canEdit = workspace.canManageProject || isOwner;
+                  const ownerMember = workspace.members.find((m) => m?.profileId === task.primaryOwnerProfileId);
+                  const ownerName = task.assignmentState === "unassigned"
+                    ? "Unassigned"
+                    : task.isOpenForClaiming
+                    ? "Open for Claiming"
+                    : ownerMember?.displayName ?? "Team member";
+                  const isEditingThis = editingTaskId === task._id;
 
-              <section className="phase-timeline-card" aria-labelledby="phase-timeline-title">
-                <div className="project-section-heading">
-                  <div>
-                    <p className="card-eyebrow">Framework breakdown</p>
-                    <h3 id="phase-timeline-title">Project phases</h3>
-                  </div>
-                </div>
-                <ol className="phase-timeline">
-                  {workspace.phases.map((phase) => {
-                    const phaseTasks = workspace.tasks.filter((task) => task.phaseId === phase._id);
-                    const complete = phaseTasks.length > 0 && phaseTasks.every((task) => ["completed", "verified"].includes(task.status));
-                    const isCurrent = !complete && phase.title === currentPhase;
-                    return (
-                      <li key={phase._id} className={complete ? "is-complete" : isCurrent ? "is-current" : "is-upcoming"}>
-                        <span className="phase-timeline-marker">{complete ? "✓" : isCurrent ? "●" : "○"}</span>
+                  return (
+                    <article
+                      key={task._id}
+                      className="task-card allocated-task-card"
+                      style={{
+                        padding: "1.15rem 1.35rem",
+                        borderRadius: "16px",
+                        border: "2px solid #101517",
+                        background: "var(--color-surface, #ffffff)",
+                        color: "var(--color-text, #101517)",
+                        boxShadow: "3px 3px 0 #101517",
+                      }}
+                    >
+                      {isEditingThis ? (
+                        <form onSubmit={submitTask} style={{ display: "grid", gap: "0.85rem" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <strong style={{ fontSize: "1.05rem" }}>✏️ Edit Task Details</strong>
+                            <button
+                              type="button"
+                              className="quiet-button"
+                              onClick={() => { resetTaskForm(); setEditingTaskId(null); }}
+                              style={{ padding: "0.2rem 0.5rem", fontSize: "0.8rem" }}
+                            >
+                              ✕ Cancel
+                            </button>
+                          </div>
+                          <label style={{ display: "grid", gap: "0.3rem", fontWeight: 800 }}>
+                            <span style={{ fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.04em" }}>Task Title</span>
+                            <input
+                              type="text"
+                              required
+                              value={taskTitle}
+                              onChange={(e) => setTaskTitle(e.target.value)}
+                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                            />
+                          </label>
+                          <label style={{ display: "grid", gap: "0.3rem", fontWeight: 800 }}>
+                            <span style={{ fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.04em" }}>Task Description</span>
+                            <textarea
+                              required
+                              rows={3}
+                              value={taskDescription}
+                              onChange={(e) => setTaskDescription(e.target.value)}
+                              style={{ padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)", resize: "vertical" }}
+                            />
+                          </label>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: "0.75rem" }}>
+                            <label style={{ display: "grid", gap: "0.3rem", fontWeight: 800 }}>
+                              <span style={{ fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.04em" }}>Assignee (Who is doing it)</span>
+                              <select
+                                value={taskOwner}
+                                onChange={(e) => setTaskOwner(e.target.value)}
+                                style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                              >
+                                {workspace.members.map((m) => (
+                                  <option key={m.profileId} value={m.profileId}>{m.displayName}</option>
+                                ))}
+                                <option value="__open">Open for Claiming</option>
+                                <option value="__unassigned">Unassigned</option>
+                              </select>
+                            </label>
+                            <label style={{ display: "grid", gap: "0.3rem", fontWeight: 800 }}>
+                              <span style={{ fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.04em" }}>Due Date</span>
+                              <input
+                                type="date"
+                                required
+                                value={taskDueDate}
+                                onChange={(e) => setTaskDueDate(e.target.value)}
+                                style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                              />
+                            </label>
+                          </div>
+                          <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.25rem" }}>
+                            <button type="submit" className="primary-button" disabled={isSaving} style={{ padding: "0.4rem 1rem", fontSize: "0.88rem" }}>
+                              {isSaving ? "Saving…" : "Save Changes"}
+                            </button>
+                            <button
+                              type="button"
+                              className="quiet-button"
+                              onClick={() => { resetTaskForm(); setEditingTaskId(null); }}
+                              style={{ padding: "0.4rem 0.85rem", fontSize: "0.88rem" }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
                         <div>
-                          <strong>{phase.title}</strong>
-                          <small>{complete ? "Completed" : isCurrent ? "Current phase" : "Upcoming"} · {phaseTasks.length} task{phaseTasks.length === 1 ? "" : "s"}</small>
-                          {phase.description ? <p className="phase-timeline-description">{phase.description}</p> : null}
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+                            <div style={{ flex: "1 1 320px", minWidth: 0 }}>
+                              <h3 style={{ margin: "0 0 0.35rem", fontSize: "1.15rem", fontWeight: 900 }}>{task.title}</h3>
+                              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap", fontSize: "0.85rem" }}>
+                                <span style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", fontWeight: 800, background: "var(--color-yellow, #fff73f)", padding: "0.15rem 0.5rem", borderRadius: "6px", border: "1.5px solid #101517" }}>
+                                  👤 {ownerName}
+                                </span>
+                                <span style={{ opacity: 0.8, fontWeight: 700 }}>• Due {formatProjectDate(task.dueDate)}</span>
+                                <span className={`task-outline-status task-outline-status-${task.status}`} style={{ fontWeight: 800 }}>
+                                  {STATUS_LABELS[task.status as TaskStatus]}
+                                </span>
+                              </div>
+                            </div>
+                            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexShrink: 0 }}>
+                              {canEdit ? (
+                                <button
+                                  type="button"
+                                  className="quiet-button"
+                                  onClick={() => editTask(task)}
+                                  style={{ padding: "0.4rem 0.8rem", fontSize: "0.82rem", fontWeight: 800, borderRadius: "8px", border: "2px solid #101517" }}
+                                >
+                                  ✏️ Edit
+                                </button>
+                              ) : null}
+                              <button
+                                type="button"
+                                className="primary-button"
+                                onClick={() => handleStartTask(task._id)}
+                                style={{ padding: "0.4rem 0.95rem", fontSize: "0.85rem", fontWeight: 900, borderRadius: "8px", background: "var(--color-yellow, #fff73f)" }}
+                              >
+                                Start Task →
+                              </button>
+                            </div>
+                          </div>
+                          {task.description ? (
+                            <p style={{ margin: "0.75rem 0 0", fontSize: "0.9rem", lineHeight: "1.5", opacity: 0.9, whiteSpace: "pre-line" }}>
+                              {task.description}
+                            </p>
+                          ) : null}
                         </div>
-                      </li>
-                    );
-                  })}
-                </ol>
-              </section>
-
-              <section className="task-outline-card" aria-labelledby="task-outline-title">
-                <div className="project-section-heading">
-                  <div>
-                    <p className="card-eyebrow">Task Outline</p>
-                    <h3 id="task-outline-title">Tasks &amp; Responsibilities</h3>
-                    <p>Who is responsible for what?</p>
-                  </div>
-                </div>
-                {workspace.tasks.length === 0 ? (
-                  <p className="project-empty-inline">No tasks have been added yet.</p>
-                ) : (
-                  <div className="task-outline-list">
-                    {workspace.phases.map((phase) => {
-                      const phaseTasks = workspace.tasks.filter((task) => task.phaseId === phase._id);
-                      if (phaseTasks.length === 0) return null;
-                      return (
-                        <section key={phase._id} className="task-outline-phase">
-                          <h4>{phase.title}</h4>
-                          <ul>
-                            {phaseTasks.map((task) => {
-                              const owner = task.assignmentState === "unassigned" ? "Unassigned" : task.isOpenForClaiming ? "Open for Claiming" : memberNameById.get(task.primaryOwnerProfileId) ?? "Team member";
-                              return (
-                                <li key={task._id}>
-                                  <div>
-                                    <strong>{task.title}</strong>
-                                    <span>{owner}</span>
-                                  </div>
-                                  <div>
-                                    <span>Due {formatProjectDate(task.dueDate)}</span>
-                                    <span className={`task-outline-status task-outline-status-${task.status}`}>{STATUS_LABELS[task.status as TaskStatus]}</span>
-                                  </div>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </section>
-                      );
-                    })}
-                  </div>
-                )}
-              </section>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
             </section>
           ) : null}
         </div>
@@ -842,7 +899,13 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
           </header>
 
           <section className="shared-battle-stage" aria-label="Shared project Battle scene">
-            <BattleScene projectId={workspace.project._id} currentPhase={currentPhase} tasksLocked={Boolean(workspace.project.tasksLocked)} />
+            <BattleScene
+              projectId={workspace.project._id}
+              currentPhase={currentPhase}
+              tasksLocked={Boolean(workspace.project.tasksLocked)}
+              openTaskId={openBattleTaskId}
+              onClearOpenTaskId={() => setOpenBattleTaskId(null)}
+            />
           </section>
 
           <section

@@ -2974,10 +2974,22 @@ footer {
   font-size: clamp(2.2rem, 4vw, 3.8rem);
 }
 
-.ai-planning-heading > span,
+.ai-planning-heading > .ai-draft-label {
+  flex: 0 0 auto;
+  padding: 0.2rem 0.5rem;
+  border: none;
+  background: transparent;
+  color: var(--color-navy, #101517);
+  opacity: 0.75;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .ai-draft-section-heading > span {
   flex: 0 0 auto;
-  padding: 0.4rem 0.6rem;
+  padding: 0.35rem 0.6rem;
   border: 2px solid var(--color-navy);
   border-radius: 999px;
   background: var(--color-pink);
@@ -2987,13 +2999,15 @@ footer {
 }
 
 .ai-safety-note {
-  margin: 0;
-  padding: 0.8rem;
-  border: 2px dashed var(--color-navy);
-  border-radius: 0.8rem;
-  background: var(--color-cream);
-  font-weight: 800;
-  line-height: 1.5;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-navy, #101517);
+  opacity: 0.82;
+  font-weight: 500;
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 
 .ai-brief-form {

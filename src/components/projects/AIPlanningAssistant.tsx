@@ -263,7 +263,7 @@ export function AIPlanningAssistant({
           <p className="card-eyebrow">AI-assisted project planning</p>
           <h3 className="display-heading" id="ai-planning-title">Build the project plan with AI</h3>
         </div>
-        <span>Draft only</span>
+        <span className="ai-draft-label">Draft only</span>
       </div>
       <p className="ai-safety-note">
         AI creates a reviewable draft. Nothing is saved or assigned until a person checks the plan and confirms it.
