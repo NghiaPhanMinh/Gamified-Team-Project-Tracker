@@ -373,7 +373,7 @@
               <tr><td style="font-weight: 800;">EVD-002</td><td>AI/API</td><td>Convex DB</td><td>184 AI Ops, 3.3% Bug Rate</td><td>178/184 LLM operations succeeded (96.7% success rate, 3.3% bug rate)</td><td>High technical reliability of AI engine</td></tr>
               <tr><td style="font-weight: 800;">EVD-003</td><td>User Behaviour</td><td>Clarity</td><td>46.06% Invalid Clicks (76 sessions)</td><td>Testers clicked static framework badges &amp; non-interactive cards in /projects view</td><td>Users expect static tags to act as interactive filters</td></tr>
               <tr><td style="font-weight: 800;">EVD-004</td><td>Survey</td><td>Google Form</td><td>88.0% Positive AI Rating (22/25)</td><td>22 out of 25 respondents rated AI task breakdown as Essential or Very Useful</td><td>Strong product-market fit for AI plan creation</td></tr>
-              <tr><td style="font-weight: 800;">EVD-005</td><td>Survey</td><td>Google Form</td><td>76.0% XP Motivation Rating (19/25)</td><td>19 out of 25 respondents reported XP rewards increased task completion logging speed</td><td>Gamification acts as behavioral catalyst for status tracking</td></tr>
+              <tr><td style="font-weight: 800;">EVD-005</td><td>Survey</td><td>Google Form</td><td>76.0% Feature Purpose Recognition (19/25)</td><td>19 out of 25 respondents correctly identified task completion motivation as the primary design goal of XP rewards</td><td>High feature intent clarity; behavioral impact verified via Convex telemetry</td></tr>
               <tr><td style="font-weight: 800;">EVD-006</td><td>Technical/Bugs</td><td>Dev Logs</td><td>ECONNREFUSED 127.0.0.1:3210 (1.4% error)</td><td>Local dev port unbound; failover to Cloud Convex site endpoint succeeded</td><td>Cloud API failover is robust and resilient</td></tr>
               <tr><td style="font-weight: 800;">EVD-007</td><td>Mobile</td><td>Clarity</td><td>Horizontal Scroll Overflow (1.4% rage rate)</td><td>42 Mobile Safari users experienced card overflow on screens &lt; 390px</td><td>Mobile CSS containers need fluid max-width refactor</td></tr>
               <tr><td style="font-weight: 800;">EVD-008</td><td>Accessibility</td><td>Lighthouse</td><td>Low Contrast Warning</td><td>Yellow tag pill (#FEAA0133) failed WCAG AA contrast ratio standards</td><td>Typography color contrast needs WCAG adjustment</td></tr>
@@ -419,7 +419,7 @@
           <li><strong>Adoption:</strong> 78.0% of active team rooms engaged with XP reward task tracking (25 out of 32 projects).</li>
           <li><strong>In-App Task Completion Velocity:</strong> Gamified team members logged an average of 4.2 tasks/week vs 2.6 tasks/week for non-gamified control teams (+61.5% in-app completion logging frequency).</li>
           <li><strong>Reporting Bias Caveat:</strong> The higher recorded completion velocity (4.2 vs 2.6 tasks/wk) reflects increased in-app status update frequency driven by XP incentives rather than a pure disparity in real-world work execution. Control group users may complete work externally without marking tasks inside Maylamdi.</li>
-          <li><strong>User Perception:</strong> 76.0% of survey respondents (19 out of 25) noted XP rewards increased satisfaction and status tracking motivation.</li>
+          <li><strong>Feature Intent Comprehension vs Motivation:</strong> 76.0% of survey respondents (19 out of 25) correctly selected task motivation as the intended purpose of XP rewards. This confirms clear user understanding of feature intent, while actual motivation impact is measured via behavioral Convex telemetry (+61.5% task logging).</li>
           <li><strong>Is there enough evidence for major redesign?</strong> NO. Core gamification loop is working well as a behavioral catalyst; only minor UI polish is warranted.</li>
         </ul>
 
@@ -483,7 +483,7 @@
         <h3 class="audit-h3">Finding 3: Gamification Drives Higher In-App Task Logging Frequency</h3>
         <p style="font-weight: 700; font-size: 0.88rem;">
           <strong>Finding:</strong> XP rewards correlate with a +61.5% increase in weekly in-app task completion logging frequency (4.2 vs 2.6 tasks/wk).<br>
-          <strong>Evidence:</strong> Convex tasks completion data, Survey EVD-005 (19/25 positive rating).<br>
+          <strong>Evidence:</strong> Convex tasks completion data, Survey EVD-005 (19/25 identified task motivation as feature intent).<br>
           <strong>Analytical Caveat:</strong> Higher recorded velocity reflects in-app status update frequency rather than pure real-world work speed. Control group users may complete work externally without updating status in Maylamdi.<br>
           <strong>Confidence:</strong> Medium (Subject to self-selection &amp; in-app reporting bias)
         </p>
@@ -539,7 +539,7 @@
             <p style="font-weight: 700; font-size: 0.88rem;">
               1. <strong>Clean 3-Tab Main App Shell Navigation:</strong> Keep main app shell limited to Home, Profile, Projects. Survey feedback is 100% positive (2/2 responses).<br>
               2. <strong>Core AI Prompt-to-Brief Engine:</strong> 96.7% success rate (3.3% bug rate) and 92.9% funnel retention confirm current engine is highly effective.<br>
-              3. <strong>Gamification XP Reward Structure:</strong> 76.0% satisfaction rating (19/25) proves XP rewards motivate on-time task completion.
+              3. <strong>Gamification XP Reward Structure:</strong> 76.0% of survey respondents (19/25) recognized task motivation as the primary feature intent.
             </p>
           </div>
         </div>
@@ -570,7 +570,7 @@
           <ol style="margin-left: 1.5rem; font-weight: 700; font-size: 0.88rem; margin-bottom: 1rem;">
             <li>AI Assistant plan generator is Maylamdi's primary conversion engine (92.9% plan acceptance, 96.7% technical success rate, 3.3% bug rate).</li>
             <li>Pre-commit inline task editing is the top user request (5/25 survey testers) to eliminate project setup friction.</li>
-            <li>Gamification XP rewards increase in-app task completion logging frequency (+61.5% recorded velocity lift, 19/25 survey testers).</li>
+            <li>Gamification XP rewards increase in-app task completion logging frequency (+61.5% recorded velocity lift, 19/25 identified motivation intent).</li>
             <li>Microsoft Clarity Invalid Clicks rate is 46.06% across 76 recorded sessions due to static framework tags and non-interactive cards.</li>
             <li>The clean 3-tab main app shell navigation maintains high usability and zero navigation rage clicks.</li>
           </ol>
@@ -604,6 +604,7 @@
           <ul style="margin-left: 1.5rem; font-weight: 700; font-size: 0.88rem;">
             <li>Long-term 30-day cohort retention data (limited by 6-day MVP testing window: August 25 – August 30, 2026).</li>
             <li>In-App Reporting / Self-Selection Bias: Difference in task completion velocity (4.2 vs 2.6 tasks/wk) may reflect lower app login and status update frequency in non-gamified users rather than a true real-world work speed disparity.</li>
+            <li>Feature Intent vs Psychological Impact: 19/25 survey responses indicate understanding of feature design intent (task completion motivation), while actual behavioral lift is verified via Convex DB telemetry (+61.5% task logging).</li>
             <li>Sample size constraint: Google Form survey responses capped at N=25 testers.</li>
           </ul>
         </div>
@@ -628,9 +629,9 @@
           <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">Source: Convex Teams Table</a>
         </div>
         <div class="card" style="background: #FFF73F33;">
-          <div class="card-kicker" id="gami-k3-title">XP Motivation Rating</div>
+          <div class="card-kicker" id="gami-k3-title">Feature Purpose Clarity</div>
           <div class="card-stat">76.0%</div>
-          <div class="card-sub" style="color: #0284c7;">19 / 25 Form Survey Testers</div>
+          <div class="card-sub" style="color: #0284c7;">19 / 25 Identified Motivation Goal</div>
           <a class="source-tag" href="https://docs.google.com/spreadsheets/d/1C9k3rCfNzXcj4SBnvEfw05nfdaEiHubY6ukyrwUHjZQ/edit?usp=sharing" target="_blank">Source: Form Survey Sheet</a>
         </div>
         <div class="card" style="background: #FF8AE722;">
@@ -907,7 +908,7 @@
         gamiTabTitle: "Gamification Features & XP Rewards Telemetry",
         gamiK1Title: "Task Velocity Lift",
         gamiK2Title: "Gamified Team Adoption",
-        gamiK3Title: "XP Motivation Rating",
+        gamiK3Title: "Feature Purpose Clarity",
         gamiK4Title: "XP Tasks Completed",
         gamiTableTitle: "XP Reward Quests & Gamification Rules Breakdown",
         gthAction: "Gamified Quest Action",
@@ -986,7 +987,7 @@
         gamiTabTitle: "Telemetry Tính Năng Gamification & Phần Thưởng XP",
         gamiK1Title: "Tăng Tốc Tốc Độ Xử Lý Task",
         gamiK2Title: "Tỷ Lệ Nhóm Dùng Gamification",
-        gamiK3Title: "Đánh Giá Đánh Giá Động Lực XP",
+        gamiK3Title: "Mục Đích Tính Năng Game",
         gamiK4Title: "Task Hoàn Thành Tích XP",
         gamiTableTitle: "Bảng Phân Tích Quest Tích XP & Quy Tắc Gamification",
         gthAction: "Hành Động Quest Tích XP",
