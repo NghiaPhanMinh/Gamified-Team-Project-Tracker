@@ -59,12 +59,12 @@ describe("AIPlanningAssistant presentation", () => {
   });
   afterEach(cleanup);
 
-  it("numbers suggested tasks and separates milestone metadata", async () => {
-    const { container } = render(<AIPlanningAssistant workspace={workspace as never} onUseTask={vi.fn()} />);
+  it("renders suggested project plan tasks and allocation details", async () => {
+    render(<AIPlanningAssistant workspace={workspace as never} onUseTask={vi.fn()} />);
     fireEvent.click(screen.getByRole("button", { name: /Generate AI Plan/i }));
 
-    await waitFor(() => expect(screen.getByText("Nonlinear Design Process (Smart Template)")).toBeInTheDocument());
-    expect(screen.getByText("Due: 2026-08-29 · Phase: Empathise")).toBeInTheDocument();
-    expect([...container.querySelectorAll(".ai-task-sequence")].map((item) => item.textContent)).toEqual(["01", "02", "03", "04", "05"]);
+    await waitFor(() => expect(screen.getByText(/Suggested project plan/i)).toBeInTheDocument());
+    expect(screen.getByText("Project task 1")).toBeInTheDocument();
+    expect(screen.getByText("Project task 2")).toBeInTheDocument();
   });
 });

@@ -46,6 +46,7 @@ export function AIPlanningAssistant({
   const hasAutoStartedRef = useRef(false);
   const byokActive = getByokSession() !== null;
   const isLeader = workspace.canManageProject || workspace.isTeamOwner;
+  const [editingTempId, setEditingTempId] = useState<string | null>(null);
 
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingSeconds, setLoadingSeconds] = useState(0);
@@ -254,6 +255,7 @@ export function AIPlanningAssistant({
           tasks: [...current.tasks, newTask],
         }
       : current);
+    setEditingTempId(newTask.tempId);
   }
 
   return (
@@ -400,174 +402,213 @@ export function AIPlanningAssistant({
 
       {draft ? (
         <div className="ai-draft" aria-live="polite">
-          <header className="ai-output-card ai-brief-interpretation">
-            <div>
-              <span>Brief interpretation</span>
-              <h4>{draft.recommendedFramework}</h4>
-              <p>{draft.frameworkReason}</p>
-              <dl className="ai-interpretation-summary">
-                <div><dt>Likely deliverables</dt><dd>{draft.tasks.slice(0, 4).map((task) => task.title).join(" · ")}</dd></div>
-                <div><dt>Constraints to verify</dt><dd>{draft.assumptions.slice(0, 3).join(" · ") || "No extra constraints identified."}</dd></div>
-              </dl>
-            </div>
-            <button className="quiet-button" type="button" onClick={() => setDraft(null)}>
-              Discard AI draft
-            </button>
-          </header>
-
-          {draft.milestones && draft.milestones.length > 0 ? (
-            <section className="ai-output-card ai-milestones-output" aria-labelledby="ai-milestones-output-title">
-              <div className="ai-draft-section-heading">
-                <h4 id="ai-milestones-output-title">Suggested Milestones</h4>
-                <span>{draft.milestones.length}</span>
-              </div>
-              <div className="ai-milestones-grid">
-                {draft.milestones.map((milestone) => (
-                  <div key={milestone.tempId} className="ai-milestone-card">
-                    <div className="ai-milestone-heading">
-                      <strong>{milestone.title}</strong>
-                      <small>Due: {milestone.dueDate} · Phase: {workspace.phases.find((p) => p._id === milestone.phaseId)?.title ?? "Phase"}</small>
-                    </div>
-                    <p>{milestone.description}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
           <section className="ai-output-card ai-plan-output" aria-labelledby="ai-plan-output-title">
-          <section className="ai-draft-section" aria-labelledby="ai-plan-output-title">
-            <div className="ai-draft-section-heading">
-              <h4 id="ai-plan-output-title">Suggested project plan</h4>
-              <span>{draft.tasks.length}</span>
-            </div>
-            <div className="ai-allocation-note" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "8px", margin: "8px 0 12px" }}>
-              <div>
-                <strong>Suggested Allocation</strong>
-                <span> · Tap on any task below to edit its title, owner, phase, effort, or deadline.</span>
-              </div>
+            <div className="ai-draft-section-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+              <h4 id="ai-plan-output-title" style={{ margin: 0 }}>Suggested project plan ({draft.tasks.length} Tasks)</h4>
               <button
-                type="button"
                 className="quiet-button"
-                onClick={handleAddNewTask}
-                style={{ fontWeight: 800, textDecoration: "underline", fontSize: "0.85rem", cursor: "pointer" }}
-              >
-                + Add Task
-              </button>
-            </div>
-            <div className="ai-task-list">
-              {draft.tasks.map((task, index) => (
-                <details key={task.tempId} className="ai-task-item-details">
-                  <summary style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px" }}>
-                    <span className="ai-task-sequence" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-                    <span className="ai-task-summary-copy" style={{ flex: 1 }}>
-                      <strong style={{ display: "block" }}>{task.title}</strong>
-                      <small style={{ opacity: 0.85 }}>{task.estimatedEffortHours}h · difficulty {task.difficulty}/5 · Due: {task.dueDate}</small>
-                    </span>
-                    <span className="ai-task-summary-owner" style={{ padding: "4px 8px", borderRadius: "999px", background: "rgba(255,255,255,0.25)", fontSize: "0.75rem", fontWeight: 700 }}>
-                      {workspace.members.find((member) => member.profileId === task.primaryOwnerProfileId)?.displayName ?? "Choose owner"}
-                    </span>
-                    <span style={{ fontSize: "0.8rem", opacity: 0.85, padding: "2px 6px", border: "1px solid currentColor", borderRadius: "6px", whiteSpace: "nowrap" }}>
-                      ✏️ Edit
-                    </span>
-                  </summary>
-                  <div className="ai-task-editor">
-                    <label className="ai-field-wide">
-                      <span>Title</span>
-                      <input value={task.title} onChange={(event) => updateTask(task.tempId, { title: event.target.value })} />
-                    </label>
-                    <label className="ai-field-wide">
-                      <span>Description</span>
-                      <textarea value={task.description} onChange={(event) => updateTask(task.tempId, { description: event.target.value })} />
-                    </label>
-                    <label>
-                      <span>Phase</span>
-                      <select value={task.phaseId} onChange={(event) => updateTask(task.tempId, { phaseId: event.target.value })}>
-                        {workspace.phases.map((phase) => <option key={phase._id} value={phase._id}>{phase.title}</option>)}
-                      </select>
-                    </label>
-                    <label>
-                      <span>Suggested owner</span>
-                      <select value={task.primaryOwnerProfileId} onChange={(event) => updateTask(task.tempId, {
-                        primaryOwnerProfileId: event.target.value,
-                        collaboratorProfileIds: task.collaboratorProfileIds.filter((profileId) => profileId !== event.target.value),
-                        reviewerProfileId: task.reviewerProfileId === event.target.value ? null : task.reviewerProfileId,
-                      })}>
-                        {workspace.members.map((member) => <option key={member.profileId} value={member.profileId}>{member.displayName}</option>)}
-                      </select>
-                    </label>
-                    <label>
-                      <span>Effort hours</span>
-                      <input type="number" min="0.5" max="2000" step="0.5" value={task.estimatedEffortHours} onChange={(event) => updateTask(task.tempId, { estimatedEffortHours: Number(event.target.value) })} />
-                    </label>
-                    <label>
-                      <span>Difficulty</span>
-                      <input type="number" min="1" max="5" step="1" value={task.difficulty} onChange={(event) => updateTask(task.tempId, { difficulty: Number(event.target.value) })} />
-                    </label>
-                    <label>
-                      <span>Due date</span>
-                      <input type="date" max={workspace.project.deadline} value={task.dueDate} onChange={(event) => updateTask(task.tempId, { dueDate: event.target.value })} />
-                    </label>
-                    <label className="ai-field-wide">
-                      <span>Required skills</span>
-                      <input value={task.requiredSkills.join(", ")} onChange={(event) => updateTask(task.tempId, { requiredSkills: event.target.value.split(",").map((skill) => skill.trim()).filter(Boolean) })} />
-                    </label>
-                    <div className="ai-explanation ai-field-wide">
-                      <strong>Why this owner?</strong>
-                      <p>{task.allocationExplanation}</p>
-                      <small>Dependencies: {task.dependencyTempIds.length ? task.dependencyTempIds.join(", ") : "none"} · Collaborators: {task.collaboratorProfileIds.length}</small>
-                    </div>
-                    {task.longTaskBreakdown ? <p className="long-task-guidance ai-field-wide">{task.longTaskBreakdown}</p> : null}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", marginTop: "10px", gridColumn: "1 / -1" }}>
-                      <button
-                        type="button"
-                        className="danger-button"
-                        onClick={() => deleteTask(task.tempId)}
-                        style={{ padding: "6px 12px", fontSize: "0.85rem", cursor: "pointer" }}
-                      >
-                        🗑️ Remove Task
-                      </button>
-                      <button className="primary-button" type="button" onClick={() => {
-                        trackEvent("ai_recommendation_accepted", {
-                          recommendation_type: "task_suggestion",
-                        });
-                        onUseTask(task);
-                      }}>
-                        Review in manual task form
-                      </button>
-                    </div>
-                  </div>
-                </details>
-              ))}
-              <button
                 type="button"
-                className="secondary-button ai-add-custom-task-btn"
-                onClick={handleAddNewTask}
-                style={{
-                  width: "100%",
-                  marginTop: "12px",
-                  padding: "12px 16px",
-                  border: "2px dashed var(--color-navy, #101517)",
-                  borderRadius: "14px",
-                  background: "color-mix(in srgb, var(--color-yellow, #fff73f) 25%, var(--color-surface, #ffffff))",
-                  color: "#101517",
-                  fontWeight: 900,
-                  fontSize: "0.95rem",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                }}
+                onClick={() => setDraft(null)}
+                style={{ padding: "0.25rem 0.65rem", fontSize: "0.82rem", fontWeight: 700 }}
               >
-                + Add Task
+                Discard draft
               </button>
             </div>
-          </section>
+            
+            <div className="ai-task-list" style={{ display: "grid", gap: "0.85rem" }}>
+              {draft.tasks.map((task) => {
+                const ownerMember = workspace.members.find((member) => member.profileId === task.primaryOwnerProfileId);
+                const ownerName = ownerMember?.displayName ?? "Choose owner";
+                const isEditing = editingTempId === task.tempId;
+
+                return (
+                  <article
+                    key={task.tempId}
+                    className="task-card ai-plan-task-card"
+                    style={{
+                      padding: "1.15rem 1.25rem",
+                      borderRadius: "16px",
+                      border: "2px solid #101517",
+                      background: "var(--color-surface, #ffffff)",
+                      color: "var(--color-text, #101517)",
+                      boxShadow: "3px 3px 0 #101517",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    {isEditing ? (
+                      <div className="ai-task-editor" style={{ display: "grid", gap: "0.85rem" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <strong style={{ fontSize: "1.05rem" }}>✏️ Edit Task Details</strong>
+                          <button
+                            type="button"
+                            className="quiet-button"
+                            onClick={() => setEditingTempId(null)}
+                            style={{ padding: "0.2rem 0.5rem", fontSize: "0.8rem" }}
+                          >
+                            ✕ Close
+                          </button>
+                        </div>
+                        <label style={{ display: "grid", gap: "0.3rem", fontWeight: 800 }}>
+                          <span style={{ fontSize: "0.8rem", textTransform: "uppercase" }}>Task Title</span>
+                          <input
+                            value={task.title}
+                            onChange={(event) => updateTask(task.tempId, { title: event.target.value })}
+                            style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                          />
+                        </label>
+                        <label style={{ display: "grid", gap: "0.3rem", fontWeight: 800 }}>
+                          <span style={{ fontSize: "0.8rem", textTransform: "uppercase" }}>Task Description</span>
+                          <textarea
+                            rows={3}
+                            value={task.description}
+                            onChange={(event) => updateTask(task.tempId, { description: event.target.value })}
+                            style={{ padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)", resize: "vertical" }}
+                          />
+                        </label>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
+                          <label style={{ display: "grid", gap: "0.3rem", fontWeight: 800 }}>
+                            <span style={{ fontSize: "0.8rem", textTransform: "uppercase" }}>Suggested Owner</span>
+                            <select
+                              value={task.primaryOwnerProfileId}
+                              onChange={(event) => updateTask(task.tempId, {
+                                primaryOwnerProfileId: event.target.value,
+                                collaboratorProfileIds: task.collaboratorProfileIds.filter((profileId) => profileId !== event.target.value),
+                                reviewerProfileId: task.reviewerProfileId === event.target.value ? null : task.reviewerProfileId,
+                              })}
+                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                            >
+                              {workspace.members.map((member) => (
+                                <option key={member.profileId} value={member.profileId}>{member.displayName}</option>
+                              ))}
+                            </select>
+                          </label>
+                          <label style={{ display: "grid", gap: "0.3rem", fontWeight: 800 }}>
+                            <span style={{ fontSize: "0.8rem", textTransform: "uppercase" }}>Due Date</span>
+                            <input
+                              type="date"
+                              max={workspace.project.deadline}
+                              value={task.dueDate}
+                              onChange={(event) => updateTask(task.tempId, { dueDate: event.target.value })}
+                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                            />
+                          </label>
+                          <label style={{ display: "grid", gap: "0.3rem", fontWeight: 800 }}>
+                            <span style={{ fontSize: "0.8rem", textTransform: "uppercase" }}>Effort Hours</span>
+                            <input
+                              type="number"
+                              min="0.5"
+                              max="2000"
+                              step="0.5"
+                              value={task.estimatedEffortHours}
+                              onChange={(event) => updateTask(task.tempId, { estimatedEffortHours: Number(event.target.value) })}
+                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                            />
+                          </label>
+                          <label style={{ display: "grid", gap: "0.3rem", fontWeight: 800 }}>
+                            <span style={{ fontSize: "0.8rem", textTransform: "uppercase" }}>Difficulty (1-5)</span>
+                            <input
+                              type="number"
+                              min="1"
+                              max="5"
+                              step="1"
+                              value={task.difficulty}
+                              onChange={(event) => updateTask(task.tempId, { difficulty: Number(event.target.value) })}
+                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                            />
+                          </label>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.5rem" }}>
+                          <button
+                            type="button"
+                            className="danger-button"
+                            onClick={() => deleteTask(task.tempId)}
+                            style={{ padding: "0.35rem 0.75rem", fontSize: "0.82rem", borderRadius: "8px" }}
+                          >
+                            🗑️ Delete Task
+                          </button>
+                          <button
+                            type="button"
+                            className="primary-button"
+                            onClick={() => setEditingTempId(null)}
+                            style={{ padding: "0.35rem 0.85rem", fontSize: "0.85rem", borderRadius: "8px" }}
+                          >
+                            Done Editing ✓
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+                          <div style={{ flex: "1 1 320px", minWidth: 0 }}>
+                            <h3 style={{ margin: "0 0 0.35rem", fontSize: "1.15rem", fontWeight: 900 }}>{task.title}</h3>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap", fontSize: "0.85rem" }}>
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", fontWeight: 800, background: "var(--color-yellow, #fff73f)", padding: "0.15rem 0.5rem", borderRadius: "6px", border: "1.5px solid #101517" }}>
+                                👤 {ownerName}
+                              </span>
+                              <span style={{ opacity: 0.8, fontWeight: 700 }}>• Due {task.dueDate}</span>
+                              <span style={{ opacity: 0.8, fontWeight: 700 }}>• {task.estimatedEffortHours}h effort</span>
+                              <span style={{ opacity: 0.8, fontWeight: 700 }}>• Difficulty {task.difficulty}/5</span>
+                            </div>
+                          </div>
+                          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexShrink: 0 }}>
+                            <button
+                              type="button"
+                              className="quiet-button"
+                              onClick={() => setEditingTempId(task.tempId)}
+                              style={{ padding: "0.35rem 0.75rem", fontSize: "0.82rem", fontWeight: 800, borderRadius: "8px", border: "2px solid #101517" }}
+                            >
+                              ✏️ Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="danger-button"
+                              onClick={() => deleteTask(task.tempId)}
+                              style={{ padding: "0.35rem 0.65rem", fontSize: "0.82rem", fontWeight: 800, borderRadius: "8px" }}
+                              title="Remove this task"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </div>
+                        {task.description ? (
+                          <p style={{ margin: "0.75rem 0 0", fontSize: "0.9rem", lineHeight: "1.5", opacity: 0.9, whiteSpace: "pre-line" }}>
+                            {task.description}
+                          </p>
+                        ) : null}
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              className="primary-button ai-add-custom-task-btn"
+              onClick={handleAddNewTask}
+              style={{
+                width: "100%",
+                marginTop: "12px",
+                padding: "10px 16px",
+                borderRadius: "14px",
+                border: "2px solid #101517",
+                background: "var(--color-yellow, #fff73f)",
+                color: "#101517",
+                fontWeight: 900,
+                fontSize: "0.95rem",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+              }}
+            >
+              + Add Task
+            </button>
           </section>
 
           <details className="ai-output-card ai-risk-output">
-            <summary className="ai-draft-section-heading"><h4>Risks & assumptions</h4><span>Check</span></summary>
+            <summary className="ai-draft-section-heading"><h4>Risks &amp; assumptions</h4><span>Check</span></summary>
             <div className="ai-notes-grid">
               <section><h4>Risks to check</h4><ul>{draft.risks.map((risk) => <li key={risk}>{risk}</li>)}</ul></section>
               <section><h4>Assumptions to verify</h4><ul>{draft.assumptions.map((assumption) => <li key={assumption}>{assumption}</li>)}</ul></section>

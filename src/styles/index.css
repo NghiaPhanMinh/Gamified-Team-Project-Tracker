@@ -3174,11 +3174,11 @@ footer {
 
 .ai-task-editor {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.65rem;
   padding: 0.9rem;
-  border-top: 2px solid var(--color-navy);
-  background: var(--color-blue);
+  border-radius: 12px;
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #101517);
 }
 
 .ai-field-wide {
