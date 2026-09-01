@@ -142,7 +142,7 @@
   gap: var(--mld-space-2);
   margin: 0;
   color: var(--landing-cream);
-  font-family: "Blodestarkly", "Arial Black", var(--mld-font-ui);
+  font-family: "Rubik 80s Fade", "Arial Black", var(--mld-font-ui);
   font-size: clamp(64px, 8.5vw, 126px);
   font-weight: 400;
   line-height: 0.82;
@@ -331,7 +331,7 @@
   align-content: space-around;
   overflow: hidden;
   color: var(--landing-neutral-text);
-  font-family: "Blodestarkly", var(--mld-font-ui);
+  font-family: "Rubik 80s Fade", var(--mld-font-ui);
   font-size: clamp(90px, 16vw, 220px);
   line-height: 0.7;
   opacity: 0.025;
@@ -433,7 +433,7 @@
   max-width: 13ch;
   margin: var(--mld-space-5) 0 0;
   color: var(--landing-cream);
-  font-family: "Blodestarkly", var(--mld-font-ui);
+  font-family: "Rubik 80s Fade", var(--mld-font-ui);
   font-size: clamp(58px, 7vw, 104px);
   font-weight: 400;
   line-height: 0.86;
@@ -525,7 +525,7 @@
 .landing-how h2,
 .landing-how h3,
 .landing-how p { color: var(--landing-charcoal); }
-.landing-how-heading h2 { margin: var(--mld-space-4) 0 var(--mld-space-2); font-family: "Blodestarkly", var(--mld-font-ui); font-size: clamp(58px, 7vw, 96px); font-weight: 400; line-height: 0.86; }
+.landing-how-heading h2 { margin: var(--mld-space-4) 0 var(--mld-space-2); font-family: "Rubik 80s Fade", var(--mld-font-ui); font-size: clamp(58px, 7vw, 96px); font-weight: 400; line-height: 0.86; }
 .landing-how-heading > p:last-child { font-size: 18px; }
 .landing-how-layout { display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(420px, 1.18fr); gap: clamp(44px, 7vw, 108px); margin-top: var(--mld-space-8); }
 .landing-workflow-steps { position: relative; display: grid; margin: 0; padding: 0; list-style: none; counter-reset: none; }
@@ -606,14 +606,14 @@
 
 .landing-final-content { position: relative; z-index: 2; display: grid; justify-items: center; width: min(100%, 840px); text-align: center; }
 .landing-final-content .landing-section-number { color: var(--mld-primary); }
-.landing-final-content h2 { max-width: 11ch; margin: var(--mld-space-5) 0; color: var(--landing-cream); font-family: "Blodestarkly", var(--mld-font-ui); font-size: clamp(68px, 9vw, 126px); font-weight: 400; line-height: 0.82; }
+.landing-final-content h2 { max-width: 11ch; margin: var(--mld-space-5) 0; color: var(--landing-cream); font-family: "Rubik 80s Fade", var(--mld-font-ui); font-size: clamp(68px, 9vw, 126px); font-weight: 400; line-height: 0.82; }
 .landing-final-content > p:not(.landing-section-number) { max-width: 44ch; margin: 0 0 var(--mld-space-6); color: rgba(255, 253, 236, 0.74); font-size: 18px; }
 .landing-final-content .sign-in-control { display: grid; justify-items: center; }
 .landing-final-content .google-sign-in,
 .landing-final-projects { min-height: 54px; padding: 13px 22px; border: 2px solid var(--landing-cream); border-radius: var(--mld-radius-control); background: var(--mld-primary); color: var(--landing-charcoal); box-shadow: 6px 6px 0 var(--mld-info); font-weight: 900; }
 .landing-final-projects { display: inline-flex; align-items: center; gap: var(--mld-space-2); text-decoration: none; }
 .landing-final-content > small { margin-top: var(--mld-space-4); color: rgba(255, 253, 236, 0.58); }
-.landing-final-marquee { position: absolute; inset: 0; display: grid; align-content: space-around; color: var(--landing-cream); font-family: "Blodestarkly", var(--mld-font-ui); font-size: clamp(110px, 16vw, 230px); line-height: 0.7; opacity: 0.035; pointer-events: none; }
+.landing-final-marquee { position: absolute; inset: 0; display: grid; align-content: space-around; color: var(--landing-cream); font-family: "Rubik 80s Fade", var(--mld-font-ui); font-size: clamp(110px, 16vw, 230px); line-height: 0.7; opacity: 0.035; pointer-events: none; }
 .landing-final-marquee span { width: max-content; white-space: nowrap; animation: landing-final-drift 32s linear infinite; }
 .landing-final-marquee span:last-child { transform: translateX(-30%); animation-direction: reverse; }
 
