@@ -473,10 +473,10 @@ function FeatureTagComposition({ tagsDropped }: { tagsDropped: boolean }) {
     const canvasRect = canvas.getBoundingClientRect();
     const width = canvasRect.width || 900;
     const height = canvasRect.height || 680;
-    const titleMask = canvas.querySelector<HTMLElement>(".marketing-features-title-mask");
-    const titleRect = titleMask?.getBoundingClientRect();
+    const title = canvas.querySelector<HTMLElement>("#features-title");
+    const titleRect = title?.getBoundingClientRect();
     const floorY = titleRect
-      ? Math.min(height - 40, Math.max(120, titleRect.top - canvasRect.top + 10))
+      ? Math.min(height - 16, Math.max(120, titleRect.top - canvasRect.top + 8))
       : height - 150;
     return { canvasRect, width, height, floorY };
   };
@@ -938,7 +938,7 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
       transition.style.setProperty("--curtain-progress", progress.toFixed(3));
       const title = section.querySelector<HTMLElement>("#features-title");
       const titleRect = title?.getBoundingClientRect();
-      if (reducedMotion?.matches || (titleRect && titleRect.top < viewportHeight * 0.9)) {
+      if (reducedMotion?.matches || (titleRect && titleRect.top < viewportHeight * 0.98)) {
         setFeatureTagsDropped(true);
       }
     };

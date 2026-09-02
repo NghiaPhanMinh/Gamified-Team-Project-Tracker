@@ -57,7 +57,7 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("stroke-width: 3");
     expect(css).toContain("stroke-width: 1.5");
     expect(css).toContain(".marketing-hero-logo-stage");
-    expect(css).toContain("min-height: max(760px, 116vh)");
+    expect(css).toContain("min-height: 0");
     expect(css).toContain("font-size: clamp(86px, 12vw, 190px)");
     expect(css).toContain("stroke-dashoffset: 0");
   });

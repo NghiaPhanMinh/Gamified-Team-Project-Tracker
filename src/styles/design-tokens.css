@@ -2747,7 +2747,7 @@ body:has(.marketing-about-transition-scene) {
 .marketing-features {
   position: relative;
   z-index: 3;
-  min-height: max(760px, 116vh);
+  min-height: 0;
   overflow: clip;
   background: #ff8ae7;
   color: #101517;
@@ -3127,7 +3127,7 @@ body:has(.marketing-about-transition-scene) {
   }
 
   .marketing-features {
-    min-height: 820px;
+    min-height: 0;
   }
 
   .marketing-features-intro {
