@@ -725,12 +725,12 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
                     </button>
                   ) : null}
                   <button className="primary-button" type="button" onClick={() => handleStartTask()}>
-                    ⚔️ Open Quest Board
+                    Open Quest Board
                   </button>
                 </div>
               </div>
 
-              <div className="allocated-tasks-list" style={{ display: "grid", gap: "0.85rem" }}>
+              <div className="allocated-tasks-list" style={{ display: "grid", gap: "0.75rem" }}>
                 {workspace.tasks.map((task) => {
                   const isOwner = task.primaryOwnerProfileId === workspace.currentProfileId;
                   const canEdit = workspace.canManageProject || isOwner;
@@ -747,12 +747,12 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
                       key={task._id}
                       className="task-card allocated-task-card"
                       style={{
-                        padding: "1.15rem 1.35rem",
-                        borderRadius: "16px",
-                        border: "2px solid #101517",
+                        padding: "1rem 1.25rem",
+                        borderRadius: "8px",
+                        border: "1.5px solid #101517",
                         background: "var(--color-surface, #ffffff)",
                         color: "var(--color-text, #101517)",
-                        boxShadow: "3px 3px 0 #101517",
+                        boxShadow: "none",
                       }}
                     >
                       {isEditingThis ? (
@@ -833,31 +833,10 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
                             <div style={{ flex: "1 1 320px", minWidth: 0 }}>
                               <h3 style={{ margin: "0 0 0.35rem", fontSize: "1.15rem", fontWeight: 900 }}>{task.title}</h3>
-                              <div style={{ display: "flex", alignItems: "center", gap: "0.65rem", flexWrap: "wrap", fontSize: "0.85rem" }}>
-                                <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontWeight: 700, color: "var(--color-text, #101517)" }}>
-                                  <span style={{ opacity: 0.65 }}>👤</span> {ownerName}
-                                </span>
-                                <span style={{ opacity: 0.7, fontWeight: 600 }}>• Due {formatProjectDate(task.dueDate)}</span>
-                                <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontSize: "0.8rem", fontWeight: 800, color: "var(--color-muted, #64748b)" }}>
-                                  <span
-                                    style={{
-                                      width: "7px",
-                                      height: "7px",
-                                      borderRadius: "50%",
-                                      background:
-                                        task.status === "completed" || task.status === "verified"
-                                          ? "#16a34a"
-                                          : task.status === "in_progress"
-                                          ? "#0284c7"
-                                          : task.status === "blocked" || task.status === "changes_requested"
-                                          ? "#ea580c"
-                                          : task.status === "review" || task.status === "submitted" || task.status === "awaiting_creator"
-                                          ? "#d946ef"
-                                          : "#94a3b8",
-                                    }}
-                                  />
-                                  {STATUS_LABELS[task.status as TaskStatus]}
-                                </span>
+                              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", fontSize: "0.85rem", color: "var(--color-text, #101517)" }}>
+                                <span style={{ fontWeight: 700 }}>{ownerName}</span>
+                                <span style={{ color: "var(--color-muted, #64748b)" }}>· Due {formatProjectDate(task.dueDate)}</span>
+                                <span style={{ color: "var(--color-muted, #64748b)", fontWeight: 700 }}>· {STATUS_LABELS[task.status as TaskStatus]}</span>
                               </div>
                             </div>
                             <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexShrink: 0 }}>
@@ -866,9 +845,9 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
                                   type="button"
                                   className="quiet-button"
                                   onClick={() => editTask(task)}
-                                  style={{ padding: "0.4rem 0.8rem", fontSize: "0.82rem", fontWeight: 800, borderRadius: "8px", border: "2px solid #101517" }}
+                                  style={{ padding: "0.4rem 0.8rem", fontSize: "0.82rem", fontWeight: 800, borderRadius: "6px", border: "1.5px solid #101517" }}
                                 >
-                                  ✏️ Edit
+                                  Edit
                                 </button>
                               ) : null}
                               <button

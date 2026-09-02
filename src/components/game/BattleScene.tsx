@@ -927,8 +927,8 @@ function QuestCardHoverItem({
         position: "relative",
         background: hovered ? palette.bg : "#ffffff",
         color: "#101517",
-        border: "2px solid #101517",
-        borderRadius: "8px",
+        border: "1.5px solid #101517",
+        borderRadius: "4px",
         padding: "10px 14px",
         cursor: "pointer",
         display: "flex",
@@ -4256,9 +4256,9 @@ export function BattleScene({
                 {/* Description */}
                 <div
                   style={{
-                    background: "rgba(16,21,23,0.05)",
-                    border: "2px solid #101517",
-                    borderRadius: "10px",
+                    background: "rgba(16,21,23,0.03)",
+                    border: "1px solid rgba(16,21,23,0.22)",
+                    borderRadius: "4px",
                     padding: "12px",
                     fontSize: "0.85rem",
                     lineHeight: "1.5",
@@ -4269,11 +4269,11 @@ export function BattleScene({
 
                 {/* Quest Metadata */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                  <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "8px", padding: "8px 10px" }}>
+                  <div style={{ background: "#ffffff", border: "1px solid rgba(16,21,23,0.22)", borderRadius: "4px", padding: "8px 10px" }}>
                     <span style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, opacity: 0.7, textTransform: "uppercase" }}>Due Date</span>
                     <span style={{ fontSize: "0.84rem", fontWeight: 800 }}>{selectedQuestTask.dueDate || "No deadline"}</span>
                   </div>
-                  <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "8px", padding: "8px 10px" }}>
+                  <div style={{ background: "#ffffff", border: "1px solid rgba(16,21,23,0.22)", borderRadius: "4px", padding: "8px 10px" }}>
                     <span style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, opacity: 0.7, textTransform: "uppercase" }}>Assigned Hero</span>
                     <span style={{ fontSize: "0.84rem", fontWeight: 800, color: selectedQuestTask.isOpen ? "#dc2626" : "#101517" }}>
                       {selectedQuestTask.assigneeName}

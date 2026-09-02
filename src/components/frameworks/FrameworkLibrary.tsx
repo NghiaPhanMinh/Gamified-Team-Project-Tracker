@@ -99,14 +99,9 @@ export function FrameworkLibrary({ onDuplicate, hideHeader = false }: FrameworkL
             <p className="card-eyebrow">{selectedFramework.shortName}</p>
             <h3>{selectedFramework.name}</h3>
             <p>{selectedFramework.description}</p>
-          </div>
-          <div className="framework-disciplines-card" aria-label="Useful disciplines">
-            <span className="disciplines-card-label">Tailored For</span>
-            <div className="discipline-tags">
-              {selectedFramework.disciplines.map((discipline) => (
-                <span key={discipline}>{discipline}</span>
-              ))}
-            </div>
+            <p className="framework-disciplines-text">
+              <strong>Disciplines:</strong> {selectedFramework.disciplines.join(" · ")}
+            </p>
           </div>
         </header>
 
@@ -116,7 +111,7 @@ export function FrameworkLibrary({ onDuplicate, hideHeader = false }: FrameworkL
             type="button"
             onClick={() => setShowDetails((current) => !current)}
           >
-            {showDetails ? "▲ Hide phase details" : `▼ View phase details (${selectedFramework.phases.length} phases)`}
+            {showDetails ? "Hide phase details" : "View phase details"}
           </button>
         </div>
 
@@ -132,49 +127,43 @@ export function FrameworkLibrary({ onDuplicate, hideHeader = false }: FrameworkL
                     <h4>{frameworkPhase.name}</h4>
                     <div className="phase-flags">
                       {frameworkPhase.canOverlap ? (
-                        <span className="phase-flag is-overlap">⚡ Can overlap</span>
+                        <span className="phase-flag">Can overlap</span>
                       ) : null}
                       {frameworkPhase.reviewCheckpoint ? (
-                        <span className="phase-flag is-review">🎯 Review point</span>
+                        <span className="phase-flag">Review point</span>
                       ) : null}
                     </div>
                   </div>
                   <p className="phase-description">{frameworkPhase.description}</p>
 
-                  <div className="phase-meta-grid">
-                    <div className="phase-meta-block">
-                      <span className="phase-meta-title">Suggested Outputs</span>
-                      <ul className="phase-meta-items">
+                  <div className="phase-info-grid">
+                    <div className="phase-info-column">
+                      <strong className="phase-info-heading">Suggested outputs</strong>
+                      <ul className="phase-clean-list">
                         {frameworkPhase.suggestedDeliverables.map((deliverable) => (
-                          <li key={deliverable}>
-                            <span className="meta-bullet">📄</span> {deliverable}
-                          </li>
+                          <li key={deliverable}>{deliverable}</li>
                         ))}
                       </ul>
                     </div>
-                    <div className="phase-meta-block">
-                      <span className="phase-meta-title">Useful Skills</span>
-                      <ul className="phase-meta-items">
+                    <div className="phase-info-column">
+                      <strong className="phase-info-heading">Useful skills</strong>
+                      <ul className="phase-clean-list">
                         {frameworkPhase.suggestedSkills.map((skill) => (
-                          <li key={skill}>
-                            <span className="meta-bullet">✨</span> {skill}
-                          </li>
+                          <li key={skill}>{skill}</li>
                         ))}
                       </ul>
                     </div>
                   </div>
 
                   {frameworkPhase.defaultDependencies.length > 0 ? (
-                    <div className="dependency-note-badge">
-                      ↳ Sequence: Usually follows{" "}
+                    <p className="dependency-note">
+                      Usually follows{" "}
                       {frameworkPhase.defaultDependencies
                         .map((dependencyId) => phaseNames.get(dependencyId) ?? dependencyId)
                         .join(" + ")}
-                    </div>
+                    </p>
                   ) : (
-                    <div className="dependency-note-badge is-independent">
-                      ✓ Sequence: Ready to start independently
-                    </div>
+                    <p className="dependency-note">Ready to start independently</p>
                   )}
                 </div>
               </li>

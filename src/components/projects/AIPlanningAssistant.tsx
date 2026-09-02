@@ -431,19 +431,19 @@ export function AIPlanningAssistant({
                     key={task.tempId}
                     className="task-card ai-plan-task-card"
                     style={{
-                      padding: "1.15rem 1.25rem",
-                      borderRadius: "16px",
-                      border: "2px solid #101517",
+                      padding: "1rem 1.25rem",
+                      borderRadius: "8px",
+                      border: "1.5px solid #101517",
                       background: "var(--color-surface, #ffffff)",
                       color: "var(--color-text, #101517)",
-                      boxShadow: "3px 3px 0 #101517",
+                      boxShadow: "none",
                       transition: "all 0.15s ease",
                     }}
                   >
                     {isEditing ? (
                       <div className="ai-task-editor" style={{ display: "grid", gap: "0.85rem" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <strong style={{ fontSize: "1.05rem" }}>✏️ Edit Task Details</strong>
+                          <strong style={{ fontSize: "1.05rem" }}>Edit Task Details</strong>
                           <button
                             type="button"
                             className="quiet-button"
@@ -546,13 +546,11 @@ export function AIPlanningAssistant({
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
                           <div style={{ flex: "1 1 320px", minWidth: 0 }}>
                             <h3 style={{ margin: "0 0 0.35rem", fontSize: "1.15rem", fontWeight: 900 }}>{task.title}</h3>
-                            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap", fontSize: "0.85rem" }}>
-                              <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontWeight: 700, color: "var(--color-text, #101517)" }}>
-                                <span style={{ opacity: 0.65 }}>👤</span> {ownerName}
-                              </span>
-                              <span style={{ opacity: 0.8, fontWeight: 700 }}>• Due {task.dueDate}</span>
-                              <span style={{ opacity: 0.8, fontWeight: 700 }}>• {task.estimatedEffortHours}h effort</span>
-                              <span style={{ opacity: 0.8, fontWeight: 700 }}>• Difficulty {task.difficulty}/5</span>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", fontSize: "0.85rem", color: "var(--color-text, #101517)" }}>
+                              <span style={{ fontWeight: 700 }}>{ownerName}</span>
+                              <span style={{ color: "var(--color-muted, #64748b)" }}>· Due {task.dueDate}</span>
+                              <span style={{ color: "var(--color-muted, #64748b)" }}>· {task.estimatedEffortHours}h effort</span>
+                              <span style={{ color: "var(--color-muted, #64748b)" }}>· Difficulty {task.difficulty}/5</span>
                             </div>
                           </div>
                           <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexShrink: 0 }}>
@@ -560,18 +558,17 @@ export function AIPlanningAssistant({
                               type="button"
                               className="quiet-button"
                               onClick={() => setEditingTempId(task.tempId)}
-                              style={{ padding: "0.35rem 0.75rem", fontSize: "0.82rem", fontWeight: 800, borderRadius: "8px", border: "2px solid #101517" }}
+                              style={{ padding: "0.35rem 0.75rem", fontSize: "0.82rem", fontWeight: 800, borderRadius: "6px", border: "1.5px solid #101517" }}
                             >
-                              ✏️ Edit
+                              Edit
                             </button>
                             <button
                               type="button"
                               className="danger-button"
                               onClick={() => deleteTask(task.tempId)}
-                              style={{ padding: "0.35rem 0.65rem", fontSize: "0.82rem", fontWeight: 800, borderRadius: "8px" }}
-                              title="Remove this task"
+                              style={{ padding: "0.35rem 0.75rem", fontSize: "0.82rem", borderRadius: "6px" }}
                             >
-                              🗑️
+                              Delete
                             </button>
                           </div>
                         </div>
