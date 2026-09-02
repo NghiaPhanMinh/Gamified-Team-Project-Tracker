@@ -49,35 +49,47 @@ describe("MayLamDi landing page", () => {
     expect(screen.getByText("About Us")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /group projects should feel shared.*not carried by one person/i })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: /simplified maylamdi project workspace/i })).toBeInTheDocument();
-    expect(purpose?.nextElementSibling).toBe(features);
+    expect(purpose?.parentElement?.nextElementSibling).toBe(features);
     expect(purpose?.querySelectorAll("[data-purpose-phrase]")).toHaveLength(7);
   });
 
-  it("reveals the About scene once and keeps it revealed", () => {
-    let reveal!: IntersectionObserverCallback;
-    const disconnect = vi.fn();
-    class MockIntersectionObserver {
-      constructor(callback: IntersectionObserverCallback) {
-        reveal = callback;
+  it("reveals About lines from scroll progress and never hides a revealed line", () => {
+    let purposeTop = 900;
+    let queuedFrame: FrameRequestCallback | undefined;
+    vi.stubGlobal("requestAnimationFrame", vi.fn((callback: FrameRequestCallback) => {
+      queuedFrame = callback;
+      return 1;
+    }));
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function getRect(this: HTMLElement) {
+      if (this.classList.contains("marketing-purpose")) {
+        return { top: purposeTop, bottom: purposeTop + 2100, left: 0, right: 1200, width: 1200, height: 2100, x: 0, y: purposeTop, toJSON: vi.fn() };
       }
-
-      observe = vi.fn();
-      disconnect = disconnect;
-    }
-    vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
+      if (this.classList.contains("marketing-pixel-transition")) {
+        return { top: 760, bottom: 960, left: 0, right: 1200, width: 1200, height: 200, x: 0, y: 760, toJSON: vi.fn() };
+      }
+      return { top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0, x: 0, y: 0, toJSON: vi.fn() };
+    });
 
     const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
     const purpose = container.querySelector<HTMLElement>(".marketing-purpose");
-    const transition = container.querySelector<HTMLElement>(".marketing-pixel-transition");
+    const phrases = Array.from(container.querySelectorAll<HTMLElement>("[data-purpose-phrase]"));
 
-    expect(purpose).not.toHaveClass("is-revealed");
-    act(() => reveal([{ isIntersecting: true } as IntersectionObserverEntry], {} as IntersectionObserver));
-    expect(purpose).toHaveClass("is-revealed");
-    expect(transition).toHaveClass("is-revealed");
-    expect(disconnect).toHaveBeenCalled();
+    expect(phrases.every((phrase) => !phrase.classList.contains("is-revealed"))).toBe(true);
+    purposeTop = -2100;
+    act(() => {
+      fireEvent.scroll(window);
+      queuedFrame?.(0);
+    });
+    expect(phrases.every((phrase) => phrase.classList.contains("is-revealed"))).toBe(true);
+    expect(purpose).toHaveClass("is-visual-revealed");
 
-    act(() => reveal([{ isIntersecting: false } as IntersectionObserverEntry], {} as IntersectionObserver));
-    expect(purpose).toHaveClass("is-revealed");
+    purposeTop = 900;
+    act(() => {
+      fireEvent.scroll(window);
+      queuedFrame?.(0);
+    });
+    expect(phrases.every((phrase) => phrase.classList.contains("is-revealed"))).toBe(true);
   });
 
   it("shows a static completed scene when reduced motion is preferred", () => {
@@ -89,8 +101,9 @@ describe("MayLamDi landing page", () => {
 
     const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
 
-    expect(container.querySelector(".marketing-purpose")).toHaveClass("is-revealed");
-    expect(container.querySelector(".marketing-pixel-transition")).toHaveClass("is-revealed");
+    expect(container.querySelector(".marketing-purpose")).toHaveClass("is-visual-revealed");
+    expect(container.querySelectorAll("[data-purpose-phrase].is-revealed")).toHaveLength(7);
+    expect(container.querySelector(".marketing-pixel-transition")).toHaveAttribute("data-progress", "1.00");
   });
 
   it("renders the looping card sequence and replays the branded title burst", () => {
@@ -122,11 +135,14 @@ describe("MayLamDi landing page", () => {
     expect(container.querySelector(".marketing-hero-visual")).toBeInTheDocument();
   });
 
-  it("renders the MayLamDi block transition and word-level wave hooks", () => {
+  it("renders the scroll wipe, aligned overlap layer, wave hooks, and two-row About marquee", () => {
     const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
 
     expect(container.querySelectorAll(".marketing-pixel-transition-block")).toHaveLength(11);
     expect(container.querySelectorAll(".marketing-purpose-word").length).toBeGreaterThan(20);
-    expect(container.querySelector(".marketing-purpose-workspace-overlap")).toHaveAttribute("aria-hidden", "true");
+    expect(container.querySelector(".marketing-purpose-workspace-overlap")).not.toBeInTheDocument();
+    expect(container.querySelector("[data-purpose-blend]")).toHaveAttribute("aria-hidden", "true");
+    expect(container.querySelectorAll(".marketing-purpose-marquee-row")).toHaveLength(2);
+    expect(container.querySelectorAll(".marketing-purpose-marquee-group")).toHaveLength(4);
   });
 });

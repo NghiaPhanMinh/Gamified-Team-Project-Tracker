@@ -50,22 +50,27 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("stroke-dashoffset: 0");
   });
 
-  it("keeps the scoped purpose story one-way, phrase-led, and mobile-safe", () => {
+  it("keeps the scoped About scene scroll-led, layered, and mobile-safe", () => {
+    expect(css).toContain(".marketing-about-transition-scene > .marketing-hero");
     expect(css).toContain(".marketing-pixel-transition-block");
     expect(css).toContain("background: #4ca0fe");
     expect(css).toContain(".marketing-purpose");
-    expect(css).toContain("min-height: 142vh");
+    expect(css).toContain("min-height: 210vh");
     expect(css).toContain(".marketing-purpose-sticky");
     expect(css).toContain("position: sticky");
-    expect(css).toContain("transform: translateX(-80px)");
-    expect(css).toContain(".marketing-purpose.is-revealed .marketing-purpose-phrase");
-    expect(css).toContain("mix-blend-mode: difference");
-    expect(css).toContain(".marketing-purpose-word:nth-child(4n + 1)");
+    expect(css).toContain("transform: translateX(-110px)");
+    expect(css).toContain(".marketing-purpose-phrase.is-revealed");
+    expect(css).toContain(".marketing-purpose-statement--blend");
+    expect(css).toContain("mix-blend-mode: screen");
+    expect(css).toContain("translateY(calc(var(--wave-lift) * -1))");
+    expect(css).toContain("@keyframes marketing-purpose-marquee-forward");
+    expect(css).toContain("@keyframes marketing-purpose-marquee-reverse");
+    expect(css).toContain("-webkit-text-stroke: 1.5px #fff73f");
     expect(css).toContain("@media (max-width: 760px)");
     expect(css).toContain("min-height: auto");
-    expect(css).toContain(".marketing-purpose-workspace-overlap");
     expect(css).toContain("display: none");
     expect(css).toContain("opacity: 1");
+    expect(css).not.toContain(".marketing-purpose-workspace-overlap");
   });
 
   it("keeps project identity, settings accordions, and sticky tabs theme-safe", () => {

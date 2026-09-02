@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { Link } from "react-router-dom";
 import { ArrowDown, CheckCircle2 } from "lucide-react";
 
@@ -39,6 +39,8 @@ const FEATURES = [
 ] as const;
 
 const MARQUEE_GROUP_COUNT = 4;
+const PURPOSE_MARQUEE_COPY = "Less guessing. Less gánh team. More shared responsibility.";
+const PURPOSE_REVEAL_THRESHOLDS = [0.05, 0.18, 0.31, 0.44, 0.57, 0.7, 0.83] as const;
 
 const BURST_COLORS = ["#fff73f", "#ff8ae7", "#4ca0fe", "#1dd851", "#feaa01"];
 
@@ -53,40 +55,73 @@ const PURPOSE_PHRASES = [
 ] as const;
 
 const PURPOSE_PIXEL_BLOCKS = [
-  { left: "0%", width: "12%", height: "58%", color: "#4CA0FE", delay: "0ms" },
-  { left: "9%", width: "8%", height: "48%", color: "#FFF73F", delay: "70ms" },
-  { left: "15%", width: "14%", height: "72%", color: "#4CA0FE", delay: "30ms" },
-  { left: "27%", width: "9%", height: "54%", color: "#FF8AE7", delay: "120ms" },
-  { left: "34%", width: "15%", height: "64%", color: "#4CA0FE", delay: "50ms" },
-  { left: "47%", width: "8%", height: "48%", color: "#101517", delay: "160ms" },
-  { left: "53%", width: "13%", height: "76%", color: "#4CA0FE", delay: "20ms" },
-  { left: "64%", width: "10%", height: "52%", color: "#FFF73F", delay: "105ms" },
-  { left: "72%", width: "13%", height: "68%", color: "#4CA0FE", delay: "45ms" },
-  { left: "83%", width: "8%", height: "48%", color: "#FF8AE7", delay: "145ms" },
-  { left: "89%", width: "11%", height: "60%", color: "#4CA0FE", delay: "65ms" },
+  { left: "0%", width: "12%", height: "58%", color: "#4CA0FE" },
+  { left: "9%", width: "8%", height: "48%", color: "#FFF73F" },
+  { left: "15%", width: "14%", height: "72%", color: "#4CA0FE" },
+  { left: "27%", width: "9%", height: "54%", color: "#FF8AE7" },
+  { left: "34%", width: "15%", height: "64%", color: "#4CA0FE" },
+  { left: "47%", width: "8%", height: "48%", color: "#101517" },
+  { left: "53%", width: "13%", height: "76%", color: "#4CA0FE" },
+  { left: "64%", width: "10%", height: "52%", color: "#FFF73F" },
+  { left: "72%", width: "13%", height: "68%", color: "#4CA0FE" },
+  { left: "83%", width: "8%", height: "48%", color: "#FF8AE7" },
+  { left: "89%", width: "11%", height: "60%", color: "#4CA0FE" },
 ] as const;
 
 function PurposePhrase({ phrase }: { phrase: string }) {
   const words = phrase.split(" ");
+  const center = (words.length - 1) / 2;
 
   return words.map((word, index) => (
-    <span className="marketing-purpose-word" key={`${word}-${index}`}>
+    <span
+      className="marketing-purpose-word"
+      key={`${word}-${index}`}
+      style={{
+        "--wave-lift": `${Math.round(2 + (1 - Math.abs(index - center) / Math.max(center, 1)) * 8)}px`,
+      } as CSSProperties}
+    >
       {word}
     </span>
   ));
 }
 
-function PurposeWorkspaceVisual() {
+function PurposeStatement({
+  blend = false,
+  revealedLines,
+}: {
+  blend?: boolean;
+  revealedLines: readonly boolean[];
+}) {
+  return (
+    <h2
+      className={`marketing-purpose-statement${blend ? " marketing-purpose-statement--blend" : ""}`}
+      id={blend ? undefined : "why-maylamdi-title"}
+      aria-hidden={blend ? "true" : undefined}
+      aria-label={blend ? undefined : PURPOSE_PHRASES.join(" ")}
+      data-purpose-blend={blend ? "true" : undefined}
+    >
+      {PURPOSE_PHRASES.map((phrase, index) => (
+        <span
+          className={`${index === 2 ? "marketing-purpose-phrase marketing-purpose-phrase--new-thought" : "marketing-purpose-phrase"}${revealedLines[index] ? " is-revealed" : ""}`}
+          data-purpose-phrase={blend ? undefined : "true"}
+          key={phrase}
+        >
+          <PurposePhrase phrase={phrase} />
+        </span>
+      ))}
+    </h2>
+  );
+}
+
+function PurposeWorkspaceVisual({ visualRef }: { visualRef: RefObject<HTMLDivElement | null> }) {
   return (
     <div
       className="marketing-purpose-workspace"
       role="img"
       aria-label="Simplified MayLamDi project workspace showing shared tasks and visible ownership"
       data-purpose-visual
+      ref={visualRef}
     >
-      <span className="marketing-purpose-workspace-overlap" aria-hidden="true">
-        and keep contribution visible
-      </span>
       <div className="marketing-purpose-workspace-bar">
         <div aria-hidden="true">
           <span />
@@ -142,14 +177,22 @@ function buildBurstWords(): BurstWord[] {
 
 export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
   const [burstWords, setBurstWords] = useState<BurstWord[]>([]);
-  const [purposeRevealed, setPurposeRevealed] = useState(() => {
-    if (typeof window === "undefined") return false;
+  const [revealedPurposeLines, setRevealedPurposeLines] = useState<boolean[]>(() => {
+    if (typeof window === "undefined") return PURPOSE_PHRASES.map(() => false);
     const shouldReduceMotion = typeof window.matchMedia === "function"
       && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    return shouldReduceMotion || typeof window.IntersectionObserver === "undefined";
+    return PURPOSE_PHRASES.map(() => shouldReduceMotion);
   });
+  const [purposeVisualRevealed, setPurposeVisualRevealed] = useState(() => (
+    typeof window !== "undefined"
+    && typeof window.matchMedia === "function"
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ));
   const cleanupTimer = useRef<number | null>(null);
   const purposeSection = useRef<HTMLElement | null>(null);
+  const pixelTransition = useRef<HTMLDivElement | null>(null);
+  const purposeStatementStack = useRef<HTMLDivElement | null>(null);
+  const purposeVisual = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => () => {
     if (cleanupTimer.current !== null) {
@@ -159,25 +202,98 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
 
   useEffect(() => {
     const section = purposeSection.current;
-    if (!section) return;
+    const transition = pixelTransition.current;
+    if (!section || !transition) return;
 
     const reducedMotion = typeof window.matchMedia === "function"
       ? window.matchMedia("(prefers-reduced-motion: reduce)")
       : null;
-    if (reducedMotion?.matches || typeof IntersectionObserver === "undefined") return;
+    const blocks = Array.from(transition.querySelectorAll<HTMLElement>(".marketing-pixel-transition-block"));
+    const base = transition.querySelector<HTMLElement>(".marketing-pixel-transition-base");
+    const blendLayer = purposeStatementStack.current?.querySelector<HTMLElement>("[data-purpose-blend]");
+    let animationFrame = 0;
 
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        setPurposeRevealed(true);
-        observer.disconnect();
+    const setPixelProgress = (progress: number) => {
+      const clamped = Math.min(1, Math.max(0, progress));
+      transition.dataset.progress = clamped.toFixed(2);
+      if (base) base.style.transform = `translateY(${(1 - clamped) * 100}%)`;
+      blocks.forEach((block, index) => {
+        const delay = (index % 4) * 0.055;
+        const localProgress = Math.min(1, Math.max(0, (clamped - delay) / (1 - delay)));
+        block.style.transform = `translateY(${(1 - localProgress) * 70}%)`;
+      });
+    };
+
+    const alignBlendLayer = () => {
+      const stack = purposeStatementStack.current;
+      const visual = purposeVisual.current;
+      if (!stack || !visual || !blendLayer) return;
+
+      const stackRect = stack.getBoundingClientRect();
+      const visualRect = visual.getBoundingClientRect();
+      const overlapLeft = Math.max(stackRect.left, visualRect.left);
+      const overlapTop = Math.max(stackRect.top, visualRect.top);
+      const overlapRight = Math.min(stackRect.right, visualRect.right);
+      const overlapBottom = Math.min(stackRect.bottom, visualRect.bottom);
+
+      if (overlapRight <= overlapLeft || overlapBottom <= overlapTop) {
+        blendLayer.style.clipPath = "inset(100% 0 0 0)";
+        return;
       }
-    }, {
-      rootMargin: "0px 0px -18% 0px",
-      threshold: 0.08,
-    });
 
-    observer.observe(section);
-    return () => observer.disconnect();
+      blendLayer.style.clipPath = `inset(${overlapTop - stackRect.top}px ${stackRect.right - overlapRight}px ${stackRect.bottom - overlapBottom}px ${overlapLeft - stackRect.left}px)`;
+    };
+
+    const updateScene = () => {
+      animationFrame = 0;
+      if (reducedMotion?.matches) {
+        setPixelProgress(1);
+        setRevealedPurposeLines(PURPOSE_PHRASES.map(() => true));
+        setPurposeVisualRevealed(true);
+        alignBlendLayer();
+        return;
+      }
+
+      const viewportHeight = Math.max(window.innerHeight, 1);
+      const transitionRect = transition.getBoundingClientRect();
+      setPixelProgress((viewportHeight * 0.96 - transitionRect.top) / (viewportHeight * 0.72));
+
+      const sectionRect = section.getBoundingClientRect();
+      if (sectionRect.height <= 0) return;
+      const revealStart = viewportHeight * 0.72;
+      const revealEnd = -Math.max(sectionRect.height - viewportHeight * 0.35, viewportHeight);
+      const progress = Math.min(1, Math.max(0, (revealStart - sectionRect.top) / (revealStart - revealEnd)));
+
+      setRevealedPurposeLines((current) => {
+        const next = current.map((isRevealed, index) => (
+          isRevealed || progress >= PURPOSE_REVEAL_THRESHOLDS[index]
+        ));
+        return next.some((value, index) => value !== current[index]) ? next : current;
+      });
+      if (progress >= 0.22) setPurposeVisualRevealed(true);
+      alignBlendLayer();
+    };
+
+    const requestUpdate = () => {
+      if (!animationFrame) animationFrame = window.requestAnimationFrame(updateScene);
+    };
+
+    const resizeObserver = typeof ResizeObserver === "undefined"
+      ? null
+      : new ResizeObserver(requestUpdate);
+    if (purposeStatementStack.current) resizeObserver?.observe(purposeStatementStack.current);
+    if (purposeVisual.current) resizeObserver?.observe(purposeVisual.current);
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    updateScene();
+
+    return () => {
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
+      resizeObserver?.disconnect();
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    };
   }, []);
 
   function triggerTextBurst() {
@@ -208,6 +324,7 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
         </div>
       </header>
 
+      <div className="marketing-about-transition-scene">
       <section className="marketing-hero" aria-labelledby="marketing-title">
         <div>
           <p className="kicker">Teamwork tracking &amp; task allocation</p>
@@ -257,8 +374,9 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
       </section>
 
       <div
-        className={`marketing-pixel-transition${purposeRevealed ? " is-revealed" : ""}`}
+        className="marketing-pixel-transition"
         aria-hidden="true"
+        ref={pixelTransition}
       >
         <span className="marketing-pixel-transition-base" />
         {PURPOSE_PIXEL_BLOCKS.map((block, index) => (
@@ -270,14 +388,13 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
               "--pixel-width": block.width,
               "--pixel-height": block.height,
               "--pixel-color": block.color,
-              "--pixel-delay": block.delay,
             } as CSSProperties}
           />
         ))}
       </div>
 
       <section
-        className={`marketing-purpose${purposeRevealed ? " is-revealed" : ""}`}
+        className={`marketing-purpose${purposeVisualRevealed ? " is-visual-revealed" : ""}`}
         id="why-maylamdi"
         aria-labelledby="why-maylamdi-title"
         ref={purposeSection}
@@ -285,29 +402,30 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
         <div className="marketing-purpose-sticky">
           <div className="marketing-purpose-copy">
             <p className="marketing-purpose-label">About Us</p>
-            <h2
-              className="marketing-purpose-statement"
-              id="why-maylamdi-title"
-              aria-label={PURPOSE_PHRASES.join(" ")}
-            >
-              {PURPOSE_PHRASES.map((phrase, index) => (
-                <span
-                  className={index === 2 ? "marketing-purpose-phrase marketing-purpose-phrase--new-thought" : "marketing-purpose-phrase"}
-                  data-purpose-phrase
-                  key={phrase}
-                  style={{ "--purpose-index": index } as CSSProperties}
-                >
-                  <PurposePhrase phrase={phrase} />
-                </span>
-              ))}
-            </h2>
+            <div className="marketing-purpose-statement-stack" ref={purposeStatementStack}>
+              <PurposeStatement revealedLines={revealedPurposeLines} />
+              <PurposeStatement blend revealedLines={revealedPurposeLines} />
+            </div>
           </div>
-          <PurposeWorkspaceVisual />
-          <p className="marketing-purpose-support">
-            Less guessing. Less gánh team. More shared responsibility.
-          </p>
+          <PurposeWorkspaceVisual visualRef={purposeVisual} />
+        </div>
+        <div className="marketing-purpose-marquee" aria-label={PURPOSE_MARQUEE_COPY}>
+          {["forward", "reverse"].map((direction) => (
+            <div className={`marketing-purpose-marquee-row marketing-purpose-marquee-row--${direction}`} key={direction}>
+              <div className="marketing-purpose-marquee-track">
+                {Array.from({ length: 2 }, (_, groupIndex) => (
+                  <div className="marketing-purpose-marquee-group" aria-hidden={groupIndex > 0 ? "true" : undefined} key={groupIndex}>
+                    {Array.from({ length: 3 }, (_, copyIndex) => (
+                      <span key={copyIndex}>{PURPOSE_MARQUEE_COPY}</span>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
+      </div>
 
       <section className="marketing-features" id="how-it-works" aria-labelledby="how-it-works-title">
         <h2 className="sr-only" id="how-it-works-title">See how it works</h2>
