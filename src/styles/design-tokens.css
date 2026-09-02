@@ -3032,6 +3032,10 @@ body:has(.marketing-about-transition-scene) {
 }
 
 @media (max-width: 760px) {
+  .marketing-shell {
+    overflow-x: clip;
+  }
+
   .marketing-pixel-transition {
     height: 100svh;
   }
