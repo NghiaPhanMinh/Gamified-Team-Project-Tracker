@@ -200,6 +200,7 @@ export function AIPlanningAssistant({
         task_count: result.taskCount,
       });
       setSaveMessage(`${result.taskCount} tasks were saved. Assigned teammates can now accept or decline.`);
+      setDraft(null);
     } catch (caughtError) {
       setError(getErrorMessage(caughtError, "The reviewed AI plan could not be saved."));
     } finally {
@@ -342,6 +343,11 @@ export function AIPlanningAssistant({
       ) : null}
       {error ? <p className="form-error ai-error" role="alert">{error}</p> : null}
       {retryNotice ? <p className="ai-retry-notice" role="status">{retryNotice}</p> : null}
+      {saveMessage ? (
+        <p className="form-success" role="status" style={{ margin: "1rem 0", fontSize: "1.05rem", fontWeight: 800 }}>
+          {saveMessage}
+        </p>
+      ) : null}
 
       {usage && !usage.platformGenerationAvailable && !byokActive ? (
         <div className="subscription-limit-card" style={{ margin: "1.25rem 0", padding: "1.5rem", borderRadius: "20px", background: "color-mix(in srgb, var(--color-pink) 15%, var(--color-surface))", border: "3px solid #101517", boxShadow: "6px 6px 0 #101517", color: "var(--color-text)" }}>
@@ -634,7 +640,6 @@ export function AIPlanningAssistant({
               Viewing AI plan preview draft. Only the room leader can confirm and save this plan.
             </p>
           )}
-          {saveMessage ? <p className="form-success" role="status" style={{ marginTop: "1rem", fontSize: "1.05rem", fontWeight: 800 }}>{saveMessage}</p> : null}
         </div>
       ) : null}
     </section>

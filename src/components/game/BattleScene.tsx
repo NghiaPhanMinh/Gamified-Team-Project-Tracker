@@ -1016,6 +1016,7 @@ export function BattleScene({
 
   // Workspace data query for tasks & user profiles
   const workspace = useQuery(api.tasks.getWorkspace, { projectId });
+  const isSoloProject = workspace?.project?.targetMemberCount === 1;
 
   // Goblin Flow state & mutations
   const postDailyEvidence = useMutation((api as any).daily.postDailyEvidence);
@@ -1782,8 +1783,8 @@ export function BattleScene({
     }
 
     try {
-      // 1. Choose reviewer if not already assigned
-      if (!currentTask.reviewerProfileId) {
+      // 1. Choose reviewer if not already assigned (bypassed for solo 1-person projects)
+      if (!isSoloProject && !currentTask.reviewerProfileId) {
         if (!selectedReviewerId) {
           throw new Error("You must choose a teammate to review your task.");
         }
@@ -3496,6 +3497,7 @@ export function BattleScene({
                 </div>
 
                 {(() => {
+                  if (isSoloProject) return null;
                   const task = myAssignableTasks.find((t) => t._id === selectedTaskId);
                   if (task && !task.reviewerProfileId) {
                     return (

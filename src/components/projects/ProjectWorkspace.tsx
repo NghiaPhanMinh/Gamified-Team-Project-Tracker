@@ -608,10 +608,6 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
             {formatDeadline(workspace.project.deadline)} · {workspace.project.frameworkName}
           </p>
         </div>
-        <dl className="compact-project-priority">
-          <div><dt>Progress</dt><dd>{progressPercent}%</dd></div>
-          <div><dt>Current phase</dt><dd>{currentPhase ?? "Project work"}</dd></div>
-        </dl>
         <div className="open-project-header-actions">
           <button className="primary-button" type="button" onClick={() => setBriefOpen(true)}>
             <PencilLine aria-hidden="true" /> Project Brief
@@ -887,17 +883,6 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
 
       {activeTab === "progress" ? (
         <div className="project-overview-flow battle-workspace-overview project-progress-view" style={{ gap: "0.5rem" }}>
-          <header className="game-section-header" style={{ margin: 0, padding: 0 }}>
-            <div>
-              <h3 className="display-heading" style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, margin: "0 0 0.25rem", lineHeight: "1.15" }}>
-                Villagers vs Dragon
-              </h3>
-              <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--color-muted)", margin: "0 0 0.35rem", lineHeight: "1.3" }}>
-                Complete tasks to attack the dragon
-              </p>
-            </div>
-          </header>
-
           <section className="shared-battle-stage" aria-label="Shared project Battle scene">
             <BattleScene
               projectId={workspace.project._id}

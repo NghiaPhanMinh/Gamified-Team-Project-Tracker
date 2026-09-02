@@ -5,11 +5,12 @@ import { AIPlanningAssistant } from "./AIPlanningAssistant";
 
 const mocks = vi.hoisted(() => ({
   generatePlan: vi.fn(),
+  savePlan: vi.fn(),
 }));
 
 vi.mock("convex/react", () => ({
   useAction: () => mocks.generatePlan,
-  useMutation: () => vi.fn(),
+  useMutation: () => mocks.savePlan,
   useQuery: () => ({ platformGenerationAvailable: true }),
 }));
 
@@ -66,5 +67,19 @@ describe("AIPlanningAssistant presentation", () => {
     await waitFor(() => expect(screen.getByText(/Suggested project plan/i)).toBeInTheDocument());
     expect(screen.getByText("Project task 1")).toBeInTheDocument();
     expect(screen.getByText("Project task 2")).toBeInTheDocument();
+  });
+
+  it("clears draft tasks when plan is confirmed and saved", async () => {
+    mocks.savePlan.mockResolvedValue({ taskCount: 5 });
+    render(<AIPlanningAssistant workspace={workspace as never} onUseTask={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /Generate AI Plan/i }));
+
+    await waitFor(() => expect(screen.getByText(/Suggested project plan/i)).toBeInTheDocument());
+    expect(screen.getByText("Project task 1")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Confirm & Save Plan/i }));
+
+    await waitFor(() => expect(screen.queryByText(/Suggested project plan/i)).not.toBeInTheDocument());
+    expect(screen.getByText(/5 tasks were saved/i)).toBeInTheDocument();
   });
 });
