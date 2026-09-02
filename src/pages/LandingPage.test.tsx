@@ -140,22 +140,36 @@ describe("MayLamDi landing page", () => {
 
     expect(container.querySelectorAll(".marketing-pixel-transition-cell").length).toBeGreaterThanOrEqual(144);
     expect(container.querySelectorAll(".marketing-pixel-transition-cell[data-threshold][data-variant]").length).toBeGreaterThanOrEqual(144);
-    expect(container.querySelectorAll(".marketing-purpose-word").length).toBeGreaterThan(20);
+    expect(container.querySelectorAll(".marketing-purpose-character").length).toBeGreaterThan(100);
     expect(container.querySelector(".marketing-purpose-workspace-overlap")).not.toBeInTheDocument();
     expect(container.querySelector("[data-purpose-blend]")).toHaveAttribute("aria-hidden", "true");
     expect(container.querySelectorAll(".marketing-purpose-marquee-row")).toHaveLength(2);
     expect(container.querySelectorAll(".marketing-purpose-marquee-group")).toHaveLength(4);
   });
 
-  it("uses a center-weighted wave curve instead of alternating word offsets", () => {
+  it("raises the hovered letter highest and tapers adjacent letters into a smooth wave", () => {
     const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
-    const firstPhraseWords = Array.from(
-      container.querySelectorAll<HTMLElement>("[data-purpose-phrase]:first-child .marketing-purpose-word"),
+    const firstPhrase = container.querySelector<HTMLElement>("[data-purpose-phrase]:first-child");
+    const firstPhraseCharacters = Array.from(
+      firstPhrase?.querySelectorAll<HTMLElement>(".marketing-purpose-character") ?? [],
     );
-    const edgeLift = Number.parseFloat(firstPhraseWords[0].style.getPropertyValue("--wave-lift"));
-    const centerLift = Number.parseFloat(firstPhraseWords[Math.floor(firstPhraseWords.length / 2)].style.getPropertyValue("--wave-lift"));
+    const hoveredIndex = Math.floor(firstPhraseCharacters.length / 2);
 
-    expect(centerLift).toBeGreaterThan(edgeLift);
-    expect(centerLift).toBeGreaterThanOrEqual(14);
+    fireEvent.mouseEnter(firstPhraseCharacters[hoveredIndex]);
+
+    const updatedCharacters = Array.from(
+      firstPhrase?.querySelectorAll<HTMLElement>(".marketing-purpose-character") ?? [],
+    );
+    const liftAt = (index: number) => Number.parseFloat(
+      updatedCharacters[index].style.getPropertyValue("--wave-lift"),
+    );
+
+    expect(liftAt(hoveredIndex)).toBe(18);
+    expect(liftAt(hoveredIndex - 1)).toBeLessThan(liftAt(hoveredIndex));
+    expect(liftAt(hoveredIndex - 1)).toBeGreaterThan(liftAt(hoveredIndex - 2));
+    expect(liftAt(hoveredIndex - 2)).toBeGreaterThan(liftAt(0));
+
+    fireEvent.mouseLeave(firstPhrase as HTMLElement);
+    expect(firstPhraseCharacters[hoveredIndex].style.getPropertyValue("--wave-lift")).toBe("0.00px");
   });
 });

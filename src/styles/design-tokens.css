@@ -2383,7 +2383,7 @@ body:has(.marketing-about-transition-scene) {
 .marketing-purpose {
   position: relative;
   z-index: 2;
-  min-height: 320vh;
+  min-height: calc(320vh + var(--mld-space-8));
   margin-top: -1px;
   overflow: visible;
   background: #4ca0fe;
@@ -2401,7 +2401,7 @@ body:has(.marketing-about-transition-scene) {
   column-gap: var(--mld-space-4);
   height: 100vh;
   min-height: 100vh;
-  padding: clamp(64px, 8vh, 96px) clamp(24px, 5vw, 80px) clamp(210px, 26vh, 240px);
+  padding: calc(var(--mld-space-9) + var(--mld-space-7)) clamp(24px, 5vw, 80px) clamp(210px, 26vh, 240px);
   isolation: isolate;
 }
 
@@ -2474,9 +2474,13 @@ body:has(.marketing-about-transition-scene) {
 
 .marketing-purpose-word {
   display: inline-block;
+}
+
+.marketing-purpose-character {
+  display: inline-block;
   transform: translateY(0) rotate(0);
   transform-origin: center bottom;
-  transition: transform 460ms cubic-bezier(0.2, 0.76, 0.24, 1);
+  transition: transform 420ms cubic-bezier(0.2, 0.76, 0.24, 1);
 }
 
 .marketing-purpose-word:not(:last-child) {
@@ -2513,7 +2517,7 @@ body:has(.marketing-about-transition-scene) {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .marketing-purpose-phrase.is-revealed.is-waved .marketing-purpose-word {
+  .marketing-purpose-phrase.is-revealed.is-waved .marketing-purpose-character {
     transform: translateY(calc(var(--wave-lift) * -1)) rotate(var(--wave-rotation));
   }
 }
@@ -3053,7 +3057,7 @@ body:has(.marketing-about-transition-scene) {
   .marketing-pixel-transition-cell,
   .marketing-purpose-phrase,
   .marketing-purpose-workspace,
-  .marketing-purpose-word {
+  .marketing-purpose-character {
     transition: none;
     will-change: auto;
   }
@@ -3063,7 +3067,7 @@ body:has(.marketing-about-transition-scene) {
   .marketing-pixel-transition-cell,
   .marketing-purpose-workspace,
   .marketing-purpose-phrase,
-  .marketing-purpose-word {
+  .marketing-purpose-character {
     transform: none;
   }
 

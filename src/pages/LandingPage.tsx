@@ -14,6 +14,11 @@ type BurstWord = {
   style: CSSProperties;
 };
 
+type PurposeCharacterHover = {
+  lineIndex: number;
+  characterIndex: number;
+};
+
 const FEATURES = [
   {
     step: "01 / Understand",
@@ -87,25 +92,54 @@ const PURPOSE_PIXEL_CELLS = Array.from({ length: 16 }, (_, columnIndex) => {
   });
 }).flat();
 
-function PurposePhrase({ phrase }: { phrase: string }) {
-  const words = phrase.split(" ");
-  const center = (words.length - 1) / 2;
+function PurposePhrase({
+  blend,
+  hoveredCharacter,
+  lineIndex,
+  onCharacterHover,
+  phrase,
+}: {
+  blend: boolean;
+  hoveredCharacter: PurposeCharacterHover | null;
+  lineIndex: number;
+  onCharacterHover?: (hover: PurposeCharacterHover | null) => void;
+  phrase: string;
+}) {
+  let characterCursor = 0;
 
-  return words.map((word, index) => {
-    const normalizedDistance = Math.abs(index - center) / Math.max(center, 1);
-    const lift = 2 + (Math.cos(Math.min(1, normalizedDistance) * Math.PI / 2) * 16);
-    const rotation = ((index - center) / Math.max(center, 1)) * 1;
+  return phrase.split(" ").map((word, wordIndex) => {
+    const wordStart = characterCursor;
+    characterCursor += word.length + 1;
 
     return (
-      <span
-        className="marketing-purpose-word"
-        key={`${word}-${index}`}
-        style={{
-          "--wave-lift": `${lift.toFixed(2)}px`,
-          "--wave-rotation": `${rotation.toFixed(2)}deg`,
-        } as CSSProperties}
-      >
-        {word}
+      <span className="marketing-purpose-word" key={`${word}-${wordIndex}`}>
+        {Array.from(word).map((character, localIndex) => {
+          const characterIndex = wordStart + localIndex;
+          const distance = hoveredCharacter?.lineIndex === lineIndex
+            ? Math.abs(characterIndex - hoveredCharacter.characterIndex)
+            : Number.POSITIVE_INFINITY;
+          const lift = Number.isFinite(distance)
+            ? 18 * Math.exp(-((distance * distance) / 3.2))
+            : 0;
+          const rotation = distance <= 3 && hoveredCharacter
+            ? Math.max(-1, Math.min(1, (characterIndex - hoveredCharacter.characterIndex) * 0.35))
+            : 0;
+
+          return (
+            <span
+              className="marketing-purpose-character"
+              data-character-index={characterIndex}
+              key={`${character}-${characterIndex}`}
+              onMouseEnter={blend ? undefined : () => onCharacterHover?.({ lineIndex, characterIndex })}
+              style={{
+                "--wave-lift": `${lift.toFixed(2)}px`,
+                "--wave-rotation": `${rotation.toFixed(2)}deg`,
+              } as CSSProperties}
+            >
+              {character}
+            </span>
+          );
+        })}
       </span>
     );
   });
@@ -113,13 +147,13 @@ function PurposePhrase({ phrase }: { phrase: string }) {
 
 function PurposeStatement({
   blend = false,
-  hoveredLine,
-  onPhraseHover,
+  hoveredCharacter,
+  onCharacterHover,
   revealedLines,
 }: {
   blend?: boolean;
-  hoveredLine: number | null;
-  onPhraseHover?: (index: number | null) => void;
+  hoveredCharacter: PurposeCharacterHover | null;
+  onCharacterHover?: (hover: PurposeCharacterHover | null) => void;
   revealedLines: readonly boolean[];
 }) {
   return (
@@ -132,13 +166,18 @@ function PurposeStatement({
     >
       {PURPOSE_PHRASES.map((phrase, index) => (
         <span
-          className={`${index === 2 ? "marketing-purpose-phrase marketing-purpose-phrase--new-thought" : "marketing-purpose-phrase"}${revealedLines[index] ? " is-revealed" : ""}${hoveredLine === index ? " is-waved" : ""}`}
+          className={`${index === 2 ? "marketing-purpose-phrase marketing-purpose-phrase--new-thought" : "marketing-purpose-phrase"}${revealedLines[index] ? " is-revealed" : ""}${hoveredCharacter?.lineIndex === index ? " is-waved" : ""}`}
           data-purpose-phrase={blend ? undefined : "true"}
           key={phrase}
-          onMouseEnter={blend ? undefined : () => onPhraseHover?.(index)}
-          onMouseLeave={blend ? undefined : () => onPhraseHover?.(null)}
+          onMouseLeave={blend ? undefined : () => onCharacterHover?.(null)}
         >
-          <PurposePhrase phrase={phrase} />
+          <PurposePhrase
+            blend={blend}
+            hoveredCharacter={hoveredCharacter}
+            lineIndex={index}
+            onCharacterHover={onCharacterHover}
+            phrase={phrase}
+          />
         </span>
       ))}
     </h2>
@@ -220,7 +259,7 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
     && typeof window.matchMedia === "function"
     && window.matchMedia("(prefers-reduced-motion: reduce)").matches
   ));
-  const [hoveredPurposeLine, setHoveredPurposeLine] = useState<number | null>(null);
+  const [hoveredPurposeCharacter, setHoveredPurposeCharacter] = useState<PurposeCharacterHover | null>(null);
   const cleanupTimer = useRef<number | null>(null);
   const purposeSection = useRef<HTMLElement | null>(null);
   const pixelTransition = useRef<HTMLDivElement | null>(null);
@@ -447,11 +486,11 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
             <p className="marketing-purpose-label">About Us</p>
             <div className="marketing-purpose-statement-stack" ref={purposeStatementStack}>
               <PurposeStatement
-                hoveredLine={hoveredPurposeLine}
-                onPhraseHover={setHoveredPurposeLine}
+                hoveredCharacter={hoveredPurposeCharacter}
+                onCharacterHover={setHoveredPurposeCharacter}
                 revealedLines={revealedPurposeLines}
               />
-              <PurposeStatement blend hoveredLine={hoveredPurposeLine} revealedLines={revealedPurposeLines} />
+              <PurposeStatement blend hoveredCharacter={hoveredPurposeCharacter} revealedLines={revealedPurposeLines} />
             </div>
           </div>
           <PurposeWorkspaceVisual visualRef={purposeVisual} />
