@@ -123,7 +123,7 @@ describe("phase and task backend", () => {
       weight: 4,
       required: true,
       startDate: "2026-08-05",
-      dueDate: "2026-09-01",
+      dueDate: "2026-12-01",
       dependencyTaskIds: [],
       requiresReview: true,
       reviewerProfileId: owner.profileId,

@@ -36,7 +36,7 @@ export function AcquisitionTab({ data }: AcquisitionTabProps) {
           <div style={{ width: "100%", height: 220 }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={acquisition.sources} dataKey="users" nameKey="name" cx="50%" cy="50%" outerRadius={75} label={({ name, value }) => `${name}: ${value}`}>
+                <Pie data={acquisition.sources} dataKey="users" nameKey="name" cx="50%" cy="50%" outerRadius={75} label={({ name, value }: any) => `${name}: ${value}`}>
                   {acquisition.sources.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--color-ink)" strokeWidth={2} />
                   ))}

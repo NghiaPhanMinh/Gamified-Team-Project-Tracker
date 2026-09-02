@@ -107,7 +107,7 @@ export function AiAssistantTab({ data }: AiAssistantTabProps) {
           <div style={{ width: "100%", height: 220 }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={ai.modelBreakdown} dataKey="count" nameKey="model" cx="50%" cy="50%" outerRadius={75} label={({ name, value }) => `${name}: ${value}`}>
+                <Pie data={ai.modelBreakdown} dataKey="count" nameKey="model" cx="50%" cy="50%" outerRadius={75} label={({ name, value }: any) => `${name}: ${value}`}>
                   {ai.modelBreakdown.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--color-ink)" strokeWidth={2} />
                   ))}
