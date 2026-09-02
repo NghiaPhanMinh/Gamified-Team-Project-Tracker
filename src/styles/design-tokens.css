@@ -2383,11 +2383,16 @@ body:has(.marketing-about-transition-scene) {
 .marketing-purpose {
   position: relative;
   z-index: 2;
-  min-height: calc(320vh + var(--mld-space-8));
+  min-height: 0;
   margin-top: -1px;
   overflow: visible;
   background: #4ca0fe;
   color: #101517;
+}
+
+.marketing-purpose-scroll-stage {
+  position: relative;
+  min-height: calc(320vh + var(--mld-space-8));
 }
 
 .marketing-purpose-sticky {
@@ -2530,13 +2535,11 @@ body:has(.marketing-about-transition-scene) {
 }
 
 .marketing-purpose-marquee {
-  position: absolute;
+  position: relative;
   z-index: 6;
-  right: 0;
-  bottom: 0;
-  left: 0;
   display: grid;
   gap: 2px;
+  margin-top: var(--mld-space-8);
   padding: 18px 0 20px;
   overflow: hidden;
   background: #4ca0fe;
@@ -2894,7 +2897,8 @@ body:has(.marketing-about-transition-scene) {
     width: min(68vw, 440px);
   }
 
-  .marketing-purpose {
+  .marketing-purpose,
+  .marketing-purpose-scroll-stage {
     min-height: auto;
   }
 
@@ -2927,6 +2931,10 @@ body:has(.marketing-about-transition-scene) {
   .marketing-purpose-statement--blend {
     display: none;
   }
+
+  .marketing-purpose-marquee {
+    margin-top: 0;
+  }
 }
 
 @media (max-width: 760px) {
@@ -2934,7 +2942,8 @@ body:has(.marketing-about-transition-scene) {
     height: 100svh;
   }
 
-  .marketing-purpose {
+  .marketing-purpose,
+  .marketing-purpose-scroll-stage {
     min-height: auto;
   }
 

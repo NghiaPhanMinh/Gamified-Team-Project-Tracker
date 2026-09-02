@@ -481,19 +481,21 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
         aria-labelledby="why-maylamdi-title"
         ref={purposeSection}
       >
-        <div className="marketing-purpose-sticky">
-          <div className="marketing-purpose-copy">
-            <p className="marketing-purpose-label">About Us</p>
-            <div className="marketing-purpose-statement-stack" ref={purposeStatementStack}>
-              <PurposeStatement
-                hoveredCharacter={hoveredPurposeCharacter}
-                onCharacterHover={setHoveredPurposeCharacter}
-                revealedLines={revealedPurposeLines}
-              />
-              <PurposeStatement blend hoveredCharacter={hoveredPurposeCharacter} revealedLines={revealedPurposeLines} />
+        <div className="marketing-purpose-scroll-stage">
+          <div className="marketing-purpose-sticky">
+            <div className="marketing-purpose-copy">
+              <p className="marketing-purpose-label">About Us</p>
+              <div className="marketing-purpose-statement-stack" ref={purposeStatementStack}>
+                <PurposeStatement
+                  hoveredCharacter={hoveredPurposeCharacter}
+                  onCharacterHover={setHoveredPurposeCharacter}
+                  revealedLines={revealedPurposeLines}
+                />
+                <PurposeStatement blend hoveredCharacter={hoveredPurposeCharacter} revealedLines={revealedPurposeLines} />
+              </div>
             </div>
+            <PurposeWorkspaceVisual visualRef={purposeVisual} />
           </div>
-          <PurposeWorkspaceVisual visualRef={purposeVisual} />
         </div>
         <div className="marketing-purpose-marquee" aria-label={PURPOSE_MARQUEE_COPY}>
           {["forward", "reverse"].map((direction) => (

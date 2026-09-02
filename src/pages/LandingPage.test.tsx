@@ -145,6 +145,9 @@ describe("MayLamDi landing page", () => {
     expect(container.querySelector("[data-purpose-blend]")).toHaveAttribute("aria-hidden", "true");
     expect(container.querySelectorAll(".marketing-purpose-marquee-row")).toHaveLength(2);
     expect(container.querySelectorAll(".marketing-purpose-marquee-group")).toHaveLength(4);
+    expect(container.querySelector(".marketing-purpose-scroll-stage")?.nextElementSibling).toBe(
+      container.querySelector(".marketing-purpose-marquee"),
+    );
   });
 
   it("raises the hovered letter highest and tapers adjacent letters into a smooth wave", () => {

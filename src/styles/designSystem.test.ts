@@ -57,6 +57,7 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain(".marketing-pixel-transition-cell");
     expect(css).toContain("background: #4ca0fe");
     expect(css).toContain(".marketing-purpose");
+    expect(css).toContain(".marketing-purpose-scroll-stage");
     expect(css).toContain("min-height: calc(320vh + var(--mld-space-8))");
     expect(css).toContain(".marketing-purpose-sticky");
     expect(css).toContain("position: sticky");
@@ -68,6 +69,7 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain(".marketing-purpose-character");
     expect(css).toContain("@keyframes marketing-purpose-marquee-forward");
     expect(css).toContain("@keyframes marketing-purpose-marquee-reverse");
+    expect(css).toContain("margin-top: var(--mld-space-8)");
     expect(css).toContain('font-family: "Anton", "Arial Narrow", sans-serif');
     expect(css).toContain("-webkit-text-stroke: 2px #fff73f");
     expect(css).toContain("@media (max-width: 760px)");
