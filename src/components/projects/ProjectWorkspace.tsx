@@ -713,7 +713,6 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
             <section className="project-plan-breakdown" aria-labelledby="project-plan-title">
               <div className="project-section-heading" style={{ marginBottom: "1rem" }}>
                 <div>
-                  <p className="card-eyebrow">Project Plan · Task Allocations</p>
                   <h2 id="project-plan-title" style={{ margin: "0.2rem 0" }}>Allocated Tasks</h2>
                   <p style={{ margin: 0, opacity: 0.9 }}>
                     Review your team's assigned tasks. Click <strong>Edit</strong> to customize requirements, or click <strong>Start Task</strong> to open it in the battle Quest Board.
@@ -834,12 +833,29 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
                             <div style={{ flex: "1 1 320px", minWidth: 0 }}>
                               <h3 style={{ margin: "0 0 0.35rem", fontSize: "1.15rem", fontWeight: 900 }}>{task.title}</h3>
-                              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap", fontSize: "0.85rem" }}>
-                                <span style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", fontWeight: 800, background: "var(--color-yellow, #fff73f)", padding: "0.15rem 0.5rem", borderRadius: "6px", border: "1.5px solid #101517" }}>
-                                  👤 {ownerName}
+                              <div style={{ display: "flex", alignItems: "center", gap: "0.65rem", flexWrap: "wrap", fontSize: "0.85rem" }}>
+                                <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontWeight: 700, color: "var(--color-text, #101517)" }}>
+                                  <span style={{ opacity: 0.65 }}>👤</span> {ownerName}
                                 </span>
-                                <span style={{ opacity: 0.8, fontWeight: 700 }}>• Due {formatProjectDate(task.dueDate)}</span>
-                                <span className={`task-outline-status task-outline-status-${task.status}`} style={{ fontWeight: 800 }}>
+                                <span style={{ opacity: 0.7, fontWeight: 600 }}>• Due {formatProjectDate(task.dueDate)}</span>
+                                <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontSize: "0.8rem", fontWeight: 800, color: "var(--color-muted, #64748b)" }}>
+                                  <span
+                                    style={{
+                                      width: "7px",
+                                      height: "7px",
+                                      borderRadius: "50%",
+                                      background:
+                                        task.status === "completed" || task.status === "verified"
+                                          ? "#16a34a"
+                                          : task.status === "in_progress"
+                                          ? "#0284c7"
+                                          : task.status === "blocked" || task.status === "changes_requested"
+                                          ? "#ea580c"
+                                          : task.status === "review" || task.status === "submitted" || task.status === "awaiting_creator"
+                                          ? "#d946ef"
+                                          : "#94a3b8",
+                                    }}
+                                  />
                                   {STATUS_LABELS[task.status as TaskStatus]}
                                 </span>
                               </div>

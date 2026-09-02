@@ -263,7 +263,6 @@ export function AIPlanningAssistant({
     <section className="ai-planning-assistant" aria-labelledby="ai-planning-title">
       <div className="ai-planning-heading">
         <div>
-          <p className="card-eyebrow">AI-assisted project planning</p>
           <h3 className="display-heading" id="ai-planning-title">Build the project plan with AI</h3>
         </div>
         <span className="ai-draft-label">Draft only</span>
@@ -548,8 +547,8 @@ export function AIPlanningAssistant({
                           <div style={{ flex: "1 1 320px", minWidth: 0 }}>
                             <h3 style={{ margin: "0 0 0.35rem", fontSize: "1.15rem", fontWeight: 900 }}>{task.title}</h3>
                             <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap", fontSize: "0.85rem" }}>
-                              <span style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", fontWeight: 800, background: "var(--color-yellow, #fff73f)", padding: "0.15rem 0.5rem", borderRadius: "6px", border: "1.5px solid #101517" }}>
-                                👤 {ownerName}
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", fontWeight: 700, color: "var(--color-text, #101517)" }}>
+                                <span style={{ opacity: 0.65 }}>👤</span> {ownerName}
                               </span>
                               <span style={{ opacity: 0.8, fontWeight: 700 }}>• Due {task.dueDate}</span>
                               <span style={{ opacity: 0.8, fontWeight: 700 }}>• {task.estimatedEffortHours}h effort</span>

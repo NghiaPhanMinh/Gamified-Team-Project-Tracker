@@ -100,70 +100,87 @@ export function FrameworkLibrary({ onDuplicate, hideHeader = false }: FrameworkL
             <h3>{selectedFramework.name}</h3>
             <p>{selectedFramework.description}</p>
           </div>
-          <div className="discipline-tags" aria-label="Useful disciplines">
-            {selectedFramework.disciplines.map((discipline) => (
-              <span key={discipline}>{discipline}</span>
-            ))}
+          <div className="framework-disciplines-card" aria-label="Useful disciplines">
+            <span className="disciplines-card-label">Tailored For</span>
+            <div className="discipline-tags">
+              {selectedFramework.disciplines.map((discipline) => (
+                <span key={discipline}>{discipline}</span>
+              ))}
+            </div>
           </div>
         </header>
 
-        <button className="quiet-button framework-detail-toggle" type="button" onClick={() => setShowDetails((current) => !current)}>{showDetails ? "Hide phase details" : "View phase details"}</button>
-        {showDetails ? <ol className="framework-phase-list">
-          {selectedFramework.phases.map((frameworkPhase, index) => (
-            <li key={frameworkPhase.id}>
-              <div className="phase-number">
-                {String(index + 1).padStart(2, "0")}
-              </div>
-              <div className="phase-details">
-                <div className="phase-heading">
-                  <h4>{frameworkPhase.name}</h4>
-                  <div className="phase-flags">
-                    {frameworkPhase.canOverlap ? (
-                      <span>Can overlap</span>
-                    ) : null}
-                    {frameworkPhase.reviewCheckpoint ? (
-                      <span>Review point</span>
-                    ) : null}
-                  </div>
+        <div className="framework-detail-bar">
+          <button
+            className="primary-button framework-detail-toggle-btn"
+            type="button"
+            onClick={() => setShowDetails((current) => !current)}
+          >
+            {showDetails ? "▲ Hide phase details" : `▼ View phase details (${selectedFramework.phases.length} phases)`}
+          </button>
+        </div>
+
+        {showDetails ? (
+          <ol className="framework-phase-list">
+            {selectedFramework.phases.map((frameworkPhase, index) => (
+              <li key={frameworkPhase.id} className="framework-phase-item">
+                <div className="phase-number-badge">
+                  {String(index + 1).padStart(2, "0")}
                 </div>
-                <p>{frameworkPhase.description}</p>
-                <div className="phase-meta-grid">
-                  <div>
-                    <strong>Suggested outputs</strong>
-                    <ul>
-                      {frameworkPhase.suggestedDeliverables.map(
-                        (deliverable) => (
-                          <li key={deliverable}>{deliverable}</li>
-                        ),
-                      )}
-                    </ul>
+                <div className="phase-details">
+                  <div className="phase-heading">
+                    <h4>{frameworkPhase.name}</h4>
+                    <div className="phase-flags">
+                      {frameworkPhase.canOverlap ? (
+                        <span className="phase-flag is-overlap">⚡ Can overlap</span>
+                      ) : null}
+                      {frameworkPhase.reviewCheckpoint ? (
+                        <span className="phase-flag is-review">🎯 Review point</span>
+                      ) : null}
+                    </div>
                   </div>
-                  <div>
-                    <strong>Useful skills</strong>
-                    <ul>
-                      {frameworkPhase.suggestedSkills.map((skill) => (
-                        <li key={skill}>{skill}</li>
-                      ))}
-                    </ul>
+                  <p className="phase-description">{frameworkPhase.description}</p>
+
+                  <div className="phase-meta-grid">
+                    <div className="phase-meta-block">
+                      <span className="phase-meta-title">Suggested Outputs</span>
+                      <ul className="phase-meta-items">
+                        {frameworkPhase.suggestedDeliverables.map((deliverable) => (
+                          <li key={deliverable}>
+                            <span className="meta-bullet">📄</span> {deliverable}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="phase-meta-block">
+                      <span className="phase-meta-title">Useful Skills</span>
+                      <ul className="phase-meta-items">
+                        {frameworkPhase.suggestedSkills.map((skill) => (
+                          <li key={skill}>
+                            <span className="meta-bullet">✨</span> {skill}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
+
+                  {frameworkPhase.defaultDependencies.length > 0 ? (
+                    <div className="dependency-note-badge">
+                      ↳ Sequence: Usually follows{" "}
+                      {frameworkPhase.defaultDependencies
+                        .map((dependencyId) => phaseNames.get(dependencyId) ?? dependencyId)
+                        .join(" + ")}
+                    </div>
+                  ) : (
+                    <div className="dependency-note-badge is-independent">
+                      ✓ Sequence: Ready to start independently
+                    </div>
+                  )}
                 </div>
-                {frameworkPhase.defaultDependencies.length > 0 ? (
-                  <p className="dependency-note">
-                    Usually follows{" "}
-                    {frameworkPhase.defaultDependencies
-                      .map(
-                        (dependencyId) =>
-                          phaseNames.get(dependencyId) ?? dependencyId,
-                      )
-                      .join(" + ")}
-                  </p>
-                ) : (
-                  <p className="dependency-note">Ready to start independently</p>
-                )}
-              </div>
-            </li>
-          ))}
-        </ol> : null}
+              </li>
+            ))}
+          </ol>
+        ) : null}
 
         <div className="framework-preview-note">
           <span>
