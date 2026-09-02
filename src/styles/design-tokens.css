@@ -2546,7 +2546,9 @@ body:has(.marketing-about-transition-scene) {
 }
 
 .marketing-purpose-marquee-row {
-  overflow: hidden;
+  /* Let Anton's accented glyphs extend beyond the tight line box. The marquee
+     wrapper still clips the moving track at the viewport edges. */
+  overflow: visible;
 }
 
 .marketing-purpose-marquee-track,

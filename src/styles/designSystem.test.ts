@@ -69,6 +69,8 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain(".marketing-purpose-character");
     expect(css).toContain("@keyframes marketing-purpose-marquee-forward");
     expect(css).toContain("@keyframes marketing-purpose-marquee-reverse");
+    expect(css).toContain(".marketing-purpose-marquee-row");
+    expect(css).toContain("overflow: visible");
     expect(css).toContain("margin-top: var(--mld-space-8)");
     expect(css).toContain('font-family: "Anton", "Arial Narrow", sans-serif');
     expect(css).toContain("-webkit-text-stroke: 2px #fff73f");
