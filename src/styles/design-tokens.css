@@ -6,6 +6,14 @@
   font-weight: 400;
 }
 
+@font-face {
+  font-family: "Anton";
+  src: url("/fonts/Anton-Regular.ttf") format("truetype");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
 /* MayLamDi production design language.
  * The design-system board is a reference; these semantic tokens are the
  * implementation layer shared by the real application screens.
@@ -2342,38 +2350,40 @@ body:has(.marketing-about-transition-scene) {
 .marketing-pixel-transition {
   position: relative;
   z-index: 2;
-  height: clamp(144px, 15vw, 220px);
+  height: 100vh;
   margin-top: 0;
   overflow: hidden;
+  contain: strict;
   pointer-events: none;
 }
 
-.marketing-pixel-transition-base,
-.marketing-pixel-transition-block {
+.marketing-pixel-transition-canvas {
   position: absolute;
-  bottom: 0;
-  transform: translateY(100%);
-  will-change: transform;
+  inset: 0;
 }
 
-.marketing-pixel-transition-base {
-  display: none;
-}
-
-.marketing-pixel-transition-block {
-  z-index: 2;
-  left: var(--pixel-left);
-  width: var(--pixel-width);
-  height: var(--pixel-height);
-  border-top: 7px solid var(--pixel-color);
+.marketing-pixel-transition[data-complete="true"],
+.marketing-pixel-transition[data-complete="true"] .marketing-pixel-transition-canvas {
   background: #4ca0fe;
-  transform: translateY(70%);
+}
+
+.marketing-pixel-transition-cell {
+  position: absolute;
+  z-index: 1;
+  top: var(--pixel-top);
+  left: var(--pixel-left);
+  width: calc(var(--pixel-width) + 1px);
+  height: calc(var(--pixel-height) + 1px);
+  opacity: 0;
+  transform: translateY(18%) scale(0.82);
+  transform-origin: center bottom;
+  will-change: background-color, opacity, transform;
 }
 
 .marketing-purpose {
   position: relative;
   z-index: 2;
-  min-height: 210vh;
+  min-height: 320vh;
   margin-top: -1px;
   overflow: visible;
   background: #4ca0fe;
@@ -2391,18 +2401,18 @@ body:has(.marketing-about-transition-scene) {
   column-gap: var(--mld-space-4);
   height: 100vh;
   min-height: 100vh;
-  padding: clamp(64px, 8vh, 96px) clamp(24px, 5vw, 80px) clamp(148px, 18vh, 184px);
+  padding: clamp(64px, 8vh, 96px) clamp(24px, 5vw, 80px) clamp(210px, 26vh, 240px);
   isolation: isolate;
 }
 
 .marketing-purpose-copy {
   position: relative;
   z-index: 3;
-  grid-column: 2 / 11;
+  grid-column: 2 / 10;
   grid-row: 1;
   align-self: center;
   min-width: 0;
-  max-width: 900px;
+  max-width: 820px;
 }
 
 .marketing-purpose-label {
@@ -2442,10 +2452,10 @@ body:has(.marketing-about-transition-scene) {
   display: block;
   color: #101517;
   opacity: 0;
-  transform: translateX(-110px);
+  transform: translateX(-150px);
   transition:
-    opacity 440ms ease-out,
-    transform 560ms cubic-bezier(0.2, 0.76, 0.24, 1);
+    opacity 640ms ease-out,
+    transform 720ms cubic-bezier(0.2, 0.76, 0.24, 1);
   will-change: opacity, transform;
 }
 
@@ -2464,8 +2474,9 @@ body:has(.marketing-about-transition-scene) {
 
 .marketing-purpose-word {
   display: inline-block;
-  transform: translateY(0);
-  transition: transform 380ms cubic-bezier(0.2, 0.76, 0.24, 1);
+  transform: translateY(0) rotate(0);
+  transform-origin: center bottom;
+  transition: transform 460ms cubic-bezier(0.2, 0.76, 0.24, 1);
 }
 
 .marketing-purpose-word:not(:last-child) {
@@ -2479,14 +2490,14 @@ body:has(.marketing-about-transition-scene) {
   grid-row: 1;
   align-self: center;
   justify-self: end;
-  width: min(560px, 36vw);
-  margin: clamp(250px, 34vh, 310px) 0 0;
+  width: min(500px, 30vw);
+  margin: clamp(250px, 34vh, 310px) var(--mld-space-6) 0 0;
   overflow: hidden;
-  border: 3px solid #101517;
+  border: 3px solid #fffdec;
   border-radius: var(--mld-radius-lg);
-  background: #ff8ae7;
-  color: #101517;
-  box-shadow: 12px 12px 0 #fff73f, 16px 16px 0 #101517;
+  background: #4ca0fe;
+  color: #fffdec;
+  box-shadow: 12px 12px 0 #fffdec;
   opacity: 0;
   transform: translateY(72px) rotate(4deg) scale(0.96);
   transform-origin: center bottom;
@@ -2502,15 +2513,15 @@ body:has(.marketing-about-transition-scene) {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .marketing-purpose-statement:not(.marketing-purpose-statement--blend) .marketing-purpose-phrase.is-revealed:hover .marketing-purpose-word {
-    transform: translateY(calc(var(--wave-lift) * -1));
+  .marketing-purpose-phrase.is-revealed.is-waved .marketing-purpose-word {
+    transform: translateY(calc(var(--wave-lift) * -1)) rotate(var(--wave-rotation));
   }
 }
 
 @media (min-width: 1500px) {
   .marketing-purpose-workspace {
     grid-column: 8 / 13;
-    width: min(600px, 35vw);
+    width: min(540px, 30vw);
   }
 }
 
@@ -2522,10 +2533,9 @@ body:has(.marketing-about-transition-scene) {
   left: 0;
   display: grid;
   gap: 2px;
-  padding: 10px 0 12px;
+  padding: 18px 0 20px;
   overflow: hidden;
-  border-top: 3px solid #101517;
-  background: #101517;
+  background: #4ca0fe;
 }
 
 .marketing-purpose-marquee-row {
@@ -2541,25 +2551,27 @@ body:has(.marketing-about-transition-scene) {
 }
 
 .marketing-purpose-marquee-track {
-  animation: marketing-purpose-marquee-forward 22s linear infinite;
+  animation: marketing-purpose-marquee-forward 26s linear infinite;
   will-change: transform;
 }
 
 .marketing-purpose-marquee-row--reverse .marketing-purpose-marquee-track {
   animation-name: marketing-purpose-marquee-reverse;
+  animation-duration: 30s;
 }
 
 .marketing-purpose-marquee-group span {
   flex: none;
   padding-right: 0.65em;
   color: transparent;
-  font-family: "Paytone One", "Arial Black", var(--mld-font-ui);
-  font-size: clamp(30px, 3.2vw, 52px);
+  font-family: "Anton", "Arial Narrow", sans-serif;
+  font-size: clamp(36px, 4vw, 62px);
   font-weight: 400;
-  letter-spacing: -0.035em;
-  line-height: 0.96;
+  letter-spacing: 0.005em;
+  line-height: 1;
+  text-transform: uppercase;
   white-space: nowrap;
-  -webkit-text-stroke: 1.5px #fff73f;
+  -webkit-text-stroke: 2px #fff73f;
 }
 
 @keyframes marketing-purpose-marquee-forward {
@@ -2579,8 +2591,9 @@ body:has(.marketing-about-transition-scene) {
   gap: var(--mld-space-3);
   min-height: 52px;
   padding: 10px var(--mld-space-4);
-  border-bottom: 2px solid #101517;
-  background: #fff73f;
+  border-bottom: 2px solid #4ca0fe;
+  background: #fffdec;
+  color: #4ca0fe;
   font-size: var(--mld-body-small-size);
 }
 
@@ -2592,24 +2605,24 @@ body:has(.marketing-about-transition-scene) {
 .marketing-purpose-workspace-bar > div span {
   width: 9px;
   height: 9px;
-  border: 1px solid #101517;
+  border: 1px solid #4ca0fe;
   border-radius: 50%;
-  background: #ff8ae7;
-}
-
-.marketing-purpose-workspace-bar > div span:nth-child(2) {
   background: #4ca0fe;
 }
 
+.marketing-purpose-workspace-bar > div span:nth-child(2) {
+  background: #fffdec;
+}
+
 .marketing-purpose-workspace-bar > div span:nth-child(3) {
-  background: #101517;
+  background: #4ca0fe;
 }
 
 .marketing-purpose-workspace-bar > .live-badge {
   justify-self: end;
-  border-color: #101517;
-  background: #ff8ae7;
-  color: #101517;
+  border-color: #4ca0fe;
+  background: #4ca0fe;
+  color: #fffdec;
 }
 
 .marketing-purpose-workspace-body {
@@ -2623,8 +2636,8 @@ body:has(.marketing-about-transition-scene) {
   flex-direction: column;
   gap: 8px;
   padding: var(--mld-space-4) 10px;
-  border-right: 2px solid #101517;
-  background: #101517;
+  border-right: 2px solid #fffdec;
+  background: #4ca0fe;
   color: #fffdec;
   font-size: 12px;
   font-weight: 800;
@@ -2636,8 +2649,8 @@ body:has(.marketing-about-transition-scene) {
 }
 
 .marketing-purpose-workspace-nav .is-active {
-  background: var(--mld-primary);
-  color: #101517;
+  background: #fffdec;
+  color: #4ca0fe;
 }
 
 .marketing-purpose-workspace-content {
@@ -2646,6 +2659,10 @@ body:has(.marketing-about-transition-scene) {
   flex-direction: column;
   padding: clamp(18px, 2vw, 24px);
   background: #4ca0fe;
+}
+
+.marketing-purpose-workspace .card-eyebrow {
+  color: #fffdec;
 }
 
 .marketing-purpose-progress-heading {
@@ -2661,7 +2678,7 @@ body:has(.marketing-about-transition-scene) {
 }
 
 .marketing-purpose-progress-heading span {
-  color: color-mix(in srgb, #101517 68%, transparent);
+  color: #fffdec;
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
@@ -2669,12 +2686,12 @@ body:has(.marketing-about-transition-scene) {
 
 .marketing-purpose-workspace .progress-track {
   height: 12px;
-  border: 2px solid #101517;
-  background: color-mix(in srgb, #fff73f 34%, #4ca0fe);
+  border: 2px solid #fffdec;
+  background: #4ca0fe;
 }
 
 .marketing-purpose-workspace .progress-track span {
-  background: #fff73f;
+  background: #fffdec;
 }
 
 .marketing-purpose-task-list {
@@ -2689,16 +2706,18 @@ body:has(.marketing-about-transition-scene) {
   justify-content: space-between;
   gap: var(--mld-space-3);
   padding: 8px 12px;
-  border: 2px solid #101517;
+  border: 2px solid #fffdec;
   border-radius: var(--mld-radius-sm);
-  background: #ff8ae7;
+  background: #fffdec;
+  color: #4ca0fe;
   font-size: 13px;
 }
 
 .marketing-purpose-task-list strong {
   padding: 4px 8px;
   border-radius: 999px;
-  background: #fff73f;
+  background: #4ca0fe;
+  color: #fffdec;
   font-size: 11px;
 }
 
@@ -2908,7 +2927,7 @@ body:has(.marketing-about-transition-scene) {
 
 @media (max-width: 760px) {
   .marketing-pixel-transition {
-    height: 112px;
+    height: 100svh;
   }
 
   .marketing-purpose {
@@ -2942,8 +2961,8 @@ body:has(.marketing-about-transition-scene) {
   }
 
   .marketing-purpose-marquee-group span {
-    font-size: clamp(25px, 8vw, 36px);
-    -webkit-text-stroke-width: 1px;
+    font-size: clamp(30px, 9vw, 42px);
+    -webkit-text-stroke-width: 1.5px;
   }
 }
 
@@ -3031,8 +3050,7 @@ body:has(.marketing-about-transition-scene) {
   }
 
   .marketing-scroll-cue,
-  .marketing-pixel-transition-base,
-  .marketing-pixel-transition-block,
+  .marketing-pixel-transition-cell,
   .marketing-purpose-phrase,
   .marketing-purpose-workspace,
   .marketing-purpose-word {
@@ -3042,12 +3060,19 @@ body:has(.marketing-about-transition-scene) {
 
   .marketing-scroll-cue:hover,
   .marketing-scroll-cue:focus-visible,
-  .marketing-pixel-transition-base,
-  .marketing-pixel-transition-block,
+  .marketing-pixel-transition-cell,
   .marketing-purpose-workspace,
   .marketing-purpose-phrase,
   .marketing-purpose-word {
     transform: none;
+  }
+
+  .marketing-pixel-transition {
+    background: #4ca0fe;
+  }
+
+  .marketing-pixel-transition-cell {
+    display: none;
   }
 
   .marketing-about-transition-scene > .marketing-hero {

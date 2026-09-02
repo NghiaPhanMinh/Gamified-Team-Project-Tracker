@@ -34,6 +34,8 @@ describe("MayLamDi design-system contract", () => {
   it("uses the selected local display font without the removed hero preview", () => {
     expect(css).toContain('font-family: "Paytone One"');
     expect(css).toContain('/fonts/PaytoneOne-Regular.ttf');
+    expect(css).toContain('font-family: "Anton"');
+    expect(css).toContain('/fonts/Anton-Regular.ttf');
     expect(css).not.toContain('font-family: "Chaco"');
     expect(css).not.toContain("Blodestarkly");
     expect(css).not.toContain(".marketing-preview-card");
@@ -52,20 +54,21 @@ describe("MayLamDi design-system contract", () => {
 
   it("keeps the scoped About scene scroll-led, layered, and mobile-safe", () => {
     expect(css).toContain(".marketing-about-transition-scene > .marketing-hero");
-    expect(css).toContain(".marketing-pixel-transition-block");
+    expect(css).toContain(".marketing-pixel-transition-cell");
     expect(css).toContain("background: #4ca0fe");
     expect(css).toContain(".marketing-purpose");
-    expect(css).toContain("min-height: 210vh");
+    expect(css).toContain("min-height: 320vh");
     expect(css).toContain(".marketing-purpose-sticky");
     expect(css).toContain("position: sticky");
-    expect(css).toContain("transform: translateX(-110px)");
+    expect(css).toContain("transform: translateX(-150px)");
     expect(css).toContain(".marketing-purpose-phrase.is-revealed");
     expect(css).toContain(".marketing-purpose-statement--blend");
     expect(css).toContain("mix-blend-mode: screen");
-    expect(css).toContain("translateY(calc(var(--wave-lift) * -1))");
+    expect(css).toContain("translateY(calc(var(--wave-lift) * -1)) rotate(var(--wave-rotation))");
     expect(css).toContain("@keyframes marketing-purpose-marquee-forward");
     expect(css).toContain("@keyframes marketing-purpose-marquee-reverse");
-    expect(css).toContain("-webkit-text-stroke: 1.5px #fff73f");
+    expect(css).toContain('font-family: "Anton", "Arial Narrow", sans-serif');
+    expect(css).toContain("-webkit-text-stroke: 2px #fff73f");
     expect(css).toContain("@media (max-width: 760px)");
     expect(css).toContain("min-height: auto");
     expect(css).toContain("display: none");

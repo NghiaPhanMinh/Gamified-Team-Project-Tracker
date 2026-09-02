@@ -135,14 +135,27 @@ describe("MayLamDi landing page", () => {
     expect(container.querySelector(".marketing-hero-visual")).toBeInTheDocument();
   });
 
-  it("renders the scroll wipe, aligned overlap layer, wave hooks, and two-row About marquee", () => {
+  it("renders the full pixel field, aligned overlap layer, wave hooks, and two-row About marquee", () => {
     const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
 
-    expect(container.querySelectorAll(".marketing-pixel-transition-block")).toHaveLength(11);
+    expect(container.querySelectorAll(".marketing-pixel-transition-cell").length).toBeGreaterThanOrEqual(144);
+    expect(container.querySelectorAll(".marketing-pixel-transition-cell[data-threshold][data-variant]").length).toBeGreaterThanOrEqual(144);
     expect(container.querySelectorAll(".marketing-purpose-word").length).toBeGreaterThan(20);
     expect(container.querySelector(".marketing-purpose-workspace-overlap")).not.toBeInTheDocument();
     expect(container.querySelector("[data-purpose-blend]")).toHaveAttribute("aria-hidden", "true");
     expect(container.querySelectorAll(".marketing-purpose-marquee-row")).toHaveLength(2);
     expect(container.querySelectorAll(".marketing-purpose-marquee-group")).toHaveLength(4);
+  });
+
+  it("uses a center-weighted wave curve instead of alternating word offsets", () => {
+    const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
+    const firstPhraseWords = Array.from(
+      container.querySelectorAll<HTMLElement>("[data-purpose-phrase]:first-child .marketing-purpose-word"),
+    );
+    const edgeLift = Number.parseFloat(firstPhraseWords[0].style.getPropertyValue("--wave-lift"));
+    const centerLift = Number.parseFloat(firstPhraseWords[Math.floor(firstPhraseWords.length / 2)].style.getPropertyValue("--wave-lift"));
+
+    expect(centerLift).toBeGreaterThan(edgeLift);
+    expect(centerLift).toBeGreaterThanOrEqual(14);
   });
 });

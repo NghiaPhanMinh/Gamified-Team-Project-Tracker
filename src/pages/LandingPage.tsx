@@ -39,8 +39,14 @@ const FEATURES = [
 ] as const;
 
 const MARQUEE_GROUP_COUNT = 4;
-const PURPOSE_MARQUEE_COPY = "Less guessing. Less gánh team. More shared responsibility.";
-const PURPOSE_REVEAL_THRESHOLDS = [0.05, 0.18, 0.31, 0.44, 0.57, 0.7, 0.83] as const;
+const PURPOSE_MARQUEE_COPY = "LESS GUESSING. LESS GÁNH TEAM. MORE SHARED RESPONSIBILITY.";
+const PURPOSE_REVEAL_THRESHOLDS = [0.04, 0.15, 0.26, 0.37, 0.48, 0.59, 0.70] as const;
+const PIXEL_COLOR_SEQUENCES = [
+  ["#FF8AE7", "#FFF73F", "#101517", "#4CA0FE"],
+  ["#FFF73F", "#FF8AE7", "#101517", "#4CA0FE"],
+  ["#101517", "#FF8AE7", "#FFF73F", "#4CA0FE"],
+  ["#FF8AE7", "#101517", "#FFF73F", "#4CA0FE"],
+] as const;
 
 const BURST_COLORS = ["#fff73f", "#ff8ae7", "#4ca0fe", "#1dd851", "#feaa01"];
 
@@ -54,42 +60,66 @@ const PURPOSE_PHRASES = [
   "from start to finish.",
 ] as const;
 
-const PURPOSE_PIXEL_BLOCKS = [
-  { left: "0%", width: "12%", height: "58%", color: "#4CA0FE" },
-  { left: "9%", width: "8%", height: "48%", color: "#FFF73F" },
-  { left: "15%", width: "14%", height: "72%", color: "#4CA0FE" },
-  { left: "27%", width: "9%", height: "54%", color: "#FF8AE7" },
-  { left: "34%", width: "15%", height: "64%", color: "#4CA0FE" },
-  { left: "47%", width: "8%", height: "48%", color: "#101517" },
-  { left: "53%", width: "13%", height: "76%", color: "#4CA0FE" },
-  { left: "64%", width: "10%", height: "52%", color: "#FFF73F" },
-  { left: "72%", width: "13%", height: "68%", color: "#4CA0FE" },
-  { left: "83%", width: "8%", height: "48%", color: "#FF8AE7" },
-  { left: "89%", width: "11%", height: "60%", color: "#4CA0FE" },
-] as const;
+const PURPOSE_PIXEL_CELLS = Array.from({ length: 16 }, (_, columnIndex) => {
+  const rowCount = 9 + ((columnIndex * 5) % 4);
+  const weights = Array.from({ length: rowCount }, (_, rowIndex) => (
+    0.78 + (((columnIndex * 7) + (rowIndex * 5)) % 6) * 0.09
+  ));
+  const totalWeight = weights.reduce((total, weight) => total + weight, 0);
+  let top = 0;
+
+  return weights.map((weight, rowIndex) => {
+    const height = (weight / totalWeight) * 100;
+    const verticalCenter = (top + (height / 2)) / 100;
+    const jitter = (((columnIndex * 11) + (rowIndex * 13)) % 9) / 100;
+    const threshold = Math.min(0.66, 0.02 + ((1 - verticalCenter) * 0.52) + jitter);
+    const cell = {
+      id: `${columnIndex}-${rowIndex}`,
+      left: `${columnIndex * 6.25}%`,
+      top: `${top}%`,
+      width: "6.25%",
+      height: `${height}%`,
+      threshold,
+      variant: (columnIndex + rowIndex) % PIXEL_COLOR_SEQUENCES.length,
+    };
+    top += height;
+    return cell;
+  });
+}).flat();
 
 function PurposePhrase({ phrase }: { phrase: string }) {
   const words = phrase.split(" ");
   const center = (words.length - 1) / 2;
 
-  return words.map((word, index) => (
-    <span
-      className="marketing-purpose-word"
-      key={`${word}-${index}`}
-      style={{
-        "--wave-lift": `${Math.round(2 + (1 - Math.abs(index - center) / Math.max(center, 1)) * 8)}px`,
-      } as CSSProperties}
-    >
-      {word}
-    </span>
-  ));
+  return words.map((word, index) => {
+    const normalizedDistance = Math.abs(index - center) / Math.max(center, 1);
+    const lift = 2 + (Math.cos(Math.min(1, normalizedDistance) * Math.PI / 2) * 16);
+    const rotation = ((index - center) / Math.max(center, 1)) * 1;
+
+    return (
+      <span
+        className="marketing-purpose-word"
+        key={`${word}-${index}`}
+        style={{
+          "--wave-lift": `${lift.toFixed(2)}px`,
+          "--wave-rotation": `${rotation.toFixed(2)}deg`,
+        } as CSSProperties}
+      >
+        {word}
+      </span>
+    );
+  });
 }
 
 function PurposeStatement({
   blend = false,
+  hoveredLine,
+  onPhraseHover,
   revealedLines,
 }: {
   blend?: boolean;
+  hoveredLine: number | null;
+  onPhraseHover?: (index: number | null) => void;
   revealedLines: readonly boolean[];
 }) {
   return (
@@ -102,9 +132,11 @@ function PurposeStatement({
     >
       {PURPOSE_PHRASES.map((phrase, index) => (
         <span
-          className={`${index === 2 ? "marketing-purpose-phrase marketing-purpose-phrase--new-thought" : "marketing-purpose-phrase"}${revealedLines[index] ? " is-revealed" : ""}`}
+          className={`${index === 2 ? "marketing-purpose-phrase marketing-purpose-phrase--new-thought" : "marketing-purpose-phrase"}${revealedLines[index] ? " is-revealed" : ""}${hoveredLine === index ? " is-waved" : ""}`}
           data-purpose-phrase={blend ? undefined : "true"}
           key={phrase}
+          onMouseEnter={blend ? undefined : () => onPhraseHover?.(index)}
+          onMouseLeave={blend ? undefined : () => onPhraseHover?.(null)}
         >
           <PurposePhrase phrase={phrase} />
         </span>
@@ -188,6 +220,7 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
     && typeof window.matchMedia === "function"
     && window.matchMedia("(prefers-reduced-motion: reduce)").matches
   ));
+  const [hoveredPurposeLine, setHoveredPurposeLine] = useState<number | null>(null);
   const cleanupTimer = useRef<number | null>(null);
   const purposeSection = useRef<HTMLElement | null>(null);
   const pixelTransition = useRef<HTMLDivElement | null>(null);
@@ -208,19 +241,26 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
     const reducedMotion = typeof window.matchMedia === "function"
       ? window.matchMedia("(prefers-reduced-motion: reduce)")
       : null;
-    const blocks = Array.from(transition.querySelectorAll<HTMLElement>(".marketing-pixel-transition-block"));
-    const base = transition.querySelector<HTMLElement>(".marketing-pixel-transition-base");
+    const cells = Array.from(transition.querySelectorAll<HTMLElement>(".marketing-pixel-transition-cell"));
     const blendLayer = purposeStatementStack.current?.querySelector<HTMLElement>("[data-purpose-blend]");
     let animationFrame = 0;
 
     const setPixelProgress = (progress: number) => {
       const clamped = Math.min(1, Math.max(0, progress));
       transition.dataset.progress = clamped.toFixed(2);
-      if (base) base.style.transform = `translateY(${(1 - clamped) * 100}%)`;
-      blocks.forEach((block, index) => {
-        const delay = (index % 4) * 0.055;
-        const localProgress = Math.min(1, Math.max(0, (clamped - delay) / (1 - delay)));
-        block.style.transform = `translateY(${(1 - localProgress) * 70}%)`;
+      transition.dataset.complete = clamped >= 0.999 ? "true" : "false";
+      cells.forEach((cell) => {
+        const threshold = Number(cell.dataset.threshold ?? 0);
+        const variant = Number(cell.dataset.variant ?? 0);
+        const localProgress = Math.min(1, Math.max(0, (clamped - threshold) / 0.34));
+        const sequence = PIXEL_COLOR_SEQUENCES[variant] ?? PIXEL_COLOR_SEQUENCES[0];
+        const colorIndex = Math.min(sequence.length - 1, Math.floor(localProgress * sequence.length));
+
+        cell.style.opacity = localProgress > 0 ? "1" : "0";
+        cell.style.backgroundColor = clamped >= 0.999 ? "#4CA0FE" : sequence[colorIndex];
+        cell.style.transform = localProgress >= 1
+          ? "translateY(0) scale(1)"
+          : `translateY(${(1 - localProgress) * 18}%) scale(${0.82 + (localProgress * 0.18)})`;
       });
     };
 
@@ -256,7 +296,7 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
 
       const viewportHeight = Math.max(window.innerHeight, 1);
       const transitionRect = transition.getBoundingClientRect();
-      setPixelProgress((viewportHeight * 0.96 - transitionRect.top) / (viewportHeight * 0.72));
+      setPixelProgress((viewportHeight - transitionRect.top) / viewportHeight);
 
       const sectionRect = section.getBoundingClientRect();
       if (sectionRect.height <= 0) return;
@@ -378,19 +418,22 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
         aria-hidden="true"
         ref={pixelTransition}
       >
-        <span className="marketing-pixel-transition-base" />
-        {PURPOSE_PIXEL_BLOCKS.map((block, index) => (
+        <div className="marketing-pixel-transition-canvas">
+        {PURPOSE_PIXEL_CELLS.map((cell) => (
           <span
-            className="marketing-pixel-transition-block"
-            key={`${block.left}-${index}`}
+            className="marketing-pixel-transition-cell"
+            data-threshold={cell.threshold.toFixed(3)}
+            data-variant={cell.variant}
+            key={cell.id}
             style={{
-              "--pixel-left": block.left,
-              "--pixel-width": block.width,
-              "--pixel-height": block.height,
-              "--pixel-color": block.color,
+              "--pixel-left": cell.left,
+              "--pixel-top": cell.top,
+              "--pixel-width": cell.width,
+              "--pixel-height": cell.height,
             } as CSSProperties}
           />
         ))}
+        </div>
       </div>
 
       <section
@@ -403,8 +446,12 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
           <div className="marketing-purpose-copy">
             <p className="marketing-purpose-label">About Us</p>
             <div className="marketing-purpose-statement-stack" ref={purposeStatementStack}>
-              <PurposeStatement revealedLines={revealedPurposeLines} />
-              <PurposeStatement blend revealedLines={revealedPurposeLines} />
+              <PurposeStatement
+                hoveredLine={hoveredPurposeLine}
+                onPhraseHover={setHoveredPurposeLine}
+                revealedLines={revealedPurposeLines}
+              />
+              <PurposeStatement blend hoveredLine={hoveredPurposeLine} revealedLines={revealedPurposeLines} />
             </div>
           </div>
           <PurposeWorkspaceVisual visualRef={purposeVisual} />
