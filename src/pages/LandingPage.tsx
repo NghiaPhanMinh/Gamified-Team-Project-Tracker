@@ -52,6 +52,30 @@ const PURPOSE_PHRASES = [
   "from start to finish.",
 ] as const;
 
+const PURPOSE_PIXEL_BLOCKS = [
+  { left: "0%", width: "12%", height: "58%", color: "#4CA0FE", delay: "0ms" },
+  { left: "9%", width: "8%", height: "48%", color: "#FFF73F", delay: "70ms" },
+  { left: "15%", width: "14%", height: "72%", color: "#4CA0FE", delay: "30ms" },
+  { left: "27%", width: "9%", height: "54%", color: "#FF8AE7", delay: "120ms" },
+  { left: "34%", width: "15%", height: "64%", color: "#4CA0FE", delay: "50ms" },
+  { left: "47%", width: "8%", height: "48%", color: "#101517", delay: "160ms" },
+  { left: "53%", width: "13%", height: "76%", color: "#4CA0FE", delay: "20ms" },
+  { left: "64%", width: "10%", height: "52%", color: "#FFF73F", delay: "105ms" },
+  { left: "72%", width: "13%", height: "68%", color: "#4CA0FE", delay: "45ms" },
+  { left: "83%", width: "8%", height: "48%", color: "#FF8AE7", delay: "145ms" },
+  { left: "89%", width: "11%", height: "60%", color: "#4CA0FE", delay: "65ms" },
+] as const;
+
+function PurposePhrase({ phrase }: { phrase: string }) {
+  const words = phrase.split(" ");
+
+  return words.map((word, index) => (
+    <span className="marketing-purpose-word" key={`${word}-${index}`}>
+      {word}
+    </span>
+  ));
+}
+
 function PurposeWorkspaceVisual() {
   return (
     <div
@@ -60,6 +84,9 @@ function PurposeWorkspaceVisual() {
       aria-label="Simplified MayLamDi project workspace showing shared tasks and visible ownership"
       data-purpose-visual
     >
+      <span className="marketing-purpose-workspace-overlap" aria-hidden="true">
+        and keep contribution visible
+      </span>
       <div className="marketing-purpose-workspace-bar">
         <div aria-hidden="true">
           <span />
@@ -115,6 +142,12 @@ function buildBurstWords(): BurstWord[] {
 
 export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
   const [burstWords, setBurstWords] = useState<BurstWord[]>([]);
+  const [purposeRevealed, setPurposeRevealed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const shouldReduceMotion = typeof window.matchMedia === "function"
+      && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    return shouldReduceMotion || typeof window.IntersectionObserver === "undefined";
+  });
   const cleanupTimer = useRef<number | null>(null);
   const purposeSection = useRef<HTMLElement | null>(null);
 
@@ -128,83 +161,23 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
     const section = purposeSection.current;
     if (!section) return;
 
-    const phrases = Array.from(
-      section.querySelectorAll<HTMLElement>("[data-purpose-phrase]"),
-    );
-    const visual = section.querySelector<HTMLElement>("[data-purpose-visual]");
     const reducedMotion = typeof window.matchMedia === "function"
       ? window.matchMedia("(prefers-reduced-motion: reduce)")
       : null;
-    const mobileLayout = typeof window.matchMedia === "function"
-      ? window.matchMedia("(max-width: 760px)")
-      : null;
-    const requestFrame = typeof window.requestAnimationFrame === "function"
-      ? window.requestAnimationFrame.bind(window)
-      : (callback: FrameRequestCallback) => window.setTimeout(() => callback(Date.now()), 16);
-    const cancelFrame = typeof window.cancelAnimationFrame === "function"
-      ? window.cancelAnimationFrame.bind(window)
-      : window.clearTimeout.bind(window);
-    let animationFrame: number | null = null;
+    if (reducedMotion?.matches || typeof IntersectionObserver === "undefined") return;
 
-    const clamp = (value: number) => Math.min(1, Math.max(0, value));
-
-    const updatePurposeReveal = () => {
-      animationFrame = null;
-      const rect = section.getBoundingClientRect();
-      const shouldReduceMotion = reducedMotion?.matches ?? false;
-      const isMobileLayout = mobileLayout?.matches ?? window.innerWidth <= 760;
-      let progress = 1;
-
-      if (!shouldReduceMotion) {
-        if (isMobileLayout) {
-          progress = clamp(
-            (window.innerHeight * 0.82 - rect.top) / Math.max(rect.height * 0.78, 1),
-          );
-        } else {
-          progress = clamp(
-            -rect.top / Math.max(section.offsetHeight - window.innerHeight, 1),
-          );
-        }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        setPurposeRevealed(true);
+        observer.disconnect();
       }
+    }, {
+      rootMargin: "0px 0px -18% 0px",
+      threshold: 0.08,
+    });
 
-      phrases.forEach((phrase, index) => {
-        const start = phrases.length > 1 ? (index / (phrases.length - 1)) * 0.72 : 0;
-        const reveal = shouldReduceMotion
-          ? 1
-          : clamp((progress - start) / 0.28);
-        const easedReveal = 1 - Math.pow(1 - reveal, 3);
-
-        phrase.style.setProperty("--purpose-phrase-opacity", String(0.2 + easedReveal * 0.8));
-        phrase.style.setProperty("--purpose-phrase-shift", `${(1 - easedReveal) * 12}px`);
-      });
-
-      if (visual) {
-        const motionProgress = shouldReduceMotion ? 1 : progress;
-        visual.style.setProperty("--purpose-visual-y", `${(1 - motionProgress) * 80}px`);
-        visual.style.setProperty("--purpose-visual-rotate", `${(1 - motionProgress) * 3}deg`);
-        visual.style.setProperty("--purpose-visual-scale", String(0.95 + motionProgress * 0.05));
-      }
-    };
-
-    const schedulePurposeReveal = () => {
-      if (animationFrame === null) {
-        animationFrame = requestFrame(updatePurposeReveal);
-      }
-    };
-
-    updatePurposeReveal();
-    window.addEventListener("scroll", schedulePurposeReveal, { passive: true });
-    window.addEventListener("resize", schedulePurposeReveal);
-    reducedMotion?.addEventListener("change", schedulePurposeReveal);
-    mobileLayout?.addEventListener("change", schedulePurposeReveal);
-
-    return () => {
-      window.removeEventListener("scroll", schedulePurposeReveal);
-      window.removeEventListener("resize", schedulePurposeReveal);
-      reducedMotion?.removeEventListener("change", schedulePurposeReveal);
-      mobileLayout?.removeEventListener("change", schedulePurposeReveal);
-      if (animationFrame !== null) cancelFrame(animationFrame);
-    };
+    observer.observe(section);
+    return () => observer.disconnect();
   }, []);
 
   function triggerTextBurst() {
@@ -281,41 +254,50 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
           </div>
         </div>
 
-        <div className="marketing-preview" aria-label="MayLamDi workspace preview">
-          <div className="marketing-preview-top">
-            <span className="card-eyebrow">Project at a glance</span>
-            <span className="live-badge">Live workspace</span>
-          </div>
-          <div className="marketing-preview-card">
-            <span className="card-eyebrow">Brand campaign · Ideation</span>
-            <h2>Build a direction your team can share.</h2>
-            <p>Brief → plan → execute, with clear ownership at every step.</p>
-            <div className="progress-track" aria-label="Project progress 68%"><span style={{ width: "68%" }} /></div>
-          </div>
-          <div className="marketing-preview-grid">
-            <div className="marketing-mini-card"><span className="card-eyebrow">Team workload</span><strong>Balanced</strong><small>Visible before work drifts</small></div>
-            <div className="marketing-mini-card"><span className="card-eyebrow">AI support</span><strong>Reviewable</strong><small>Suggestions stay with your team</small></div>
-          </div>
-        </div>
       </section>
 
+      <div
+        className={`marketing-pixel-transition${purposeRevealed ? " is-revealed" : ""}`}
+        aria-hidden="true"
+      >
+        <span className="marketing-pixel-transition-base" />
+        {PURPOSE_PIXEL_BLOCKS.map((block, index) => (
+          <span
+            className="marketing-pixel-transition-block"
+            key={`${block.left}-${index}`}
+            style={{
+              "--pixel-left": block.left,
+              "--pixel-width": block.width,
+              "--pixel-height": block.height,
+              "--pixel-color": block.color,
+              "--pixel-delay": block.delay,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
       <section
-        className="marketing-purpose"
+        className={`marketing-purpose${purposeRevealed ? " is-revealed" : ""}`}
         id="why-maylamdi"
         aria-labelledby="why-maylamdi-title"
         ref={purposeSection}
       >
         <div className="marketing-purpose-sticky">
           <div className="marketing-purpose-copy">
-            <p className="marketing-purpose-label">Why MayLamDi</p>
-            <h2 className="marketing-purpose-statement" id="why-maylamdi-title">
+            <p className="marketing-purpose-label">About Us</p>
+            <h2
+              className="marketing-purpose-statement"
+              id="why-maylamdi-title"
+              aria-label={PURPOSE_PHRASES.join(" ")}
+            >
               {PURPOSE_PHRASES.map((phrase, index) => (
                 <span
                   className={index === 2 ? "marketing-purpose-phrase marketing-purpose-phrase--new-thought" : "marketing-purpose-phrase"}
                   data-purpose-phrase
                   key={phrase}
+                  style={{ "--purpose-index": index } as CSSProperties}
                 >
-                  {phrase}
+                  <PurposePhrase phrase={phrase} />
                 </span>
               ))}
             </h2>

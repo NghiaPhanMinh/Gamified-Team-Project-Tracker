@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 
@@ -46,12 +46,51 @@ describe("MayLamDi landing page", () => {
     const purpose = container.querySelector<HTMLElement>("#why-maylamdi");
     const features = container.querySelector<HTMLElement>("#how-it-works");
 
-    expect(screen.getByText("Why MayLamDi")).toBeInTheDocument();
-    expect(screen.getByText("Group projects should feel shared,")).toBeInTheDocument();
-    expect(screen.getByText("not carried by one person.")).toBeInTheDocument();
+    expect(screen.getByText("About Us")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /group projects should feel shared.*not carried by one person/i })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: /simplified maylamdi project workspace/i })).toBeInTheDocument();
     expect(purpose?.nextElementSibling).toBe(features);
     expect(purpose?.querySelectorAll("[data-purpose-phrase]")).toHaveLength(7);
+  });
+
+  it("reveals the About scene once and keeps it revealed", () => {
+    let reveal!: IntersectionObserverCallback;
+    const disconnect = vi.fn();
+    class MockIntersectionObserver {
+      constructor(callback: IntersectionObserverCallback) {
+        reveal = callback;
+      }
+
+      observe = vi.fn();
+      disconnect = disconnect;
+    }
+    vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
+
+    const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
+    const purpose = container.querySelector<HTMLElement>(".marketing-purpose");
+    const transition = container.querySelector<HTMLElement>(".marketing-pixel-transition");
+
+    expect(purpose).not.toHaveClass("is-revealed");
+    act(() => reveal([{ isIntersecting: true } as IntersectionObserverEntry], {} as IntersectionObserver));
+    expect(purpose).toHaveClass("is-revealed");
+    expect(transition).toHaveClass("is-revealed");
+    expect(disconnect).toHaveBeenCalled();
+
+    act(() => reveal([{ isIntersecting: false } as IntersectionObserverEntry], {} as IntersectionObserver));
+    expect(purpose).toHaveClass("is-revealed");
+  });
+
+  it("shows a static completed scene when reduced motion is preferred", () => {
+    vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+
+    const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
+
+    expect(container.querySelector(".marketing-purpose")).toHaveClass("is-revealed");
+    expect(container.querySelector(".marketing-pixel-transition")).toHaveClass("is-revealed");
   });
 
   it("renders the looping card sequence and replays the branded title burst", () => {
@@ -74,14 +113,20 @@ describe("MayLamDi landing page", () => {
     expect(container.querySelectorAll(".marketing-title-sketch path")).toHaveLength(2);
   });
 
-  it("places the existing project preview across the full hero grid", () => {
+  it("removes the Project at a Glance preview without replacing it", () => {
     const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
 
-    const hero = container.querySelector<HTMLElement>(".marketing-hero");
-    const visual = container.querySelector<HTMLElement>(".marketing-hero-visual");
-    const preview = container.querySelector<HTMLElement>(".marketing-preview");
+    expect(screen.queryByText(/project at a glance/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/live workspace/i)).not.toBeInTheDocument();
+    expect(container.querySelector(".marketing-preview")).not.toBeInTheDocument();
+    expect(container.querySelector(".marketing-hero-visual")).toBeInTheDocument();
+  });
 
-    expect(preview?.parentElement).toBe(hero);
-    expect(visual).not.toContainElement(preview);
+  it("renders the MayLamDi block transition and word-level wave hooks", () => {
+    const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
+
+    expect(container.querySelectorAll(".marketing-pixel-transition-block")).toHaveLength(11);
+    expect(container.querySelectorAll(".marketing-purpose-word").length).toBeGreaterThan(20);
+    expect(container.querySelector(".marketing-purpose-workspace-overlap")).toHaveAttribute("aria-hidden", "true");
   });
 });

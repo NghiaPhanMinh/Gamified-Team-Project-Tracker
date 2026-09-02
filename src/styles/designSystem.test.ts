@@ -31,13 +31,12 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("overflow-x: auto");
   });
 
-  it("uses the selected local display font and blue project preview treatment", () => {
+  it("uses the selected local display font without the removed hero preview", () => {
     expect(css).toContain('font-family: "Paytone One"');
     expect(css).toContain('/fonts/PaytoneOne-Regular.ttf');
     expect(css).not.toContain('font-family: "Chaco"');
     expect(css).not.toContain("Blodestarkly");
-    expect(css).toContain(".marketing-preview-card");
-    expect(css).toContain("background: var(--mld-info)");
+    expect(css).not.toContain(".marketing-preview-card");
   });
 
   it("keeps landing polish responsive and reduced-motion safe", () => {
@@ -47,22 +46,25 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("stroke-width: 3");
     expect(css).toContain("stroke-width: 1.5");
     expect(css).toContain(".marketing-hero-logo-stage");
-    expect(css).toContain("grid-column: 1 / -1");
-    expect(css).toContain('"preview-primary preview-supporting"');
     expect(css).toContain("padding: 68px 0 76px");
     expect(css).toContain("stroke-dashoffset: 0");
   });
 
-  it("keeps the scoped purpose story sticky, phrase-led, and mobile-safe", () => {
+  it("keeps the scoped purpose story one-way, phrase-led, and mobile-safe", () => {
+    expect(css).toContain(".marketing-pixel-transition-block");
+    expect(css).toContain("background: #4ca0fe");
     expect(css).toContain(".marketing-purpose");
-    expect(css).toContain("min-height: 175vh");
+    expect(css).toContain("min-height: 142vh");
     expect(css).toContain(".marketing-purpose-sticky");
     expect(css).toContain("position: sticky");
-    expect(css).toContain("--purpose-phrase-opacity");
-    expect(css).toContain("--purpose-visual-y");
+    expect(css).toContain("transform: translateX(-80px)");
+    expect(css).toContain(".marketing-purpose.is-revealed .marketing-purpose-phrase");
+    expect(css).toContain("mix-blend-mode: difference");
+    expect(css).toContain(".marketing-purpose-word:nth-child(4n + 1)");
     expect(css).toContain("@media (max-width: 760px)");
     expect(css).toContain("min-height: auto");
-    expect(css).toContain(".marketing-purpose-phrase");
+    expect(css).toContain(".marketing-purpose-workspace-overlap");
+    expect(css).toContain("display: none");
     expect(css).toContain("opacity: 1");
   });
 
