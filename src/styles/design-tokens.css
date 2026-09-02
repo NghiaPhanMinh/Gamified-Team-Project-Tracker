@@ -2730,7 +2730,7 @@ body:has(.marketing-about-transition-scene) {
   position: relative;
   z-index: 4;
   height: clamp(180px, 25vh, 300px);
-  overflow: hidden;
+  overflow: clip;
   background: #4ca0fe;
 }
 
@@ -2748,7 +2748,7 @@ body:has(.marketing-about-transition-scene) {
   position: relative;
   z-index: 3;
   min-height: max(760px, 116vh);
-  overflow: hidden;
+  overflow: clip;
   background: #ff8ae7;
   color: #101517;
 }
@@ -2799,8 +2799,8 @@ body:has(.marketing-about-transition-scene) {
 .marketing-feature-tag {
   position: absolute;
   z-index: 3;
-  top: var(--tag-top);
-  left: var(--tag-left);
+  top: 0;
+  left: 0;
   max-width: min(34vw, 330px);
   min-height: 44px;
   padding: 11px 18px;
@@ -2815,15 +2815,13 @@ body:has(.marketing-about-transition-scene) {
   letter-spacing: 0.04em;
   line-height: 1;
   text-align: left;
-  transform: translateY(-180px) rotate(var(--tag-rotation));
-  transition: background 240ms ease, color 240ms ease, border-color 240ms ease, transform 240ms ease;
+  transform: translate3d(var(--tag-x), var(--tag-y), 0) rotate(var(--tag-rotation));
+  scale: 1;
+  opacity: var(--tag-opacity, 0);
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease, scale 180ms ease;
   user-select: none;
   touch-action: none;
   white-space: nowrap;
-}
-
-.marketing-feature-tag.is-dropped {
-  animation: marketing-feature-tag-drop 760ms cubic-bezier(0.2, 0.8, 0.25, 1.08) var(--tag-delay) both;
 }
 
 .marketing-feature-tag:hover,
@@ -2831,11 +2829,10 @@ body:has(.marketing-about-transition-scene) {
   border-color: #fff73f;
   background: #fff73f;
   color: #101517;
-  transform: scale(1.05) rotate(0deg);
+  scale: 1.04;
 }
 
-.marketing-feature-tag:not(.is-dropped) {
-  opacity: 0;
+.marketing-feature-tag:not(.is-visible) {
   pointer-events: none;
 }
 
@@ -2843,7 +2840,7 @@ body:has(.marketing-about-transition-scene) {
 .marketing-feature-tag.is-dragging {
   z-index: 8;
   cursor: grabbing;
-  transform: scale(1.04) rotate(0deg);
+  scale: 1.02;
 }
 
 .marketing-feature-tag:focus-visible {
@@ -2871,31 +2868,45 @@ body:has(.marketing-about-transition-scene) {
   letter-spacing: -0.07em;
   line-height: 0.78;
   text-align: center;
-  transform: translateY(48%);
+  transform: translateY(72%);
   white-space: nowrap;
 }
 
 .marketing-features-description {
   position: absolute;
   z-index: 4;
-  right: clamp(20px, 5vw, 80px);
-  bottom: clamp(128px, 17vh, 180px);
-  width: min(380px, calc(100% - 40px));
+  top: var(--feature-info-top, 12px);
+  left: var(--feature-info-left, 12px);
+  width: min(320px, calc(100% - 24px));
   padding: 18px 20px;
-  border: 2px solid #fffdec;
+  border: 2px solid #101517;
   border-radius: var(--mld-radius-card);
-  background: #101517;
-  color: #fffdec;
+  background: #fff73f;
+  color: #101517;
+  box-shadow: 6px 6px 0 #101517;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.94);
+  transform-origin: center left;
+  transition: opacity 180ms ease, transform 180ms ease, visibility 180ms ease;
+  visibility: hidden;
+}
+
+.marketing-features-description.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+  visibility: visible;
 }
 
 .marketing-features-description span,
 .marketing-features-description strong,
 .marketing-features-description p {
   display: block;
+  color: #101517;
 }
 
 .marketing-features-description span {
-  color: #fff73f;
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -2910,15 +2921,13 @@ body:has(.marketing-about-transition-scene) {
 
 .marketing-features-description p {
   margin: 8px 0 0;
-  color: #fffdec;
   font-size: var(--mld-body-small-size);
   line-height: 1.35;
 }
 
-@keyframes marketing-feature-tag-drop {
-  0% { opacity: 0; transform: translateY(-180px) rotate(-9deg) scale(0.96); }
-  72% { opacity: 1; transform: translateY(10px) rotate(calc(var(--tag-rotation) * 0.8)) scale(1.01); }
-  100% { opacity: 1; transform: translateY(0) rotate(var(--tag-rotation)) scale(1); }
+@keyframes marketing-feature-tag-mobile-drop {
+  0% { opacity: 0; transform: translateY(-72px) rotate(-7deg); }
+  100% { opacity: 1; transform: translateY(0) rotate(var(--tag-rotation)); }
 }
 
 .maylamdi-burst {
@@ -3129,6 +3138,11 @@ body:has(.marketing-about-transition-scene) {
 
   .marketing-features-tag-canvas {
     inset: 0 16px;
+    display: block;
+    padding: 0;
+  }
+
+  .marketing-features-tag-canvas.is-simple {
     display: flex;
     flex-wrap: wrap;
     align-content: flex-start;
@@ -3137,12 +3151,19 @@ body:has(.marketing-about-transition-scene) {
     padding-top: var(--mld-space-6);
   }
 
-  .marketing-feature-tag {
+  .marketing-features-tag-canvas.is-simple .marketing-feature-tag {
     position: relative;
     top: auto !important;
     left: auto !important;
     max-width: 100%;
     white-space: normal;
+    transform: translateY(-72px) rotate(var(--tag-rotation));
+    opacity: 0;
+  }
+
+  .marketing-features-tag-canvas.is-simple .marketing-feature-tag.is-visible {
+    animation: marketing-feature-tag-mobile-drop 620ms cubic-bezier(0.2, 0.8, 0.25, 1) var(--tag-delay) both;
+    opacity: 1;
   }
 
   .marketing-features-title-mask {
@@ -3154,10 +3175,7 @@ body:has(.marketing-about-transition-scene) {
   }
 
   .marketing-features-description {
-    right: 16px;
-    bottom: 142px;
-    left: 16px;
-    width: auto;
+    width: min(320px, calc(100% - 32px));
   }
 }
 
@@ -3234,7 +3252,12 @@ body:has(.marketing-about-transition-scene) {
   }
 
   .marketing-feature-tag {
-    transform: none;
+    animation: none;
+  }
+
+  .marketing-feature-tag.is-reduced {
+    opacity: 1;
+    transform: translate3d(var(--tag-x), var(--tag-y), 0) rotate(var(--tag-rotation));
   }
 }
 

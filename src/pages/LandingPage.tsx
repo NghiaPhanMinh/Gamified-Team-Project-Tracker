@@ -71,32 +71,32 @@ const FEATURE_TAGS = [
   {
     id: "ai-assistant",
     label: "AI ASSISTANT",
-    description: "Turns a project brief into editable task and allocation suggestions.",
+    description: "Turns your brief into editable plans, tasks, and allocation suggestions.",
   },
   {
     id: "team-tracking",
     label: "TEAM TRACKING",
-    description: "See responsibilities, workload, evidence, and progress in one place.",
+    description: "See ownership, deadlines, workload, and progress in one shared view.",
   },
   {
     id: "fair-task-allocation",
     label: "FAIR TASK ALLOCATION",
-    description: "Make ownership visible so the work can be shared before it becomes a problem.",
+    description: "Suggests ownership using skills, workload, capacity, and team context.",
   },
   {
     id: "gamification",
     label: "GAMIFICATION",
-    description: "Turn real project progress into shared quests and team outcomes.",
+    description: "Turns real project progress into shared quests and team outcomes.",
   },
   {
     id: "real-time-workspace",
     label: "REAL-TIME WORKSPACE",
-    description: "Keep project changes and team progress visible as they happen.",
+    description: "Keeps project changes and team progress visible as they happen.",
   },
   {
     id: "contribution-evidence",
     label: "CONTRIBUTION EVIDENCE",
-    description: "Keep a useful record of who contributed what and when.",
+    description: "Attach proof of work so contribution stays visible throughout the project.",
   },
   {
     id: "workload-visibility",
@@ -106,17 +106,17 @@ const FEATURE_TAGS = [
   {
     id: "project-planning",
     label: "PROJECT PLANNING",
-    description: "Move from a brief to a clear, shared sequence of project work.",
+    description: "Move from brief to phases, milestones, tasks, and owners.",
   },
   {
     id: "peer-review",
     label: "PEER REVIEW",
-    description: "Create supportive checkpoints for feedback before the final handoff.",
+    description: "Review evidence and recommend completion or changes.",
   },
   {
     id: "human-control",
     label: "HUMAN CONTROL",
-    description: "Keep every suggestion editable and every important decision with the team.",
+    description: "AI suggests; your team reviews, edits, and decides.",
   },
 ] as const;
 
@@ -125,6 +125,31 @@ type FeatureTagPosition = {
   top: number;
   rotation: number;
   delay: number;
+};
+
+type FeatureBody = {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  angle: number;
+  angularVelocity: number;
+  width: number;
+  height: number;
+  spawnDelay: number;
+  spawned: boolean;
+  opacity: number;
+};
+
+type FeatureBodyMap = Record<string, FeatureBody>;
+
+type FeatureDrag = {
+  id: string;
+  offsetX: number;
+  offsetY: number;
+  lastX: number;
+  lastY: number;
+  lastTime: number;
 };
 
 const INITIAL_FEATURE_TAG_POSITIONS: Record<string, FeatureTagPosition> = {
@@ -274,89 +299,444 @@ function PurposeWorkspaceVisual({ visualRef }: { visualRef: RefObject<HTMLDivEle
   );
 }
 
+function createFeatureBodies(): FeatureBodyMap {
+  return FEATURE_TAGS.reduce<FeatureBodyMap>((bodies, tag) => {
+    bodies[tag.id] = {
+      x: 0,
+      y: -120,
+      vx: 0,
+      vy: 0,
+      angle: INITIAL_FEATURE_TAG_POSITIONS[tag.id].rotation,
+      angularVelocity: 0,
+      width: Math.max(130, tag.label.length * 9 + 36),
+      height: 44,
+      spawnDelay: INITIAL_FEATURE_TAG_POSITIONS[tag.id].delay,
+      spawned: false,
+      opacity: 0,
+    };
+    return bodies;
+  }, {});
+}
+
+function stepFeatureBodies(
+  bodies: FeatureBodyMap,
+  width: number,
+  height: number,
+  floorY: number,
+  deltaSeconds: number,
+  draggingTagId: string | null,
+): FeatureBodyMap {
+  const next = Object.fromEntries(Object.entries(bodies).map(([id, body]) => [id, { ...body }])) as FeatureBodyMap;
+  const gravity = 1180;
+  const restitution = 0.27;
+  const friction = 0.78;
+  const airFriction = Math.pow(0.992, deltaSeconds * 60);
+
+  Object.entries(next).forEach(([id, body]) => {
+    if (!body.spawned) {
+      body.spawnDelay = Math.max(0, body.spawnDelay - deltaSeconds * 1000);
+      if (body.spawnDelay <= 0) {
+        body.spawned = true;
+        body.opacity = 1;
+      }
+    }
+    if (!body.spawned || id === draggingTagId) return;
+
+    body.vy += gravity * deltaSeconds;
+    body.vx *= airFriction;
+    body.vy *= airFriction;
+    body.angularVelocity *= airFriction;
+    body.x += body.vx * deltaSeconds;
+    body.y += body.vy * deltaSeconds;
+    body.angle += body.angularVelocity * deltaSeconds;
+
+    const maxX = Math.max(0, width - body.width);
+    if (body.x < 0) {
+      body.x = 0;
+      body.vx = Math.abs(body.vx) * restitution;
+      body.angularVelocity += 0.5;
+    } else if (body.x > maxX) {
+      body.x = maxX;
+      body.vx = -Math.abs(body.vx) * restitution;
+      body.angularVelocity -= 0.5;
+    }
+
+    const maxY = Math.max(0, floorY - body.height);
+    if (body.y > maxY) {
+      body.y = maxY;
+      if (body.vy > 0) body.vy *= -restitution;
+      body.vx *= friction;
+      body.angularVelocity *= 0.82;
+      if (Math.abs(body.vy) < 14) body.vy = 0;
+      if (Math.abs(body.vx) < 2) body.vx = 0;
+      if (Math.abs(body.angularVelocity) < 0.04) body.angularVelocity = 0;
+    }
+  });
+
+  const ids = Object.keys(next);
+  for (let iteration = 0; iteration < 2; iteration += 1) {
+    for (let index = 0; index < ids.length; index += 1) {
+      for (let otherIndex = index + 1; otherIndex < ids.length; otherIndex += 1) {
+        const first = next[ids[index]];
+        const second = next[ids[otherIndex]];
+        if (!first.spawned || !second.spawned) continue;
+
+        const overlapX = Math.min(first.x + first.width, second.x + second.width) - Math.max(first.x, second.x);
+        const overlapY = Math.min(first.y + first.height, second.y + second.height) - Math.max(first.y, second.y);
+        if (overlapX <= 0 || overlapY <= 0) continue;
+
+        const firstDragging = ids[index] === draggingTagId;
+        const secondDragging = ids[otherIndex] === draggingTagId;
+        const horizontal = overlapX < overlapY;
+        const direction = horizontal
+          ? (first.x < second.x ? -1 : 1)
+          : (first.y < second.y ? -1 : 1);
+        const amount = horizontal ? overlapX : overlapY;
+        if (firstDragging && !secondDragging) {
+          if (horizontal) second.x += amount * direction;
+          else second.y += amount * direction;
+        } else if (secondDragging && !firstDragging) {
+          if (horizontal) first.x -= amount * direction;
+          else first.y -= amount * direction;
+        } else {
+          if (horizontal) {
+            first.x += (amount / 2) * direction;
+            second.x -= (amount / 2) * direction;
+          } else {
+            first.y += (amount / 2) * direction;
+            second.y -= (amount / 2) * direction;
+          }
+        }
+
+        if (horizontal) {
+          const relativeVelocity = first.vx - second.vx;
+          if (relativeVelocity * direction > 0) {
+            const impulse = relativeVelocity * restitution;
+            if (!firstDragging) first.vx -= impulse;
+            if (!secondDragging) second.vx += impulse;
+          }
+          first.vx *= friction;
+          second.vx *= friction;
+          first.angularVelocity += direction * 0.12;
+          second.angularVelocity -= direction * 0.12;
+        } else {
+          const relativeVelocity = first.vy - second.vy;
+          if (relativeVelocity * direction > 0) {
+            const impulse = relativeVelocity * restitution;
+            if (!firstDragging) first.vy -= impulse;
+            if (!secondDragging) second.vy += impulse;
+          }
+          first.vy *= 0.9;
+          second.vy *= 0.9;
+        }
+      }
+    }
+  }
+
+  Object.values(next).forEach((body) => {
+    body.x = Math.min(Math.max(body.x, 0), Math.max(0, width - body.width));
+    body.y = Math.min(body.y, Math.max(0, floorY - body.height));
+  });
+  return next;
+}
+
 function FeatureTagComposition({ tagsDropped }: { tagsDropped: boolean }) {
+  const interactionRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
-  const dragState = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
-  const [activeTagId, setActiveTagId] = useState<string>(FEATURE_TAGS[0].id);
+  const infoRef = useRef<HTMLDivElement | null>(null);
+  const tagRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const dragState = useRef<FeatureDrag | null>(null);
+  const hideInfoTimer = useRef<number | null>(null);
+  const [bodies, setBodies] = useState<FeatureBodyMap>(() => createFeatureBodies());
+  const bodiesRef = useRef<FeatureBodyMap>(bodies);
   const [draggingTagId, setDraggingTagId] = useState<string | null>(null);
-  const [positions, setPositions] = useState<Record<string, FeatureTagPosition>>(
-    () => structuredClone(INITIAL_FEATURE_TAG_POSITIONS),
-  );
+  const [hoveredTagId, setHoveredTagId] = useState<string | null>(null);
+  const [infoPosition, setInfoPosition] = useState({ left: 16, top: 80 });
+  const [isInView, setIsInView] = useState(true);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth <= 760);
+  const [reducedMotion, setReducedMotion] = useState(() => (
+    typeof window !== "undefined"
+    && typeof window.matchMedia === "function"
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ));
 
-  const updateTagPosition = (event: PointerEvent<HTMLButtonElement>) => {
-    const drag = dragState.current;
+  const visibleTags = isMobile ? FEATURE_TAGS.slice(0, 7) : FEATURE_TAGS;
+
+  const commitBodies = (next: FeatureBodyMap) => {
+    bodiesRef.current = next;
+    setBodies(next);
+  };
+
+  const getCanvasGeometry = () => {
     const canvas = canvasRef.current;
-    if (!drag || !canvas) return;
-
+    if (!canvas) return null;
     const canvasRect = canvas.getBoundingClientRect();
-    const tagRect = event.currentTarget.getBoundingClientRect();
-    const maxLeft = Math.max(0, canvasRect.width - tagRect.width);
-    const maxTop = Math.max(0, canvasRect.height - tagRect.height);
-    const left = Math.min(maxLeft, Math.max(0, event.clientX - canvasRect.left - drag.offsetX));
-    const top = Math.min(maxTop, Math.max(0, event.clientY - canvasRect.top - drag.offsetY));
+    const width = canvasRect.width || 900;
+    const height = canvasRect.height || 680;
+    const titleMask = canvas.querySelector<HTMLElement>(".marketing-features-title-mask");
+    const titleRect = titleMask?.getBoundingClientRect();
+    const floorY = titleRect
+      ? Math.min(height - 40, Math.max(120, titleRect.top - canvasRect.top + 10))
+      : height - 150;
+    return { canvasRect, width, height, floorY };
+  };
 
-    setPositions((current) => ({
-      ...current,
-      [drag.id]: {
-        ...current[drag.id],
-        left: canvasRect.width > 0 ? (left / canvasRect.width) * 100 : current[drag.id].left,
-        top: canvasRect.height > 0 ? (top / canvasRect.height) * 100 : current[drag.id].top,
-        rotation: Math.max(-5, Math.min(5, (left / Math.max(maxLeft, 1) - 0.5) * 8)),
-      },
-    }));
+  const measureBody = (tagId: string) => {
+    const rect = tagRefs.current[tagId]?.getBoundingClientRect();
+    const current = bodiesRef.current[tagId];
+    return {
+      width: rect?.width || current.width,
+      height: rect?.height || current.height,
+    };
+  };
+
+  useEffect(() => {
+    const media = typeof window.matchMedia === "function"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
+    const updateMotion = () => setReducedMotion(Boolean(media?.matches));
+    media?.addEventListener("change", updateMotion);
+    return () => media?.removeEventListener("change", updateMotion);
+  }, []);
+
+  useEffect(() => {
+    const updateViewport = () => setIsMobile(window.innerWidth <= 760);
+    window.addEventListener("resize", updateViewport);
+    return () => window.removeEventListener("resize", updateViewport);
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const updateVisibility = () => {
+      const rect = canvas.getBoundingClientRect();
+      setIsInView(rect.bottom > 0 && rect.top < window.innerHeight);
+    };
+    const observer = typeof IntersectionObserver === "undefined"
+      ? null
+      : new IntersectionObserver(([entry]) => setIsInView(entry.isIntersecting), { threshold: 0 });
+    observer?.observe(canvas);
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    window.addEventListener("resize", updateVisibility);
+    const initialFrame = window.requestAnimationFrame(updateVisibility);
+    const handleVisibility = () => setIsInView(!document.hidden);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("scroll", updateVisibility);
+      window.removeEventListener("resize", updateVisibility);
+      window.cancelAnimationFrame(initialFrame);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!tagsDropped) return;
+    const frame = window.requestAnimationFrame(() => {
+      const geometry = getCanvasGeometry();
+      if (!geometry) return;
+      const next = createFeatureBodies();
+      FEATURE_TAGS.forEach((tag, index) => {
+        const measured = measureBody(tag.id);
+        const position = INITIAL_FEATURE_TAG_POSITIONS[tag.id];
+        const maxX = Math.max(0, geometry.width - measured.width);
+        const floorY = geometry.floorY;
+        const settledRow = Math.floor(index / 4);
+        next[tag.id] = {
+          ...next[tag.id],
+          width: measured.width,
+          height: measured.height,
+          x: reducedMotion
+            ? Math.min(maxX, (index % 4) * (maxX / 3))
+            : Math.min(maxX, (position.left / 100) * maxX),
+          y: reducedMotion
+            ? Math.max(0, floorY - measured.height - settledRow * measured.height * 0.82)
+            : -measured.height - (index % 3) * 26,
+          vx: reducedMotion || isMobile ? 0 : -26 + (index % 5) * 13,
+          vy: 0,
+          angle: position.rotation,
+          angularVelocity: reducedMotion || isMobile ? 0 : -0.55 + (index % 4) * 0.33,
+          spawnDelay: reducedMotion || isMobile ? 0 : position.delay,
+          spawned: reducedMotion || isMobile,
+          opacity: reducedMotion || isMobile ? 1 : 0,
+        };
+      });
+      commitBodies(next);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [isMobile, reducedMotion, tagsDropped]);
+
+  useEffect(() => {
+    if (!tagsDropped || reducedMotion || isMobile || !isInView) return;
+    let animationFrame = 0;
+    let previousTime = performance.now();
+    const animate = (time: number) => {
+      if (document.hidden || !isInView) return;
+      const geometry = getCanvasGeometry();
+      if (!geometry) return;
+      const deltaSeconds = Math.min(0.034, Math.max(0.001, (time - previousTime) / 1000));
+      previousTime = time;
+      commitBodies(stepFeatureBodies(
+        bodiesRef.current,
+        geometry.width,
+        geometry.height,
+        geometry.floorY,
+        deltaSeconds,
+        draggingTagId,
+      ));
+      animationFrame = window.requestAnimationFrame(animate);
+    };
+    animationFrame = window.requestAnimationFrame(animate);
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [draggingTagId, isInView, isMobile, reducedMotion, tagsDropped]);
+
+  useEffect(() => {
+    if (!hoveredTagId) return;
+    const updateInfoPosition = () => {
+      const interaction = interactionRef.current;
+      const tag = tagRefs.current[hoveredTagId];
+      const info = infoRef.current;
+      if (!interaction || !tag) return;
+      const interactionRect = interaction.getBoundingClientRect();
+      const tagRect = tag.getBoundingClientRect();
+      const infoWidth = info?.offsetWidth || Math.min(320, Math.max(220, window.innerWidth - 32));
+      const infoHeight = info?.offsetHeight || 136;
+      const gap = 14;
+      let left = tagRect.right - interactionRect.left + gap;
+      if (left + infoWidth > interactionRect.width - 12) {
+        left = tagRect.left - interactionRect.left - infoWidth - gap;
+      }
+      left = Math.min(Math.max(12, left), Math.max(12, interactionRect.width - infoWidth - 12));
+      const top = Math.min(
+        Math.max(12, tagRect.top - interactionRect.top - 8),
+        Math.max(12, interactionRect.height - infoHeight - 12),
+      );
+      setInfoPosition({ left, top });
+    };
+    const frame = window.requestAnimationFrame(updateInfoPosition);
+    window.addEventListener("resize", updateInfoPosition);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", updateInfoPosition);
+    };
+  }, [bodies, hoveredTagId]);
+
+  useEffect(() => () => {
+    if (hideInfoTimer.current !== null) window.clearTimeout(hideInfoTimer.current);
+  }, []);
+
+  const clearHideInfoTimer = () => {
+    if (hideInfoTimer.current !== null) {
+      window.clearTimeout(hideInfoTimer.current);
+      hideInfoTimer.current = null;
+    }
+  };
+
+  const showFeatureInfo = (tagId: string) => {
+    clearHideInfoTimer();
+    setHoveredTagId(tagId);
+  };
+
+  const scheduleInfoHide = () => {
+    clearHideInfoTimer();
+    hideInfoTimer.current = window.setTimeout(() => setHoveredTagId(null), 190);
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLButtonElement>, tagId: string) => {
-    if (!tagsDropped) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
+    showFeatureInfo(tagId);
+    if (!tagsDropped || reducedMotion || isMobile) return;
+    const geometry = getCanvasGeometry();
     const tagRect = event.currentTarget.getBoundingClientRect();
+    if (!geometry) return;
     dragState.current = {
       id: tagId,
       offsetX: event.clientX - tagRect.left,
       offsetY: event.clientY - tagRect.top,
+      lastX: event.clientX,
+      lastY: event.clientY,
+      lastTime: event.timeStamp || 0,
     };
-    setActiveTagId(tagId);
     setDraggingTagId(tagId);
-    event.currentTarget.setPointerCapture(event.pointerId);
+    if (typeof event.currentTarget.setPointerCapture === "function") {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
     event.preventDefault();
   };
 
   const handlePointerMove = (event: PointerEvent<HTMLButtonElement>) => {
-    if (dragState.current) updateTagPosition(event);
+    const drag = dragState.current;
+    const geometry = getCanvasGeometry();
+    if (!drag || !geometry) return;
+    const now = event.timeStamp || drag.lastTime + 16;
+    const elapsed = Math.max(16, now - drag.lastTime);
+    const body = bodiesRef.current[drag.id];
+    const measured = measureBody(drag.id);
+    const maxX = Math.max(0, geometry.width - measured.width);
+    const maxY = Math.max(0, geometry.floorY - measured.height);
+    const x = Math.min(maxX, Math.max(0, event.clientX - geometry.canvasRect.left - drag.offsetX));
+    const y = Math.min(maxY, Math.max(0, event.clientY - geometry.canvasRect.top - drag.offsetY));
+    const next = Object.fromEntries(Object.entries(bodiesRef.current).map(([id, current]) => [id, { ...current }])) as FeatureBodyMap;
+    next[drag.id] = {
+      ...body,
+      x,
+      y,
+      width: measured.width,
+      height: measured.height,
+      vx: ((event.clientX - drag.lastX) / elapsed) * 1000,
+      vy: ((event.clientY - drag.lastY) / elapsed) * 1000,
+      opacity: 1,
+      spawned: true,
+    };
+    drag.lastX = event.clientX;
+    drag.lastY = event.clientY;
+    drag.lastTime = now;
+    commitBodies(next);
   };
 
   const handlePointerUp = (event: PointerEvent<HTMLButtonElement>) => {
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+    if (typeof event.currentTarget.hasPointerCapture === "function" && event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    const drag = dragState.current;
+    if (drag) {
+      const body = bodiesRef.current[drag.id];
+      const next = Object.fromEntries(Object.entries(bodiesRef.current).map(([id, current]) => [id, { ...current }])) as FeatureBodyMap;
+      next[drag.id] = { ...body, vy: body.vy + 80 };
+      commitBodies(next);
     }
     dragState.current = null;
     setDraggingTagId(null);
   };
 
-  const activeTag = FEATURE_TAGS.find((tag) => tag.id === activeTagId) ?? FEATURE_TAGS[0];
+  const activeTag = FEATURE_TAGS.find((tag) => tag.id === hoveredTagId);
 
   return (
-    <div className="marketing-features-interaction">
-      <div className="marketing-features-tag-canvas" ref={canvasRef}>
-        {FEATURE_TAGS.map((tag) => {
-          const position = positions[tag.id] ?? INITIAL_FEATURE_TAG_POSITIONS[tag.id];
+    <div className="marketing-features-interaction" ref={interactionRef}>
+      <div className={`marketing-features-tag-canvas${isMobile ? " is-simple" : ""}`} ref={canvasRef}>
+        {visibleTags.map((tag) => {
+          const body = bodies[tag.id] ?? bodiesRef.current[tag.id];
+          const position = INITIAL_FEATURE_TAG_POSITIONS[tag.id];
           return (
             <button
-              aria-pressed={activeTagId === tag.id}
-              className={`marketing-feature-tag${tagsDropped ? " is-dropped" : ""}${draggingTagId === tag.id ? " is-dragging" : ""}`}
+              aria-label={tag.label}
+              className={`marketing-feature-tag${tagsDropped ? " is-dropped" : ""}${body.spawned ? " is-visible" : ""}${reducedMotion ? " is-reduced" : ""}${draggingTagId === tag.id ? " is-dragging" : ""}`}
               key={tag.id}
-              onClick={() => setActiveTagId(tag.id)}
+              onClick={() => showFeatureInfo(tag.id)}
+              onFocus={() => showFeatureInfo(tag.id)}
+              onBlur={scheduleInfoHide}
+              onMouseEnter={() => showFeatureInfo(tag.id)}
+              onMouseLeave={scheduleInfoHide}
               onPointerCancel={handlePointerUp}
               onPointerDown={(event) => handlePointerDown(event, tag.id)}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
+              ref={(element) => { tagRefs.current[tag.id] = element; }}
               style={{
                 "--tag-delay": `${position.delay}ms`,
-                "--tag-left": `${position.left}%`,
-                "--tag-rotation": `${position.rotation}deg`,
-                "--tag-top": `${position.top}%`,
+                "--tag-opacity": body.opacity,
+                "--tag-rotation": `${body.angle}deg`,
+                "--tag-x": `${body.x}px`,
+                "--tag-y": `${body.y}px`,
               } as CSSProperties}
               type="button"
             >
@@ -369,11 +749,20 @@ function FeatureTagComposition({ tagsDropped }: { tagsDropped: boolean }) {
         </div>
       </div>
 
-      <div className="marketing-features-description" aria-live="polite">
-        <span>Selected feature</span>
-        <strong>{activeTag.label}</strong>
-        <p>{activeTag.description}</p>
-      </div>
+      {activeTag ? (
+        <div
+          aria-live="polite"
+          className="marketing-features-description is-visible"
+          onMouseEnter={clearHideInfoTimer}
+          onMouseLeave={scheduleInfoHide}
+          ref={infoRef}
+          style={{ "--feature-info-left": `${infoPosition.left}px`, "--feature-info-top": `${infoPosition.top}px` } as CSSProperties}
+        >
+          <span>Feature info</span>
+          <strong>{activeTag.label}</strong>
+          <p>{activeTag.description}</p>
+        </div>
+      ) : null}
     </div>
   );
 }

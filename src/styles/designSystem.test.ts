@@ -27,9 +27,13 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain(".marketing-features-curtain");
     expect(css).toContain("--curtain-progress");
     expect(css).toContain(".marketing-feature-tag");
-    expect(css).toContain("@keyframes marketing-feature-tag-drop");
+    expect(css).toContain("@keyframes marketing-feature-tag-mobile-drop");
+    expect(css).toContain("translate3d(var(--tag-x), var(--tag-y), 0) rotate(var(--tag-rotation))");
     expect(css).toContain("cursor: grab");
     expect(css).toContain("cursor: grabbing");
+    expect(css).toContain("touch-action: none");
+    expect(css).toContain("box-shadow: 6px 6px 0 #101517");
+    expect(css).toContain("background: #fff73f");
     expect(css).toContain(".marketing-features-title-mask");
     expect(css).toContain("overflow: hidden");
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");

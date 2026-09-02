@@ -115,11 +115,28 @@ describe("MayLamDi landing page", () => {
     expect(screen.getByRole("heading", { name: "OUR FEATURES" })).toBeInTheDocument();
     expect(container.querySelectorAll(".marketing-feature-tag")).toHaveLength(10);
     expect(screen.getByRole("button", { name: "AI ASSISTANT" })).toBeInTheDocument();
+    expect(screen.queryByText("Selected feature")).not.toBeInTheDocument();
     expect(screen.queryByText("Start with the brief.")).not.toBeInTheDocument();
     expect(container.querySelector(".marketing-marquee")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /make teamwork.*feel shared/i }));
     expect(screen.getAllByText("MAYLAMDI")).toHaveLength(42);
+  });
+
+  it("shows the hovered feature description beside the current tag", () => {
+    const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
+    const aiTag = screen.getByRole("button", { name: "AI ASSISTANT" });
+
+    expect(container.querySelector(".marketing-features-description")).not.toBeInTheDocument();
+    fireEvent.mouseEnter(aiTag);
+
+    const description = container.querySelector<HTMLElement>(".marketing-features-description");
+    expect(description).toHaveClass("is-visible");
+    expect(screen.getByText("Feature info")).toBeInTheDocument();
+    expect(screen.getByText("Turns your brief into editable plans, tasks, and allocation suggestions.")).toBeInTheDocument();
+
+    fireEvent.mouseLeave(aiTag);
+    expect(description).toHaveClass("is-visible");
   });
 
   it("marks feel shared with a responsive hand-drawn annotation", () => {
