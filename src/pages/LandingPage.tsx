@@ -328,8 +328,8 @@ function stepFeatureBodies(
 ): FeatureBodyMap {
   const next = Object.fromEntries(Object.entries(bodies).map(([id, body]) => [id, { ...body }])) as FeatureBodyMap;
   const gravity = 1180;
-  const restitution = 0.27;
-  const friction = 0.78;
+  const restitution = 0.18;
+  const friction = 0.84;
   const airFriction = Math.pow(0.992, deltaSeconds * 60);
 
   Object.entries(next).forEach(([id, body]) => {
@@ -374,7 +374,7 @@ function stepFeatureBodies(
   });
 
   const ids = Object.keys(next);
-  for (let iteration = 0; iteration < 2; iteration += 1) {
+  for (let iteration = 0; iteration < 4; iteration += 1) {
     for (let index = 0; index < ids.length; index += 1) {
       for (let otherIndex = index + 1; otherIndex < ids.length; otherIndex += 1) {
         const first = next[ids[index]];
@@ -388,54 +388,59 @@ function stepFeatureBodies(
         const firstDragging = ids[index] === draggingTagId;
         const secondDragging = ids[otherIndex] === draggingTagId;
         const horizontal = overlapX < overlapY;
-        const direction = horizontal
-          ? (first.x < second.x ? -1 : 1)
-          : (first.y < second.y ? -1 : 1);
-        const amount = horizontal ? overlapX : overlapY;
+        const normal = horizontal
+          ? (first.x < second.x ? 1 : -1)
+          : (first.y < second.y ? 1 : -1);
+        const amount = (horizontal ? overlapX : overlapY) + 2;
         if (firstDragging && !secondDragging) {
-          if (horizontal) second.x += amount * direction;
-          else second.y += amount * direction;
+          if (horizontal) second.x += amount * normal;
+          else second.y += amount * normal;
         } else if (secondDragging && !firstDragging) {
-          if (horizontal) first.x -= amount * direction;
-          else first.y -= amount * direction;
+          if (horizontal) first.x -= amount * normal;
+          else first.y -= amount * normal;
         } else {
           if (horizontal) {
-            first.x += (amount / 2) * direction;
-            second.x -= (amount / 2) * direction;
+            first.x -= (amount / 2) * normal;
+            second.x += (amount / 2) * normal;
           } else {
-            first.y += (amount / 2) * direction;
-            second.y -= (amount / 2) * direction;
+            first.y -= (amount / 2) * normal;
+            second.y += (amount / 2) * normal;
           }
         }
 
         if (horizontal) {
-          const relativeVelocity = first.vx - second.vx;
-          if (relativeVelocity * direction > 0) {
-            const impulse = relativeVelocity * restitution;
-            if (!firstDragging) first.vx -= impulse;
-            if (!secondDragging) second.vx += impulse;
+          const relativeVelocity = (second.vx - first.vx) * normal;
+          if (relativeVelocity < 0) {
+            const impulse = -relativeVelocity * (1 + restitution) * 0.5;
+            if (!firstDragging) first.vx -= impulse * normal;
+            if (!secondDragging) second.vx += impulse * normal;
           }
           first.vx *= friction;
           second.vx *= friction;
-          first.angularVelocity += direction * 0.12;
-          second.angularVelocity -= direction * 0.12;
+          first.angularVelocity += normal * 0.06;
+          second.angularVelocity -= normal * 0.06;
         } else {
-          const relativeVelocity = first.vy - second.vy;
-          if (relativeVelocity * direction > 0) {
-            const impulse = relativeVelocity * restitution;
-            if (!firstDragging) first.vy -= impulse;
-            if (!secondDragging) second.vy += impulse;
+          const relativeVelocity = (second.vy - first.vy) * normal;
+          if (relativeVelocity < 0) {
+            const impulse = -relativeVelocity * (1 + restitution) * 0.5;
+            if (!firstDragging) first.vy -= impulse * normal;
+            if (!secondDragging) second.vy += impulse * normal;
           }
-          first.vy *= 0.9;
-          second.vy *= 0.9;
+          first.vy *= 0.94;
+          second.vy *= 0.94;
         }
       }
     }
+
+    Object.values(next).forEach((body) => {
+      body.x = Math.min(Math.max(body.x, 0), Math.max(0, width - body.width));
+      body.y = Math.min(Math.max(body.y, 0), Math.max(0, floorY - body.height));
+    });
   }
 
   Object.values(next).forEach((body) => {
     body.x = Math.min(Math.max(body.x, 0), Math.max(0, width - body.width));
-    body.y = Math.min(body.y, Math.max(0, floorY - body.height));
+    body.y = Math.min(Math.max(body.y, 0), Math.max(0, floorY - body.height));
   });
   return next;
 }
@@ -482,11 +487,11 @@ function FeatureTagComposition({ tagsDropped }: { tagsDropped: boolean }) {
   };
 
   const measureBody = (tagId: string) => {
-    const rect = tagRefs.current[tagId]?.getBoundingClientRect();
+    const element = tagRefs.current[tagId];
     const current = bodiesRef.current[tagId];
     return {
-      width: rect?.width || current.width,
-      height: rect?.height || current.height,
+      width: element?.offsetWidth || current.width,
+      height: element?.offsetHeight || current.height,
     };
   };
 

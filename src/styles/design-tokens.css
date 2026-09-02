@@ -2767,7 +2767,7 @@ body:has(.marketing-about-transition-scene) {
 
 .marketing-features-intro p {
   margin: 0;
-  color: #101517;
+  color: #fffdec;
   font-size: clamp(13px, 1vw, 16px);
   font-weight: 900;
   letter-spacing: 0.14em;
@@ -2776,7 +2776,7 @@ body:has(.marketing-about-transition-scene) {
 
 .marketing-features-intro span {
   max-width: 34ch;
-  color: #101517;
+  color: #fffdec;
   font-size: clamp(17px, 1.7vw, 24px);
   font-weight: 700;
   line-height: 1.12;
@@ -2868,7 +2868,7 @@ body:has(.marketing-about-transition-scene) {
   letter-spacing: -0.07em;
   line-height: 0.78;
   text-align: center;
-  transform: translateY(72%);
+  transform: translateY(60%);
   white-space: nowrap;
 }
 

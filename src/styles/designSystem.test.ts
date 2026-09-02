@@ -36,6 +36,8 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("background: #fff73f");
     expect(css).toContain(".marketing-features-title-mask");
     expect(css).toContain("overflow: hidden");
+    expect(css).toContain("color: #fffdec");
+    expect(css).toContain("transform: translateY(60%)");
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");
     expect(css).toContain(".marketing-features-description");
   });
