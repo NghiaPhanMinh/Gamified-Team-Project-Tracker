@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type RefObject } from "react";
 import { Link } from "react-router-dom";
 import { ArrowDown, CheckCircle2 } from "lucide-react";
 
@@ -19,31 +19,6 @@ type PurposeCharacterHover = {
   characterIndex: number;
 };
 
-const FEATURES = [
-  {
-    step: "01 / Understand",
-    title: "Start with the brief.",
-    description:
-      "Keep the assignment purpose, requirements, deadline, and constraints visible to everyone.",
-    accent: "yellow",
-  },
-  {
-    step: "02 / Share",
-    title: "Plan work fairly.",
-    description:
-      "See who owns what, how much effort it carries, and where workload needs attention.",
-    accent: "pink",
-  },
-  {
-    step: "03 / Move",
-    title: "Make progress visible.",
-    description:
-      "Track contribution and celebrate team moments without turning collaboration into a ranking.",
-    accent: "blue",
-  },
-] as const;
-
-const MARQUEE_GROUP_COUNT = 4;
 const PURPOSE_MARQUEE_COPY = "LESS GUESSING. LESS GÁNH TEAM. MORE SHARED RESPONSIBILITY.";
 const PURPOSE_REVEAL_THRESHOLDS = [0.04, 0.15, 0.26, 0.37, 0.48, 0.59, 0.70] as const;
 const PIXEL_COLOR_SEQUENCES = [
@@ -91,6 +66,79 @@ const PURPOSE_PIXEL_CELLS = Array.from({ length: 16 }, (_, columnIndex) => {
     return cell;
   });
 }).flat();
+
+const FEATURE_TAGS = [
+  {
+    id: "ai-assistant",
+    label: "AI ASSISTANT",
+    description: "Turns a project brief into editable task and allocation suggestions.",
+  },
+  {
+    id: "team-tracking",
+    label: "TEAM TRACKING",
+    description: "See responsibilities, workload, evidence, and progress in one place.",
+  },
+  {
+    id: "fair-task-allocation",
+    label: "FAIR TASK ALLOCATION",
+    description: "Make ownership visible so the work can be shared before it becomes a problem.",
+  },
+  {
+    id: "gamification",
+    label: "GAMIFICATION",
+    description: "Turn real project progress into shared quests and team outcomes.",
+  },
+  {
+    id: "real-time-workspace",
+    label: "REAL-TIME WORKSPACE",
+    description: "Keep project changes and team progress visible as they happen.",
+  },
+  {
+    id: "contribution-evidence",
+    label: "CONTRIBUTION EVIDENCE",
+    description: "Keep a useful record of who contributed what and when.",
+  },
+  {
+    id: "workload-visibility",
+    label: "WORKLOAD VISIBILITY",
+    description: "Spot uneven effort early and rebalance the plan together.",
+  },
+  {
+    id: "project-planning",
+    label: "PROJECT PLANNING",
+    description: "Move from a brief to a clear, shared sequence of project work.",
+  },
+  {
+    id: "peer-review",
+    label: "PEER REVIEW",
+    description: "Create supportive checkpoints for feedback before the final handoff.",
+  },
+  {
+    id: "human-control",
+    label: "HUMAN CONTROL",
+    description: "Keep every suggestion editable and every important decision with the team.",
+  },
+] as const;
+
+type FeatureTagPosition = {
+  left: number;
+  top: number;
+  rotation: number;
+  delay: number;
+};
+
+const INITIAL_FEATURE_TAG_POSITIONS: Record<string, FeatureTagPosition> = {
+  "ai-assistant": { left: 8, top: 20, rotation: -4, delay: 60 },
+  "team-tracking": { left: 29, top: 14, rotation: 3, delay: 150 },
+  "fair-task-allocation": { left: 56, top: 21, rotation: -2, delay: 240 },
+  gamification: { left: 78, top: 13, rotation: 4, delay: 330 },
+  "real-time-workspace": { left: 15, top: 42, rotation: 2, delay: 420 },
+  "contribution-evidence": { left: 43, top: 38, rotation: -3, delay: 510 },
+  "workload-visibility": { left: 72, top: 43, rotation: 3, delay: 600 },
+  "project-planning": { left: 4, top: 66, rotation: -2, delay: 690 },
+  "peer-review": { left: 31, top: 60, rotation: 4, delay: 780 },
+  "human-control": { left: 63, top: 66, rotation: -3, delay: 870 },
+};
 
 function PurposePhrase({
   blend,
@@ -226,6 +274,110 @@ function PurposeWorkspaceVisual({ visualRef }: { visualRef: RefObject<HTMLDivEle
   );
 }
 
+function FeatureTagComposition({ tagsDropped }: { tagsDropped: boolean }) {
+  const canvasRef = useRef<HTMLDivElement | null>(null);
+  const dragState = useRef<{ id: string; offsetX: number; offsetY: number } | null>(null);
+  const [activeTagId, setActiveTagId] = useState<string>(FEATURE_TAGS[0].id);
+  const [draggingTagId, setDraggingTagId] = useState<string | null>(null);
+  const [positions, setPositions] = useState<Record<string, FeatureTagPosition>>(
+    () => structuredClone(INITIAL_FEATURE_TAG_POSITIONS),
+  );
+
+  const updateTagPosition = (event: PointerEvent<HTMLButtonElement>) => {
+    const drag = dragState.current;
+    const canvas = canvasRef.current;
+    if (!drag || !canvas) return;
+
+    const canvasRect = canvas.getBoundingClientRect();
+    const tagRect = event.currentTarget.getBoundingClientRect();
+    const maxLeft = Math.max(0, canvasRect.width - tagRect.width);
+    const maxTop = Math.max(0, canvasRect.height - tagRect.height);
+    const left = Math.min(maxLeft, Math.max(0, event.clientX - canvasRect.left - drag.offsetX));
+    const top = Math.min(maxTop, Math.max(0, event.clientY - canvasRect.top - drag.offsetY));
+
+    setPositions((current) => ({
+      ...current,
+      [drag.id]: {
+        ...current[drag.id],
+        left: canvasRect.width > 0 ? (left / canvasRect.width) * 100 : current[drag.id].left,
+        top: canvasRect.height > 0 ? (top / canvasRect.height) * 100 : current[drag.id].top,
+        rotation: Math.max(-5, Math.min(5, (left / Math.max(maxLeft, 1) - 0.5) * 8)),
+      },
+    }));
+  };
+
+  const handlePointerDown = (event: PointerEvent<HTMLButtonElement>, tagId: string) => {
+    if (!tagsDropped) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const tagRect = event.currentTarget.getBoundingClientRect();
+    dragState.current = {
+      id: tagId,
+      offsetX: event.clientX - tagRect.left,
+      offsetY: event.clientY - tagRect.top,
+    };
+    setActiveTagId(tagId);
+    setDraggingTagId(tagId);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  };
+
+  const handlePointerMove = (event: PointerEvent<HTMLButtonElement>) => {
+    if (dragState.current) updateTagPosition(event);
+  };
+
+  const handlePointerUp = (event: PointerEvent<HTMLButtonElement>) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    dragState.current = null;
+    setDraggingTagId(null);
+  };
+
+  const activeTag = FEATURE_TAGS.find((tag) => tag.id === activeTagId) ?? FEATURE_TAGS[0];
+
+  return (
+    <div className="marketing-features-interaction">
+      <div className="marketing-features-tag-canvas" ref={canvasRef}>
+        {FEATURE_TAGS.map((tag) => {
+          const position = positions[tag.id] ?? INITIAL_FEATURE_TAG_POSITIONS[tag.id];
+          return (
+            <button
+              aria-pressed={activeTagId === tag.id}
+              className={`marketing-feature-tag${tagsDropped ? " is-dropped" : ""}${draggingTagId === tag.id ? " is-dragging" : ""}`}
+              key={tag.id}
+              onClick={() => setActiveTagId(tag.id)}
+              onPointerCancel={handlePointerUp}
+              onPointerDown={(event) => handlePointerDown(event, tag.id)}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              style={{
+                "--tag-delay": `${position.delay}ms`,
+                "--tag-left": `${position.left}%`,
+                "--tag-rotation": `${position.rotation}deg`,
+                "--tag-top": `${position.top}%`,
+              } as CSSProperties}
+              type="button"
+            >
+              {tag.label}
+            </button>
+          );
+        })}
+        <div className="marketing-features-title-mask">
+          <h2 id="features-title">OUR FEATURES</h2>
+        </div>
+      </div>
+
+      <div className="marketing-features-description" aria-live="polite">
+        <span>Selected feature</span>
+        <strong>{activeTag.label}</strong>
+        <p>{activeTag.description}</p>
+      </div>
+    </div>
+  );
+}
+
 function buildBurstWords(): BurstWord[] {
   return Array.from({ length: 42 }, (_, index) => {
     const angle = Math.random() * Math.PI * 2;
@@ -265,6 +417,9 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
   const pixelTransition = useRef<HTMLDivElement | null>(null);
   const purposeStatementStack = useRef<HTMLDivElement | null>(null);
   const purposeVisual = useRef<HTMLDivElement | null>(null);
+  const featuresTransition = useRef<HTMLDivElement | null>(null);
+  const featuresSection = useRef<HTMLElement | null>(null);
+  const [featureTagsDropped, setFeatureTagsDropped] = useState(false);
 
   useEffect(() => () => {
     if (cleanupTimer.current !== null) {
@@ -372,6 +527,40 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
       window.removeEventListener("resize", requestUpdate);
       resizeObserver?.disconnect();
       if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    };
+  }, []);
+
+  useEffect(() => {
+    const transition = featuresTransition.current;
+    const section = featuresSection.current;
+    if (!transition || !section) return;
+
+    const reducedMotion = typeof window.matchMedia === "function"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
+
+    const updateFeaturesEntrance = () => {
+      const viewportHeight = Math.max(window.innerHeight, 1);
+      const transitionRect = transition.getBoundingClientRect();
+      const progress = reducedMotion?.matches
+        ? 1
+        : Math.min(1, Math.max(0, (viewportHeight - transitionRect.top) / (viewportHeight + transitionRect.height)));
+
+      transition.style.setProperty("--curtain-progress", progress.toFixed(3));
+      const title = section.querySelector<HTMLElement>("#features-title");
+      const titleRect = title?.getBoundingClientRect();
+      if (reducedMotion?.matches || (titleRect && titleRect.top < viewportHeight * 0.9)) {
+        setFeatureTagsDropped(true);
+      }
+    };
+
+    window.addEventListener("scroll", updateFeaturesEntrance, { passive: true });
+    window.addEventListener("resize", updateFeaturesEntrance);
+    updateFeaturesEntrance();
+
+    return () => {
+      window.removeEventListener("scroll", updateFeaturesEntrance);
+      window.removeEventListener("resize", updateFeaturesEntrance);
     };
   }, []);
 
@@ -515,30 +704,21 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
       </section>
       </div>
 
-      <section className="marketing-features" id="how-it-works" aria-labelledby="how-it-works-title">
-        <h2 className="sr-only" id="how-it-works-title">See how it works</h2>
-        <div className="marketing-marquee">
-          <div className="marketing-marquee-track">
-            {Array.from({ length: MARQUEE_GROUP_COUNT }, (_, groupIndex) => (
-              <div
-                className="marketing-feature-group"
-                key={groupIndex}
-                aria-hidden={groupIndex > 0 ? "true" : undefined}
-              >
-                {FEATURES.map((feature) => (
-                  <article
-                    className={`marketing-feature marketing-feature--${feature.accent}`}
-                    key={`${groupIndex}-${feature.step}`}
-                  >
-                    <span className="card-eyebrow">{feature.step}</span>
-                    <h3>{feature.title}</h3>
-                    <p>{feature.description}</p>
-                  </article>
-                ))}
-              </div>
-            ))}
-          </div>
+      <div className="marketing-features-transition" ref={featuresTransition} aria-hidden="true">
+        <div className="marketing-features-curtain" />
+      </div>
+
+      <section
+        className="marketing-features"
+        id="features"
+        aria-labelledby="features-title"
+        ref={featuresSection}
+      >
+        <div className="marketing-features-intro">
+          <p>What MayLamDi offers</p>
+          <span>Everything your team needs to plan fairly, stay visible, and keep moving.</span>
         </div>
+        <FeatureTagComposition tagsDropped={featureTagsDropped} />
       </section>
 
       {burstWords.length > 0 ? (

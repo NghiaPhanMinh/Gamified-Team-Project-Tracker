@@ -22,13 +22,18 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("grid-template-columns: repeat(5, 1fr)");
   });
 
-  it("keeps the landing marquee seamless and motion-sensitive", () => {
-    expect(css).toContain("@keyframes marketing-marquee");
-    expect(css).toContain("padding-inline-end: var(--marquee-gap)");
-    expect(css).toContain("transform: translate3d(-25%, 0, 0)");
-    expect(css).toContain("animation-play-state: paused");
+  it("keeps the landing Features composition interactive and motion-sensitive", () => {
+    expect(css).toContain(".marketing-features-transition");
+    expect(css).toContain(".marketing-features-curtain");
+    expect(css).toContain("--curtain-progress");
+    expect(css).toContain(".marketing-feature-tag");
+    expect(css).toContain("@keyframes marketing-feature-tag-drop");
+    expect(css).toContain("cursor: grab");
+    expect(css).toContain("cursor: grabbing");
+    expect(css).toContain(".marketing-features-title-mask");
+    expect(css).toContain("overflow: hidden");
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");
-    expect(css).toContain("overflow-x: auto");
+    expect(css).toContain(".marketing-features-description");
   });
 
   it("uses the selected local display font without the removed hero preview", () => {
@@ -48,7 +53,8 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("stroke-width: 3");
     expect(css).toContain("stroke-width: 1.5");
     expect(css).toContain(".marketing-hero-logo-stage");
-    expect(css).toContain("padding: 68px 0 76px");
+    expect(css).toContain("min-height: max(760px, 116vh)");
+    expect(css).toContain("font-size: clamp(86px, 12vw, 190px)");
     expect(css).toContain("stroke-dashoffset: 0");
   });
 

@@ -40,16 +40,18 @@ describe("MayLamDi landing page", () => {
     expect(screen.queryByRole("button", { name: /continue with google/i })).not.toBeInTheDocument();
   });
 
-  it("adds the scoped product-purpose section before the existing feature marquee", () => {
+  it("adds the scoped product-purpose section before the new Features section", () => {
     const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
 
     const purpose = container.querySelector<HTMLElement>("#why-maylamdi");
-    const features = container.querySelector<HTMLElement>("#how-it-works");
+    const transition = container.querySelector<HTMLElement>(".marketing-features-transition");
+    const features = container.querySelector<HTMLElement>("#features");
 
     expect(screen.getByText("About Us")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /group projects should feel shared.*not carried by one person/i })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: /simplified maylamdi project workspace/i })).toBeInTheDocument();
-    expect(purpose?.parentElement?.nextElementSibling).toBe(features);
+    expect(purpose?.parentElement?.nextElementSibling).toBe(transition);
+    expect(transition?.nextElementSibling).toBe(features);
     expect(purpose?.querySelectorAll("[data-purpose-phrase]")).toHaveLength(7);
   });
 
@@ -106,14 +108,15 @@ describe("MayLamDi landing page", () => {
     expect(container.querySelector(".marketing-pixel-transition")).toHaveAttribute("data-progress", "1.00");
   });
 
-  it("renders the looping card sequence and replays the branded title burst", () => {
+  it("renders the interactive feature composition and replays the branded title burst", () => {
     const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
 
     expect(screen.getAllByAltText("MayLamDi logo")).toHaveLength(2);
-    expect(container.querySelectorAll(".marketing-feature-group")).toHaveLength(4);
-    expect(screen.getAllByText("Start with the brief.")).toHaveLength(4);
-    expect(screen.getAllByText("Plan work fairly.")).toHaveLength(4);
-    expect(screen.getAllByText("Make progress visible.")).toHaveLength(4);
+    expect(screen.getByRole("heading", { name: "OUR FEATURES" })).toBeInTheDocument();
+    expect(container.querySelectorAll(".marketing-feature-tag")).toHaveLength(10);
+    expect(screen.getByRole("button", { name: "AI ASSISTANT" })).toBeInTheDocument();
+    expect(screen.queryByText("Start with the brief.")).not.toBeInTheDocument();
+    expect(container.querySelector(".marketing-marquee")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /make teamwork.*feel shared/i }));
     expect(screen.getAllByText("MAYLAMDI")).toHaveLength(42);
@@ -145,6 +148,8 @@ describe("MayLamDi landing page", () => {
     expect(container.querySelector("[data-purpose-blend]")).toHaveAttribute("aria-hidden", "true");
     expect(container.querySelectorAll(".marketing-purpose-marquee-row")).toHaveLength(2);
     expect(container.querySelectorAll(".marketing-purpose-marquee-group")).toHaveLength(4);
+    expect(container.querySelector(".marketing-features-transition")).toBeInTheDocument();
+    expect(container.querySelectorAll(".marketing-feature-tag")).toHaveLength(10);
     expect(container.querySelector(".marketing-purpose-scroll-stage")?.nextElementSibling).toBe(
       container.querySelector(".marketing-purpose-marquee"),
     );
