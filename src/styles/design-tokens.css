@@ -3156,7 +3156,42 @@ body:has(.marketing-about-transition-scene) {
 
 .marketing-how-it-works-scroll-stage {
   position: relative;
-  min-height: 400vh;
+  min-height: calc(400vh + 18vh);
+}
+
+.marketing-how-it-works-dot-transition {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  overflow: hidden;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 120ms linear, visibility 120ms linear;
+}
+
+.marketing-how-it-works-dot-transition[data-active="true"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.marketing-how-it-works-dot-transition[data-complete="true"] {
+  background: #feaa01;
+}
+
+.marketing-how-it-works-dot {
+  position: absolute;
+  left: var(--how-dot-left);
+  top: var(--how-dot-top);
+  width: clamp(72px, 9vw, 132px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #feaa01;
+  opacity: var(--how-dot-progress, 0);
+  transform: translate(-50%, -50%) scale(calc(0.28 + (var(--how-dot-progress, 0) * 0.72)));
+  transform-origin: center;
+  will-change: transform, opacity;
 }
 
 .marketing-how-it-works-sticky {
@@ -3579,41 +3614,6 @@ body:has(.marketing-about-transition-scene) {
   overflow: clip;
   background: #feaa01;
   color: #101517;
-}
-
-.marketing-subscription-transition {
-  position: fixed;
-  z-index: 10;
-  inset: 0;
-  overflow: hidden;
-  background: transparent;
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
-  transition: opacity 120ms linear, visibility 120ms linear;
-}
-
-.marketing-subscription-transition[data-active="true"] {
-  opacity: 1;
-  visibility: visible;
-}
-
-.marketing-subscription-transition[data-complete="true"] {
-  background: #feaa01;
-}
-
-.marketing-subscription-dot {
-  position: absolute;
-  left: var(--subscription-dot-left);
-  top: var(--subscription-dot-top);
-  width: clamp(72px, 9vw, 132px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--subscription-dot-color);
-  opacity: var(--subscription-dot-progress, 0);
-  transform: translate(-50%, -50%) scale(calc(0.32 + (var(--subscription-dot-progress, 0) * 0.68)));
-  transform-origin: center;
-  will-change: transform, opacity;
 }
 
 .marketing-subscription-scroll-stage {
@@ -4138,7 +4138,11 @@ body:has(.marketing-about-transition-scene) {
   }
 
   .marketing-how-it-works-scroll-stage {
-    min-height: 400svh;
+    min-height: calc(400svh + 18svh);
+  }
+
+  .marketing-how-it-works-dot {
+    width: clamp(52px, 18vw, 84px);
   }
 
   .marketing-how-it-works-sticky {
@@ -4369,20 +4373,6 @@ body:has(.marketing-about-transition-scene) {
     background: transparent;
     opacity: 0;
     visibility: hidden;
-  }
-
-  .marketing-subscription-transition {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    background: transparent;
-    opacity: 0;
-    visibility: hidden;
-  }
-
-  .marketing-subscription-dot {
-    width: clamp(52px, 18vw, 84px);
   }
 
   .marketing-subscription-scroll-stage {

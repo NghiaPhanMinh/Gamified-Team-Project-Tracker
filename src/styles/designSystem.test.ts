@@ -52,9 +52,11 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain(".marketing-how-it-works-stripe.is-from-left");
     expect(css).toContain(".marketing-how-it-works-stripe.is-from-right");
     expect(css).toContain(".marketing-how-it-works-scroll-stage");
-    expect(css).toContain("min-height: 400vh");
-    expect(css).toContain(".marketing-how-it-works-rail::before");
+    expect(css).toContain("min-height: calc(400vh + 18vh)");
+    expect(css).toContain(".marketing-how-it-works-dot-transition");
+    expect(css).toContain(".marketing-how-it-works-dot");
     expect(css).toContain("background: #feaa01");
+    expect(css).toContain(".marketing-how-it-works-rail::before");
     expect(css).toContain(".marketing-how-it-works-step.is-before");
     expect(css).toContain("translateX(120px)");
     expect(css).toContain(".how-works-visual--setup");
@@ -67,9 +69,6 @@ describe("MayLamDi design-system contract", () => {
   it("includes the scroll-led Subscription scene and polka-dot handoff", () => {
     expect(css).toContain(".marketing-subscription");
     expect(css).toContain("background: #feaa01");
-    expect(css).toContain(".marketing-subscription-transition");
-    expect(css).toContain(".marketing-subscription-dot");
-    expect(css).toContain("--subscription-dot-progress");
     expect(css).toContain("min-height: 230vh");
     expect(css).toContain(".marketing-subscription-comparison");
     expect(css).toContain(".marketing-subscription-comparison-plan--free");

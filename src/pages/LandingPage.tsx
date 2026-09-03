@@ -160,14 +160,15 @@ const HOW_IT_WORKS_STEPS = [
 
 const HOW_IT_WORKS_STRIPES = ["#fff73f", "#fff73f", "#fff73f", "#fff73f", "#fff73f", "#fff73f"] as const;
 
-const SUBSCRIPTION_DOTS = Array.from({ length: 40 }, (_, index) => {
-  const column = index % 8;
-  const row = Math.floor(index / 8);
+const HOW_IT_WORKS_DOTS = Array.from({ length: 48 }, (_, index) => {
+  const randomPosition = (seed: number) => {
+    const value = Math.sin(seed * 12.9898) * 43758.5453;
+    return value - Math.floor(value);
+  };
 
   return {
-    color: index % 2 === 0 ? "#feaa01" : "#1dd851",
-    left: `${((column + 0.5) / 8) * 100}%`,
-    top: `${((row + 0.5) / 5) * 100}%`,
+    left: `${(randomPosition(index + 1) * 96 + 2).toFixed(2)}%`,
+    top: `${(randomPosition(index + 101) * 96 + 2).toFixed(2)}%`,
   } as const;
 });
 
@@ -1061,8 +1062,8 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
   const featuresSection = useRef<HTMLElement | null>(null);
   const howItWorksTransition = useRef<HTMLDivElement | null>(null);
   const howItWorksSection = useRef<HTMLElement | null>(null);
+  const howItWorksDotTransition = useRef<HTMLDivElement | null>(null);
   const subscriptionSection = useRef<HTMLElement | null>(null);
-  const subscriptionTransition = useRef<HTMLDivElement | null>(null);
   const [howItWorksProgress, setHowItWorksProgress] = useState(0);
   const [subscriptionProgress, setSubscriptionProgress] = useState(0);
   const [featureTagsDropped, setFeatureTagsDropped] = useState(false);
@@ -1179,13 +1180,11 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
 
   useEffect(() => {
     const section = subscriptionSection.current;
-    const transition = subscriptionTransition.current;
-    if (!section || !transition) return;
+    if (!section) return;
 
     const reducedMotion = typeof window.matchMedia === "function"
       ? window.matchMedia("(prefers-reduced-motion: reduce)")
       : null;
-    const dots = Array.from(transition.querySelectorAll<HTMLElement>(".marketing-subscription-dot"));
 
     const updateScene = () => {
       const viewportHeight = Math.max(window.innerHeight, 1);
@@ -1194,17 +1193,6 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
         ? 1
         : clampProgress((viewportHeight - sectionRect.top) / Math.max(section.offsetHeight, 1));
       setSubscriptionProgress(progress);
-      const transitionProgress = reducedMotion?.matches ? 1 : progressBetween(progress, 0, 0.16);
-      transition.style.setProperty("--subscription-transition-progress", transitionProgress.toFixed(3));
-      dots.forEach((dot, index) => {
-        const localStart = (index / Math.max(dots.length - 1, 1)) * 0.66;
-        const localProgress = reducedMotion?.matches
-          ? 1
-          : progressBetween(transitionProgress, localStart, Math.min(1, localStart + 0.34));
-        dot.style.setProperty("--subscription-dot-progress", localProgress.toFixed(3));
-      });
-      transition.dataset.active = transitionProgress > 0 && transitionProgress < 1 ? "true" : "false";
-      transition.dataset.complete = transitionProgress >= 1 ? "true" : "false";
     };
 
     window.addEventListener("scroll", updateScene, { passive: true });
@@ -1237,22 +1225,54 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
   useEffect(() => {
     const section = howItWorksSection.current;
     const stage = section?.querySelector<HTMLElement>(".marketing-how-it-works-scroll-stage");
-    if (!section || !stage) return;
+    const transition = howItWorksDotTransition.current;
+    if (!section || !stage || !transition) return;
+
+    const reducedMotion = typeof window.matchMedia === "function"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
+    const dots = Array.from(transition.querySelectorAll<HTMLElement>(".marketing-how-it-works-dot"));
 
     const updateScene = () => {
       const viewportHeight = Math.max(window.innerHeight, 1);
       const howStageRect = stage.getBoundingClientRect();
-      const progress = Math.min(1, Math.max(0, (viewportHeight - howStageRect.top) / Math.max(stage.offsetHeight, 1)));
+      const sectionRect = section.getBoundingClientRect();
+      const distanceTravelled = viewportHeight - howStageRect.top;
+      const transitionHoldDistance = viewportHeight * 0.18;
+      const sceneDistance = Math.max(stage.offsetHeight - transitionHoldDistance, 1);
+      const transitionDistance = Math.max(stage.offsetHeight - sceneDistance, 1);
+      const progress = reducedMotion?.matches
+        ? 1
+        : clampProgress(distanceTravelled / sceneDistance);
+      const transitionProgress = reducedMotion?.matches
+        ? 1
+        : progressBetween(distanceTravelled, sceneDistance, sceneDistance + transitionDistance);
+
       setHowItWorksProgress(progress);
+      transition.style.setProperty("--how-dots-transition-progress", transitionProgress.toFixed(3));
+      dots.forEach((dot, index) => {
+        const localStart = (index / Math.max(dots.length - 1, 1)) * 0.62;
+        const localProgress = reducedMotion?.matches
+          ? 1
+          : progressBetween(transitionProgress, localStart, Math.min(1, localStart + 0.3));
+        dot.style.setProperty("--how-dot-progress", localProgress.toFixed(3));
+      });
+      const transitionVisible = !reducedMotion?.matches
+        && transitionProgress > 0
+        && sectionRect.bottom >= 0;
+      transition.dataset.active = transitionVisible ? "true" : "false";
+      transition.dataset.complete = !reducedMotion?.matches && transitionProgress >= 0.999 ? "true" : "false";
     };
 
     window.addEventListener("scroll", updateScene, { passive: true });
     window.addEventListener("resize", updateScene);
+    reducedMotion?.addEventListener("change", updateScene);
     updateScene();
 
     return () => {
       window.removeEventListener("scroll", updateScene);
       window.removeEventListener("resize", updateScene);
+      reducedMotion?.removeEventListener("change", updateScene);
     };
   }, []);
 
@@ -1501,6 +1521,19 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
         </div>
       </section>
 
+      <div className="marketing-how-it-works-dot-transition" ref={howItWorksDotTransition} aria-hidden="true">
+        {HOW_IT_WORKS_DOTS.map((dot, index) => (
+          <span
+            className="marketing-how-it-works-dot"
+            key={`how-dot-${index}`}
+            style={{
+              "--how-dot-left": dot.left,
+              "--how-dot-top": dot.top,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
       <section
         aria-labelledby="how-it-works-title"
         className="marketing-how-it-works"
@@ -1567,19 +1600,6 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
         id="subscription"
         ref={subscriptionSection}
       >
-        <div className="marketing-subscription-transition" ref={subscriptionTransition} aria-hidden="true">
-          {SUBSCRIPTION_DOTS.map((dot, index) => (
-            <span
-              className="marketing-subscription-dot"
-              key={`${dot.color}-${index}`}
-              style={{
-                "--subscription-dot-color": dot.color,
-                "--subscription-dot-left": dot.left,
-                "--subscription-dot-top": dot.top,
-              } as CSSProperties}
-            />
-          ))}
-        </div>
         <div className="marketing-subscription-scroll-stage">
           <div className="marketing-subscription-sticky">
             <header className="marketing-subscription-heading" style={{ "--subscription-title-progress": subscriptionTitleProgress } as CSSProperties}>
