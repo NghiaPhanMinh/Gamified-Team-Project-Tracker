@@ -2748,7 +2748,7 @@ body:has(.marketing-about-transition-scene) {
   position: relative;
   z-index: 3;
   min-height: 0;
-  overflow: clip;
+  overflow: visible;
   background: #ff8ae7;
   color: #101517;
 }
@@ -2926,13 +2926,14 @@ body:has(.marketing-about-transition-scene) {
 }
 
 .marketing-how-it-works-transition {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 4;
   height: 100vh;
-  margin-top: clamp(36px, 7vh, 84px);
+  margin-top: -100vh;
   overflow: hidden;
-  background: #ff8ae7;
-  contain: paint;
+  background: transparent;
+  pointer-events: none;
   transition: background-color 120ms linear;
 }
 
@@ -3668,7 +3669,7 @@ body:has(.marketing-about-transition-scene) {
 
   .marketing-how-it-works-transition {
     height: 100svh;
-    margin-top: 36px;
+    margin-top: -100svh;
   }
 
   .marketing-how-it-works-scroll-stage {
@@ -3845,8 +3846,10 @@ body:has(.marketing-about-transition-scene) {
   }
 
   .marketing-how-it-works-transition {
-    height: 120px;
-    margin-top: 0;
+    position: relative;
+    top: auto;
+    height: 100vh;
+    margin-top: -100vh;
     background: #fff73f;
   }
 

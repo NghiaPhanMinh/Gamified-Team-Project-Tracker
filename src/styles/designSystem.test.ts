@@ -44,6 +44,8 @@ describe("MayLamDi design-system contract", () => {
 
   it("includes the yellow horizontal How It Works sequence", () => {
     expect(css).toContain(".marketing-how-it-works-transition");
+    expect(css).toContain("margin-top: -100vh");
+    expect(css).toContain("background: transparent");
     expect(css).toContain(".marketing-how-it-works-stripe.is-from-left");
     expect(css).toContain(".marketing-how-it-works-stripe.is-from-right");
     expect(css).toContain(".marketing-how-it-works-scroll-stage");

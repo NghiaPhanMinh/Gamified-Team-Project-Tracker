@@ -1038,10 +1038,10 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
     const updateScene = () => {
       const viewportHeight = Math.max(window.innerHeight, 1);
       const transitionRect = transition.getBoundingClientRect();
-      const transitionStart = viewportHeight * 0.64;
+      const transitionStart = viewportHeight * 0.58;
       const transitionProgress = reducedMotion?.matches
         ? 1
-        : Math.min(1, Math.max(0, (transitionStart - transitionRect.top) / (transitionStart + Math.max(transitionRect.height * 0.62, 1))));
+        : Math.min(1, Math.max(0, (transitionStart - transitionRect.top) / transitionStart));
       transition.style.setProperty("--how-transition-progress", transitionProgress.toFixed(3));
       transition.dataset.complete = transitionProgress >= 0.999 ? "true" : "false";
 
