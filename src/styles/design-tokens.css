@@ -3634,16 +3634,15 @@ body:has(.marketing-about-transition-scene) {
 
 .marketing-subscription-scroll-stage {
   position: relative;
-  min-height: 230vh;
+  min-height: 0;
 }
 
 .marketing-subscription-sticky {
-  position: sticky;
-  top: 0;
+  position: relative;
   display: flex;
-  min-height: 100vh;
+  min-height: 0;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   gap: clamp(20px, 3vh, 36px);
   padding: clamp(32px, 5vw, 72px) clamp(20px, 6vw, 96px);
 }

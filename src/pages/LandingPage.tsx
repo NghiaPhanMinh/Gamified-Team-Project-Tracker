@@ -1192,7 +1192,10 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
       const sectionRect = section.getBoundingClientRect();
       const progress = reducedMotion?.matches
         ? 1
-        : clampProgress((viewportHeight - sectionRect.top) / Math.max(section.offsetHeight, 1));
+        : clampProgress(
+            (viewportHeight - sectionRect.top) /
+              Math.max(section.offsetHeight + viewportHeight, 1),
+          );
       setSubscriptionProgress(progress);
     };
 

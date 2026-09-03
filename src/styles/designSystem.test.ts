@@ -69,7 +69,9 @@ describe("MayLamDi design-system contract", () => {
   it("includes the scroll-led Subscription scene and polka-dot handoff", () => {
     expect(css).toContain(".marketing-subscription");
     expect(css).toContain("background: #feaa01");
-    expect(css).toContain("min-height: 230vh");
+    expect(css).toContain(".marketing-subscription-scroll-stage");
+    expect(css).toContain("position: relative");
+    expect(css).toContain("justify-content: flex-start");
     expect(css).toContain(".marketing-subscription-comparison");
     expect(css).toContain(".marketing-subscription-comparison-plan--free");
     expect(css).toContain(".marketing-subscription-comparison-plan--plus");
