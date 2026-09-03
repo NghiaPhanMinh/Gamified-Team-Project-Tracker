@@ -1719,7 +1719,7 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
               <span className="marketing-final-cta-arrow-head">→</span>
             </div>
             {isAuthenticated ? (
-              <Link className="marketing-final-cta-explore" to="/projects">Go to Projects</Link>
+              <Link className="marketing-final-cta-explore" to="/home">Go to Projects</Link>
             ) : (
               <a className="marketing-final-cta-explore" href="#why-maylamdi">Explore</a>
             )}

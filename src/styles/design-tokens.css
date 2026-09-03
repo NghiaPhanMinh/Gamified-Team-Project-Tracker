@@ -3989,9 +3989,10 @@ body:has(.marketing-about-transition-scene) {
 
 .marketing-final-cta-action-row {
   display: flex;
-  width: 100%;
+  width: calc(100% + clamp(16px, 5vw, 64px));
   align-items: center;
   gap: clamp(24px, 4vw, 64px);
+  margin-left: calc(-1 * clamp(16px, 5vw, 64px));
   margin-bottom: clamp(28px, 5vh, 72px);
 }
 
@@ -4005,7 +4006,8 @@ body:has(.marketing-about-transition-scene) {
 
 .marketing-final-cta-arrow-line {
   display: block;
-  width: 100%;
+  width: auto;
+  flex: 1;
   height: clamp(2px, 0.25vw, 4px);
   background: #1dd851;
   transform: scaleX(0);
@@ -4014,12 +4016,14 @@ body:has(.marketing-about-transition-scene) {
 
 .marketing-final-cta-arrow-head {
   display: block;
-  margin-left: -1px;
-  font-size: clamp(38px, 5vw, 72px);
-  font-weight: 400;
-  line-height: 0.5;
+  width: clamp(22px, 2.4vw, 38px);
+  height: clamp(22px, 2.4vw, 38px);
+  margin-left: clamp(-18px, -1.2vw, -8px);
+  border-top: clamp(2px, 0.25vw, 4px) solid currentColor;
+  border-right: clamp(2px, 0.25vw, 4px) solid currentColor;
+  font-size: 0;
   opacity: 0;
-  transform: translateX(-16px);
+  transform: translateX(-16px) rotate(45deg);
 }
 
 .marketing-final-cta-explore {
@@ -4038,7 +4042,7 @@ body:has(.marketing-about-transition-scene) {
   text-align: center;
   text-decoration: none;
   opacity: 0;
-  transform: translateY(18px);
+  transform: translateX(64px);
 }
 
 .marketing-final-cta-explore:hover,
@@ -4052,7 +4056,7 @@ body:has(.marketing-about-transition-scene) {
   align-self: flex-start;
   margin: 0;
   color: #1dd851;
-  font-size: clamp(118px, 29vw, 520px);
+  font-size: clamp(112px, 23vw, 420px);
   font-weight: 900;
   letter-spacing: -0.1em;
   line-height: 0.7;
@@ -4092,13 +4096,13 @@ body:has(.marketing-about-transition-scene) {
 }
 
 @keyframes marketing-final-arrowhead-in {
-  from { opacity: 0; transform: translateX(-16px); }
-  to { opacity: 1; transform: translateX(0); }
+  from { opacity: 0; transform: translateX(-16px) rotate(45deg); }
+  to { opacity: 1; transform: translateX(0) rotate(45deg); }
 }
 
 @keyframes marketing-final-explore-in {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateX(64px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes marketing-final-nav-in {
@@ -4514,7 +4518,7 @@ body:has(.marketing-about-transition-scene) {
   }
 
   .marketing-final-cta h2 {
-    font-size: clamp(92px, 29vw, 180px);
+    font-size: clamp(84px, 25vw, 180px);
   }
 
   .how-works-visual {

@@ -221,7 +221,7 @@ describe("MayLamDi landing page", () => {
 
     expect(finalCta).toHaveTextContent("Switch account");
     expect(finalCta).toHaveTextContent("Sign out");
-    expect(screen.getByRole("link", { name: "Go to Projects" })).toHaveAttribute("href", "/projects");
+    expect(screen.getByRole("link", { name: "Go to Projects" })).toHaveAttribute("href", "/home");
     expect(finalCta).not.toHaveTextContent("Sign up");
   });
 
