@@ -64,6 +64,17 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");
   });
 
+  it("includes the scroll-led Subscription scene and bubble handoff", () => {
+    expect(css).toContain(".marketing-subscription");
+    expect(css).toContain("background: #feaa01");
+    expect(css).toContain(".marketing-subscription-transition");
+    expect(css).toContain(".marketing-subscription-bubble");
+    expect(css).toContain("min-height: 230vh");
+    expect(css).toContain(".marketing-subscription-card--free");
+    expect(css).toContain(".marketing-subscription-card--plus");
+    expect(css).toContain(".marketing-subscription-plan-grid");
+  });
+
   it("uses the selected local display font without the removed hero preview", () => {
     expect(css).toContain('font-family: "Paytone One"');
     expect(css).toContain('/fonts/PaytoneOne-Regular.ttf');

@@ -172,6 +172,26 @@ describe("MayLamDi landing page", () => {
     );
   });
 
+  it("places the subscription section after How It Works and reflects the current plan", () => {
+    const { container } = render(<MemoryRouter><LandingPage isAuthenticated currentPlan="plus" /></MemoryRouter>);
+
+    const howItWorks = container.querySelector("#how-it-works");
+    const subscription = container.querySelector("#subscription");
+
+    expect(howItWorks?.nextElementSibling).toBe(subscription);
+    expect(screen.getByRole("heading", { name: "Choose the support your team needs." })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "FREE PLAN" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "CURRENT PLAN" })).toBeDisabled();
+    expect(subscription?.querySelectorAll(".marketing-subscription-bubble")).toHaveLength(5);
+  });
+
+  it("offers the existing visitor sign-in action from the Free plan", () => {
+    render(<MemoryRouter><LandingPage /></MemoryRouter>);
+
+    expect(screen.getByRole("button", { name: "START FREE" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "UPGRADE TO PLUS" })).toBeInTheDocument();
+  });
+
   it("raises the hovered letter highest and tapers adjacent letters into a smooth wave", () => {
     const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
     const firstPhrase = container.querySelector<HTMLElement>("[data-purpose-phrase]:first-child");

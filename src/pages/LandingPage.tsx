@@ -1,12 +1,18 @@
+import { useAuthActions } from "@convex-dev/auth/react";
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type RefObject } from "react";
 import { Link } from "react-router-dom";
-import { ArrowDown, CheckCircle2 } from "lucide-react";
+import { ArrowDown, Check, CheckCircle2, Sparkles } from "lucide-react";
 
 import { BrandLogo } from "../components/brand/BrandLogo";
 import { ThemeToggle } from "../components/theme/ThemeToggle";
+import {
+  SUBSCRIPTION_PLANS,
+  type SubscriptionPlan,
+} from "../lib/subscription";
 
 type LandingPageProps = {
   isAuthenticated?: boolean;
+  currentPlan?: SubscriptionPlan;
 };
 
 type BurstWord = {
@@ -152,6 +158,14 @@ const HOW_IT_WORKS_STEPS = [
 ] as const;
 
 const HOW_IT_WORKS_STRIPES = ["#fff73f", "#fff73f", "#fff73f", "#fff73f", "#fff73f", "#fff73f"] as const;
+
+const SUBSCRIPTION_BUBBLES = [
+  { color: "#fff73f", left: "8%", top: "18%", size: "38vw", scale: 5.8 },
+  { color: "#ff8ae7", left: "86%", top: "14%", size: "44vw", scale: 5.2 },
+  { color: "#feaa01", left: "20%", top: "82%", size: "46vw", scale: 5.1 },
+  { color: "#fff73f", left: "78%", top: "78%", size: "42vw", scale: 5.6 },
+  { color: "#ff8ae7", left: "52%", top: "46%", size: "34vw", scale: 6.4 },
+] as const;
 
 type FeatureTagPosition = {
   left: number;
@@ -890,7 +904,91 @@ function buildBurstWords(): BurstWord[] {
   });
 }
 
-export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
+function clampProgress(value: number) {
+  return Math.min(1, Math.max(0, value));
+}
+
+function progressBetween(progress: number, start: number, end: number) {
+  return clampProgress((progress - start) / Math.max(end - start, 0.001));
+}
+
+function SubscriptionLandingCard({
+  cardProgress,
+  contentProgress,
+  currentPlan,
+  isAuthenticated,
+  onStartFree,
+  plan,
+}: {
+  cardProgress: number;
+  contentProgress: number;
+  currentPlan?: SubscriptionPlan;
+  isAuthenticated: boolean;
+  onStartFree: (label: string) => void;
+  plan: SubscriptionPlan;
+}) {
+  const details = SUBSCRIPTION_PLANS[plan];
+  const isCurrent = currentPlan === plan;
+  const isFreeVisitor = plan === "free" && !isAuthenticated;
+  const isPlusVisitor = plan === "plus" && !isAuthenticated;
+  const featureStartIndex = plan === "plus" ? 5 : 4;
+  const lineCount = featureStartIndex + details.features.length + 1;
+
+  const lineStyle = (index: number) => ({
+    "--subscription-line-progress": progressBetween(
+      contentProgress,
+      (index / Math.max(lineCount - 1, 1)) * 0.78,
+      (index / Math.max(lineCount - 1, 1)) * 0.78 + 0.22,
+    ),
+  } as CSSProperties);
+
+  return (
+    <article
+      className={`marketing-subscription-card marketing-subscription-card--${plan}${isCurrent ? " is-current" : ""}`}
+      style={{ "--subscription-card-progress": cardProgress } as CSSProperties}
+    >
+      <div className="marketing-subscription-card-inner">
+        <header className="marketing-subscription-card-header">
+          <div className="marketing-subscription-card-kicker" style={lineStyle(0)}>
+            <span>{details.name}</span>
+            {plan === "plus" ? <Sparkles size={16} aria-hidden="true" /> : null}
+          </div>
+          <h3 style={lineStyle(1)}>{details.heading}</h3>
+          <p className="marketing-subscription-card-description" style={lineStyle(2)}>{details.description}</p>
+          <p className="marketing-subscription-price" style={lineStyle(3)}>
+            <strong>{details.price}</strong>
+            {details.cadence ? <span>{details.cadence}</span> : null}
+          </p>
+          {plan === "plus" ? <p className="marketing-subscription-semester" style={lineStyle(4)}>{SUBSCRIPTION_PLANS.plus.semesterPrice}</p> : null}
+        </header>
+
+        <ul className="marketing-subscription-features">
+          {details.features.map((feature, index) => (
+            <li key={feature} style={lineStyle(index + featureStartIndex)}>
+              <Check size={17} strokeWidth={3} aria-hidden="true" />
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+
+        <footer className="marketing-subscription-card-footer" style={lineStyle(lineCount - 1)}>
+          {isFreeVisitor ? (
+            <button type="button" onClick={() => onStartFree("START FREE")}>START FREE</button>
+          ) : isPlusVisitor ? (
+            <button type="button" onClick={() => onStartFree("UPGRADE TO PLUS")}>UPGRADE TO PLUS</button>
+          ) : plan === "plus" && !isCurrent ? (
+            <Link to="/subscription">UPGRADE TO PLUS</Link>
+          ) : (
+            <button type="button" disabled>{isCurrent ? "CURRENT PLAN" : "FREE PLAN"}</button>
+          )}
+        </footer>
+      </div>
+    </article>
+  );
+}
+
+export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPageProps) {
+  const { signIn } = useAuthActions();
   const [burstWords, setBurstWords] = useState<BurstWord[]>([]);
   const [revealedPurposeLines, setRevealedPurposeLines] = useState<boolean[]>(() => {
     if (typeof window === "undefined") return PURPOSE_PHRASES.map(() => false);
@@ -913,8 +1011,12 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
   const featuresSection = useRef<HTMLElement | null>(null);
   const howItWorksTransition = useRef<HTMLDivElement | null>(null);
   const howItWorksSection = useRef<HTMLElement | null>(null);
+  const subscriptionSection = useRef<HTMLElement | null>(null);
+  const subscriptionTransition = useRef<HTMLDivElement | null>(null);
   const [howItWorksProgress, setHowItWorksProgress] = useState(0);
+  const [subscriptionProgress, setSubscriptionProgress] = useState(0);
   const [featureTagsDropped, setFeatureTagsDropped] = useState(false);
+  const [subscriptionAuthError, setSubscriptionAuthError] = useState<string | null>(null);
 
   useEffect(() => () => {
     if (cleanupTimer.current !== null) {
@@ -1024,6 +1126,55 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
       if (animationFrame) window.cancelAnimationFrame(animationFrame);
     };
   }, []);
+
+  useEffect(() => {
+    const section = subscriptionSection.current;
+    const transition = subscriptionTransition.current;
+    if (!section || !transition) return;
+
+    const reducedMotion = typeof window.matchMedia === "function"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
+
+    const updateScene = () => {
+      const viewportHeight = Math.max(window.innerHeight, 1);
+      const sectionRect = section.getBoundingClientRect();
+      const progress = reducedMotion?.matches
+        ? 1
+        : clampProgress((viewportHeight - sectionRect.top) / Math.max(section.offsetHeight, 1));
+      setSubscriptionProgress(progress);
+      const transitionProgress = reducedMotion?.matches ? 1 : progressBetween(progress, 0, 0.16);
+      transition.style.setProperty("--subscription-transition-progress", transitionProgress.toFixed(3));
+      transition.dataset.active = transitionProgress > 0 && transitionProgress < 1 ? "true" : "false";
+      transition.dataset.complete = transitionProgress >= 1 ? "true" : "false";
+    };
+
+    window.addEventListener("scroll", updateScene, { passive: true });
+    window.addEventListener("resize", updateScene);
+    reducedMotion?.addEventListener("change", updateScene);
+    updateScene();
+
+    return () => {
+      window.removeEventListener("scroll", updateScene);
+      window.removeEventListener("resize", updateScene);
+      reducedMotion?.removeEventListener("change", updateScene);
+    };
+  }, []);
+
+  const subscriptionStoryProgress = progressBetween(subscriptionProgress, 0.16, 1);
+  const subscriptionTitleProgress = progressBetween(subscriptionStoryProgress, 0.02, 0.18);
+  const subscriptionCardProgress = progressBetween(subscriptionStoryProgress, 0.15, 0.34);
+  const freeContentProgress = progressBetween(subscriptionStoryProgress, 0.27, 0.68);
+  const plusContentProgress = progressBetween(subscriptionStoryProgress, 0.52, 0.9);
+
+  const handleStartFree = async (label: string) => {
+    setSubscriptionAuthError(null);
+    try {
+      await signIn("google", { redirectTo: "/home" });
+    } catch {
+      setSubscriptionAuthError(`${label} could not start. Check the Google sign-in setup and try again.`);
+    }
+  };
 
   useEffect(() => {
     const section = howItWorksSection.current;
@@ -1348,6 +1499,57 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
                 );
               })}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="marketing-subscription-title"
+        className="marketing-subscription"
+        id="subscription"
+        ref={subscriptionSection}
+      >
+        <div className="marketing-subscription-transition" ref={subscriptionTransition} aria-hidden="true">
+          {SUBSCRIPTION_BUBBLES.map((bubble, index) => (
+            <span
+              className="marketing-subscription-bubble"
+              key={`${bubble.color}-${index}`}
+              style={{
+                "--subscription-bubble-color": bubble.color,
+                "--subscription-bubble-left": bubble.left,
+                "--subscription-bubble-top": bubble.top,
+                "--subscription-bubble-size": bubble.size,
+                "--subscription-bubble-scale": bubble.scale,
+              } as CSSProperties}
+            />
+          ))}
+        </div>
+        <div className="marketing-subscription-scroll-stage">
+          <div className="marketing-subscription-sticky">
+            <header className="marketing-subscription-heading" style={{ "--subscription-title-progress": subscriptionTitleProgress } as CSSProperties}>
+              <p className="marketing-subscription-kicker">Subscription</p>
+              <h2 id="marketing-subscription-title">Choose the support your team needs.</h2>
+              <p>Keep the core project experience free, then add more AI room when your team needs it.</p>
+            </header>
+            <div className="marketing-subscription-plan-grid" aria-label="MayLamDi subscription plans">
+              <SubscriptionLandingCard
+                cardProgress={subscriptionCardProgress}
+                contentProgress={freeContentProgress}
+                currentPlan={currentPlan}
+                isAuthenticated={isAuthenticated}
+                onStartFree={handleStartFree}
+                plan="free"
+              />
+              <SubscriptionLandingCard
+                cardProgress={subscriptionCardProgress}
+                contentProgress={plusContentProgress}
+                currentPlan={currentPlan}
+                isAuthenticated={isAuthenticated}
+                onStartFree={handleStartFree}
+                plan="plus"
+              />
+            </div>
+            {subscriptionAuthError ? <p className="marketing-subscription-auth-error" role="alert">{subscriptionAuthError}</p> : null}
           </div>
         </div>
       </section>
