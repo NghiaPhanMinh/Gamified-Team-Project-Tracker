@@ -1042,7 +1042,7 @@ function SubscriptionComparisonChart({
 }
 
 export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPageProps) {
-  const { signIn } = useAuthActions();
+  const { signIn, signOut } = useAuthActions();
   const [burstWords, setBurstWords] = useState<BurstWord[]>([]);
   const [revealedPurposeLines, setRevealedPurposeLines] = useState<boolean[]>(() => {
     if (typeof window === "undefined") return PURPOSE_PHRASES.map(() => false);
@@ -1067,10 +1067,14 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
   const howItWorksSection = useRef<HTMLElement | null>(null);
   const howItWorksDotTransition = useRef<HTMLDivElement | null>(null);
   const subscriptionSection = useRef<HTMLElement | null>(null);
+  const finalTransitionStage = useRef<HTMLDivElement | null>(null);
+  const finalTransition = useRef<HTMLDivElement | null>(null);
+  const finalSection = useRef<HTMLElement | null>(null);
   const [howItWorksProgress, setHowItWorksProgress] = useState(0);
   const [subscriptionProgress, setSubscriptionProgress] = useState(0);
   const [featureTagsDropped, setFeatureTagsDropped] = useState(false);
   const [subscriptionAuthError, setSubscriptionAuthError] = useState<string | null>(null);
+  const [finalEntered, setFinalEntered] = useState(false);
 
   useEffect(() => () => {
     if (cleanupTimer.current !== null) {
@@ -1210,6 +1214,48 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
     };
   }, []);
 
+  useEffect(() => {
+    const stage = finalTransitionStage.current;
+    const transition = finalTransition.current;
+    const section = finalSection.current;
+    if (!stage || !transition || !section) return;
+
+    const reducedMotion = typeof window.matchMedia === "function"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
+
+    const updateScene = () => {
+      const viewportHeight = Math.max(window.innerHeight, 1);
+      const stageRect = stage.getBoundingClientRect();
+      const sectionRect = section.getBoundingClientRect();
+      const rawProgress = -stageRect.top / Math.max(stage.offsetHeight, 1);
+      const progress = reducedMotion?.matches ? 1 : clampProgress(rawProgress);
+      const isTransitioning = reducedMotion?.matches
+        ? stageRect.top < viewportHeight && stageRect.bottom > 0
+        : rawProgress > 0 && rawProgress < 1;
+
+      transition.style.setProperty("--final-transition-progress", progress.toFixed(3));
+      transition.dataset.active = isTransitioning ? "true" : "false";
+      transition.dataset.complete = !reducedMotion?.matches && rawProgress >= 1 ? "true" : "false";
+      transition.dataset.reducedMotion = reducedMotion?.matches ? "true" : "false";
+      setFinalEntered((current) => {
+        const next = reducedMotion?.matches || sectionRect.top <= viewportHeight * 0.92;
+        return current === next ? current : next;
+      });
+    };
+
+    window.addEventListener("scroll", updateScene, { passive: true });
+    window.addEventListener("resize", updateScene);
+    reducedMotion?.addEventListener("change", updateScene);
+    updateScene();
+
+    return () => {
+      window.removeEventListener("scroll", updateScene);
+      window.removeEventListener("resize", updateScene);
+      reducedMotion?.removeEventListener("change", updateScene);
+    };
+  }, []);
+
   const subscriptionStoryProgress = progressBetween(subscriptionProgress, 0.08, 1);
   const subscriptionTitleProgress = progressBetween(subscriptionStoryProgress, 0, 0.18);
   const subscriptionCardProgress = progressBetween(subscriptionStoryProgress, 0.24, 0.4);
@@ -1222,6 +1268,16 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
       await signIn("google", { redirectTo: "/home" });
     } catch {
       setSubscriptionAuthError(`${label} could not start. Check the Google sign-in setup and try again.`);
+    }
+  };
+
+  const handleSwitchAccount = async () => {
+    setSubscriptionAuthError(null);
+    try {
+      await signOut();
+      await signIn("google", { redirectTo: "/home" });
+    } catch {
+      setSubscriptionAuthError("Switching accounts could not start. Check the Google sign-in setup and try again.");
     }
   };
 
@@ -1624,6 +1680,52 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
             />
             {subscriptionAuthError ? <p className="marketing-subscription-auth-error" role="alert">{subscriptionAuthError}</p> : null}
           </div>
+        </div>
+      </section>
+
+      <div className="marketing-final-word-transition-stage" ref={finalTransitionStage}>
+        <div className="marketing-final-word-transition" ref={finalTransition} aria-hidden="true">
+          <span className="marketing-final-word-transition-word">
+            <span className="marketing-final-word-transition-outline">MAYLAMDI</span>
+            <span className="marketing-final-word-transition-fill">MAYLAMDI</span>
+          </span>
+        </div>
+      </div>
+
+      <section
+        aria-labelledby="marketing-final-title"
+        className={`marketing-final-cta${finalEntered ? " is-entered" : ""}`}
+        id="final-cta"
+        ref={finalSection}
+      >
+        <div className="marketing-final-cta-inner">
+          <nav className="marketing-final-cta-nav" aria-label="MayLamDi account actions">
+            {isAuthenticated ? (
+              <>
+                <button type="button" onClick={() => void handleSwitchAccount()}>Switch account</button>
+                <button type="button" onClick={() => void signOut()}>Sign out</button>
+              </>
+            ) : (
+              <>
+                <button type="button" onClick={() => void handleStartFree("SIGN UP")}>Sign up</button>
+                <button type="button" onClick={() => void handleStartFree("LOG IN")}>Log in</button>
+              </>
+            )}
+          </nav>
+
+          <div className="marketing-final-cta-action-row">
+            <div className="marketing-final-cta-arrow" aria-hidden="true">
+              <span className="marketing-final-cta-arrow-line" />
+              <span className="marketing-final-cta-arrow-head">→</span>
+            </div>
+            {isAuthenticated ? (
+              <Link className="marketing-final-cta-explore" to="/projects">Go to Projects</Link>
+            ) : (
+              <a className="marketing-final-cta-explore" href="#why-maylamdi">Explore</a>
+            )}
+          </div>
+
+          <h2 id="marketing-final-title">MayLamDi</h2>
         </div>
       </section>
 

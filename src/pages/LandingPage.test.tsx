@@ -34,10 +34,11 @@ describe("MayLamDi landing page", () => {
   });
 
   it("keeps the hero free of authentication CTAs for authenticated visitors too", () => {
-    render(<MemoryRouter><LandingPage isAuthenticated /></MemoryRouter>);
+    const { container } = render(<MemoryRouter><LandingPage isAuthenticated /></MemoryRouter>);
+    const hero = container.querySelector(".marketing-hero");
 
-    expect(screen.queryByRole("link", { name: /go to projects/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /continue with google/i })).not.toBeInTheDocument();
+    expect(hero?.querySelector("a[href=\"/projects\"]")).not.toBeInTheDocument();
+    expect(hero).not.toHaveTextContent("Continue with Google");
   });
 
   it("adds the scoped product-purpose section before the new Features section", () => {
@@ -120,7 +121,7 @@ describe("MayLamDi landing page", () => {
     expect(container.querySelector(".marketing-marquee")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /make teamwork.*feel shared/i }));
-    expect(screen.getAllByText("MAYLAMDI")).toHaveLength(42);
+    expect(container.querySelectorAll(".maylamdi-burst-word")).toHaveLength(42);
   });
 
   it("shows the hovered feature description beside the current tag", () => {
@@ -196,6 +197,32 @@ describe("MayLamDi landing page", () => {
     expect(screen.getByRole("button", { name: "START FREE" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "UPGRADE TO PLUS" })).toBeInTheDocument();
     expect(screen.getByRole("table", { name: "MayLamDi subscription plan comparison" })).toBeInTheDocument();
+  });
+
+  it("adds the final green CTA and word-mask handoff after Subscription", () => {
+    const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
+
+    const subscription = container.querySelector("#subscription");
+    const transitionStage = container.querySelector(".marketing-final-word-transition-stage");
+    const finalCta = container.querySelector("#final-cta");
+
+    expect(subscription?.nextElementSibling).toBe(transitionStage);
+    expect(transitionStage?.nextElementSibling).toBe(finalCta);
+    expect(container.querySelectorAll(".marketing-final-word-transition-outline, .marketing-final-word-transition-fill")).toHaveLength(2);
+    expect(finalCta).toHaveTextContent("Sign up");
+    expect(finalCta).toHaveTextContent("Log in");
+    expect(finalCta).toHaveTextContent("Explore");
+    expect(finalCta).toHaveTextContent("MayLamDi");
+  });
+
+  it("uses the existing authenticated actions in the final CTA", () => {
+    const { container } = render(<MemoryRouter><LandingPage isAuthenticated /></MemoryRouter>);
+    const finalCta = container.querySelector("#final-cta");
+
+    expect(finalCta).toHaveTextContent("Switch account");
+    expect(finalCta).toHaveTextContent("Sign out");
+    expect(screen.getByRole("link", { name: "Go to Projects" })).toHaveAttribute("href", "/projects");
+    expect(finalCta).not.toHaveTextContent("Sign up");
   });
 
   it("raises the hovered letter highest and tapers adjacent letters into a smooth wave", () => {
