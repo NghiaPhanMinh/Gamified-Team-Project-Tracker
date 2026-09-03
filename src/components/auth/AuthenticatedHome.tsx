@@ -251,6 +251,7 @@ export function AuthenticatedHome() {
               onNavigateHome={() => navigate("/home")}
               onOpenProjects={(view) => openProjects(view)}
               onOpenRoom={(roomId) => openProjects("room", roomId)}
+              resumePendingProjectCreation={new URLSearchParams(location.search).get("resume") === "1"}
             />
           )}
         </div>

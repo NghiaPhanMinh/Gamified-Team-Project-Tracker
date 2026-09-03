@@ -42,6 +42,7 @@ type TeamSystemProps = {
   onNavigateHome: () => void;
   onOpenProjects: (view: ProjectsView) => void;
   onOpenRoom: (roomId: Id<"teams">) => void;
+  resumePendingProjectCreation?: boolean;
 };
 
 type ProjectRemovalTarget = {
@@ -158,6 +159,7 @@ export function TeamSystem({
   onNavigateHome,
   onOpenProjects,
   onOpenRoom,
+  resumePendingProjectCreation = false,
 }: TeamSystemProps) {
   const personalTaskGroups = useQuery(api.tasks.listMineAcrossRooms);
   const removeProject = useMutation(api.projects.removeFromMine);
@@ -242,6 +244,7 @@ export function TeamSystem({
         currentProfileId={profile._id}
         onCancel={onNavigateHome}
         onRoomReady={onOpenRoom}
+        resumePendingDraft={projectsView === "create" && resumePendingProjectCreation}
       />
     );
   }

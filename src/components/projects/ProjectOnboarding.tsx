@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { useMutation } from "convex/react";
 
 import { api } from "../../../convex/_generated/api";
@@ -8,24 +8,23 @@ import { getErrorMessage } from "../../lib/errors";
 import { trackEvent } from "../../lib/analytics";
 import { createTelemetryTracker } from "../../lib/telemetry";
 import { MAYLAMDI_FRAMEWORK_COLORS, paletteColorAt } from "../../lib/brandPalette";
+import {
+  clearPendingProjectDraft,
+  loadPendingProjectDraft,
+  type PendingProjectDraft,
+  type PendingProjectTask,
+} from "../../lib/pendingProjectDraft";
 
 type ProjectOnboardingProps = {
   mode: "create" | "join";
-  currentProfileId: Id<"userProfiles">;
+  currentProfileId?: Id<"userProfiles">;
   onCancel: () => void;
-  onRoomReady: (teamId: Id<"teams">) => void;
+  onRoomReady?: (teamId: Id<"teams">) => void;
+  onAuthenticationRequired?: (draft: PendingProjectDraft) => Promise<void> | void;
+  resumePendingDraft?: boolean;
 };
 
-type DraftTask = {
-  id: string;
-  title: string;
-  description: string;
-  phaseKey: string;
-  ownerMode: "creator" | "open" | "unassigned";
-  weight: number;
-  dueDate: string;
-  skills: string;
-};
+type DraftTask = PendingProjectTask;
 
 function dateAfter(days: number) {
   const date = new Date();
@@ -41,6 +40,8 @@ export function ProjectOnboarding({
   currentProfileId,
   onCancel,
   onRoomReady,
+  onAuthenticationRequired,
+  resumePendingDraft = false,
 }: ProjectOnboardingProps) {
   const createTeam = useMutation(api.teams.create);
   const joinTeam = useMutation(api.teams.joinByCode);
@@ -49,18 +50,21 @@ export function ProjectOnboarding({
   const logTelemetryEvent = useMutation(api.telemetry.logEvent);
   const telemetry = useMemo(() => createTelemetryTracker(logTelemetryEvent), [logTelemetryEvent]);
 
-  const [step, setStep] = useState(1);
-  const [frameworkChoice, setFrameworkChoice] = useState(BUILT_IN_FRAMEWORKS[0].id);
+  const pendingDraft = useMemo(() => resumePendingDraft ? loadPendingProjectDraft() : null, [resumePendingDraft]);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const hasResumedCreation = useRef(false);
+  const [step, setStep] = useState(pendingDraft ? 5 : 1);
+  const [frameworkChoice, setFrameworkChoice] = useState(pendingDraft?.frameworkChoice ?? BUILT_IN_FRAMEWORKS[0].id);
   const [showAllFrameworks, setShowAllFrameworks] = useState(false);
-  const [customFrameworkName, setCustomFrameworkName] = useState("My framework");
-  const [customPhaseNames, setCustomPhaseNames] = useState("Discover, Make, Review, Deliver");
-  const [title, setTitle] = useState("");
-  const [brief, setBrief] = useState("");
-  const [deadline, setDeadline] = useState(dateAfter(14));
-  const [targetMemberCount, setTargetMemberCount] = useState("4");
-  const [taskCreationMode, setTaskCreationMode] = useState<"ai" | "manual">("ai");
-  const [allocationMode, setAllocationMode] = useState<"ai" | "manual" | "self_selection">("ai");
-  const [draftTasks, setDraftTasks] = useState<DraftTask[]>([]);
+  const [customFrameworkName, setCustomFrameworkName] = useState(pendingDraft?.customFrameworkName ?? "My framework");
+  const [customPhaseNames, setCustomPhaseNames] = useState(pendingDraft?.customPhaseNames ?? "Discover, Make, Review, Deliver");
+  const [title, setTitle] = useState(pendingDraft?.title ?? "");
+  const [brief, setBrief] = useState(pendingDraft?.brief ?? "");
+  const [deadline, setDeadline] = useState(pendingDraft?.deadline ?? dateAfter(14));
+  const [targetMemberCount, setTargetMemberCount] = useState(pendingDraft?.targetMemberCount ?? "4");
+  const [taskCreationMode, setTaskCreationMode] = useState<"ai" | "manual">(pendingDraft?.taskCreationMode ?? "ai");
+  const [allocationMode, setAllocationMode] = useState<"ai" | "manual" | "self_selection">(pendingDraft?.allocationMode ?? "ai");
+  const [draftTasks, setDraftTasks] = useState<DraftTask[]>(pendingDraft?.draftTasks ?? []);
   const [draftTitle, setDraftTitle] = useState("");
   const [draftDescription, setDraftDescription] = useState("");
   const [draftPhaseKey, setDraftPhaseKey] = useState("");
@@ -71,6 +75,12 @@ export function ProjectOnboarding({
   const [joinCode, setJoinCode] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!pendingDraft || !currentProfileId || hasResumedCreation.current) return;
+    hasResumedCreation.current = true;
+    formRef.current?.requestSubmit();
+  }, [currentProfileId, pendingDraft]);
 
   const selectedFramework = useMemo(() => {
     if (frameworkChoice === "custom") {
@@ -174,6 +184,34 @@ export function ProjectOnboarding({
       return;
     }
 
+    if (!currentProfileId) {
+      if (!onAuthenticationRequired) {
+        setError("Sign in is required to create this project.");
+        return;
+      }
+      setIsSaving(true);
+      try {
+        await onAuthenticationRequired({
+          version: 1,
+          frameworkChoice,
+          customFrameworkName,
+          customPhaseNames,
+          title,
+          brief,
+          deadline,
+          targetMemberCount,
+          taskCreationMode,
+          allocationMode,
+          draftTasks,
+        });
+      } catch (caughtError) {
+        setError(getErrorMessage(caughtError, "Google sign-in could not start."));
+      } finally {
+        setIsSaving(false);
+      }
+      return;
+    }
+
     setIsSaving(true);
     try {
       const teamId = await createTeam({ name: title.trim() });
@@ -228,7 +266,8 @@ export function ProjectOnboarding({
         sessionStorage.setItem(`maylamdi:draft-tasks:${projectId}`, JSON.stringify(draftTasks));
         sessionStorage.setItem(`maylamdi:draft-owner:${projectId}`, currentProfileId);
       }
-      onRoomReady(teamId);
+      clearPendingProjectDraft();
+      onRoomReady?.(teamId);
     } catch (caughtError) {
       const errorMsg = getErrorMessage(caughtError, "The room could not be created.");
       setError(errorMsg);
@@ -244,7 +283,7 @@ export function ProjectOnboarding({
     setIsSaving(true);
     try {
       const teamId = await joinTeam({ code: joinCode });
-      onRoomReady(teamId);
+      onRoomReady?.(teamId);
     } catch (caughtError) {
       setError(getErrorMessage(caughtError, "That room code is not valid."));
     } finally {
@@ -292,7 +331,7 @@ export function ProjectOnboarding({
         ← Back
       </button>
       <ol className="guided-stepper" aria-label="Create project progress">{stepLabels.map((label, index) => <li key={label} className={step === index + 1 ? "is-current" : step > index + 1 ? "is-complete" : ""}><span>{index + 1}</span><small>{label}</small></li>)}</ol>
-      <form className="guided-card" onSubmit={handleCreate}>
+      <form className="guided-card" onSubmit={handleCreate} ref={formRef}>
         {step === 1 ? <>
           <p className="kicker">Step 1 · Structure</p>
           <h1 className="display-heading" id="create-flow-title">Choose your project structure</h1>
@@ -350,7 +389,7 @@ export function ProjectOnboarding({
             </button>
           ) : <span />}
           <button className="primary-button guided-primary" type="submit" disabled={isSaving}>
-            {isSaving ? "Creating room…" : step === 5 ? "Create Room" : step === 2 ? "Continue to Project Plan" : step === 3 ? "Continue to Allocation" : step === 4 ? "Review Project" : "Continue"}
+            {isSaving ? (currentProfileId ? "Creating project…" : "Opening Google…") : step === 5 ? "Create Project" : step === 2 ? "Continue to Project Plan" : step === 3 ? "Continue to Allocation" : step === 4 ? "Review Project" : "Continue"}
           </button>
         </div>
       </form>

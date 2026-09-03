@@ -1736,7 +1736,7 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
             {isAuthenticated ? (
               <Link className="marketing-final-cta-explore" to="/home">Go to Projects</Link>
             ) : (
-              <a className="marketing-final-cta-explore" href="#why-maylamdi">Explore</a>
+              <Link className="marketing-final-cta-explore" to="/projects/create">Explore</Link>
             )}
           </div>
 

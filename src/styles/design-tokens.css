@@ -3962,6 +3962,8 @@ body:has(.marketing-about-transition-scene) {
 }
 
 .marketing-final-cta-action-row {
+  position: relative;
+  z-index: 4;
   display: flex;
   width: calc(100% + clamp(16px, 5vw, 64px));
   align-items: center;
@@ -4001,6 +4003,8 @@ body:has(.marketing-about-transition-scene) {
 }
 
 .marketing-final-cta-explore {
+  position: relative;
+  z-index: 5;
   display: inline-flex;
   min-width: clamp(138px, 12vw, 210px);
   min-height: 52px;
@@ -4015,6 +4019,8 @@ body:has(.marketing-about-transition-scene) {
   line-height: 1;
   text-align: center;
   text-decoration: none;
+  pointer-events: auto;
+  cursor: pointer;
   opacity: 0;
   transform: translateX(64px);
 }
@@ -4027,18 +4033,61 @@ body:has(.marketing-about-transition-scene) {
 }
 
 .marketing-final-cta h2 {
-  align-self: center;
-  width: 100%;
-  margin: 0;
+  align-self: flex-start;
+  width: calc(100% + clamp(16px, 5vw, 64px));
+  margin: 0 0 0 calc(-1 * clamp(16px, 5vw, 64px));
   color: #1dd851;
-  font-size: clamp(104px, 21vw, 390px);
+  font-size: clamp(96px, 18vw, 340px);
   font-weight: 900;
   letter-spacing: -0.1em;
   line-height: 0.7;
   opacity: 0;
-  text-align: center;
+  text-align: left;
   transform: translateY(100%);
   white-space: nowrap;
+}
+
+.guest-project-shell {
+  min-height: 100svh;
+  padding: 0 0 var(--mld-space-8);
+  background: var(--color-page);
+  color: var(--mld-text);
+}
+
+.guest-project-header {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mld-space-4);
+  padding: var(--mld-space-4) clamp(16px, 5vw, 64px);
+  border-bottom: 1px solid var(--mld-border-strong);
+  background: var(--color-page);
+}
+
+.guest-project-header a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mld-space-3);
+  color: inherit;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.guest-project-header > span {
+  font-weight: 800;
+}
+
+.guest-project-shell > .guided-flow {
+  width: min(1180px, calc(100% - 32px));
+  margin: var(--mld-space-6) auto 0;
+}
+
+.guest-project-auth-error {
+  width: min(1180px, calc(100% - 32px));
+  margin: var(--mld-space-4) auto 0;
 }
 
 .marketing-final-cta.is-entered h2 {
@@ -4515,7 +4564,7 @@ body:has(.marketing-about-transition-scene) {
   }
 
   .marketing-final-cta h2 {
-    font-size: clamp(84px, 25vw, 180px);
+    font-size: clamp(60px, 19vw, 136px);
   }
 
   .how-works-visual {

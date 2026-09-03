@@ -7,6 +7,14 @@ import { AuthLoadingPage } from "./components/auth/AuthLoadingPage";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import { normalizeSubscriptionPlan } from "./lib/subscription";
 import { LandingPage } from "./pages/LandingPage";
+import { GuestProjectCreationPage } from "./pages/GuestProjectCreationPage";
+
+function UnauthenticatedExperience() {
+  const location = useLocation();
+  return location.pathname.startsWith("/projects/create")
+    ? <GuestProjectCreationPage />
+    : <LandingPage />;
+}
 
 function AuthenticatedExperience() {
   const location = useLocation();
@@ -26,7 +34,7 @@ export function App() {
         <AuthLoadingPage />
       </AuthLoading>
       <Unauthenticated>
-        <LandingPage />
+        <UnauthenticatedExperience />
       </Unauthenticated>
       <Authenticated>
         <ErrorBoundary>

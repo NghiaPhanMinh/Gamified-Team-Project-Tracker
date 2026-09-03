@@ -214,6 +214,7 @@ describe("MayLamDi landing page", () => {
     expect(finalCta).toHaveTextContent("Log in");
     expect(finalCta).toHaveTextContent("Explore");
     expect(finalCta).toHaveTextContent("MayLamDi");
+    expect(screen.getByRole("link", { name: "Explore" })).toHaveAttribute("href", "/projects/create");
   });
 
   it("uses the existing authenticated actions in the final CTA", () => {

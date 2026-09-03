@@ -1,7 +1,8 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Id } from "../../../convex/_generated/dataModel";
+import { PENDING_PROJECT_DRAFT_KEY } from "../../lib/pendingProjectDraft";
 import { ProjectOnboarding } from "./ProjectOnboarding";
 
 vi.mock("convex/react", () => ({
@@ -10,6 +11,10 @@ vi.mock("convex/react", () => ({
 
 describe("ProjectOnboarding", () => {
   afterEach(cleanup);
+
+  afterEach(() => {
+    window.sessionStorage.clear();
+  });
 
   it("uses the new structure-to-create flow and retains earlier input", () => {
     render(
@@ -58,6 +63,68 @@ describe("ProjectOnboarding", () => {
     expect(screen.getByRole("option", { name: "1 person" })).toHaveValue("1");
     fireEvent.change(teamSize, { target: { value: "1" } });
     expect(teamSize).toHaveValue("1");
+  });
+
+  it("keeps guest planning available and requests Google authentication only at creation", async () => {
+    const onAuthenticationRequired = vi.fn().mockResolvedValue(undefined);
+    render(
+      <ProjectOnboarding
+        mode="create"
+        onAuthenticationRequired={onAuthenticationRequired}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /^continue$/i }));
+    fireEvent.change(screen.getByLabelText(/project brief/i), {
+      target: { value: "Create and test a clear project prototype for university students." },
+    });
+    fireEvent.change(screen.getByLabelText(/project name/i), { target: { value: "Guest project" } });
+    fireEvent.click(screen.getByRole("button", { name: /continue to project plan/i }));
+    fireEvent.click(screen.getByRole("button", { name: /continue to allocation/i }));
+    fireEvent.click(screen.getByRole("button", { name: /review project/i }));
+
+    expect(onAuthenticationRequired).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: /create project/i }));
+
+    await waitFor(() => expect(onAuthenticationRequired).toHaveBeenCalledTimes(1));
+    expect(onAuthenticationRequired).toHaveBeenCalledWith(expect.objectContaining({
+      version: 1,
+      title: "Guest project",
+      brief: "Create and test a clear project prototype for university students.",
+    }));
+  });
+
+  it("resumes a saved guest draft after Google authentication", async () => {
+    window.sessionStorage.setItem(PENDING_PROJECT_DRAFT_KEY, JSON.stringify({
+      version: 1,
+      frameworkChoice: "design-nonlinear",
+      customFrameworkName: "My framework",
+      customPhaseNames: "Discover, Make, Review, Deliver",
+      title: "Saved guest project",
+      brief: "Continue this project after authentication.",
+      deadline: "2026-09-30",
+      targetMemberCount: "3",
+      taskCreationMode: "manual",
+      allocationMode: "self_selection",
+      draftTasks: [],
+    }));
+    const onRoomReady = vi.fn();
+
+    render(
+      <ProjectOnboarding
+        mode="create"
+        currentProfileId={"profile-1" as Id<"userProfiles">}
+        onCancel={vi.fn()}
+        onRoomReady={onRoomReady}
+        resumePendingDraft
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: /review your project/i })).toBeInTheDocument();
+    expect(screen.getByText("Saved guest project")).toBeInTheDocument();
+    await waitFor(() => expect(onRoomReady).toHaveBeenCalledTimes(1));
+    expect(window.sessionStorage.getItem(PENDING_PROJECT_DRAFT_KEY)).toBeNull();
   });
 
   it("keeps the member flow to one code screen and reuses the saved profile", () => {
