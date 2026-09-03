@@ -1037,12 +1037,19 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
 
     const updateScene = () => {
       const viewportHeight = Math.max(window.innerHeight, 1);
-      const transitionRect = transition.getBoundingClientRect();
-      const transitionStart = viewportHeight * 0.58;
+      const sectionRect = section.getBoundingClientRect();
+      const transitionRunway = viewportHeight;
+      const transitionHold = viewportHeight * 0.24;
+      const scrollPastFeaturesContent = transitionRunway - sectionRect.bottom;
+      const transitionDistance = transitionRunway - transitionHold;
       const transitionProgress = reducedMotion?.matches
         ? 1
-        : Math.min(1, Math.max(0, (transitionStart - transitionRect.top) / transitionStart));
+        : Math.min(1, Math.max(0, (scrollPastFeaturesContent - transitionHold) / transitionDistance));
+      const transitionActive = !reducedMotion?.matches
+        && scrollPastFeaturesContent >= transitionHold
+        && sectionRect.bottom >= 0;
       transition.style.setProperty("--how-transition-progress", transitionProgress.toFixed(3));
+      transition.dataset.active = transitionActive ? "true" : "false";
       transition.dataset.complete = transitionProgress >= 0.999 ? "true" : "false";
 
       if (reducedMotion?.matches) {
@@ -1050,8 +1057,8 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
         return;
       }
 
-      const sectionRect = stage.getBoundingClientRect();
-      const progress = Math.min(1, Math.max(0, (viewportHeight - sectionRect.top) / Math.max(stage.offsetHeight, 1)));
+      const howStageRect = stage.getBoundingClientRect();
+      const progress = Math.min(1, Math.max(0, (viewportHeight - howStageRect.top) / Math.max(stage.offsetHeight, 1)));
       setHowItWorksProgress(progress);
     };
 
