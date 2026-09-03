@@ -1026,10 +1026,31 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
   }, []);
 
   useEffect(() => {
-    const transition = howItWorksTransition.current;
     const section = howItWorksSection.current;
     const stage = section?.querySelector<HTMLElement>(".marketing-how-it-works-scroll-stage");
-    if (!transition || !section || !stage) return;
+    if (!section || !stage) return;
+
+    const updateScene = () => {
+      const viewportHeight = Math.max(window.innerHeight, 1);
+      const howStageRect = stage.getBoundingClientRect();
+      const progress = Math.min(1, Math.max(0, (viewportHeight - howStageRect.top) / Math.max(stage.offsetHeight, 1)));
+      setHowItWorksProgress(progress);
+    };
+
+    window.addEventListener("scroll", updateScene, { passive: true });
+    window.addEventListener("resize", updateScene);
+    updateScene();
+
+    return () => {
+      window.removeEventListener("scroll", updateScene);
+      window.removeEventListener("resize", updateScene);
+    };
+  }, []);
+
+  useEffect(() => {
+    const transition = howItWorksTransition.current;
+    const section = featuresSection.current;
+    if (!transition || !section) return;
 
     const reducedMotion = typeof window.matchMedia === "function"
       ? window.matchMedia("(prefers-reduced-motion: reduce)")
@@ -1038,9 +1059,11 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
     const updateScene = () => {
       const viewportHeight = Math.max(window.innerHeight, 1);
       const sectionRect = section.getBoundingClientRect();
+      const paddingBottom = Number.parseFloat(getComputedStyle(section).paddingBottom) || 0;
+      const contentBottom = sectionRect.bottom - paddingBottom;
       const transitionRunway = viewportHeight;
       const transitionHold = viewportHeight * 0.24;
-      const scrollPastFeaturesContent = transitionRunway - sectionRect.bottom;
+      const scrollPastFeaturesContent = transitionRunway - contentBottom;
       const transitionDistance = transitionRunway - transitionHold;
       const transitionProgress = reducedMotion?.matches
         ? 1
@@ -1055,15 +1078,6 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
       section.style.setProperty("--features-scene-lock-offset", `${sceneLockOffset}px`);
       transition.dataset.active = transitionActive ? "true" : "false";
       transition.dataset.complete = transitionProgress >= 0.999 ? "true" : "false";
-
-      if (reducedMotion?.matches) {
-        setHowItWorksProgress(0);
-        return;
-      }
-
-      const howStageRect = stage.getBoundingClientRect();
-      const progress = Math.min(1, Math.max(0, (viewportHeight - howStageRect.top) / Math.max(stage.offsetHeight, 1)));
-      setHowItWorksProgress(progress);
     };
 
     window.addEventListener("scroll", updateScene, { passive: true });
