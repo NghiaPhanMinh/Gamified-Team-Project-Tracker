@@ -3886,7 +3886,8 @@ body:has(.marketing-about-transition-scene) {
 
 .marketing-final-reveal-stage {
   position: relative;
-  min-height: 68vh;
+  min-height: 100vh;
+  min-height: 100svh;
   background: #feaa01;
 }
 
@@ -4486,7 +4487,8 @@ body:has(.marketing-about-transition-scene) {
   }
 
   .marketing-final-reveal-stage {
-    min-height: 58vh;
+    min-height: 100vh;
+    min-height: 100svh;
   }
 
   .marketing-final-cta-inner {
