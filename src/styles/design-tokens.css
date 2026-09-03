@@ -2925,6 +2925,468 @@ body:has(.marketing-about-transition-scene) {
   line-height: 1.35;
 }
 
+.marketing-how-it-works-transition {
+  position: relative;
+  z-index: 4;
+  height: clamp(280px, 62vh, 620px);
+  overflow: hidden;
+  background: #4ca0fe;
+  contain: paint;
+}
+
+.marketing-how-it-works-stripe {
+  position: absolute;
+  z-index: 1;
+  left: -12%;
+  width: 124%;
+  height: 18%;
+  background: color-mix(in srgb, #fff73f calc(var(--how-transition-progress, 0) * 100%), var(--stripe-color));
+  transform: translateX(0);
+  transition: background-color 80ms linear;
+  will-change: transform, background-color;
+}
+
+.marketing-how-it-works-stripe:nth-child(1) { top: -2%; }
+.marketing-how-it-works-stripe:nth-child(2) { top: 15%; }
+.marketing-how-it-works-stripe:nth-child(3) { top: 32%; }
+.marketing-how-it-works-stripe:nth-child(4) { top: 49%; }
+.marketing-how-it-works-stripe:nth-child(5) { top: 66%; }
+.marketing-how-it-works-stripe:nth-child(6) { top: 83%; }
+
+.marketing-how-it-works-transition:not([data-complete="true"]) .marketing-how-it-works-stripe.is-from-left {
+  transform: translateX(calc((1 - var(--how-transition-progress, 0)) * -115%));
+}
+
+.marketing-how-it-works-transition:not([data-complete="true"]) .marketing-how-it-works-stripe.is-from-right {
+  transform: translateX(calc((1 - var(--how-transition-progress, 0)) * 115%));
+}
+
+.marketing-how-it-works {
+  position: relative;
+  z-index: 3;
+  overflow: clip;
+  background: #fff73f;
+  color: #101517;
+}
+
+.marketing-how-it-works-scroll-stage {
+  position: relative;
+  min-height: 400vh;
+}
+
+.marketing-how-it-works-sticky {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--mld-space-6);
+  height: 100vh;
+  min-height: 620px;
+  padding: clamp(28px, 5vw, 72px) clamp(20px, 6vw, 96px);
+  isolation: isolate;
+}
+
+.marketing-how-it-works-heading {
+  display: grid;
+  gap: var(--mld-space-4);
+  align-content: start;
+}
+
+.marketing-how-it-works-heading > p {
+  margin: 0;
+  color: #4ca0fe;
+  font-size: clamp(15px, 1.3vw, 20px);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.marketing-how-it-works-rail {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(100%, 600px);
+  min-height: 44px;
+  overflow: hidden;
+  border-radius: var(--mld-radius-pill);
+  background: #4ca0fe;
+  isolation: isolate;
+}
+
+.marketing-how-it-works-rail::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0 auto 0 0;
+  width: 25%;
+  background: #feaa01;
+  content: "";
+  transform: translateX(calc(var(--how-active-index, 0) * 100%));
+  transition: transform 420ms cubic-bezier(0.2, 0.76, 0.24, 1);
+}
+
+.marketing-how-it-works-rail-step {
+  display: grid;
+  min-height: 44px;
+  place-items: center;
+  color: #fffdec;
+  font-size: var(--mld-body-large-size);
+  font-weight: 900;
+}
+
+.marketing-how-it-works-rail-step.is-active {
+  color: #101517;
+}
+
+.marketing-how-it-works-track {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.marketing-how-it-works-step {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 0.45fr) minmax(0, 0.55fr);
+  align-items: center;
+  gap: clamp(28px, 6vw, 96px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(120px);
+  transition: opacity 520ms ease, transform 620ms cubic-bezier(0.2, 0.76, 0.24, 1);
+  will-change: opacity, transform;
+}
+
+.marketing-how-it-works-step.is-before {
+  transform: translateX(-120px);
+}
+
+.marketing-how-it-works-step.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.marketing-how-it-works-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.marketing-how-it-works-step-number {
+  margin-bottom: var(--mld-space-4);
+  color: #101517;
+  font-size: var(--mld-label-size);
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.marketing-how-it-works-copy h2 {
+  margin: 0;
+  color: #4ca0fe;
+  font-size: clamp(64px, 7.1vw, 112px);
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 0.88;
+  text-wrap: balance;
+}
+
+.marketing-how-it-works-copy h2 span {
+  display: block;
+  opacity: var(--how-title-progress, 0);
+  transform: translateX(calc((1 - var(--how-title-progress, 0)) * 120px));
+}
+
+.marketing-how-it-works-copy h2 span + span {
+  transition-delay: 50ms;
+}
+
+.marketing-how-it-works-copy > p {
+  max-width: 520px;
+  margin: var(--mld-space-6) 0 0;
+  color: #101517;
+  font-size: clamp(18px, 1.65vw, 24px);
+  line-height: 1.4;
+  opacity: var(--how-description-progress, 0);
+  transform: translateY(calc((1 - var(--how-description-progress, 0)) * 28px));
+}
+
+.how-works-visual {
+  --how-visual-tone: #4ca0fe;
+  position: relative;
+  width: min(100%, 650px);
+  aspect-ratio: 1.25;
+  justify-self: end;
+  overflow: hidden;
+  border: 3px solid #fffdec;
+  border-radius: var(--mld-radius-lg);
+  background: var(--how-visual-tone);
+  color: #fffdec;
+  box-shadow: 12px 12px 0 #fffdec;
+  opacity: var(--how-image-progress, 0);
+  transform: translateX(calc((1 - var(--how-image-progress, 0)) * 120px)) rotate(calc((1 - var(--how-image-progress, 0)) * 3deg)) scale(calc(0.94 + (var(--how-image-progress, 0) * 0.06)));
+}
+
+.how-works-visual--setup { --how-visual-tone: #4ca0fe; }
+.how-works-visual--plan { --how-visual-tone: #feaa01; }
+.how-works-visual--work { --how-visual-tone: #fd39e4; }
+.how-works-visual--together { --how-visual-tone: #4ca0fe; }
+
+.how-works-visual-window-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--mld-space-3);
+  min-height: 58px;
+  padding: 10px var(--mld-space-5);
+  border-bottom: 3px solid #fffdec;
+  background: #fffdec;
+  color: var(--how-visual-tone);
+}
+
+.how-works-visual-window-bar > div {
+  display: flex;
+  gap: 6px;
+}
+
+.how-works-visual-window-bar > div span {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--how-visual-tone);
+  border-radius: 50%;
+  background: var(--how-visual-tone);
+}
+
+.how-works-visual-window-bar > div span:nth-child(2) {
+  background: #fffdec;
+}
+
+.how-works-visual-window-bar strong {
+  font-size: clamp(14px, 1.6vw, 22px);
+  text-align: center;
+}
+
+.how-works-visual-window-bar b {
+  justify-self: end;
+  font-size: var(--mld-label-size);
+}
+
+.how-works-visual-setup,
+.how-works-visual-plan,
+.how-works-visual-board,
+.how-works-visual-game {
+  height: calc(100% - 58px);
+  padding: clamp(20px, 3vw, 42px);
+}
+
+.how-works-visual-setup {
+  display: grid;
+  grid-template-columns: 0.3fr 0.7fr;
+  gap: var(--mld-space-5);
+}
+
+.how-works-visual-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mld-space-3);
+  padding-right: var(--mld-space-4);
+  border-right: 2px solid #fffdec;
+  font-size: clamp(12px, 1.3vw, 18px);
+  font-weight: 900;
+}
+
+.how-works-visual-sidebar span {
+  padding: 10px 12px;
+}
+
+.how-works-visual-sidebar .is-active {
+  background: #fffdec;
+  color: var(--how-visual-tone);
+}
+
+.how-works-visual-form,
+.how-works-visual-plan,
+.how-works-visual-board-column,
+.how-works-visual-game {
+  display: flex;
+  flex-direction: column;
+}
+
+.how-works-visual-kicker,
+.how-works-visual-plan-banner,
+.how-works-visual-game-status,
+.how-works-visual-board-column > strong {
+  font-size: var(--mld-caption-size);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.how-works-visual-form > strong {
+  margin: var(--mld-space-3) 0 var(--mld-space-5);
+  font-size: clamp(24px, 3.4vw, 52px);
+  line-height: 0.95;
+}
+
+.how-works-visual-input,
+.how-works-visual-form-footer,
+.how-works-visual-plan-row,
+.how-works-visual-plan-footer,
+.how-works-visual-board-column > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mld-space-3);
+  padding: 12px 14px;
+  border: 2px solid #fffdec;
+  background: var(--how-visual-tone);
+  color: #fffdec;
+  font-size: clamp(11px, 1.2vw, 16px);
+}
+
+.how-works-visual-input + .how-works-visual-input,
+.how-works-visual-plan-row + .how-works-visual-plan-row,
+.how-works-visual-board-column > div + div {
+  margin-top: var(--mld-space-3);
+}
+
+.how-works-visual-form-footer,
+.how-works-visual-plan-footer {
+  margin-top: auto;
+  border-color: #fffdec;
+  background: #fffdec;
+  color: var(--how-visual-tone);
+}
+
+.how-works-visual-plan {
+  gap: var(--mld-space-3);
+}
+
+.how-works-visual-plan-banner,
+.how-works-visual-game-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mld-space-3);
+  margin-bottom: var(--mld-space-4);
+}
+
+.how-works-visual-plan-banner b,
+.how-works-visual-game-status b {
+  padding: 7px 10px;
+  background: #fffdec;
+  color: var(--how-visual-tone);
+}
+
+.how-works-visual-plan-row strong {
+  color: #fffdec;
+}
+
+.how-works-visual-plan-row b {
+  min-width: 66px;
+  padding: 6px 8px;
+  background: #fffdec;
+  color: var(--how-visual-tone);
+  text-align: center;
+}
+
+.how-works-visual-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: var(--mld-space-3);
+}
+
+.how-works-visual-board-column {
+  gap: var(--mld-space-3);
+}
+
+.how-works-visual-board-column > strong {
+  padding-bottom: 10px;
+  border-bottom: 2px solid #fffdec;
+}
+
+.how-works-visual-board-column > div {
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 92px;
+  padding: 12px;
+}
+
+.how-works-visual-board-column > div b {
+  align-self: flex-end;
+  padding: 4px 8px;
+  background: #fffdec;
+  color: var(--how-visual-tone);
+}
+
+.how-works-visual-game {
+  align-items: center;
+  justify-content: center;
+  gap: var(--mld-space-5);
+}
+
+.how-works-visual-shield {
+  display: grid;
+  width: clamp(90px, 13vw, 156px);
+  aspect-ratio: 1;
+  place-items: center;
+  border: 5px solid #fffdec;
+  border-radius: 28% 28% 44% 44%;
+  background: var(--how-visual-tone);
+  box-shadow: 10px 10px 0 #fffdec;
+}
+
+.how-works-visual-shield span {
+  font-size: clamp(42px, 6vw, 76px);
+  font-weight: 900;
+}
+
+.how-works-visual-boss {
+  font-size: clamp(16px, 2vw, 26px);
+  letter-spacing: 0.1em;
+}
+
+.how-works-visual-hp {
+  width: min(82%, 430px);
+  height: 22px;
+  overflow: hidden;
+  border: 3px solid #fffdec;
+  background: var(--how-visual-tone);
+}
+
+.how-works-visual-hp span {
+  display: block;
+  height: 100%;
+  background: #fffdec;
+}
+
+.how-works-visual-players {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--mld-caption-size);
+  font-weight: 900;
+}
+
+.how-works-visual-players b {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 2px solid #fffdec;
+  border-radius: 50%;
+  background: #fffdec;
+  color: var(--how-visual-tone);
+}
+
+.how-works-visual-players span {
+  margin-left: var(--mld-space-2);
+}
+
 @keyframes marketing-feature-tag-mobile-drop {
   0% { opacity: 0; transform: translateY(-72px) rotate(-7deg); }
   100% { opacity: 1; transform: translateY(0) rotate(var(--tag-rotation)); }
@@ -3028,6 +3490,18 @@ body:has(.marketing-about-transition-scene) {
 
   .marketing-feature-tag {
     max-width: 42vw;
+  }
+
+  .marketing-how-it-works-sticky {
+    padding-inline: clamp(20px, 5vw, 48px);
+  }
+
+  .marketing-how-it-works-copy h2 {
+    font-size: clamp(56px, 8vw, 86px);
+  }
+
+  .how-works-visual {
+    box-shadow: 8px 8px 0 #fffdec;
   }
 }
 
@@ -3185,6 +3659,101 @@ body:has(.marketing-about-transition-scene) {
   .marketing-features-description {
     width: min(320px, calc(100% - 32px));
   }
+
+  .marketing-how-it-works-transition {
+    height: 240px;
+  }
+
+  .marketing-how-it-works-scroll-stage {
+    min-height: 400svh;
+  }
+
+  .marketing-how-it-works-sticky {
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: var(--mld-space-4);
+    min-height: 100svh;
+    padding: 24px 16px 28px;
+  }
+
+  .marketing-how-it-works-heading {
+    gap: var(--mld-space-3);
+  }
+
+  .marketing-how-it-works-rail {
+    width: 100%;
+  }
+
+  .marketing-how-it-works-track {
+    min-height: 0;
+  }
+
+  .marketing-how-it-works-step {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    align-content: center;
+    gap: var(--mld-space-5);
+  }
+
+  .marketing-how-it-works-step-number {
+    margin-bottom: var(--mld-space-3);
+  }
+
+  .marketing-how-it-works-copy h2 {
+    font-size: clamp(50px, 14.5vw, 78px);
+    line-height: 0.9;
+  }
+
+  .marketing-how-it-works-copy > p {
+    margin-top: var(--mld-space-4);
+    font-size: clamp(16px, 4.4vw, 20px);
+  }
+
+  .how-works-visual {
+    width: min(100%, 520px);
+    aspect-ratio: 1.16;
+    align-self: center;
+    justify-self: center;
+    box-shadow: 6px 6px 0 #fffdec;
+  }
+
+  .how-works-visual-window-bar {
+    min-height: 46px;
+    padding-inline: 14px;
+  }
+
+  .how-works-visual-setup,
+  .how-works-visual-plan,
+  .how-works-visual-board,
+  .how-works-visual-game {
+    height: calc(100% - 46px);
+    padding: 16px;
+  }
+
+  .how-works-visual-sidebar {
+    gap: 6px;
+    padding-right: 10px;
+  }
+
+  .how-works-visual-sidebar span {
+    padding: 8px 6px;
+  }
+
+  .how-works-visual-input,
+  .how-works-visual-form-footer,
+  .how-works-visual-plan-row,
+  .how-works-visual-plan-footer,
+  .how-works-visual-board-column > div {
+    padding: 9px 10px;
+    font-size: 11px;
+  }
+
+  .how-works-visual-board-column > div {
+    min-height: 72px;
+  }
+
+  .how-works-visual-players span {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3266,6 +3835,47 @@ body:has(.marketing-about-transition-scene) {
   .marketing-feature-tag.is-reduced {
     opacity: 1;
     transform: translate3d(var(--tag-x), var(--tag-y), 0) rotate(var(--tag-rotation));
+  }
+
+  .marketing-how-it-works-transition {
+    height: 120px;
+    background: #fff73f;
+  }
+
+  .marketing-how-it-works-stripe {
+    display: none;
+  }
+
+  .marketing-how-it-works-scroll-stage {
+    min-height: auto;
+  }
+
+  .marketing-how-it-works-sticky {
+    position: relative;
+    height: auto;
+    min-height: 100svh;
+  }
+
+  .marketing-how-it-works-track {
+    min-height: 580px;
+  }
+
+  .marketing-how-it-works-step {
+    position: relative;
+    display: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .marketing-how-it-works-step.is-active {
+    display: grid;
+  }
+
+  .marketing-how-it-works-copy h2 span,
+  .marketing-how-it-works-copy > p,
+  .how-works-visual {
+    opacity: 1;
+    transform: none;
   }
 }
 

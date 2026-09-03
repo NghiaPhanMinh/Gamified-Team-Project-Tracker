@@ -42,6 +42,23 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain(".marketing-features-description");
   });
 
+  it("includes the yellow horizontal How It Works sequence", () => {
+    expect(css).toContain(".marketing-how-it-works-transition");
+    expect(css).toContain(".marketing-how-it-works-stripe.is-from-left");
+    expect(css).toContain(".marketing-how-it-works-stripe.is-from-right");
+    expect(css).toContain(".marketing-how-it-works-scroll-stage");
+    expect(css).toContain("min-height: 400vh");
+    expect(css).toContain(".marketing-how-it-works-rail::before");
+    expect(css).toContain("background: #feaa01");
+    expect(css).toContain(".marketing-how-it-works-step.is-before");
+    expect(css).toContain("translateX(120px)");
+    expect(css).toContain(".how-works-visual--setup");
+    expect(css).toContain(".how-works-visual--plan");
+    expect(css).toContain(".how-works-visual--work");
+    expect(css).toContain(".how-works-visual--together");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce)");
+  });
+
   it("uses the selected local display font without the removed hero preview", () => {
     expect(css).toContain('font-family: "Paytone One"');
     expect(css).toContain('/fonts/PaytoneOne-Regular.ttf');

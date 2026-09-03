@@ -120,6 +120,39 @@ const FEATURE_TAGS = [
   },
 ] as const;
 
+const HOW_IT_WORKS_STEPS = [
+  {
+    number: "01",
+    title: "SET UP\nTHE PROJECT",
+    description: "Add your brief, deadline, framework, team skills, availability and capacity.",
+    visual: "setup",
+    visualLabel: "Project setup interface",
+  },
+  {
+    number: "02",
+    title: "BUILD A\nFAIR PLAN",
+    description: "AI suggests tasks and ownership, while the team reviews, edits or rejects every suggestion.",
+    visual: "plan",
+    visualLabel: "Editable AI task plan interface",
+  },
+  {
+    number: "03",
+    title: "WORK & STAY\nVISIBLE",
+    description: "Complete tasks, upload evidence, review work and keep workload and contribution visible.",
+    visual: "work",
+    visualLabel: "Shared task board with visible ownership",
+  },
+  {
+    number: "04",
+    title: "MOVE FORWARD\nTOGETHER",
+    description: "Real progress powers the shared game while the team works toward the deadline together.",
+    visual: "together",
+    visualLabel: "Shared team game progress interface",
+  },
+] as const;
+
+const HOW_IT_WORKS_STRIPES = ["#fff73f", "#4ca0fe", "#feaa01", "#fff73f", "#4ca0fe", "#feaa01"] as const;
+
 type FeatureTagPosition = {
   left: number;
   top: number;
@@ -772,6 +805,71 @@ function FeatureTagComposition({ tagsDropped }: { tagsDropped: boolean }) {
   );
 }
 
+function HowItWorksVisual({ step }: { step: typeof HOW_IT_WORKS_STEPS[number] }) {
+  return (
+    <div
+      aria-label={step.visualLabel}
+      className={`how-works-visual how-works-visual--${step.visual}`}
+      role="img"
+    >
+      <div className="how-works-visual-window-bar">
+        <div aria-hidden="true"><span /><span /><span /></div>
+        <strong>{step.visual === "plan" ? "Fair plan" : step.visual === "work" ? "Project room" : step.visual === "together" ? "Team quest" : "New project"}</strong>
+        <b>{step.number}</b>
+      </div>
+
+      {step.visual === "setup" ? (
+        <div className="how-works-visual-setup">
+          <div className="how-works-visual-sidebar"><span className="is-active">Brief</span><span>Framework</span><span>Team</span><span>Capacity</span></div>
+          <div className="how-works-visual-form">
+            <span className="how-works-visual-kicker">Project brief</span>
+            <strong>Launch week</strong>
+            <div className="how-works-visual-input"><span>Deadline</span><b>14 AUG</b></div>
+            <div className="how-works-visual-input"><span>Framework</span><b>Design process</b></div>
+            <div className="how-works-visual-form-footer"><span>Team capacity</span><b>Balanced</b></div>
+          </div>
+        </div>
+      ) : null}
+
+      {step.visual === "plan" ? (
+        <div className="how-works-visual-plan">
+          <div className="how-works-visual-plan-banner"><span>AI DRAFT</span><b>EDITABLE</b></div>
+          <div className="how-works-visual-plan-row"><strong>01</strong><span>Research findings</span><b>Team</b></div>
+          <div className="how-works-visual-plan-row"><strong>02</strong><span>Prototype review</span><b>You</b></div>
+          <div className="how-works-visual-plan-row"><strong>03</strong><span>Final handoff</span><b>Shared</b></div>
+          <div className="how-works-visual-plan-footer"><span>Review suggestion</span><b>Keep plan</b></div>
+        </div>
+      ) : null}
+
+      {step.visual === "work" ? (
+        <div className="how-works-visual-board">
+          {[
+            ["TO DO", "Brief notes", "Open questions"],
+            ["IN PROGRESS", "Prototype review", "Evidence upload"],
+            ["DONE", "Research findings", "Team check-in"],
+          ].map(([heading, first, second]) => (
+            <div className="how-works-visual-board-column" key={heading}>
+              <strong>{heading}</strong>
+              <div><span>{first}</span><b>2</b></div>
+              <div><span>{second}</span><b>✓</b></div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {step.visual === "together" ? (
+        <div className="how-works-visual-game">
+          <div className="how-works-visual-game-status"><span>SHARED QUEST</span><b>LIVE</b></div>
+          <div className="how-works-visual-shield"><span>✓</span></div>
+          <strong className="how-works-visual-boss">PROJECT GOAL</strong>
+          <div className="how-works-visual-hp"><span style={{ width: "72%" }} /></div>
+          <div className="how-works-visual-players"><b>Q</b><b>N</b><b>T</b><span>72% visible progress</span></div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function buildBurstWords(): BurstWord[] {
   return Array.from({ length: 42 }, (_, index) => {
     const angle = Math.random() * Math.PI * 2;
@@ -813,6 +911,9 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
   const purposeVisual = useRef<HTMLDivElement | null>(null);
   const featuresTransition = useRef<HTMLDivElement | null>(null);
   const featuresSection = useRef<HTMLElement | null>(null);
+  const howItWorksTransition = useRef<HTMLDivElement | null>(null);
+  const howItWorksSection = useRef<HTMLElement | null>(null);
+  const [howItWorksProgress, setHowItWorksProgress] = useState(0);
   const [featureTagsDropped, setFeatureTagsDropped] = useState(false);
 
   useEffect(() => () => {
@@ -921,6 +1022,47 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
       window.removeEventListener("resize", requestUpdate);
       resizeObserver?.disconnect();
       if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    };
+  }, []);
+
+  useEffect(() => {
+    const transition = howItWorksTransition.current;
+    const section = howItWorksSection.current;
+    const stage = section?.querySelector<HTMLElement>(".marketing-how-it-works-scroll-stage");
+    if (!transition || !section || !stage) return;
+
+    const reducedMotion = typeof window.matchMedia === "function"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
+
+    const updateScene = () => {
+      const viewportHeight = Math.max(window.innerHeight, 1);
+      const transitionRect = transition.getBoundingClientRect();
+      const transitionProgress = reducedMotion?.matches
+        ? 1
+        : Math.min(1, Math.max(0, (viewportHeight - transitionRect.top) / (viewportHeight + Math.max(transitionRect.height * 0.62, 1))));
+      transition.style.setProperty("--how-transition-progress", transitionProgress.toFixed(3));
+      transition.dataset.complete = transitionProgress >= 0.999 ? "true" : "false";
+
+      if (reducedMotion?.matches) {
+        setHowItWorksProgress(0);
+        return;
+      }
+
+      const sectionRect = stage.getBoundingClientRect();
+      const progress = Math.min(1, Math.max(0, (viewportHeight - sectionRect.top) / Math.max(stage.offsetHeight, 1)));
+      setHowItWorksProgress(progress);
+    };
+
+    window.addEventListener("scroll", updateScene, { passive: true });
+    window.addEventListener("resize", updateScene);
+    reducedMotion?.addEventListener("change", updateScene);
+    updateScene();
+
+    return () => {
+      window.removeEventListener("scroll", updateScene);
+      window.removeEventListener("resize", updateScene);
+      reducedMotion?.removeEventListener("change", updateScene);
     };
   }, []);
 
@@ -1113,6 +1255,76 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
           <span>Everything your team needs to plan fairly, stay visible, and keep moving.</span>
         </div>
         <FeatureTagComposition tagsDropped={featureTagsDropped} />
+      </section>
+
+      <div className="marketing-how-it-works-transition" ref={howItWorksTransition} aria-hidden="true">
+        {HOW_IT_WORKS_STRIPES.map((color, index) => (
+          <span
+            className={`marketing-how-it-works-stripe${index % 2 === 0 ? " is-from-left" : " is-from-right"}`}
+            key={`${color}-${index}`}
+            style={{ "--stripe-color": color, "--stripe-index": index } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <section
+        aria-labelledby="how-it-works-title"
+        className="marketing-how-it-works"
+        id="how-it-works"
+        ref={howItWorksSection}
+      >
+        <div className="marketing-how-it-works-scroll-stage">
+          <div className="marketing-how-it-works-sticky">
+            <div className="marketing-how-it-works-heading">
+              <p id="how-it-works-title">How it works</p>
+              <div
+                aria-label="How it works steps"
+                className="marketing-how-it-works-rail"
+                style={{ "--how-active-index": Math.min(HOW_IT_WORKS_STEPS.length - 1, Math.floor(howItWorksProgress * HOW_IT_WORKS_STEPS.length)) } as CSSProperties}
+              >
+                {HOW_IT_WORKS_STEPS.map((step, index) => (
+                  <span
+                    className={`marketing-how-it-works-rail-step${index === Math.min(HOW_IT_WORKS_STEPS.length - 1, Math.floor(howItWorksProgress * HOW_IT_WORKS_STEPS.length)) ? " is-active" : ""}`}
+                    key={step.number}
+                  >
+                    {step.number.slice(1)}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="marketing-how-it-works-track">
+              {HOW_IT_WORKS_STEPS.map((step, index) => {
+                const activeIndex = Math.min(HOW_IT_WORKS_STEPS.length - 1, Math.floor(howItWorksProgress * HOW_IT_WORKS_STEPS.length));
+                const localProgress = index === activeIndex
+                  ? Math.min(1, Math.max(0, (howItWorksProgress * HOW_IT_WORKS_STEPS.length) - activeIndex))
+                  : index < activeIndex ? 1 : 0;
+                const titleProgress = Math.min(1, localProgress / 0.25);
+                const imageProgress = Math.min(1, Math.max(0, (localProgress - 0.2) / 0.3));
+                const descriptionProgress = Math.min(1, Math.max(0, (localProgress - 0.5) / 0.2));
+                return (
+                  <article
+                    aria-hidden={index !== activeIndex}
+                    className={`marketing-how-it-works-step${index === activeIndex ? " is-active" : index < activeIndex ? " is-before" : " is-after"}`}
+                    key={step.number}
+                    style={{
+                      "--how-title-progress": titleProgress,
+                      "--how-image-progress": imageProgress,
+                      "--how-description-progress": descriptionProgress,
+                    } as CSSProperties}
+                  >
+                    <div className="marketing-how-it-works-copy">
+                      <span className="marketing-how-it-works-step-number">Step {step.number}</span>
+                      <h2>{step.title.split("\n").map((line) => <span key={line}>{line}</span>)}</h2>
+                      <p>{step.description}</p>
+                    </div>
+                    <HowItWorksVisual step={step} />
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </section>
 
       {burstWords.length > 0 ? (
