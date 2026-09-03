@@ -48,6 +48,7 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("[data-active=\"true\"]");
     expect(css).toContain("background: transparent");
     expect(css).toContain("padding-bottom: 100vh");
+    expect(css).toContain("translateY(var(--features-scene-lock-offset, 0px))");
     expect(css).toContain(".marketing-how-it-works-stripe.is-from-left");
     expect(css).toContain(".marketing-how-it-works-stripe.is-from-right");
     expect(css).toContain(".marketing-how-it-works-scroll-stage");

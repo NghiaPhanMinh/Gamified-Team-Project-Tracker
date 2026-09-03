@@ -1048,7 +1048,11 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
       const transitionActive = !reducedMotion?.matches
         && scrollPastFeaturesContent >= transitionHold
         && sectionRect.bottom >= 0;
+      const sceneLockOffset = reducedMotion?.matches
+        ? 0
+        : Math.min(transitionRunway, Math.max(0, scrollPastFeaturesContent));
       transition.style.setProperty("--how-transition-progress", transitionProgress.toFixed(3));
+      section.style.setProperty("--features-scene-lock-offset", `${sceneLockOffset}px`);
       transition.dataset.active = transitionActive ? "true" : "false";
       transition.dataset.complete = transitionProgress >= 0.999 ? "true" : "false";
 
