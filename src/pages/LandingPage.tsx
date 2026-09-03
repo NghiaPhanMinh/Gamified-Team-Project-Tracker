@@ -1254,7 +1254,7 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
         const localStart = (index / Math.max(dots.length - 1, 1)) * 0.62;
         const localProgress = reducedMotion?.matches
           ? 1
-          : progressBetween(transitionProgress, localStart, Math.min(1, localStart + 0.3));
+          : transitionProgress >= localStart ? 1 : 0;
         dot.style.setProperty("--how-dot-progress", localProgress.toFixed(3));
       });
       const transitionVisible = !reducedMotion?.matches

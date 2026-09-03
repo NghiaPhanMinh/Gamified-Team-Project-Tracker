@@ -3189,7 +3189,7 @@ body:has(.marketing-about-transition-scene) {
   border-radius: 50%;
   background: #feaa01;
   opacity: var(--how-dot-progress, 0);
-  transform: translate(-50%, -50%) scale(calc(0.28 + (var(--how-dot-progress, 0) * 0.72)));
+  transform: translate(-50%, -50%);
   transform-origin: center;
   will-change: transform, opacity;
 }
