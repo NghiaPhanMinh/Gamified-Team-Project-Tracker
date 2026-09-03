@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Sparkles } from "lucide-react";
 
+import { SubscriptionComparisonValue } from "./SubscriptionComparisonValue";
 import {
   SUBSCRIPTION_COMPARISON_ROWS,
   SUBSCRIPTION_PLANS,
@@ -78,11 +79,11 @@ export function SubscriptionPage({ currentPlan }: { currentPlan: SubscriptionPla
             </div>
             <div className="subscription-comparison-value subscription-comparison-value--free" role="cell">
               <span className="subscription-comparison-value-label">Free</span>
-              <strong>{row.free}</strong>
+              <strong><SubscriptionComparisonValue className="subscription-comparison-symbol" value={row.free} /></strong>
             </div>
             <div className="subscription-comparison-value subscription-comparison-value--plus" role="cell">
               <span className="subscription-comparison-value-label">MayLamDi+</span>
-              <strong>{row.plus}</strong>
+              <strong><SubscriptionComparisonValue className="subscription-comparison-symbol" value={row.plus} /></strong>
             </div>
           </div>
         ))}

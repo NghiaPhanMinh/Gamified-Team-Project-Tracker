@@ -186,6 +186,8 @@ describe("MayLamDi landing page", () => {
     expect(dotTransition?.querySelectorAll(".marketing-how-it-works-dot")).toHaveLength(48);
     expect(howItWorks?.previousElementSibling).toBe(dotTransition);
     expect(subscription?.querySelector(".marketing-subscription-comparison")).toBeInTheDocument();
+    expect(subscription?.querySelectorAll(".marketing-subscription-comparison-symbol--included")).toHaveLength(3);
+    expect(subscription?.querySelectorAll(".marketing-subscription-comparison-symbol--not-included")).toHaveLength(1);
   });
 
   it("offers the existing visitor sign-in action from the Free plan", () => {

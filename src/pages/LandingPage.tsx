@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ArrowDown, CheckCircle2, Sparkles } from "lucide-react";
 
 import { BrandLogo } from "../components/brand/BrandLogo";
+import { SubscriptionComparisonValue } from "../components/subscription/SubscriptionComparisonValue";
 import { ThemeToggle } from "../components/theme/ThemeToggle";
 import {
   SUBSCRIPTION_COMPARISON_ROWS,
@@ -1001,11 +1002,11 @@ function SubscriptionComparisonChart({
           </div>
           <div className="marketing-subscription-comparison-value marketing-subscription-comparison-value--free" role="cell" style={lineStyle(freeContentProgress, index)}>
             <span className="marketing-subscription-comparison-value-label">Free</span>
-            <strong>{row.free}</strong>
+            <strong><SubscriptionComparisonValue className="marketing-subscription-comparison-symbol" value={row.free} /></strong>
           </div>
           <div className="marketing-subscription-comparison-value marketing-subscription-comparison-value--plus" role="cell" style={lineStyle(plusContentProgress, index)}>
             <span className="marketing-subscription-comparison-value-label">MayLamDi+</span>
-            <strong>{row.plus}</strong>
+            <strong><SubscriptionComparisonValue className="marketing-subscription-comparison-symbol" value={row.plus} /></strong>
           </div>
         </div>
       ))}
@@ -1241,9 +1242,11 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
       const transitionHoldDistance = viewportHeight * 0.18;
       const sceneDistance = Math.max(stage.offsetHeight - transitionHoldDistance, 1);
       const transitionDistance = Math.max(stage.offsetHeight - sceneDistance, 1);
+      const sceneLeadDistance = viewportHeight * 0.36;
+      const contentDistance = Math.max(sceneDistance - sceneLeadDistance, 1);
       const progress = reducedMotion?.matches
         ? 1
-        : clampProgress(distanceTravelled / sceneDistance);
+        : clampProgress((distanceTravelled - sceneLeadDistance) / contentDistance);
       const transitionProgress = reducedMotion?.matches
         ? 1
         : progressBetween(distanceTravelled, sceneDistance, sceneDistance + transitionDistance);

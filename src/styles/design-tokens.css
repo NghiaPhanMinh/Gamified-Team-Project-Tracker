@@ -1518,6 +1518,22 @@ input::placeholder, textarea::placeholder { color: var(--mld-muted); opacity: 0.
   line-height: 1.1;
 }
 
+.subscription-comparison-symbol,
+.marketing-subscription-comparison-symbol {
+  display: inline-grid;
+  width: 1.5em;
+  height: 1.5em;
+  place-items: center;
+  vertical-align: middle;
+}
+
+.subscription-comparison-symbol svg,
+.marketing-subscription-comparison-symbol svg {
+  width: 1.2em;
+  height: 1.2em;
+  stroke-width: 3;
+}
+
 .subscription-comparison-value-label {
   display: none;
   font-size: 10px;
@@ -3785,6 +3801,13 @@ body:has(.marketing-about-transition-scene) {
   font-size: clamp(14px, 1.25vw, 18px);
   font-weight: 900;
   line-height: 1.1;
+}
+
+.marketing-subscription-comparison-symbol--included,
+.marketing-subscription-comparison-symbol--not-included,
+.subscription-comparison-symbol--included,
+.subscription-comparison-symbol--not-included {
+  color: currentColor;
 }
 
 .marketing-subscription-comparison-value-label {
