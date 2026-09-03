@@ -1232,9 +1232,6 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
       const sectionRect = section.getBoundingClientRect();
       const rawProgress = -stageRect.top / Math.max(stage.offsetHeight, 1);
       const progress = reducedMotion?.matches ? 1 : clampProgress(rawProgress);
-      const completionProgress = reducedMotion?.matches
-        ? 1
-        : clampProgress((rawProgress - 1) / 0.18);
       const currentScrollY = window.scrollY;
       const previousScrollY = previousFinalScrollY.current;
       const scrollDirection = previousScrollY === null || currentScrollY === previousScrollY
@@ -1246,14 +1243,12 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
       const isBeforeFinal = !reducedMotion?.matches
         && sectionRect.top > viewportHeight
         && rawProgress <= 0;
-      const isTransitioning = reducedMotion?.matches
-        ? stageRect.top < viewportHeight && stageRect.bottom > 0
-        : rawProgress > 0 && rawProgress < 1.18;
+      const isTransitioning = !reducedMotion?.matches
+        && stageRect.top <= 0
+        && stageRect.bottom > 1;
 
-      transition.style.setProperty("--final-transition-progress", progress.toFixed(3));
-      transition.style.setProperty("--final-transition-complete-progress", completionProgress.toFixed(3));
+      transition.style.setProperty("--final-reveal-radius", `${(progress * 150).toFixed(1)}%`);
       transition.dataset.active = isTransitioning ? "true" : "false";
-      transition.dataset.complete = !reducedMotion?.matches && rawProgress >= 1 ? "true" : "false";
       transition.dataset.reducedMotion = reducedMotion?.matches ? "true" : "false";
       if (isBeforeFinal) {
         setFinalScrollDirection("forward");
@@ -1261,7 +1256,7 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
         setFinalScrollDirection(scrollDirection);
       }
       setFinalEntered((current) => {
-        if (reducedMotion?.matches || sectionRect.top <= viewportHeight * 0.92) return true;
+        if (reducedMotion?.matches || sectionRect.top <= 1) return true;
         if (isBeforeFinal) return false;
         return current;
       });
@@ -1706,13 +1701,9 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
         </div>
       </section>
 
-      <div className="marketing-final-word-transition-stage" ref={finalTransitionStage}>
-        <div className="marketing-final-word-transition" ref={finalTransition} aria-hidden="true">
-          <span className="marketing-final-word-transition-green" />
-          <span className="marketing-final-word-transition-word">
-            <span className="marketing-final-word-transition-outline">MAYLAMDI</span>
-            <span className="marketing-final-word-transition-fill">MAYLAMDI</span>
-          </span>
+      <div className="marketing-final-reveal-stage" ref={finalTransitionStage}>
+        <div className="marketing-final-reveal" ref={finalTransition} aria-hidden="true">
+          <span className="marketing-final-reveal-circle" />
         </div>
       </div>
 

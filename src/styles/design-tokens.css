@@ -3884,73 +3884,36 @@ body:has(.marketing-about-transition-scene) {
   font-weight: 800;
 }
 
-.marketing-final-word-transition-stage {
+.marketing-final-reveal-stage {
   position: relative;
-  min-height: 72vh;
+  min-height: 68vh;
   background: #feaa01;
 }
 
-.marketing-final-word-transition {
+.marketing-final-reveal {
   position: fixed;
   z-index: 20;
   inset: 0;
-  display: grid;
   overflow: hidden;
-  place-items: center;
   background: #feaa01;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 180ms ease, visibility 180ms ease;
+  transition: opacity 80ms linear, visibility 80ms linear;
 }
 
-.marketing-final-word-transition-green {
+.marketing-final-reveal-circle {
   position: absolute;
   inset: 0;
   background: #17a738;
-  opacity: var(--final-transition-complete-progress, 0);
+  clip-path: circle(var(--final-reveal-radius, 0%) at 50% 108%);
   pointer-events: none;
-  transition: opacity 120ms linear;
+  will-change: clip-path;
 }
 
-.marketing-final-word-transition[data-active="true"] {
+.marketing-final-reveal[data-active="true"] {
   opacity: 1;
   visibility: visible;
-}
-
-.marketing-final-word-transition-word {
-  position: relative;
-  z-index: 1;
-  display: block;
-  color: transparent;
-  font-family: var(--mld-font-ui);
-  font-size: clamp(84px, 21vw, 320px);
-  font-weight: 900;
-  letter-spacing: -0.08em;
-  line-height: 0.8;
-  transform: scale(calc(0.88 + (var(--final-transition-progress, 0) * 1.55)));
-  transform-origin: center;
-  white-space: nowrap;
-  will-change: transform;
-}
-
-.marketing-final-word-transition-outline,
-.marketing-final-word-transition-fill {
-  position: absolute;
-  inset: 0;
-  display: block;
-}
-
-.marketing-final-word-transition-outline {
-  color: transparent;
-  -webkit-text-stroke: clamp(2px, 0.35vw, 5px) #1dd851;
-  text-stroke: clamp(2px, 0.35vw, 5px) #1dd851;
-}
-
-.marketing-final-word-transition-fill {
-  overflow: hidden;
-  color: #1dd851;
-  clip-path: inset(calc((1 - var(--final-transition-progress, 0)) * 100%) 0 0 0);
 }
 
 .marketing-final-cta {
@@ -4522,8 +4485,8 @@ body:has(.marketing-about-transition-scene) {
     grid-column: 1 / -1;
   }
 
-  .marketing-final-word-transition-stage {
-    min-height: 64vh;
+  .marketing-final-reveal-stage {
+    min-height: 58vh;
   }
 
   .marketing-final-cta-inner {
@@ -4711,11 +4674,11 @@ body:has(.marketing-about-transition-scene) {
     transition: none;
   }
 
-  .marketing-final-word-transition-stage {
+  .marketing-final-reveal-stage {
     min-height: 0;
   }
 
-  .marketing-final-word-transition {
+  .marketing-final-reveal {
     display: none;
   }
 

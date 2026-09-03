@@ -199,16 +199,17 @@ describe("MayLamDi landing page", () => {
     expect(screen.getByRole("table", { name: "MayLamDi subscription plan comparison" })).toBeInTheDocument();
   });
 
-  it("adds the final green CTA and word-mask handoff after Subscription", () => {
+  it("adds the final green CTA and radial handoff after Subscription", () => {
     const { container } = render(<MemoryRouter><LandingPage /></MemoryRouter>);
 
     const subscription = container.querySelector("#subscription");
-    const transitionStage = container.querySelector(".marketing-final-word-transition-stage");
+    const transitionStage = container.querySelector(".marketing-final-reveal-stage");
     const finalCta = container.querySelector("#final-cta");
 
     expect(subscription?.nextElementSibling).toBe(transitionStage);
     expect(transitionStage?.nextElementSibling).toBe(finalCta);
-    expect(container.querySelectorAll(".marketing-final-word-transition-outline, .marketing-final-word-transition-fill")).toHaveLength(2);
+    expect(transitionStage?.querySelector(".marketing-final-reveal-circle")).toBeInTheDocument();
+    expect(container.querySelector(".marketing-final-word-transition-word")).not.toBeInTheDocument();
     expect(finalCta).toHaveTextContent("Sign up");
     expect(finalCta).toHaveTextContent("Log in");
     expect(finalCta).toHaveTextContent("Explore");
