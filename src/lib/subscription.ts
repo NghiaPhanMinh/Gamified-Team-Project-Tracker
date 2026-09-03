@@ -49,6 +49,45 @@ export const SUBSCRIPTION_PLANS = {
   },
 } as const;
 
+export const SUBSCRIPTION_COMPARISON_ROWS = [
+  {
+    label: "Core teamwork",
+    detail: "Project rooms, tracking, frameworks, evidence, and basic gamification",
+    free: "Included",
+    plus: "Included",
+  },
+  {
+    label: "AI project setup",
+    detail: "Draft project plan, task allocation, and workload suggestion",
+    free: "1× per project",
+    plus: "Included",
+  },
+  {
+    label: "Extended AI support",
+    detail: "Regenerate, balance, reassign, break down, and adjust deadlines",
+    free: "—",
+    plus: "30 actions / month",
+  },
+  {
+    label: "Project access",
+    detail: "Active projects your team can keep moving",
+    free: "Up to 2",
+    plus: "Unlimited",
+  },
+  {
+    label: "Insights & history",
+    detail: "Contribution insights, report export, and project history",
+    free: "Basic",
+    plus: "Detailed + full history",
+  },
+  {
+    label: "Price",
+    detail: "Keep the core project experience free",
+    free: SUBSCRIPTION_PLANS.free.price,
+    plus: `${SUBSCRIPTION_PLANS.plus.price} / month`,
+  },
+] as const;
+
 export function normalizeSubscriptionPlan(
   tier: "free" | "plus" | "pro" | undefined,
 ): SubscriptionPlan {

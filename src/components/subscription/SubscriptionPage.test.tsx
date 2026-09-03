@@ -32,6 +32,7 @@ describe("subscription experience", () => {
     expect(screen.getByText("Get the team moving.")).toBeInTheDocument();
     expect(screen.getByText("More AI when plans change.")).toBeInTheDocument();
     expect(screen.getByText("39K₫")).toBeInTheDocument();
+    expect(screen.getByRole("table", { name: "MayLamDi subscription plan comparison" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Current plan" })).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: "Upgrade to Plus" }));
@@ -59,7 +60,9 @@ describe("subscription experience", () => {
     expect(designStyles).toContain(".subscription-nav-label");
     expect(designStyles).toContain("display: none;");
     expect(designStyles).toContain(".subscription-page-heading,");
-    expect(designStyles).toContain(".subscription-plan-grid");
+    expect(designStyles).toContain(".subscription-comparison");
+    expect(designStyles).toContain(".subscription-comparison-plan--free");
+    expect(designStyles).toContain(".subscription-comparison-plan--plus");
     expect(designStyles).toContain("grid-template-columns: 1fr;");
     expect(designStyles).toContain(".subscription-plan-actions");
     expect(designStyles).toContain("background: transparent;");

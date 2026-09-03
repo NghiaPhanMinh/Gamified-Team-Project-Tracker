@@ -182,7 +182,8 @@ describe("MayLamDi landing page", () => {
     expect(screen.getByRole("heading", { name: "Choose the support your team needs." })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "FREE PLAN" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "CURRENT PLAN" })).toBeDisabled();
-    expect(subscription?.querySelectorAll(".marketing-subscription-bubble")).toHaveLength(5);
+    expect(subscription?.querySelectorAll(".marketing-subscription-dot")).toHaveLength(40);
+    expect(subscription?.querySelector(".marketing-subscription-comparison")).toBeInTheDocument();
   });
 
   it("offers the existing visitor sign-in action from the Free plan", () => {
@@ -190,6 +191,7 @@ describe("MayLamDi landing page", () => {
 
     expect(screen.getByRole("button", { name: "START FREE" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "UPGRADE TO PLUS" })).toBeInTheDocument();
+    expect(screen.getByRole("table", { name: "MayLamDi subscription plan comparison" })).toBeInTheDocument();
   });
 
   it("raises the hovered letter highest and tapers adjacent letters into a smooth wave", () => {

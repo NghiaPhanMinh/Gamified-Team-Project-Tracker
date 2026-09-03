@@ -64,15 +64,17 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");
   });
 
-  it("includes the scroll-led Subscription scene and bubble handoff", () => {
+  it("includes the scroll-led Subscription scene and polka-dot handoff", () => {
     expect(css).toContain(".marketing-subscription");
     expect(css).toContain("background: #feaa01");
     expect(css).toContain(".marketing-subscription-transition");
-    expect(css).toContain(".marketing-subscription-bubble");
+    expect(css).toContain(".marketing-subscription-dot");
+    expect(css).toContain("--subscription-dot-progress");
     expect(css).toContain("min-height: 230vh");
-    expect(css).toContain(".marketing-subscription-card--free");
-    expect(css).toContain(".marketing-subscription-card--plus");
-    expect(css).toContain(".marketing-subscription-plan-grid");
+    expect(css).toContain(".marketing-subscription-comparison");
+    expect(css).toContain(".marketing-subscription-comparison-plan--free");
+    expect(css).toContain(".marketing-subscription-comparison-plan--plus");
+    expect(css).toContain("color: #fff73f");
   });
 
   it("uses the selected local display font without the removed hero preview", () => {

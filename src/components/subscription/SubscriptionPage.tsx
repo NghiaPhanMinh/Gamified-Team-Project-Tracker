@@ -1,27 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
 
 import {
-  FREE_SUBSCRIPTION_FEATURES,
-  PLUS_SUBSCRIPTION_FEATURES,
+  SUBSCRIPTION_COMPARISON_ROWS,
   SUBSCRIPTION_PLANS,
   getSubscriptionPlanLabel,
   type SubscriptionPlan,
 } from "../../lib/subscription";
-
-function PlanFeatureList({ features }: { features: string[] }) {
-  return (
-    <ul className="subscription-feature-list">
-      {features.map((feature) => (
-        <li key={feature}>
-          <Check size={18} strokeWidth={2.25} aria-hidden="true" />
-          <span>{feature}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 export function SubscriptionPage({ currentPlan }: { currentPlan: SubscriptionPlan }) {
   const navigate = useNavigate();
@@ -66,38 +52,61 @@ export function SubscriptionPage({ currentPlan }: { currentPlan: SubscriptionPla
         </aside>
       </header>
 
-      <div className="subscription-plan-grid">
-        <article className={`subscription-plan-card is-free ${currentPlan === "free" ? "is-current" : ""}`}>
-          <header>
-            <p className="subscription-plan-name">{SUBSCRIPTION_PLANS.free.name}</p>
-            <h2>{SUBSCRIPTION_PLANS.free.heading}</h2>
-            <p className="subscription-price"><strong>{SUBSCRIPTION_PLANS.free.price}</strong></p>
-          </header>
-          <PlanFeatureList features={[...FREE_SUBSCRIPTION_FEATURES]} />
-          <footer className="subscription-plan-actions">
+      <div className="subscription-comparison" role="table" aria-label="MayLamDi subscription plan comparison">
+        <div className="subscription-comparison-row subscription-comparison-head" role="row">
+          <div className="subscription-comparison-feature" role="columnheader">
+            <span>Compare plans</span>
+            <small>Keep the core project experience free, then add more AI room.</small>
+          </div>
+          <div className="subscription-comparison-plan subscription-comparison-plan--free" role="columnheader">
+            <strong>{SUBSCRIPTION_PLANS.free.name}</strong>
+            <span>{SUBSCRIPTION_PLANS.free.heading}</span>
+            <small>{SUBSCRIPTION_PLANS.free.price}</small>
+          </div>
+          <div className="subscription-comparison-plan subscription-comparison-plan--plus" role="columnheader">
+            <strong>{SUBSCRIPTION_PLANS.plus.name}<Sparkles size={16} aria-hidden="true" /></strong>
+            <span>{SUBSCRIPTION_PLANS.plus.heading}</span>
+            <small><span className="subscription-comparison-price-value">{SUBSCRIPTION_PLANS.plus.price}</span> {SUBSCRIPTION_PLANS.plus.cadence}</small>
+          </div>
+        </div>
+
+        {SUBSCRIPTION_COMPARISON_ROWS.map((row) => (
+          <div className="subscription-comparison-row" key={row.label} role="row">
+            <div className="subscription-comparison-feature" role="rowheader">
+              <strong>{row.label}</strong>
+              <small>{row.detail}</small>
+            </div>
+            <div className="subscription-comparison-value subscription-comparison-value--free" role="cell">
+              <span className="subscription-comparison-value-label">Free</span>
+              <strong>{row.free}</strong>
+            </div>
+            <div className="subscription-comparison-value subscription-comparison-value--plus" role="cell">
+              <span className="subscription-comparison-value-label">MayLamDi+</span>
+              <strong>{row.plus}</strong>
+            </div>
+          </div>
+        ))}
+
+        <div className="subscription-comparison-row subscription-comparison-actions" role="row">
+          <div className="subscription-comparison-feature" role="rowheader">
+            <strong>Choose your starting point</strong>
+            <small>Core teamwork stays available for every team.</small>
+          </div>
+          <div className="subscription-comparison-value subscription-comparison-value--free" role="cell">
+            <span className="subscription-comparison-value-label">Free</span>
             <button type="button" disabled>
               {currentPlan === "free" ? "Current plan" : "Included with Plus"}
             </button>
-          </footer>
-        </article>
-
-        <article className={`subscription-plan-card is-plus ${currentPlan === "plus" ? "is-current" : ""}`}>
-          <span className="subscription-flexible-badge"><Sparkles size={16} aria-hidden="true" /> Best for group projects</span>
-          <header>
-            <p className="subscription-plan-name">{SUBSCRIPTION_PLANS.plus.name}</p>
-            <h2>{SUBSCRIPTION_PLANS.plus.heading}</h2>
-            <p className="subscription-price"><strong>{SUBSCRIPTION_PLANS.plus.price}</strong><span>{SUBSCRIPTION_PLANS.plus.cadence}</span></p>
-            <p className="subscription-semester-price">{SUBSCRIPTION_PLANS.plus.semesterPrice}</p>
-          </header>
-          <PlanFeatureList features={[...PLUS_SUBSCRIPTION_FEATURES]} />
-          <footer className="subscription-plan-actions">
+          </div>
+          <div className="subscription-comparison-value subscription-comparison-value--plus" role="cell">
+            <span className="subscription-comparison-value-label">MayLamDi+</span>
             {currentPlan === "plus" ? (
               <button type="button" disabled>Current plan</button>
             ) : (
               <button type="button" onClick={() => setUpgradeMessage("Plus checkout is not connected in this assignment demo yet.")}>Upgrade to Plus</button>
             )}
-          </footer>
-        </article>
+          </div>
+        </div>
       </div>
 
       {upgradeMessage ? <p className="subscription-upgrade-note" role="status">{upgradeMessage}</p> : null}

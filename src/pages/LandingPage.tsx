@@ -1,11 +1,12 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type RefObject } from "react";
 import { Link } from "react-router-dom";
-import { ArrowDown, Check, CheckCircle2, Sparkles } from "lucide-react";
+import { ArrowDown, CheckCircle2, Sparkles } from "lucide-react";
 
 import { BrandLogo } from "../components/brand/BrandLogo";
 import { ThemeToggle } from "../components/theme/ThemeToggle";
 import {
+  SUBSCRIPTION_COMPARISON_ROWS,
   SUBSCRIPTION_PLANS,
   type SubscriptionPlan,
 } from "../lib/subscription";
@@ -159,13 +160,16 @@ const HOW_IT_WORKS_STEPS = [
 
 const HOW_IT_WORKS_STRIPES = ["#fff73f", "#fff73f", "#fff73f", "#fff73f", "#fff73f", "#fff73f"] as const;
 
-const SUBSCRIPTION_BUBBLES = [
-  { color: "#fff73f", left: "8%", top: "18%", size: "38vw", scale: 5.8 },
-  { color: "#ff8ae7", left: "86%", top: "14%", size: "44vw", scale: 5.2 },
-  { color: "#feaa01", left: "20%", top: "82%", size: "46vw", scale: 5.1 },
-  { color: "#fff73f", left: "78%", top: "78%", size: "42vw", scale: 5.6 },
-  { color: "#ff8ae7", left: "52%", top: "46%", size: "34vw", scale: 6.4 },
-] as const;
+const SUBSCRIPTION_DOTS = Array.from({ length: 40 }, (_, index) => {
+  const column = index % 8;
+  const row = Math.floor(index / 8);
+
+  return {
+    color: index % 2 === 0 ? "#feaa01" : "#1dd851",
+    left: `${((column + 0.5) / 8) * 100}%`,
+    top: `${((row + 0.5) / 5) * 100}%`,
+  } as const;
+});
 
 type FeatureTagPosition = {
   left: number;
@@ -912,78 +916,124 @@ function progressBetween(progress: number, start: number, end: number) {
   return clampProgress((progress - start) / Math.max(end - start, 0.001));
 }
 
-function SubscriptionLandingCard({
-  cardProgress,
-  contentProgress,
+function SubscriptionPlanAction({
   currentPlan,
   isAuthenticated,
   onStartFree,
   plan,
 }: {
-  cardProgress: number;
-  contentProgress: number;
   currentPlan?: SubscriptionPlan;
   isAuthenticated: boolean;
   onStartFree: (label: string) => void;
   plan: SubscriptionPlan;
 }) {
-  const details = SUBSCRIPTION_PLANS[plan];
   const isCurrent = currentPlan === plan;
-  const isFreeVisitor = plan === "free" && !isAuthenticated;
-  const isPlusVisitor = plan === "plus" && !isAuthenticated;
-  const featureStartIndex = plan === "plus" ? 5 : 4;
-  const lineCount = featureStartIndex + details.features.length + 1;
 
-  const lineStyle = (index: number) => ({
+  if (plan === "free" && !isAuthenticated) {
+    return <button type="button" onClick={() => onStartFree("START FREE")}>START FREE</button>;
+  }
+
+  if (plan === "plus" && !isAuthenticated) {
+    return <button type="button" onClick={() => onStartFree("UPGRADE TO PLUS")}>UPGRADE TO PLUS</button>;
+  }
+
+  if (plan === "plus" && !isCurrent) {
+    return <Link to="/subscription">UPGRADE TO PLUS</Link>;
+  }
+
+  return <button type="button" disabled>{isCurrent ? "CURRENT PLAN" : "FREE PLAN"}</button>;
+}
+
+function SubscriptionComparisonChart({
+  cardProgress,
+  freeContentProgress,
+  plusContentProgress,
+  currentPlan,
+  isAuthenticated,
+  onStartFree,
+}: {
+  cardProgress: number;
+  freeContentProgress: number;
+  plusContentProgress: number;
+  currentPlan?: SubscriptionPlan;
+  isAuthenticated: boolean;
+  onStartFree: (label: string) => void;
+}) {
+  const lineCount = SUBSCRIPTION_COMPARISON_ROWS.length + 1;
+  const lineStyle = (progress: number, index: number) => ({
     "--subscription-line-progress": progressBetween(
-      contentProgress,
-      (index / Math.max(lineCount - 1, 1)) * 0.78,
-      (index / Math.max(lineCount - 1, 1)) * 0.78 + 0.22,
+      progress,
+      (index / Math.max(lineCount - 1, 1)) * 0.8,
+      (index / Math.max(lineCount - 1, 1)) * 0.8 + 0.2,
     ),
   } as CSSProperties);
 
   return (
-    <article
-      className={`marketing-subscription-card marketing-subscription-card--${plan}${isCurrent ? " is-current" : ""}`}
+    <div
+      aria-label="MayLamDi subscription plan comparison"
+      className="marketing-subscription-comparison"
+      role="table"
       style={{ "--subscription-card-progress": cardProgress } as CSSProperties}
     >
-      <div className="marketing-subscription-card-inner">
-        <header className="marketing-subscription-card-header">
-          <div className="marketing-subscription-card-kicker" style={lineStyle(0)}>
-            <span>{details.name}</span>
-            {plan === "plus" ? <Sparkles size={16} aria-hidden="true" /> : null}
-          </div>
-          <h3 style={lineStyle(1)}>{details.heading}</h3>
-          <p className="marketing-subscription-card-description" style={lineStyle(2)}>{details.description}</p>
-          <p className="marketing-subscription-price" style={lineStyle(3)}>
-            <strong>{details.price}</strong>
-            {details.cadence ? <span>{details.cadence}</span> : null}
-          </p>
-          {plan === "plus" ? <p className="marketing-subscription-semester" style={lineStyle(4)}>{SUBSCRIPTION_PLANS.plus.semesterPrice}</p> : null}
-        </header>
-
-        <ul className="marketing-subscription-features">
-          {details.features.map((feature, index) => (
-            <li key={feature} style={lineStyle(index + featureStartIndex)}>
-              <Check size={17} strokeWidth={3} aria-hidden="true" />
-              <span>{feature}</span>
-            </li>
-          ))}
-        </ul>
-
-        <footer className="marketing-subscription-card-footer" style={lineStyle(lineCount - 1)}>
-          {isFreeVisitor ? (
-            <button type="button" onClick={() => onStartFree("START FREE")}>START FREE</button>
-          ) : isPlusVisitor ? (
-            <button type="button" onClick={() => onStartFree("UPGRADE TO PLUS")}>UPGRADE TO PLUS</button>
-          ) : plan === "plus" && !isCurrent ? (
-            <Link to="/subscription">UPGRADE TO PLUS</Link>
-          ) : (
-            <button type="button" disabled>{isCurrent ? "CURRENT PLAN" : "FREE PLAN"}</button>
-          )}
-        </footer>
+      <div className="marketing-subscription-comparison-row marketing-subscription-comparison-head" role="row">
+        <div className="marketing-subscription-comparison-feature" role="columnheader">
+          <span>Compare plans</span>
+          <small>Shared project work, with room to grow.</small>
+        </div>
+        <div className="marketing-subscription-comparison-plan marketing-subscription-comparison-plan--free" role="columnheader">
+          <strong>{SUBSCRIPTION_PLANS.free.name}</strong>
+          {currentPlan === "free" ? <span>Current plan</span> : null}
+          <small>{SUBSCRIPTION_PLANS.free.price}</small>
+        </div>
+        <div className="marketing-subscription-comparison-plan marketing-subscription-comparison-plan--plus" role="columnheader">
+          <strong>{SUBSCRIPTION_PLANS.plus.name}<Sparkles size={16} aria-hidden="true" /></strong>
+          {currentPlan === "plus" ? <span>Current plan</span> : null}
+          <small>{SUBSCRIPTION_PLANS.plus.price} / month</small>
+        </div>
       </div>
-    </article>
+
+      {SUBSCRIPTION_COMPARISON_ROWS.map((row, index) => (
+        <div className="marketing-subscription-comparison-row" key={row.label} role="row">
+          <div className="marketing-subscription-comparison-feature" role="rowheader" style={lineStyle(freeContentProgress, index)}>
+            <strong>{row.label}</strong>
+            <small>{row.detail}</small>
+          </div>
+          <div className="marketing-subscription-comparison-value marketing-subscription-comparison-value--free" role="cell" style={lineStyle(freeContentProgress, index)}>
+            <span className="marketing-subscription-comparison-value-label">Free</span>
+            <strong>{row.free}</strong>
+          </div>
+          <div className="marketing-subscription-comparison-value marketing-subscription-comparison-value--plus" role="cell" style={lineStyle(plusContentProgress, index)}>
+            <span className="marketing-subscription-comparison-value-label">MayLamDi+</span>
+            <strong>{row.plus}</strong>
+          </div>
+        </div>
+      ))}
+
+      <div className="marketing-subscription-comparison-row marketing-subscription-comparison-actions" role="row">
+        <div className="marketing-subscription-comparison-feature" role="rowheader" style={lineStyle(freeContentProgress, lineCount - 1)}>
+          <strong>Choose your starting point</strong>
+          <small>Core teamwork stays available for every team.</small>
+        </div>
+        <div className="marketing-subscription-comparison-value marketing-subscription-comparison-value--free" role="cell" style={lineStyle(freeContentProgress, lineCount - 1)}>
+          <span className="marketing-subscription-comparison-value-label">Free</span>
+          <SubscriptionPlanAction
+            currentPlan={currentPlan}
+            isAuthenticated={isAuthenticated}
+            onStartFree={onStartFree}
+            plan="free"
+          />
+        </div>
+        <div className="marketing-subscription-comparison-value marketing-subscription-comparison-value--plus" role="cell" style={lineStyle(plusContentProgress, lineCount - 1)}>
+          <span className="marketing-subscription-comparison-value-label">MayLamDi+</span>
+          <SubscriptionPlanAction
+            currentPlan={currentPlan}
+            isAuthenticated={isAuthenticated}
+            onStartFree={onStartFree}
+            plan="plus"
+          />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1135,6 +1185,7 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
     const reducedMotion = typeof window.matchMedia === "function"
       ? window.matchMedia("(prefers-reduced-motion: reduce)")
       : null;
+    const dots = Array.from(transition.querySelectorAll<HTMLElement>(".marketing-subscription-dot"));
 
     const updateScene = () => {
       const viewportHeight = Math.max(window.innerHeight, 1);
@@ -1145,6 +1196,13 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
       setSubscriptionProgress(progress);
       const transitionProgress = reducedMotion?.matches ? 1 : progressBetween(progress, 0, 0.16);
       transition.style.setProperty("--subscription-transition-progress", transitionProgress.toFixed(3));
+      dots.forEach((dot, index) => {
+        const localStart = (index / Math.max(dots.length - 1, 1)) * 0.66;
+        const localProgress = reducedMotion?.matches
+          ? 1
+          : progressBetween(transitionProgress, localStart, Math.min(1, localStart + 0.34));
+        dot.style.setProperty("--subscription-dot-progress", localProgress.toFixed(3));
+      });
       transition.dataset.active = transitionProgress > 0 && transitionProgress < 1 ? "true" : "false";
       transition.dataset.complete = transitionProgress >= 1 ? "true" : "false";
     };
@@ -1510,16 +1568,14 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
         ref={subscriptionSection}
       >
         <div className="marketing-subscription-transition" ref={subscriptionTransition} aria-hidden="true">
-          {SUBSCRIPTION_BUBBLES.map((bubble, index) => (
+          {SUBSCRIPTION_DOTS.map((dot, index) => (
             <span
-              className="marketing-subscription-bubble"
-              key={`${bubble.color}-${index}`}
+              className="marketing-subscription-dot"
+              key={`${dot.color}-${index}`}
               style={{
-                "--subscription-bubble-color": bubble.color,
-                "--subscription-bubble-left": bubble.left,
-                "--subscription-bubble-top": bubble.top,
-                "--subscription-bubble-size": bubble.size,
-                "--subscription-bubble-scale": bubble.scale,
+                "--subscription-dot-color": dot.color,
+                "--subscription-dot-left": dot.left,
+                "--subscription-dot-top": dot.top,
               } as CSSProperties}
             />
           ))}
@@ -1531,24 +1587,14 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
               <h2 id="marketing-subscription-title">Choose the support your team needs.</h2>
               <p>Keep the core project experience free, then add more AI room when your team needs it.</p>
             </header>
-            <div className="marketing-subscription-plan-grid" aria-label="MayLamDi subscription plans">
-              <SubscriptionLandingCard
-                cardProgress={subscriptionCardProgress}
-                contentProgress={freeContentProgress}
-                currentPlan={currentPlan}
-                isAuthenticated={isAuthenticated}
-                onStartFree={handleStartFree}
-                plan="free"
-              />
-              <SubscriptionLandingCard
-                cardProgress={subscriptionCardProgress}
-                contentProgress={plusContentProgress}
-                currentPlan={currentPlan}
-                isAuthenticated={isAuthenticated}
-                onStartFree={handleStartFree}
-                plan="plus"
-              />
-            </div>
+            <SubscriptionComparisonChart
+              cardProgress={subscriptionCardProgress}
+              freeContentProgress={freeContentProgress}
+              plusContentProgress={plusContentProgress}
+              currentPlan={currentPlan}
+              isAuthenticated={isAuthenticated}
+              onStartFree={handleStartFree}
+            />
             {subscriptionAuthError ? <p className="marketing-subscription-auth-error" role="alert">{subscriptionAuthError}</p> : null}
           </div>
         </div>
