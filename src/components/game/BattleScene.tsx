@@ -2630,7 +2630,7 @@ export function BattleScene({
       <SVGDefs />
 
       {/* Main 10-Layer Geometric SVG Landscape Scene */}
-      <div className="landscape-scene-container" style={{ position: "relative", overflow: "hidden" }} aria-label="Interactive project encounter scene">
+      <div className={`landscape-scene-container ${showTutorial ? "has-tutorial-active" : ""}`} style={{ position: "relative", overflow: "hidden" }} aria-label="Interactive project encounter scene">
         {/* Top Control Bar Overlay (Flex row - prevents any collision across all screen dimensions) */}
         <div
           className="rpg-top-bar-controls"
