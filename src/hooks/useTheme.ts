@@ -5,9 +5,17 @@ export type Theme = "light" | "dark";
 const STORAGE_KEY = "maylamdi-theme";
 
 function readInitialTheme(): Theme {
+  if (typeof window !== "undefined") {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved === "dark") return "dark";
+      if (saved === "light") return "light";
+    } catch {}
+  }
+
   if (typeof document !== "undefined") {
     const current = document.documentElement.dataset.theme;
-    if (current === "light" || current === "dark") {
+    if (current === "dark" || current === "light") {
       return current;
     }
   }

@@ -8688,4 +8688,57 @@ button.maylamdi-button:active {
   }
 }
 
+/* ==========================================================================
+   PROJECT SECTION & FRAMEWORK PILLS (Theme-safe, high contrast, non-stretching)
+   ========================================================================== */
+.room-index-card {
+  align-content: start;
+  justify-items: start;
+}
+
+.room-index-card > strong,
+.room-index-card > small {
+  width: 100%;
+}
+
+.room-index-card > span:last-child {
+  margin-top: auto;
+  font-weight: 700;
+}
+
+:root[data-theme="dark"] .framework-filter-pill {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+:root[data-theme="dark"] .room-index-card.room-index-card-colored .framework-filter-pill,
+:root[data-theme="dark"] .room-index-card.room-index-card-colored > .framework-filter-pill {
+  background: #0f172a !important;
+  color: #ffffff !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+}
+
+:root[data-theme="dark"] .room-index-card.room-index-card-colored .framework-filter-pill:hover {
+  background: #000000 !important;
+  color: #fff73f !important;
+  border-color: #fff73f !important;
+}
+
+:root[data-theme="dark"] .framework-active-filter-bar {
+  background: #0f172a !important;
+  border-color: #38bdf8 !important;
+  color: #f8fafc !important;
+}
+
+:root[data-theme="dark"] .framework-active-filter-bar strong {
+  color: #38bdf8 !important;
+}
+
+:root[data-theme="dark"] .framework-active-filter-bar .quiet-button {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
 
