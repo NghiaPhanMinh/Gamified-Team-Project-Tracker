@@ -3904,6 +3904,15 @@ body:has(.marketing-about-transition-scene) {
   transition: opacity 180ms ease, visibility 180ms ease;
 }
 
+.marketing-final-word-transition-green {
+  position: absolute;
+  inset: 0;
+  background: #17a738;
+  opacity: var(--final-transition-complete-progress, 0);
+  pointer-events: none;
+  transition: opacity 120ms linear;
+}
+
 .marketing-final-word-transition[data-active="true"] {
   opacity: 1;
   visibility: visible;
@@ -3911,6 +3920,7 @@ body:has(.marketing-about-transition-scene) {
 
 .marketing-final-word-transition-word {
   position: relative;
+  z-index: 1;
   display: block;
   color: transparent;
   font-family: var(--mld-font-ui);
@@ -3918,7 +3928,7 @@ body:has(.marketing-about-transition-scene) {
   font-weight: 900;
   letter-spacing: -0.08em;
   line-height: 0.8;
-  transform: scale(calc(0.92 + (var(--final-transition-progress, 0) * 1.9)));
+  transform: scale(calc(0.88 + (var(--final-transition-progress, 0) * 1.55)));
   transform-origin: center;
   white-space: nowrap;
   will-change: transform;
@@ -4049,40 +4059,62 @@ body:has(.marketing-about-transition-scene) {
 .marketing-final-cta-explore:focus-visible {
   background: #fffdec;
   color: #17a738;
-  transform: translateY(0) scale(1.04);
+  transform: translateX(0) scale(1.04);
 }
 
 .marketing-final-cta h2 {
-  align-self: flex-start;
+  align-self: center;
+  width: 100%;
   margin: 0;
   color: #1dd851;
-  font-size: clamp(112px, 23vw, 420px);
+  font-size: clamp(104px, 21vw, 390px);
   font-weight: 900;
   letter-spacing: -0.1em;
   line-height: 0.7;
   opacity: 0;
+  text-align: center;
   transform: translateY(100%);
   white-space: nowrap;
 }
 
 .marketing-final-cta.is-entered h2 {
-  animation: marketing-final-title-rise 780ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: marketing-final-title-rise 1500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .marketing-final-cta.is-entered .marketing-final-cta-arrow-line {
-  animation: marketing-final-arrow-draw 700ms ease-out 620ms forwards;
+  animation: marketing-final-arrow-draw 1300ms ease-out 900ms forwards;
 }
 
 .marketing-final-cta.is-entered .marketing-final-cta-arrow-head {
-  animation: marketing-final-arrowhead-in 260ms ease-out 1240ms forwards;
+  animation: marketing-final-arrowhead-in 500ms ease-out 2300ms forwards;
 }
 
 .marketing-final-cta.is-entered .marketing-final-cta-explore {
-  animation: marketing-final-explore-in 420ms cubic-bezier(0.16, 1, 0.3, 1) 1320ms forwards;
+  animation: marketing-final-explore-in 800ms cubic-bezier(0.16, 1, 0.3, 1) 2900ms forwards;
 }
 
 .marketing-final-cta.is-entered .marketing-final-cta-nav {
-  animation: marketing-final-nav-in 520ms cubic-bezier(0.16, 1, 0.3, 1) 1480ms forwards;
+  animation: marketing-final-nav-in 900ms cubic-bezier(0.16, 1, 0.3, 1) 3900ms forwards;
+}
+
+.marketing-final-cta.is-reversing h2 {
+  animation: marketing-final-title-rise 1500ms cubic-bezier(0.16, 1, 0.3, 1) 3700ms reverse both;
+}
+
+.marketing-final-cta.is-reversing .marketing-final-cta-arrow-line {
+  animation: marketing-final-arrow-draw 1300ms ease-out 2800ms reverse both;
+}
+
+.marketing-final-cta.is-reversing .marketing-final-cta-arrow-head {
+  animation: marketing-final-arrowhead-in 500ms ease-out 2200ms reverse both;
+}
+
+.marketing-final-cta.is-reversing .marketing-final-cta-explore {
+  animation: marketing-final-explore-in 800ms cubic-bezier(0.16, 1, 0.3, 1) 1300ms reverse both;
+}
+
+.marketing-final-cta.is-reversing .marketing-final-cta-nav {
+  animation: marketing-final-nav-in 900ms cubic-bezier(0.16, 1, 0.3, 1) 0ms reverse both;
 }
 
 @keyframes marketing-final-title-rise {

@@ -1075,6 +1075,8 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
   const [featureTagsDropped, setFeatureTagsDropped] = useState(false);
   const [subscriptionAuthError, setSubscriptionAuthError] = useState<string | null>(null);
   const [finalEntered, setFinalEntered] = useState(false);
+  const [finalScrollDirection, setFinalScrollDirection] = useState<"forward" | "reverse">("forward");
+  const previousFinalScrollY = useRef<number | null>(null);
 
   useEffect(() => () => {
     if (cleanupTimer.current !== null) {
@@ -1230,17 +1232,38 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
       const sectionRect = section.getBoundingClientRect();
       const rawProgress = -stageRect.top / Math.max(stage.offsetHeight, 1);
       const progress = reducedMotion?.matches ? 1 : clampProgress(rawProgress);
+      const completionProgress = reducedMotion?.matches
+        ? 1
+        : clampProgress((rawProgress - 1) / 0.18);
+      const currentScrollY = window.scrollY;
+      const previousScrollY = previousFinalScrollY.current;
+      const scrollDirection = previousScrollY === null || currentScrollY === previousScrollY
+        ? null
+        : currentScrollY < previousScrollY
+          ? "reverse"
+          : "forward";
+      previousFinalScrollY.current = currentScrollY;
+      const isBeforeFinal = !reducedMotion?.matches
+        && sectionRect.top > viewportHeight
+        && rawProgress <= 0;
       const isTransitioning = reducedMotion?.matches
         ? stageRect.top < viewportHeight && stageRect.bottom > 0
-        : rawProgress > 0 && rawProgress < 1;
+        : rawProgress > 0 && rawProgress < 1.18;
 
       transition.style.setProperty("--final-transition-progress", progress.toFixed(3));
+      transition.style.setProperty("--final-transition-complete-progress", completionProgress.toFixed(3));
       transition.dataset.active = isTransitioning ? "true" : "false";
       transition.dataset.complete = !reducedMotion?.matches && rawProgress >= 1 ? "true" : "false";
       transition.dataset.reducedMotion = reducedMotion?.matches ? "true" : "false";
+      if (isBeforeFinal) {
+        setFinalScrollDirection("forward");
+      } else if (scrollDirection) {
+        setFinalScrollDirection(scrollDirection);
+      }
       setFinalEntered((current) => {
-        const next = reducedMotion?.matches || sectionRect.top <= viewportHeight * 0.92;
-        return current === next ? current : next;
+        if (reducedMotion?.matches || sectionRect.top <= viewportHeight * 0.92) return true;
+        if (isBeforeFinal) return false;
+        return current;
       });
     };
 
@@ -1685,6 +1708,7 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
 
       <div className="marketing-final-word-transition-stage" ref={finalTransitionStage}>
         <div className="marketing-final-word-transition" ref={finalTransition} aria-hidden="true">
+          <span className="marketing-final-word-transition-green" />
           <span className="marketing-final-word-transition-word">
             <span className="marketing-final-word-transition-outline">MAYLAMDI</span>
             <span className="marketing-final-word-transition-fill">MAYLAMDI</span>
@@ -1694,7 +1718,7 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
 
       <section
         aria-labelledby="marketing-final-title"
-        className={`marketing-final-cta${finalEntered ? " is-entered" : ""}`}
+        className={`marketing-final-cta${finalEntered ? " is-entered" : ""}${finalEntered && finalScrollDirection === "reverse" ? " is-reversing" : ""}`}
         id="final-cta"
         ref={finalSection}
       >
