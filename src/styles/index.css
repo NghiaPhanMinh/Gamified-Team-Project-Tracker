@@ -8479,4 +8479,76 @@ button.maylamdi-button:active {
   border-color: rgba(255, 255, 255, 0.45) !important;
 }
 
+/* ==========================================================================
+   INTERACTIVE TUTORIAL REALM (Clean, Uncluttered, Responsive Mobile & Desktop)
+   ========================================================================== */
+
+/* Expand landscape container when cutscene tutorial is open so mobile fits comfortably like desktop */
+.landscape-scene-container.has-tutorial-active {
+  min-height: 420px !important;
+  aspect-ratio: auto !important;
+}
+
+@media (max-width: 760px) {
+  .shared-battle-stage .landscape-scene-container.has-tutorial-active,
+  .landscape-scene-container.has-tutorial-active {
+    min-height: 380px !important;
+    height: 380px !important;
+    max-height: 440px !important;
+    aspect-ratio: auto !important;
+    border-radius: 16px !important;
+  }
+}
+
+.rpg-tutorial-bottom-card {
+  position: relative;
+  z-index: 35;
+  margin: 0 12px 10px 12px;
+  background: #fffded;
+  border: 2.5px solid #101517;
+  box-shadow: 3px 3px 0 #101517;
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+:root[data-theme="dark"] .rpg-tutorial-bottom-card {
+  background: #0f172a !important;
+  border-color: #ffffff !important;
+  box-shadow: 3px 3px 0 rgba(255, 255, 255, 0.4) !important;
+  color: #f8fafc !important;
+}
+
+:root[data-theme="dark"] .rpg-tutorial-bottom-card span,
+:root[data-theme="dark"] .rpg-tutorial-bottom-card p {
+  color: #f8fafc !important;
+}
+
+:root[data-theme="dark"] .rpg-action-menu-flow-card {
+  background: #0f172a !important;
+  border-color: #ffffff !important;
+  box-shadow: 3px 3px 0 rgba(255, 255, 255, 0.4) !important;
+  color: #f8fafc !important;
+}
+
+:root[data-theme="dark"] .rpg-action-menu-flow-card span {
+  color: #f8fafc !important;
+}
+
+@media (max-width: 640px) {
+  .rpg-tutorial-bottom-card {
+    margin: 0 8px 8px 8px !important;
+    padding: 8px 10px !important;
+    gap: 4px !important;
+  }
+  .rpg-tutorial-bottom-card p {
+    font-size: 0.74rem !important;
+    line-height: 1.32 !important;
+  }
+}
+
 
