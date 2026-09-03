@@ -161,7 +161,9 @@ const HOW_IT_WORKS_STEPS = [
 
 const HOW_IT_WORKS_STRIPES = ["#fff73f", "#fff73f", "#fff73f", "#fff73f", "#fff73f", "#fff73f"] as const;
 
-const HOW_IT_WORKS_DOTS = Array.from({ length: 96 }, (_, index) => {
+// Use a dense field so the wipe continues covering gaps before the final
+// orange fill takes over the viewport.
+const HOW_IT_WORKS_DOTS = Array.from({ length: 240 }, (_, index) => {
   const randomPosition = (seed: number) => {
     const value = Math.sin(seed * 12.9898) * 43758.5453;
     return value - Math.floor(value);

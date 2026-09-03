@@ -183,7 +183,7 @@ describe("MayLamDi landing page", () => {
     expect(screen.getByRole("button", { name: "FREE PLAN" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "CURRENT PLAN" })).toBeDisabled();
     const dotTransition = container.querySelector(".marketing-how-it-works-dot-transition");
-    expect(dotTransition?.querySelectorAll(".marketing-how-it-works-dot")).toHaveLength(96);
+    expect(dotTransition?.querySelectorAll(".marketing-how-it-works-dot")).toHaveLength(240);
     expect(howItWorks?.previousElementSibling).toBe(dotTransition);
     expect(subscription?.querySelector(".marketing-subscription-comparison")).toBeInTheDocument();
     expect(subscription?.querySelectorAll(".marketing-subscription-comparison-symbol--included")).toHaveLength(3);
