@@ -161,7 +161,7 @@ const HOW_IT_WORKS_STEPS = [
 
 const HOW_IT_WORKS_STRIPES = ["#fff73f", "#fff73f", "#fff73f", "#fff73f", "#fff73f", "#fff73f"] as const;
 
-const HOW_IT_WORKS_DOTS = Array.from({ length: 48 }, (_, index) => {
+const HOW_IT_WORKS_DOTS = Array.from({ length: 96 }, (_, index) => {
   const randomPosition = (seed: number) => {
     const value = Math.sin(seed * 12.9898) * 43758.5453;
     return value - Math.floor(value);
@@ -1242,11 +1242,13 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
       const transitionHoldDistance = viewportHeight * 0.18;
       const sceneDistance = Math.max(stage.offsetHeight - transitionHoldDistance, 1);
       const transitionDistance = Math.max(stage.offsetHeight - sceneDistance, 1);
-      const sceneLeadDistance = viewportHeight * 0.36;
-      const contentDistance = Math.max(sceneDistance - sceneLeadDistance, 1);
+      // Start the reveal when the sticky scene reaches the top of the viewport,
+      // so Step 1 animates in while it is visible instead of finishing early.
+      const sceneStartDistance = viewportHeight;
+      const contentDistance = Math.max(sceneDistance - sceneStartDistance, 1);
       const progress = reducedMotion?.matches
         ? 1
-        : clampProgress((distanceTravelled - sceneLeadDistance) / contentDistance);
+        : clampProgress((distanceTravelled - sceneStartDistance) / contentDistance);
       const transitionProgress = reducedMotion?.matches
         ? 1
         : progressBetween(distanceTravelled, sceneDistance, sceneDistance + transitionDistance);
