@@ -3634,15 +3634,16 @@ body:has(.marketing-about-transition-scene) {
 
 .marketing-subscription-scroll-stage {
   position: relative;
-  min-height: 0;
+  min-height: 260vh;
 }
 
 .marketing-subscription-sticky {
-  position: relative;
+  position: sticky;
+  top: 0;
   display: flex;
-  min-height: 0;
+  min-height: 100vh;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   gap: clamp(20px, 3vh, 36px);
   padding: clamp(32px, 5vw, 72px) clamp(20px, 6vw, 96px);
 }
@@ -3650,7 +3651,7 @@ body:has(.marketing-about-transition-scene) {
 .marketing-subscription-heading {
   max-width: 820px;
   opacity: var(--subscription-title-progress, 0);
-  transform: translateY(calc((1 - var(--subscription-title-progress, 0)) * 28px));
+  transform: translateY(calc((1 - var(--subscription-title-progress, 0)) * 64px));
   will-change: opacity, transform;
 }
 

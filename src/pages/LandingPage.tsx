@@ -1194,10 +1194,7 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
       const sectionRect = section.getBoundingClientRect();
       const progress = reducedMotion?.matches
         ? 1
-        : clampProgress(
-            (viewportHeight - sectionRect.top) /
-              Math.max(section.offsetHeight + viewportHeight, 1),
-          );
+        : clampProgress((viewportHeight - sectionRect.top) / Math.max(section.offsetHeight, 1));
       setSubscriptionProgress(progress);
     };
 
@@ -1213,11 +1210,11 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
     };
   }, []);
 
-  const subscriptionStoryProgress = progressBetween(subscriptionProgress, 0.16, 1);
-  const subscriptionTitleProgress = progressBetween(subscriptionStoryProgress, 0.02, 0.18);
-  const subscriptionCardProgress = progressBetween(subscriptionStoryProgress, 0.15, 0.34);
-  const freeContentProgress = progressBetween(subscriptionStoryProgress, 0.27, 0.68);
-  const plusContentProgress = progressBetween(subscriptionStoryProgress, 0.52, 0.9);
+  const subscriptionStoryProgress = progressBetween(subscriptionProgress, 0.08, 1);
+  const subscriptionTitleProgress = progressBetween(subscriptionStoryProgress, 0, 0.18);
+  const subscriptionCardProgress = progressBetween(subscriptionStoryProgress, 0.24, 0.4);
+  const freeContentProgress = progressBetween(subscriptionStoryProgress, 0.4, 0.72);
+  const plusContentProgress = progressBetween(subscriptionStoryProgress, 0.62, 0.94);
 
   const handleStartFree = async (label: string) => {
     setSubscriptionAuthError(null);

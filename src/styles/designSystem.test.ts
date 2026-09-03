@@ -70,8 +70,9 @@ describe("MayLamDi design-system contract", () => {
     expect(css).toContain(".marketing-subscription");
     expect(css).toContain("background: #feaa01");
     expect(css).toContain(".marketing-subscription-scroll-stage");
-    expect(css).toContain("position: relative");
-    expect(css).toContain("justify-content: flex-start");
+    expect(css).toContain("min-height: 260vh");
+    expect(css).toContain("position: sticky");
+    expect(css).toContain("justify-content: center");
     expect(css).toContain(".marketing-subscription-comparison");
     expect(css).toContain(".marketing-subscription-comparison-plan--free");
     expect(css).toContain(".marketing-subscription-comparison-plan--plus");
