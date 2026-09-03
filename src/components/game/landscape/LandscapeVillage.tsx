@@ -9,6 +9,7 @@ type LandscapeVillageProps = {
   villageHpBarWidth?: number;
   villageHpBarHeight?: number;
   villageHpBarScale?: number;
+  hideHpBar?: boolean;
 };
 
 export function LandscapeVillage({
@@ -18,6 +19,7 @@ export function LandscapeVillage({
   villageHpBarWidth = 140,
   villageHpBarHeight = 12,
   villageHpBarScale = 1,
+  hideHpBar = false,
 }: LandscapeVillageProps) {
   const tier: VillageHpTier = useMemo(() => {
     if (villageHpPercent > 75) return "healthy";
@@ -31,9 +33,10 @@ export function LandscapeVillage({
   return (
     <div className={`landscape-layer layer-5-village village-tier-${tier}`} aria-label={`Village state: ${villageHpPercent}% HP (${tier})`}>
       {/* Floating Mob-Style Village HP Bar with Name directly ABOVE the bar */}
-      <div
-        className="village-hp-container"
-        style={{
+      {!hideHpBar && (
+        <div
+          className="village-hp-container"
+          style={{
           position: "absolute",
           left: `calc(135px + ${villageHpBarPos.x}px)`,
           top: `calc(95px + ${villageHpBarPos.y}px)`,
@@ -107,6 +110,7 @@ export function LandscapeVillage({
           </span>
         </div>
       </div>
+      )}
 
       <svg viewBox="0 0 1000 400" width="100%" height="100%">
         <defs>

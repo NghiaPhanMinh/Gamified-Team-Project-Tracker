@@ -102,7 +102,7 @@ export function LandscapeTutorial({
         <LandscapeTerrain />
       </div>
 
-      {/* STEP 1: AUTHENTIC REAL IN-GAME VILLAGE */}
+      {/* STEP 1: REAL IN-GAME VILLAGE CENTERED IN MEADOW */}
       {step === 1 && (
         <div
           style={{
@@ -112,16 +112,68 @@ export function LandscapeTutorial({
             height: "100%",
             pointerEvents: "none",
             zIndex: 2,
+            transform: "translate(36.5%, -18%) scale(0.95)",
           }}
         >
           <LandscapeVillage
             villageHpPercent={100}
             villageName={villageName}
+            hideHpBar={true}
           />
         </div>
       )}
 
-      {/* STEP 2: CRISP DAILY GOBLIN CENTERED & SCALED UP IN MEADOW */}
+      {/* STEP 1: VILLAGE HP BAR (CENTERED DIRECTLY ABOVE VILLAGE) */}
+      {step === 1 && (
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "48px",
+            transform: "translateX(-50%)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            zIndex: 12,
+            pointerEvents: "none",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "0.72rem",
+              fontWeight: 800,
+              fontFamily: "var(--font-heading), sans-serif",
+              color: "#ffffff",
+              marginBottom: "3px",
+              textShadow: "0 1px 3px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,0.9)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {villageName}
+          </div>
+          <div
+            style={{
+              width: "150px",
+              height: "14px",
+              background: "#1e293b",
+              borderRadius: "3px",
+              border: "1.5px solid #101517",
+              overflow: "hidden",
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", background: "#22c55e" }} />
+            <span style={{ position: "relative", zIndex: 2, fontSize: "0.58rem", fontWeight: 800, color: "#ffffff" }}>
+              100% HP (Healthy)
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* STEP 2: CRISP DAILY GOBLIN CENTERED IN MEADOW */}
       {step === 2 && (
         <svg
           viewBox="0 0 1000 400"
@@ -134,8 +186,8 @@ export function LandscapeTutorial({
             zIndex: 2,
           }}
         >
-          {/* Centered at (500, 200), scaled up 4.2x */}
-          <g transform="translate(500, 200) scale(4.2)">
+          {/* Centered at (500, 145), scaled up 3.2x */}
+          <g transform="translate(500, 145) scale(3.2)">
             <g transform="translate(-15, -20)">
               {/* Undershadow */}
               <ellipse cx="15" cy="38" rx="14" ry="4" fill="#000000" opacity="0.25" />
@@ -172,7 +224,7 @@ export function LandscapeTutorial({
         </svg>
       )}
 
-      {/* STEP 3: AUTHENTIC DRAGON BOSS */}
+      {/* STEP 3: AUTHENTIC DRAGON BOSS CENTERED */}
       {step === 3 && (
         <div
           style={{
@@ -182,6 +234,7 @@ export function LandscapeTutorial({
             height: "100%",
             pointerEvents: "none",
             zIndex: 3,
+            transform: "translate(-24%, -12%) scale(0.95)",
           }}
         >
           <LandscapeDragon
@@ -198,38 +251,41 @@ export function LandscapeTutorial({
         </div>
       )}
 
-      {/* STEP 3 BOSS HP BAR */}
+      {/* STEP 3 BOSS HP BAR (CENTERED DIRECTLY ABOVE DRAGON) */}
       {step === 3 && (
         <div
-          className="boss-hp-container"
           style={{
             position: "absolute",
-            right: "16px",
-            top: "55px",
+            left: "50%",
+            top: "48px",
+            transform: "translateX(-50%)",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            zIndex: 10,
+            zIndex: 12,
             pointerEvents: "none",
           }}
         >
           <div
             style={{
-              fontSize: "0.68rem",
+              fontSize: "0.72rem",
               fontWeight: 800,
               fontFamily: "var(--font-heading), sans-serif",
               color: "#ffffff",
               marginBottom: "3px",
+              textShadow: "0 1px 3px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,0.9)",
+              whiteSpace: "nowrap",
             }}
           >
             {bossName}
           </div>
           <div
             style={{
-              width: "160px",
-              height: "15px",
+              width: "150px",
+              height: "14px",
               background: "#1e293b",
               borderRadius: "3px",
+              border: "1.5px solid #101517",
               overflow: "hidden",
               position: "relative",
               display: "flex",
@@ -245,97 +301,89 @@ export function LandscapeTutorial({
         </div>
       )}
 
-      {/* STEP 4: ACTION MENU FLOW (PERFECTLY CENTERED IN VIEWPORT) */}
+      {/* STEP 4: ACTION MENU FLOW (CENTERED IN UPPER MEADOW) */}
       {step === 4 && (
         <div
           style={{
             position: "absolute",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            paddingBottom: "80px",
+            left: "50%",
+            top: "50px",
+            transform: "translateX(-50%)",
+            width: "92%",
+            maxWidth: "360px",
             pointerEvents: "none",
             zIndex: 30,
           }}
         >
           <div
+            className="rpg-action-menu-flow-card"
             style={{
-              background: "#fffded",
-              border: "3px solid #101517",
-              boxShadow: "5px 5px 0 #101517",
-              borderRadius: "14px",
-              padding: "16px 22px",
-              maxWidth: "460px",
-              width: "88%",
+              borderRadius: "10px",
+              padding: "8px 12px",
               pointerEvents: "auto",
               animation: "tutorialPopIn 0.3s ease forwards",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px" }}>
-              <Zap size={18} color="#7c3aed" />
-              <span style={{ fontSize: "0.9rem", fontWeight: 900, fontFamily: "var(--font-heading), sans-serif", color: "#101517" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
+              <Zap size={14} color="#7c3aed" />
+              <span className="rpg-action-flow-title" style={{ fontSize: "0.78rem", fontWeight: 900, fontFamily: "var(--font-heading), sans-serif" }}>
                 Action Menu Flow
               </span>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", width: "100%" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", width: "100%" }}>
               {/* Attack Button */}
               <div
                 style={{
                   background: "#dc2626",
                   color: "#ffffff",
-                  border: "2px solid #101517",
-                  boxShadow: "2px 2px 0 #101517",
-                  padding: "10px 14px",
-                  borderRadius: "8px",
-                  fontSize: "0.8rem",
+                  border: "1.5px solid #101517",
+                  boxShadow: "1.5px 1.5px 0 #101517",
+                  padding: "6px 10px",
+                  borderRadius: "6px",
+                  fontSize: "0.72rem",
                   fontWeight: 900,
                   display: "flex",
                   alignItems: "center",
-                  gap: "6px",
+                  gap: "4px",
                   flexShrink: 0,
                 }}
               >
-                <Swords size={16} />
+                <Swords size={13} />
                 <span>ATTACK</span>
               </div>
 
               {/* Branching Arrow */}
-              <ArrowRight size={18} color="#101517" />
+              <ArrowRight size={14} color="currentColor" />
 
               {/* Sub-options */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px", flex: 1 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
                 <div
+                  className="rpg-action-flow-item is-goblin"
                   style={{
-                    background: "#dcfce7",
-                    border: "2px solid #101517",
-                    boxShadow: "2px 2px 0 #101517",
-                    borderRadius: "6px",
-                    padding: "6px 10px",
+                    borderRadius: "5px",
+                    padding: "4px 8px",
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                   }}
                 >
-                  <span style={{ fontSize: "0.76rem", fontWeight: 900, color: "#15803d" }}>👹 Daily Goblin</span>
-                  <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#334155" }}>Submit Daily Proof</span>
+                  <span style={{ fontSize: "0.7rem", fontWeight: 900 }}>Daily Goblin</span>
+                  <span style={{ fontSize: "0.64rem", fontWeight: 700 }}>Submit Proof</span>
                 </div>
 
                 <div
+                  className="rpg-action-flow-item is-dragon"
                   style={{
-                    background: "#fee2e2",
-                    border: "2px solid #101517",
-                    boxShadow: "2px 2px 0 #101517",
-                    borderRadius: "6px",
-                    padding: "6px 10px",
+                    borderRadius: "5px",
+                    padding: "4px 8px",
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                   }}
                 >
-                  <span style={{ fontSize: "0.76rem", fontWeight: 900, color: "#b91c1c" }}>🐉 Dragon Boss</span>
-                  <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#334155" }}>Submit Task Evidence</span>
+                  <span style={{ fontSize: "0.7rem", fontWeight: 900 }}>Dragon Boss</span>
+                  <span style={{ fontSize: "0.64rem", fontWeight: 700 }}>Submit Evidence</span>
                 </div>
               </div>
             </div>
@@ -356,8 +404,8 @@ export function LandscapeTutorial({
             zIndex: 15,
           }}
         >
-          {/* Centered at (500, 160) with 2.2x scale matching village and goblin */}
-          <g transform="translate(500, 175) scale(2.2)">
+          {/* Centered at (500, 125) with 1.6x scale so it is 100% above the bottom card */}
+          <g transform="translate(500, 125) scale(1.6)">
             <g transform="translate(-46, -49)">
               {/* Ground Vector Shadow Under Support Posts */}
               <ellipse cx="46" cy="94" rx="44" ry="5.5" fill="#000000" opacity="0.25" />
@@ -387,14 +435,14 @@ export function LandscapeTutorial({
                 <rect x="0" y="0" width="27" height="19" rx="1" fill="#fef3c7" />
                 <circle cx="13.5" cy="2" r="1.5" fill="#b91c1c" />
                 <line x1="3" y1="7" x2="24" y2="7" stroke="#92400e" strokeWidth="1" strokeLinecap="round" />
-                <line x1="3" y1="11" x2="20" y2="11" stroke="#92400e" strokeWidth="1" strokeLinecap="round" />
+                <line x1="3" y1="11" x2="24" y2="11" stroke="#92400e" strokeWidth="1" strokeLinecap="round" />
                 <line x1="3" y1="15" x2="15" y2="15" stroke="#92400e" strokeWidth="1" strokeLinecap="round" />
               </g>
 
               {/* Note 2: Top-Right Parchment */}
               <g transform="translate(49, 23) rotate(4)">
                 <rect x="0" y="0" width="26" height="18" rx="1" fill="#fed7aa" />
-                <circle cx="13" cy="2" r="1.5" fill="#0369a1" />
+                <circle cx="13.5" cy="2" r="1.5" fill="#0369a1" />
                 <line x1="3" y1="7" x2="23" y2="7" stroke="#9a3412" strokeWidth="1" strokeLinecap="round" />
                 <line x1="3" y1="11" x2="18" y2="11" stroke="#9a3412" strokeWidth="1" strokeLinecap="round" />
               </g>
@@ -428,68 +476,53 @@ export function LandscapeTutorial({
               >
                 QUESTS
               </text>
-
-              {/* Notification Badge on step 5 */}
-              {step === 5 && (
-                <g transform="translate(70, 0)">
-                  <circle cx="8.5" cy="8.5" r="8.5" fill="#ef4444" stroke="#ffffff" strokeWidth="1.5" />
-                  <text
-                    x="8.5"
-                    y="11.5"
-                    textAnchor="middle"
-                    fill="#ffffff"
-                    fontSize="8"
-                    fontWeight="900"
-                    fontFamily="sans-serif"
-                  >
-                    2
-                  </text>
-                </g>
-              )}
             </g>
           </g>
         </svg>
       )}
 
-      {/* TOP BAR (Step indicator, Nudge tool toggle, and Skip) */}
+      {/* TOP BAR (Step indicator and Skip) */}
       <div
+        className="rpg-tutorial-top-bar"
         style={{
           position: "relative",
           zIndex: 35,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "12px 16px",
+          padding: "8px 12px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <span
             style={{
-              fontSize: "0.74rem",
+              fontSize: "0.68rem",
               fontWeight: 900,
               fontFamily: "var(--font-heading), sans-serif",
               textTransform: "uppercase",
               letterSpacing: "0.04em",
               background: "#fff73f",
               color: "#101517",
-              border: "2px solid #101517",
-              boxShadow: "2px 2px 0 #101517",
-              padding: "3px 10px",
+              border: "1.5px solid #101517",
+              boxShadow: "1.5px 1.5px 0 #101517",
+              padding: "2px 8px",
               borderRadius: "999px",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
             }}
           >
             Step {step} of 6
           </span>
-          <div style={{ display: "flex", gap: "5px" }}>
+          <div style={{ display: "flex", gap: "3px", flexShrink: 0 }}>
             {([1, 2, 3, 4, 5, 6] as TutorialStep[]).map((s) => (
               <div
                 key={s}
                 style={{
-                  width: "18px",
-                  height: "6px",
-                  borderRadius: "3px",
-                  border: "1.5px solid #101517",
-                  background: s === step ? "#fff73f" : (s < step ? "#4ade80" : "rgba(255,255,255,0.5)"),
+                  width: "12px",
+                  height: "4px",
+                  borderRadius: "2px",
+                  border: "1px solid #101517",
+                  background: s === step ? "#fff73f" : (s < step ? "#4ade80" : "rgba(255,255,255,0.6)"),
                   boxShadow: "1px 1px 0 #101517",
                   transition: "background 0.25s ease",
                 }}
@@ -501,17 +534,15 @@ export function LandscapeTutorial({
         <button
           type="button"
           onClick={handleFinish}
+          className="rpg-tutorial-skip-btn"
           style={{
-            background: "#fffded",
-            border: "2px solid #101517",
-            boxShadow: "2px 2px 0 #101517",
-            color: "#101517",
-            fontSize: "0.75rem",
+            fontSize: "0.72rem",
             fontWeight: 800,
-            padding: "4px 12px",
-            borderRadius: "8px",
+            padding: "3px 10px",
+            borderRadius: "6px",
             cursor: "pointer",
             whiteSpace: "nowrap",
+            flexShrink: 0,
           }}
         >
           Skip Tutorial ✕
@@ -519,35 +550,12 @@ export function LandscapeTutorial({
       </div>
 
       {/* SINGLE COMPACT BOTTOM CARD (Clean, Uncluttered, Fits Mobile & Desktop) */}
-      <div
-        className="rpg-tutorial-bottom-card"
-        style={{
-          position: "relative",
-          zIndex: 35,
-          margin: "0 12px 10px 12px",
-          background: "#fffded",
-          border: "2.5px solid #101517",
-          boxShadow: "3px 3px 0 #101517",
-          borderRadius: "12px",
-          padding: "10px 14px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "6px",
-          flexShrink: 0,
-        }}
-      >
+      <div className="rpg-tutorial-bottom-card">
         {/* Step Title & Quick Badges */}
-        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "6px" }}>
-          <span
-            style={{
-              fontSize: "0.85rem",
-              fontWeight: 900,
-              fontFamily: "var(--font-heading), sans-serif",
-              color: "#101517",
-            }}
-          >
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "4px" }}>
+          <span className="rpg-tut-title">
             {step === 1 && `1. Defend ${villageName}`}
-            {step === 2 && "2. Daily Goblins (1 Per Team Member)"}
+            {step === 2 && "2. Daily Goblins"}
             {step === 3 && `3. Dragon Boss (${bossName})`}
             {step === 4 && "4. How to Submit Proof & Attack"}
             {step === 5 && "5. Room Creator (Edit & Create Tasks)"}
@@ -555,106 +563,52 @@ export function LandscapeTutorial({
           </span>
 
           {step === 1 && (
-            <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-              <span
-                style={{
-                  background: "#dcfce7",
-                  border: "1.5px solid #101517",
-                  fontSize: "0.68rem",
-                  fontWeight: 800,
-                  color: "#15803d",
-                  padding: "2px 6px",
-                  borderRadius: "4px",
-                  whiteSpace: "nowrap",
-                }}
-              >
+            <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
+              <span className="rpg-tut-badge rpg-tut-badge-win">
                 Win: ≥ 50% HP
               </span>
-              <span
-                style={{
-                  background: "#fee2e2",
-                  border: "1.5px solid #101517",
-                  fontSize: "0.68rem",
-                  fontWeight: 800,
-                  color: "#b91c1c",
-                  padding: "2px 6px",
-                  borderRadius: "4px",
-                  whiteSpace: "nowrap",
-                }}
-              >
+              <span className="rpg-tut-badge rpg-tut-badge-defeat">
                 Defeat: &lt; 50% HP
               </span>
             </div>
           )}
 
           {step === 5 && (
-            <span
-              style={{
-                background: "#fef08a",
-                border: "1.5px solid #101517",
-                fontSize: "0.68rem",
-                fontWeight: 900,
-                color: "#854d0e",
-                padding: "2px 8px",
-                borderRadius: "4px",
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-              }}
-            >
+            <span className="rpg-tut-badge rpg-tut-badge-owner">
               Owner Only
             </span>
           )}
 
           {step === 6 && (
-            <span
-              style={{
-                background: "#bae6fd",
-                border: "1.5px solid #101517",
-                fontSize: "0.68rem",
-                fontWeight: 900,
-                color: "#0369a1",
-                padding: "2px 8px",
-                borderRadius: "4px",
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-              }}
-            >
+            <span className="rpg-tut-badge rpg-tut-badge-team">
               Team Flow
             </span>
           )}
         </div>
 
         {/* Concise Description */}
-        <p
-          style={{
-            margin: 0,
-            fontSize: "0.78rem",
-            lineHeight: 1.38,
-            color: "#334155",
-            fontWeight: 600,
-          }}
-        >
+        <p className="rpg-tut-desc">
           {step === 1 &&
-            `Your team's objective is to defend the village until the project deadline. If Village HP stays at or above 50%, your project succeeds. Missed task deadlines and unslayed goblins reduce Village HP.`}
+            `Defend the village until the deadline. Keep Village HP at or above 50% to win. Missed deadlines & alive goblins damage the village.`}
 
           {step === 2 &&
-            `Each team member gets 1 goblin every day. Submit your Daily Proof of Work (progress note or screenshot) to defeat your goblin and protect the village from daily damage.`}
+            `Each member gets 1 daily goblin. Submit daily proof of progress to defeat your goblin and prevent village damage.`}
 
           {step === 3 &&
-            `The Dragon's HP scales with all created tasks. Completing tasks on time deals damage to the Dragon. If a task deadline is missed, the damage deflects straight into your Village HP.`}
+            `Dragon HP scales with tasks. Completing tasks deals damage. If a task deadline is missed, the damage hits your Village HP.`}
 
           {step === 4 &&
-            `Click the red ATTACK button anytime to choose between submitting Daily Proof (to slay your goblin) or Task Evidence (to damage the dragon).`}
+            `Tap ATTACK anytime to submit Daily Proof (slays your goblin) or Task Evidence (strikes the dragon boss).`}
 
           {step === 5 &&
-            `As the Room Owner, only you have permission to create new tasks and edit existing AI-generated tasks directly from the Quest Board. Customize requirements, rubrics, deadlines, and dragon damage to match your course assignment!`}
+            `As Room Owner, create and edit tasks directly from the Quest Board. Customize deadlines, requirements, and dragon damage.`}
 
           {step === 6 &&
-            `Team participants click the Quest Board in the middle of the meadow to inspect their tasks, submit evidence of work to damage the dragon, peer-review teammate submissions under the 'Reviews' tab, and check daily team check-ins.`}
+            `Participants click the Quest Board to claim tasks, submit evidence, peer-review submissions, and track team progress.`}
         </p>
 
         {/* Footer Navigation */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "4px", flexShrink: 0 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "2px", flexShrink: 0 }}>
           <div>
             {step > 1 && (
               <button
@@ -664,23 +618,22 @@ export function LandscapeTutorial({
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "4px",
-                  padding: "4px 10px",
-                  fontSize: "0.74rem",
+                  gap: "3px",
+                  padding: "3px 8px",
+                  fontSize: "0.7rem",
                   fontWeight: 800,
-                  borderRadius: "6px",
-                  border: "1.5px solid #101517",
-                  boxShadow: "2px 2px 0 #101517",
+                  borderRadius: "5px",
                   cursor: "pointer",
+                  height: "26px",
                 }}
               >
-                <ArrowLeft size={13} />
+                <ArrowLeft size={12} />
                 <span>Back</span>
               </button>
             )}
           </div>
 
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div style={{ display: "flex", gap: "6px" }}>
             {step < 6 ? (
               <button
                 type="button"
@@ -689,18 +642,17 @@ export function LandscapeTutorial({
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "6px",
-                  padding: "5px 16px",
-                  fontSize: "0.78rem",
+                  gap: "5px",
+                  padding: "3px 14px",
+                  fontSize: "0.74rem",
                   fontWeight: 900,
-                  borderRadius: "8px",
-                  border: "2px solid #101517",
-                  boxShadow: "2px 2px 0 #101517",
+                  borderRadius: "6px",
                   cursor: "pointer",
+                  height: "26px",
                 }}
               >
                 <span>Next</span>
-                <ArrowRight size={14} />
+                <ArrowRight size={13} />
               </button>
             ) : (
               <>
@@ -711,17 +663,16 @@ export function LandscapeTutorial({
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "4px",
-                    padding: "5px 12px",
-                    fontSize: "0.78rem",
+                    gap: "3px",
+                    padding: "3px 10px",
+                    fontSize: "0.72rem",
                     fontWeight: 800,
-                    borderRadius: "8px",
-                    border: "2px solid #101517",
-                    boxShadow: "2px 2px 0 #101517",
+                    borderRadius: "6px",
                     cursor: "pointer",
+                    height: "26px",
                   }}
                 >
-                  <RotateCcw size={13} />
+                  <RotateCcw size={12} />
                   <span>Again</span>
                 </button>
 
@@ -732,17 +683,16 @@ export function LandscapeTutorial({
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "6px",
-                    padding: "5px 18px",
-                    fontSize: "0.78rem",
+                    gap: "5px",
+                    padding: "3px 14px",
+                    fontSize: "0.74rem",
                     fontWeight: 900,
-                    borderRadius: "8px",
-                    border: "2px solid #101517",
-                    boxShadow: "2px 2px 0 #101517",
+                    borderRadius: "6px",
                     cursor: "pointer",
+                    height: "26px",
                   }}
                 >
-                  <CheckCircle2 size={14} />
+                  <CheckCircle2 size={13} />
                   <span>Enter Realm</span>
                 </button>
               </>
