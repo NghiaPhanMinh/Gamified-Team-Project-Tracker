@@ -8500,18 +8500,33 @@ button.maylamdi-button:active {
   }
 }
 
+.rpg-tutorial-skip-btn {
+  background: #fffded;
+  border: 1.5px solid #101517;
+  box-shadow: 1.5px 1.5px 0 #101517;
+  color: #101517;
+}
+
+:root[data-theme="dark"] .rpg-tutorial-skip-btn {
+  background: #1e293b !important;
+  border-color: #ffffff !important;
+  box-shadow: 1.5px 1.5px 0 rgba(255, 255, 255, 0.4) !important;
+  color: #f8fafc !important;
+}
+
+/* Compact Bottom Instruction UI Card */
 .rpg-tutorial-bottom-card {
   position: relative;
   z-index: 35;
-  margin: 0 12px 10px 12px;
+  margin: 0 10px 8px 10px;
   background: #fffded;
-  border: 2.5px solid #101517;
-  box-shadow: 3px 3px 0 #101517;
-  border-radius: 12px;
-  padding: 10px 14px;
+  border: 2px solid #101517;
+  box-shadow: 2.5px 2.5px 0 #101517;
+  border-radius: 10px;
+  padding: 8px 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   flex-shrink: 0;
   box-sizing: border-box;
 }
@@ -8519,35 +8534,157 @@ button.maylamdi-button:active {
 :root[data-theme="dark"] .rpg-tutorial-bottom-card {
   background: #0f172a !important;
   border-color: #ffffff !important;
-  box-shadow: 3px 3px 0 rgba(255, 255, 255, 0.4) !important;
-  color: #f8fafc !important;
+  box-shadow: 2.5px 2.5px 0 rgba(255, 255, 255, 0.4) !important;
 }
 
-:root[data-theme="dark"] .rpg-tutorial-bottom-card span,
-:root[data-theme="dark"] .rpg-tutorial-bottom-card p {
-  color: #f8fafc !important;
+.rpg-tutorial-bottom-card .rpg-tut-title {
+  font-size: 0.78rem;
+  font-weight: 900;
+  font-family: var(--font-heading), sans-serif;
+  color: #101517;
+}
+
+:root[data-theme="dark"] .rpg-tutorial-bottom-card .rpg-tut-title {
+  color: #ffffff !important;
+}
+
+.rpg-tutorial-bottom-card .rpg-tut-desc {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.34;
+  color: #334155;
+  font-weight: 600;
+}
+
+:root[data-theme="dark"] .rpg-tutorial-bottom-card .rpg-tut-desc {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Tutorial Quick Badges */
+.rpg-tut-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 1.5px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.rpg-tut-badge-win {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #16a34a;
+}
+
+:root[data-theme="dark"] .rpg-tut-badge-win {
+  background: rgba(34, 197, 94, 0.22) !important;
+  color: #4ade80 !important;
+  border-color: #22c55e !important;
+}
+
+.rpg-tut-badge-defeat {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #dc2626;
+}
+
+:root[data-theme="dark"] .rpg-tut-badge-defeat {
+  background: rgba(239, 68, 68, 0.22) !important;
+  color: #f87171 !important;
+  border-color: #ef4444 !important;
+}
+
+.rpg-tut-badge-owner {
+  background: #fef08a;
+  color: #854d0e;
+  border: 1px solid #ca8a04;
+}
+
+:root[data-theme="dark"] .rpg-tut-badge-owner {
+  background: rgba(234, 179, 8, 0.22) !important;
+  color: #facc15 !important;
+  border-color: #eab308 !important;
+}
+
+.rpg-tut-badge-team {
+  background: #bae6fd;
+  color: #0369a1;
+  border: 1px solid #0284c7;
+}
+
+:root[data-theme="dark"] .rpg-tut-badge-team {
+  background: rgba(14, 165, 233, 0.22) !important;
+  color: #38bdf8 !important;
+  border-color: #38bdf8 !important;
+}
+
+/* Action Menu Flow Card in Step 4 */
+.rpg-action-menu-flow-card {
+  background: #fffded;
+  border: 2px solid #101517;
+  box-shadow: 2px 2px 0 #101517;
+  color: #101517;
 }
 
 :root[data-theme="dark"] .rpg-action-menu-flow-card {
   background: #0f172a !important;
   border-color: #ffffff !important;
-  box-shadow: 3px 3px 0 rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 2px 2px 0 rgba(255, 255, 255, 0.4) !important;
   color: #f8fafc !important;
 }
 
-:root[data-theme="dark"] .rpg-action-menu-flow-card span {
-  color: #f8fafc !important;
+.rpg-action-flow-item.is-goblin {
+  background: #dcfce7;
+  border: 1px solid #15803d;
+  color: #15803d;
+}
+
+.rpg-action-flow-item.is-goblin span:last-child {
+  color: #334155;
+}
+
+:root[data-theme="dark"] .rpg-action-flow-item.is-goblin {
+  background: rgba(34, 197, 94, 0.2) !important;
+  border-color: #22c55e !important;
+  color: #4ade80 !important;
+}
+
+:root[data-theme="dark"] .rpg-action-flow-item.is-goblin span:last-child {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.rpg-action-flow-item.is-dragon {
+  background: #fee2e2;
+  border: 1px solid #b91c1c;
+  color: #b91c1c;
+}
+
+.rpg-action-flow-item.is-dragon span:last-child {
+  color: #334155;
+}
+
+:root[data-theme="dark"] .rpg-action-flow-item.is-dragon {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: #ef4444 !important;
+  color: #f87171 !important;
+}
+
+:root[data-theme="dark"] .rpg-action-flow-item.is-dragon span:last-child {
+  color: rgba(255, 255, 255, 0.85) !important;
 }
 
 @media (max-width: 640px) {
   .rpg-tutorial-bottom-card {
-    margin: 0 8px 8px 8px !important;
-    padding: 8px 10px !important;
-    gap: 4px !important;
+    margin: 0 6px 6px 6px !important;
+    padding: 6px 8px !important;
+    gap: 3px !important;
   }
-  .rpg-tutorial-bottom-card p {
-    font-size: 0.74rem !important;
-    line-height: 1.32 !important;
+  .rpg-tutorial-bottom-card .rpg-tut-desc {
+    font-size: 0.67rem !important;
+    line-height: 1.28 !important;
   }
 }
 
