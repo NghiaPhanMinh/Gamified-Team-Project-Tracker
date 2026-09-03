@@ -920,24 +920,13 @@ function QuestCardHoverItem({
 
   return (
     <div
+      className="quest-card-item"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={() => onDetails(task)}
       style={{
-        position: "relative",
-        background: hovered ? palette.bg : "#ffffff",
-        color: "#101517",
-        border: "1.5px solid #101517",
-        borderRadius: "4px",
-        padding: "10px 14px",
-        cursor: "pointer",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        minHeight: "78px",
-        boxSizing: "border-box",
         opacity: isCompleted ? 0.45 : 1,
-        transition: "background-color 0.15s ease",
+        background: hovered ? palette.bg : undefined,
       }}
     >
       {/* Top Header Row: Task Name & Assignee */}
@@ -947,7 +936,6 @@ function QuestCardHoverItem({
             margin: 0,
             fontSize: "0.98rem",
             fontWeight: 900,
-            color: "#101517",
             lineHeight: "1.25",
             display: "-webkit-box",
             WebkitLineClamp: 2,
@@ -961,10 +949,11 @@ function QuestCardHoverItem({
 
         {/* Owner Name Under */}
         <div
+          className="quest-card-owner"
           style={{
             fontSize: "0.76rem",
             fontWeight: 700,
-            color: task.isOpen ? "#dc2626" : "#475569",
+            color: task.isOpen ? "#dc2626" : undefined,
             marginTop: "3px",
           }}
         >
@@ -3567,7 +3556,7 @@ export function BattleScene({
             style={{ maxWidth: "720px", width: "95vw", height: "600px", display: "flex", flexDirection: "column", boxSizing: "border-box" }}
           >
             {/* Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #101517", paddingBottom: "12px", flexShrink: 0 }}>
+            <div className="rpg-modal-divider" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", flexShrink: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <h3 className="rpg-modern-title" style={{ fontSize: "1.28rem" }}>
                   Tasks & Quests
@@ -4255,10 +4244,8 @@ export function BattleScene({
               <>
                 {/* Description */}
                 <div
+                  className="rpg-meta-box"
                   style={{
-                    background: "rgba(16,21,23,0.03)",
-                    border: "1px solid rgba(16,21,23,0.22)",
-                    borderRadius: "4px",
                     padding: "12px",
                     fontSize: "0.85rem",
                     lineHeight: "1.5",
@@ -4269,13 +4256,13 @@ export function BattleScene({
 
                 {/* Quest Metadata */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                  <div style={{ background: "#ffffff", border: "1px solid rgba(16,21,23,0.22)", borderRadius: "4px", padding: "8px 10px" }}>
-                    <span style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, opacity: 0.7, textTransform: "uppercase" }}>Due Date</span>
+                  <div className="rpg-meta-box">
+                    <span className="rpg-meta-label" style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, textTransform: "uppercase" }}>Due Date</span>
                     <span style={{ fontSize: "0.84rem", fontWeight: 800 }}>{selectedQuestTask.dueDate || "No deadline"}</span>
                   </div>
-                  <div style={{ background: "#ffffff", border: "1px solid rgba(16,21,23,0.22)", borderRadius: "4px", padding: "8px 10px" }}>
-                    <span style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, opacity: 0.7, textTransform: "uppercase" }}>Assigned Hero</span>
-                    <span style={{ fontSize: "0.84rem", fontWeight: 800, color: selectedQuestTask.isOpen ? "#dc2626" : "#101517" }}>
+                  <div className="rpg-meta-box">
+                    <span className="rpg-meta-label" style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, textTransform: "uppercase" }}>Assigned Hero</span>
+                    <span style={{ fontSize: "0.84rem", fontWeight: 800, color: selectedQuestTask.isOpen ? "#ef4444" : "inherit" }}>
                       {selectedQuestTask.assigneeName}
                     </span>
                   </div>
@@ -5774,11 +5761,11 @@ export function BattleScene({
             </div>
 
             {/* 1. Master Audio & Volume Slider */}
-            <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "10px", padding: "14px", display: "grid", gap: "10px", marginTop: "10px" }}>
+            <div className="rpg-panel-card" style={{ display: "grid", gap: "10px", marginTop: "10px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 900, color: "#101517" }}>Master Audio</h4>
-                  <p style={{ margin: "2px 0 0 0", fontSize: "0.76rem", color: "#64748b" }}>Control game volume and sound effects</p>
+                  <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 900 }}>Master Audio</h4>
+                  <p style={{ margin: "2px 0 0 0", fontSize: "0.76rem", opacity: 0.8 }}>Control game volume and sound effects</p>
                 </div>
                 <button
                   type="button"
@@ -5821,11 +5808,11 @@ export function BattleScene({
             </div>
 
             {/* 2. Medieval Heroic Combat Background Music */}
-            <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "10px", padding: "14px", display: "grid", gap: "8px" }}>
+            <div className="rpg-panel-card" style={{ display: "grid", gap: "8px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 900, color: "#101517" }}>Medieval Heroic Combat BGM</h4>
-                  <p style={{ margin: "2px 0 0 0", fontSize: "0.76rem", color: "#64748b" }}>Driving 128 BPM medieval gallop, battle drums, and brass fanfare</p>
+                  <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 900 }}>Medieval Heroic Combat BGM</h4>
+                  <p style={{ margin: "2px 0 0 0", fontSize: "0.76rem", opacity: 0.8 }}>Driving 128 BPM medieval gallop, battle drums, and brass fanfare</p>
                 </div>
                 <button
                   type="button"
@@ -5844,17 +5831,17 @@ export function BattleScene({
                   {isLofiBgmPlaying ? "Pause Heroic Music" : "Play Heroic Music"}
                 </button>
               </div>
-              <p style={{ margin: 0, fontSize: "0.74rem", color: "#475569" }}>
+              <p style={{ margin: 0, fontSize: "0.74rem", opacity: 0.85 }}>
                 Ferocious dragon roar periodically echoes across the battlefield every 60 seconds while music is active.
               </p>
             </div>
 
             {/* 3. Web Push Notifications & Task Reminders */}
-            <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "10px", padding: "14px", display: "grid", gap: "12px" }}>
+            <div className="rpg-panel-card" style={{ display: "grid", gap: "12px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 900, color: "#101517" }}>Task & Daily Goblin Reminders</h4>
-                  <p style={{ margin: "2px 0 0 0", fontSize: "0.76rem", color: "#64748b" }}>Browser push notifications and periodic alarms</p>
+                  <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 900 }}>Task & Daily Goblin Reminders</h4>
+                  <p style={{ margin: "2px 0 0 0", fontSize: "0.76rem", opacity: 0.8 }}>Browser push notifications and periodic alarms</p>
                 </div>
                 <button
                   type="button"
@@ -5937,8 +5924,8 @@ export function BattleScene({
             </div>
 
             {/* 4. Sound Effects Testing Board */}
-            <div style={{ background: "#ffffff", border: "2px solid #101517", borderRadius: "10px", padding: "14px", display: "grid", gap: "8px" }}>
-              <h4 style={{ margin: 0, fontSize: "0.88rem", fontWeight: 900, color: "#101517" }}>Sound Effects Palette</h4>
+            <div className="rpg-panel-card" style={{ display: "grid", gap: "8px" }}>
+              <h4 style={{ margin: 0, fontSize: "0.88rem", fontWeight: 900 }}>Sound Effects Palette</h4>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px" }}>
                 <button
                   type="button"
