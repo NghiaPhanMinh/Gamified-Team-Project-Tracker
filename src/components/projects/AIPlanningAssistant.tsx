@@ -433,9 +433,6 @@ export function AIPlanningAssistant({
                     style={{
                       padding: "1rem 1.25rem",
                       borderRadius: "8px",
-                      border: "1.5px solid #101517",
-                      background: "var(--color-surface, #ffffff)",
-                      color: "var(--color-text, #101517)",
                       boxShadow: "none",
                       transition: "all 0.15s ease",
                     }}
@@ -458,7 +455,8 @@ export function AIPlanningAssistant({
                           <input
                             value={task.title}
                             onChange={(event) => updateTask(task.tempId, { title: event.target.value })}
-                            style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                            className="allocated-task-input"
+                            style={{ minHeight: "40px", padding: "0.45rem 0.75rem" }}
                           />
                         </label>
                         <label style={{ display: "grid", gap: "0.3rem", fontWeight: 800 }}>
@@ -467,7 +465,8 @@ export function AIPlanningAssistant({
                             rows={3}
                             value={task.description}
                             onChange={(event) => updateTask(task.tempId, { description: event.target.value })}
-                            style={{ padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)", resize: "vertical" }}
+                            className="allocated-task-textarea"
+                            style={{ padding: "0.45rem 0.75rem", resize: "vertical" }}
                           />
                         </label>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
@@ -480,7 +479,8 @@ export function AIPlanningAssistant({
                                 collaboratorProfileIds: task.collaboratorProfileIds.filter((profileId) => profileId !== event.target.value),
                                 reviewerProfileId: task.reviewerProfileId === event.target.value ? null : task.reviewerProfileId,
                               })}
-                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                              className="allocated-task-select"
+                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem" }}
                             >
                               {workspace.members.map((member) => (
                                 <option key={member.profileId} value={member.profileId}>{member.displayName}</option>
@@ -494,7 +494,8 @@ export function AIPlanningAssistant({
                               max={workspace.project.deadline}
                               value={task.dueDate}
                               onChange={(event) => updateTask(task.tempId, { dueDate: event.target.value })}
-                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                              className="allocated-task-input"
+                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem" }}
                             />
                           </label>
                           <label style={{ display: "grid", gap: "0.3rem", fontWeight: 800 }}>
@@ -506,7 +507,8 @@ export function AIPlanningAssistant({
                               step="0.5"
                               value={task.estimatedEffortHours}
                               onChange={(event) => updateTask(task.tempId, { estimatedEffortHours: Number(event.target.value) })}
-                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                              className="allocated-task-input"
+                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem" }}
                             />
                           </label>
                           <label style={{ display: "grid", gap: "0.3rem", fontWeight: 800 }}>
@@ -518,7 +520,8 @@ export function AIPlanningAssistant({
                               step="1"
                               value={task.difficulty}
                               onChange={(event) => updateTask(task.tempId, { difficulty: Number(event.target.value) })}
-                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                              className="allocated-task-input"
+                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem" }}
                             />
                           </label>
                         </div>
@@ -527,17 +530,17 @@ export function AIPlanningAssistant({
                             type="button"
                             className="danger-button"
                             onClick={() => deleteTask(task.tempId)}
-                            style={{ padding: "0.35rem 0.75rem", fontSize: "0.82rem", borderRadius: "8px" }}
+                            style={{ padding: "0.35rem 0.75rem", fontSize: "0.82rem", borderRadius: "6px" }}
                           >
-                            🗑️ Delete Task
+                            Delete Task
                           </button>
                           <button
                             type="button"
                             className="primary-button"
                             onClick={() => setEditingTempId(null)}
-                            style={{ padding: "0.35rem 0.85rem", fontSize: "0.85rem", borderRadius: "8px" }}
+                            style={{ padding: "0.35rem 0.85rem", fontSize: "0.85rem", borderRadius: "6px" }}
                           >
-                            Done Editing ✓
+                            Done Editing
                           </button>
                         </div>
                       </div>
@@ -546,19 +549,18 @@ export function AIPlanningAssistant({
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
                           <div style={{ flex: "1 1 320px", minWidth: 0 }}>
                             <h3 style={{ margin: "0 0 0.35rem", fontSize: "1.15rem", fontWeight: 900 }}>{task.title}</h3>
-                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", fontSize: "0.85rem", color: "var(--color-text, #101517)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", fontSize: "0.85rem" }}>
                               <span style={{ fontWeight: 700 }}>{ownerName}</span>
-                              <span style={{ color: "var(--color-muted, #64748b)" }}>· Due {task.dueDate}</span>
-                              <span style={{ color: "var(--color-muted, #64748b)" }}>· {task.estimatedEffortHours}h effort</span>
-                              <span style={{ color: "var(--color-muted, #64748b)" }}>· Difficulty {task.difficulty}/5</span>
+                              <span style={{ opacity: 0.75 }}>· Due {task.dueDate}</span>
+                              <span style={{ opacity: 0.75 }}>· {task.estimatedEffortHours}h effort</span>
+                              <span style={{ opacity: 0.75 }}>· Difficulty {task.difficulty}/5</span>
                             </div>
                           </div>
                           <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexShrink: 0 }}>
                             <button
                               type="button"
-                              className="quiet-button"
+                              className="quiet-button task-edit-btn"
                               onClick={() => setEditingTempId(task.tempId)}
-                              style={{ padding: "0.35rem 0.75rem", fontSize: "0.82rem", fontWeight: 800, borderRadius: "6px", border: "1.5px solid #101517" }}
                             >
                               Edit
                             </button>

@@ -38,6 +38,9 @@
   --color-muted: #4d5a60;
   --color-error: #8c1028;
   --border-strong: 1px solid rgba(16, 21, 23, 0.26);
+  --color-card-border: #101517;
+  --color-card-surface: #ffffff;
+  --color-outline: #101517;
   --shadow-card: 0 2px 8px rgba(16, 21, 23, 0.06);
   --font-display: Inter, "Avenir Next", "Helvetica Neue", Arial, sans-serif;
   --font-body: Inter, "Avenir Next", "Helvetica Neue", Arial, sans-serif;
@@ -69,6 +72,9 @@
   --color-muted: rgba(255, 253, 236, 0.62);
   --color-error: #ff9bb0;
   --border-strong: 1px solid rgba(255, 253, 236, 0.26);
+  --color-card-border: #ffffff;
+  --color-card-surface: #0f172a;
+  --color-outline: #ffffff;
   --shadow-card: none;
   --color-sky-top: #0369a1;
   --color-sky-bottom: #7dd3fc;
@@ -8284,6 +8290,193 @@ button.maylamdi-button:active {
   height: 10px;
   border: 1.5px solid currentColor;
   border-radius: 0 2px 2px 0;
+}
+
+/* ==========================================================================
+   HIGH-CONTRAST DARK MODE ADAPTATIONS & WHITE OUTLINES
+   ========================================================================== */
+
+/* Allocated Task Cards & AI Draft Cards */
+.allocated-task-card,
+.ai-plan-task-card {
+  border: 1.5px solid var(--color-card-border, #101517);
+  background: var(--color-card-surface, #ffffff);
+  color: var(--color-text, #101517);
+  box-shadow: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+:root[data-theme="dark"] .allocated-task-card,
+:root[data-theme="dark"] .ai-plan-task-card {
+  border-color: #ffffff !important;
+  background: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+:root[data-theme="dark"] .allocated-task-card h3,
+:root[data-theme="dark"] .ai-plan-task-card h3 {
+  color: #ffffff !important;
+}
+
+:root[data-theme="dark"] .allocated-task-card p,
+:root[data-theme="dark"] .ai-plan-task-card p {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+/* Edit Button on Task Cards */
+.task-edit-btn {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  border-radius: 6px;
+  border: 1.5px solid var(--color-card-border, #101517);
+  background: transparent;
+  color: var(--color-text, #101517);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+:root[data-theme="dark"] .task-edit-btn {
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+:root[data-theme="dark"] .task-edit-btn:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+
+/* Edit Form Fields inside Task Cards */
+.allocated-task-input,
+.allocated-task-textarea,
+.allocated-task-select {
+  width: 100%;
+  border: 1.5px solid var(--color-card-border, #101517);
+  border-radius: 6px;
+  background: var(--color-card-surface, #ffffff);
+  color: var(--color-text, #101517);
+  box-sizing: border-box;
+}
+
+:root[data-theme="dark"] .allocated-task-input,
+:root[data-theme="dark"] .allocated-task-textarea,
+:root[data-theme="dark"] .allocated-task-select {
+  border-color: #ffffff !important;
+  background: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+/* Outer Allocated Tasks Section Container */
+:root[data-theme="dark"] .project-plan-breakdown {
+  border: 1.5px solid rgba(255, 255, 255, 0.4) !important;
+  background: #0b181c !important;
+}
+
+:root[data-theme="dark"] .project-plan-breakdown h2 {
+  color: #ffffff !important;
+}
+
+:root[data-theme="dark"] .project-plan-breakdown p {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
+/* Quest Details & In-Canvas Modal Info Boxes */
+.rpg-meta-box {
+  background: rgba(16, 21, 23, 0.04);
+  border: 1px solid rgba(16, 21, 23, 0.22);
+  border-radius: 4px;
+  padding: 8px 10px;
+  color: #101517;
+  box-sizing: border-box;
+}
+
+:root[data-theme="dark"] .rpg-meta-box {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  color: #f8fafc !important;
+}
+
+:root[data-theme="dark"] .rpg-meta-box span {
+  color: #f8fafc !important;
+}
+
+:root[data-theme="dark"] .rpg-meta-box .rpg-meta-label {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* In-Canvas Panels (Audio, Reminders, SFX Palette) */
+.rpg-panel-card {
+  background: #ffffff;
+  border: 2px solid #101517;
+  border-radius: 10px;
+  padding: 14px;
+  color: #101517;
+  box-sizing: border-box;
+}
+
+:root[data-theme="dark"] .rpg-panel-card {
+  background: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  color: #f8fafc !important;
+}
+
+:root[data-theme="dark"] .rpg-panel-card h4,
+:root[data-theme="dark"] .rpg-panel-card p,
+:root[data-theme="dark"] .rpg-panel-card span,
+:root[data-theme="dark"] .rpg-panel-card label,
+:root[data-theme="dark"] .rpg-panel-card div {
+  color: #f8fafc !important;
+}
+
+/* Quest Board Cards */
+.quest-card-item {
+  position: relative;
+  background: #ffffff;
+  color: #101517;
+  border: 1.5px solid var(--color-card-border, #101517);
+  border-radius: 4px;
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 78px;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.quest-card-owner {
+  color: #475569;
+}
+
+:root[data-theme="dark"] .quest-card-item {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #ffffff !important;
+}
+
+:root[data-theme="dark"] .quest-card-item h4 {
+  color: #ffffff !important;
+}
+
+:root[data-theme="dark"] .quest-card-item .quest-card-owner {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Modal header divider */
+.rpg-modal-divider {
+  border-bottom: 2px solid #101517;
+}
+
+:root[data-theme="dark"] .rpg-modal-divider {
+  border-bottom-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Secondary Button in Dark Mode */
+:root[data-theme="dark"] .rpg-modern-btn.is-secondary {
+  background: #334155 !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.45) !important;
 }
 
 

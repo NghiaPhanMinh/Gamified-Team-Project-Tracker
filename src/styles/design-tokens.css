@@ -89,6 +89,9 @@
   --color-cream: var(--mld-bg);
   --color-navy: var(--mld-text);
   --border-strong: 1px solid var(--mld-border-strong);
+  --color-card-border: #101517;
+  --color-card-surface: var(--color-surface, #ffffff);
+  --color-outline: #101517;
   --shadow-card: var(--mld-shadow);
   --font-body: var(--mld-font-ui);
   --font-heading: var(--mld-font-ui);
@@ -102,9 +105,9 @@
   --mld-surface-02: #171a1e;
   --mld-text: #fffdec;
   --mld-muted: rgba(255, 253, 236, 0.68);
-  --mld-border: rgba(255, 253, 236, 0.14);
-  --mld-border-strong: rgba(255, 253, 236, 0.26);
-  --mld-line: rgba(255, 253, 236, 0.14);
+  --mld-border: rgba(255, 253, 236, 0.3);
+  --mld-border-strong: #ffffff;
+  --mld-line: rgba(255, 253, 236, 0.3);
   --mld-soft-blue: rgba(76, 160, 254, 0.13);
   --mld-soft-pink: rgba(255, 138, 231, 0.12);
   --mld-shadow: none;
@@ -115,6 +118,9 @@
   --color-muted: var(--mld-muted);
   --color-cream: var(--mld-bg);
   --color-navy: var(--mld-text);
+  --color-card-border: #ffffff;
+  --color-card-surface: #0f172a;
+  --color-outline: #ffffff;
   --border-strong: 1px solid var(--mld-border-strong);
   --shadow-card: var(--mld-shadow);
 }

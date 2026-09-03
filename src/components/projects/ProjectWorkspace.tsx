@@ -749,16 +749,13 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
                       style={{
                         padding: "1rem 1.25rem",
                         borderRadius: "8px",
-                        border: "1.5px solid #101517",
-                        background: "var(--color-surface, #ffffff)",
-                        color: "var(--color-text, #101517)",
                         boxShadow: "none",
                       }}
                     >
                       {isEditingThis ? (
                         <form onSubmit={submitTask} style={{ display: "grid", gap: "0.85rem" }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <strong style={{ fontSize: "1.05rem" }}>✏️ Edit Task Details</strong>
+                            <strong style={{ fontSize: "1.05rem" }}>Edit Task Details</strong>
                             <button
                               type="button"
                               className="quiet-button"
@@ -775,7 +772,8 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
                               required
                               value={taskTitle}
                               onChange={(e) => setTaskTitle(e.target.value)}
-                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                              className="allocated-task-input"
+                              style={{ minHeight: "40px", padding: "0.45rem 0.75rem" }}
                             />
                           </label>
                           <label style={{ display: "grid", gap: "0.3rem", fontWeight: 800 }}>
@@ -785,7 +783,8 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
                               rows={3}
                               value={taskDescription}
                               onChange={(e) => setTaskDescription(e.target.value)}
-                              style={{ padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)", resize: "vertical" }}
+                              className="allocated-task-textarea"
+                              style={{ padding: "0.45rem 0.75rem", resize: "vertical" }}
                             />
                           </label>
                           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: "0.75rem" }}>
@@ -794,7 +793,8 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
                               <select
                                 value={taskOwner}
                                 onChange={(e) => setTaskOwner(e.target.value)}
-                                style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                                className="allocated-task-select"
+                                style={{ minHeight: "40px", padding: "0.45rem 0.75rem" }}
                               >
                                 {workspace.members.map((m) => (
                                   <option key={m.profileId} value={m.profileId}>{m.displayName}</option>
@@ -810,7 +810,8 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
                                 required
                                 value={taskDueDate}
                                 onChange={(e) => setTaskDueDate(e.target.value)}
-                                style={{ minHeight: "40px", padding: "0.45rem 0.75rem", borderRadius: "10px", border: "2px solid #101517", background: "var(--color-page, #fff)" }}
+                                className="allocated-task-input"
+                                style={{ minHeight: "40px", padding: "0.45rem 0.75rem" }}
                               />
                             </label>
                           </div>
@@ -833,19 +834,18 @@ function ProjectWorkspaceReady({ workspace, initialTab }: {
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
                             <div style={{ flex: "1 1 320px", minWidth: 0 }}>
                               <h3 style={{ margin: "0 0 0.35rem", fontSize: "1.15rem", fontWeight: 900 }}>{task.title}</h3>
-                              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", fontSize: "0.85rem", color: "var(--color-text, #101517)" }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", fontSize: "0.85rem" }}>
                                 <span style={{ fontWeight: 700 }}>{ownerName}</span>
-                                <span style={{ color: "var(--color-muted, #64748b)" }}>· Due {formatProjectDate(task.dueDate)}</span>
-                                <span style={{ color: "var(--color-muted, #64748b)", fontWeight: 700 }}>· {STATUS_LABELS[task.status as TaskStatus]}</span>
+                                <span style={{ opacity: 0.75 }}>· Due {formatProjectDate(task.dueDate)}</span>
+                                <span style={{ opacity: 0.75, fontWeight: 700 }}>· {STATUS_LABELS[task.status as TaskStatus]}</span>
                               </div>
                             </div>
                             <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexShrink: 0 }}>
                               {canEdit ? (
                                 <button
                                   type="button"
-                                  className="quiet-button"
+                                  className="quiet-button task-edit-btn"
                                   onClick={() => editTask(task)}
-                                  style={{ padding: "0.4rem 0.8rem", fontSize: "0.82rem", fontWeight: 800, borderRadius: "6px", border: "1.5px solid #101517" }}
                                 >
                                   Edit
                                 </button>
