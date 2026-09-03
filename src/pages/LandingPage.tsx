@@ -151,7 +151,7 @@ const HOW_IT_WORKS_STEPS = [
   },
 ] as const;
 
-const HOW_IT_WORKS_STRIPES = ["#fff73f", "#4ca0fe", "#feaa01", "#fff73f", "#4ca0fe", "#feaa01"] as const;
+const HOW_IT_WORKS_STRIPES = ["#fff73f", "#fff73f", "#fff73f", "#fff73f", "#fff73f", "#fff73f"] as const;
 
 type FeatureTagPosition = {
   left: number;
@@ -1038,9 +1038,10 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
     const updateScene = () => {
       const viewportHeight = Math.max(window.innerHeight, 1);
       const transitionRect = transition.getBoundingClientRect();
+      const transitionStart = viewportHeight * 0.64;
       const transitionProgress = reducedMotion?.matches
         ? 1
-        : Math.min(1, Math.max(0, (viewportHeight - transitionRect.top) / (viewportHeight + Math.max(transitionRect.height * 0.62, 1))));
+        : Math.min(1, Math.max(0, (transitionStart - transitionRect.top) / (transitionStart + Math.max(transitionRect.height * 0.62, 1))));
       transition.style.setProperty("--how-transition-progress", transitionProgress.toFixed(3));
       transition.dataset.complete = transitionProgress >= 0.999 ? "true" : "false";
 
@@ -1255,17 +1256,16 @@ export function LandingPage({ isAuthenticated = false }: LandingPageProps) {
           <span>Everything your team needs to plan fairly, stay visible, and keep moving.</span>
         </div>
         <FeatureTagComposition tagsDropped={featureTagsDropped} />
+        <div className="marketing-how-it-works-transition" ref={howItWorksTransition} aria-hidden="true">
+          {HOW_IT_WORKS_STRIPES.map((color, index) => (
+            <span
+              className={`marketing-how-it-works-stripe${index % 2 === 0 ? " is-from-left" : " is-from-right"}`}
+              key={`${color}-${index}`}
+              style={{ "--stripe-color": color, "--stripe-index": index } as CSSProperties}
+            />
+          ))}
+        </div>
       </section>
-
-      <div className="marketing-how-it-works-transition" ref={howItWorksTransition} aria-hidden="true">
-        {HOW_IT_WORKS_STRIPES.map((color, index) => (
-          <span
-            className={`marketing-how-it-works-stripe${index % 2 === 0 ? " is-from-left" : " is-from-right"}`}
-            key={`${color}-${index}`}
-            style={{ "--stripe-color": color, "--stripe-index": index } as CSSProperties}
-          />
-        ))}
-      </div>
 
       <section
         aria-labelledby="how-it-works-title"
