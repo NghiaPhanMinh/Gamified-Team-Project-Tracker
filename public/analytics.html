@@ -641,6 +641,18 @@
           <div class="card-sub" style="color: #17A738;">88.0% Funnel Step 8 Completion</div>
           <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">Source: Convex Tasks DB</a>
         </div>
+        <div class="card" style="background: #4CA0FE22;">
+          <div class="card-kicker" id="gami-k5-title">Battle Scene Visits</div>
+          <div class="card-stat" style="color: #0284c7;">28</div>
+          <div class="card-sub" style="color: #17A738;">93.3% Active Team Visits</div>
+          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">Source: Telemetry Sessions</a>
+        </div>
+        <div class="card" style="background: #1DD85122;">
+          <div class="card-kicker" id="gami-k6-title">Attack Actions Executed</div>
+          <div class="card-stat" style="color: #17A738;">22</div>
+          <div class="card-sub" style="color: #17A738;">0% Attack Rage Clicks</div>
+          <a class="source-tag" href="https://dashboard.convex.dev" target="_blank">Source: Convex combatEvents</a>
+        </div>
       </div>
 
       <div class="table-container">
@@ -657,7 +669,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td style="font-weight: 800;">Complete Assigned Project Task</td><td><span class="tag-pill" style="background: #1DD85133;">+50 XP</span></td><td style="font-weight: 800;">22 Tasks</td><td>Drives +61.5% weekly in-app task completion logging frequency</td></tr>
+            <tr><td style="font-weight: 800;">Click "ATTACK" / Slay Goblin to Submit Task</td><td><span class="tag-pill" style="background: #1DD85133;">+50 XP</span></td><td style="font-weight: 800;">22 Attacks Executed</td><td>88.0% task completion conversion rate; 0% attack friction/rage click</td></tr>
             <tr><td style="font-weight: 800;">Accept AI Assistant Project Brief</td><td><span class="tag-pill" style="background: #FEAA0133;">+100 XP</span></td><td style="font-weight: 800;">26 Plans</td><td>Accelerates initial team onboarding &amp; setup</td></tr>
             <tr><td style="font-weight: 800;">Join Team Room via Join Code</td><td><span class="tag-pill" style="background: #4CA0FE33;">+30 XP</span></td><td style="font-weight: 800;">30 Rooms</td><td>Encourages peer collaboration &amp; team joining</td></tr>
             <tr><td style="font-weight: 800;">Complete Profile Capacity Setup</td><td><span class="tag-pill" style="background: #FF8AE733;">+20 XP</span></td><td style="font-weight: 800;">38 Users</td><td>Improves profile data completion &amp; skill fit</td></tr>
@@ -911,6 +923,8 @@
         gamiK2Title: "Gamified Team Adoption",
         gamiK3Title: "XP Motivation Rating",
         gamiK4Title: "XP Tasks Completed",
+        gamiK5Title: "Battle Scene Visits",
+        gamiK6Title: "Attack Actions Executed",
         gamiTableTitle: "XP Reward Quests & Gamification Rules Breakdown",
         gthAction: "Gamified Quest Action",
         gthXp: "XP Reward Value",
@@ -990,6 +1004,8 @@
         gamiK2Title: "Tỷ Lệ Nhóm Dùng Gamification",
         gamiK3Title: "Đánh Giá Động Lực XP",
         gamiK4Title: "Task Hoàn Thành Tích XP",
+        gamiK5Title: "Lượt Vào Trang Game (Battle)",
+        gamiK6Title: "Lượt Bấm Attack Làm Task",
         gamiTableTitle: "Bảng Phân Tích Quest Tích XP & Quy Tắc Gamification",
         gthAction: "Hành Động Quest Tích XP",
         gthXp: "Giá Trị Thưởng XP",
@@ -1084,6 +1100,8 @@
       document.getElementById("gami-k2-title").textContent = t.gamiK2Title;
       document.getElementById("gami-k3-title").textContent = t.gamiK3Title;
       document.getElementById("gami-k4-title").textContent = t.gamiK4Title;
+      if (document.getElementById("gami-k5-title")) document.getElementById("gami-k5-title").textContent = t.gamiK5Title;
+      if (document.getElementById("gami-k6-title")) document.getElementById("gami-k6-title").textContent = t.gamiK6Title;
       document.getElementById("gami-table-title").textContent = t.gamiTableTitle;
       document.getElementById("gth-action").textContent = t.gthAction;
       document.getElementById("gth-xp").textContent = t.gthXp;
