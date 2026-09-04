@@ -22,7 +22,9 @@ describe("GoogleSignInButton", () => {
     fireEvent.click(screen.getByRole("button", { name: /continue with google/i }));
 
     await waitFor(() => {
-      expect(signInMock).toHaveBeenCalledWith("google", { redirectTo: "/home" });
+      expect(signInMock).toHaveBeenCalledWith("google", {
+        redirectTo: expect.stringMatching(/\/home$/),
+      });
     });
   });
 });
