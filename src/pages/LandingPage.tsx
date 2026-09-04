@@ -1283,7 +1283,8 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
   const handleStartFree = async (label: string) => {
     setSubscriptionAuthError(null);
     try {
-      await signIn("google", { redirectTo: "/home" });
+      const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/home` : "/home";
+      await signIn("google", { redirectTo });
     } catch {
       setSubscriptionAuthError(`${label} could not start. Check the Google sign-in setup and try again.`);
     }
@@ -1293,7 +1294,8 @@ export function LandingPage({ currentPlan, isAuthenticated = false }: LandingPag
     setSubscriptionAuthError(null);
     try {
       await signOut();
-      await signIn("google", { redirectTo: "/home" });
+      const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/home` : "/home";
+      await signIn("google", { redirectTo });
     } catch {
       setSubscriptionAuthError("Switching accounts could not start. Check the Google sign-in setup and try again.");
     }

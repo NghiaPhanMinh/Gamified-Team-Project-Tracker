@@ -11,7 +11,11 @@ export function GoogleSignInButton() {
     setError(null);
 
     try {
-      await signIn("google", { redirectTo: "/home" });
+      const redirectTo =
+        typeof window !== "undefined"
+          ? `${window.location.origin}/home`
+          : "/home";
+      await signIn("google", { redirectTo });
     } catch {
       setError(
         "Google sign-in could not start. Check the OAuth setup and try again.",

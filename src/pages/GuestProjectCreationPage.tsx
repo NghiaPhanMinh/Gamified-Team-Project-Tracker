@@ -15,7 +15,8 @@ export function GuestProjectCreationPage() {
     setAuthError(null);
     savePendingProjectDraft(draft);
     try {
-      await signIn("google", { redirectTo: "/projects/create?resume=1" });
+      const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/projects/create?resume=1` : "/projects/create?resume=1";
+      await signIn("google", { redirectTo });
     } catch {
       setAuthError("Google sign-in could not start. Your project draft is still saved in this tab, so you can try again.");
       throw new Error("Google sign-in could not start.");
