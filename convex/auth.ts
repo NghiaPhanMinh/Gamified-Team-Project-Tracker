@@ -1,6 +1,8 @@
 import Google from "@auth/core/providers/google";
 import { convexAuth } from "@convex-dev/auth/server";
 
+declare const process: { env: Record<string, string | undefined> };
+
 const ALLOWED_ORIGINS = [
   "https://may-lam-di-a3.vercel.app",
   "https://maylamdi.vercel.app",
